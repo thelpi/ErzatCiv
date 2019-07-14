@@ -98,15 +98,15 @@ namespace ErsatzCiv.Model
                     {
                         if (seaWidth > 0 || currentSeaHeight > 0)
                         {
-                            _mapSquareList.Add(new MapSquareData(MapSquareTypeData.Coast, j, i));
+                            _mapSquareList.Add(new MapSquareData(MapSquareTypeData.Sea, j, i));
                         }
                         else if (currentContinentWidth <= 0 || currentContinentHeight <= 0)
                         {
-                            _mapSquareList.Add(new MapSquareData(MapSquareTypeData.Coast, j, i));
+                            _mapSquareList.Add(new MapSquareData(MapSquareTypeData.Sea, j, i));
                         }
                         else
                         {
-                            _mapSquareList.Add(new MapSquareData(MapSquareTypeData.Grass, j, i));
+                            _mapSquareList.Add(new MapSquareData(MapSquareTypeData.Grassland, j, i));
                         }
                         if (currentSeaHeight > 0)
                         {
