@@ -4,9 +4,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ErsatzCiv"
-        mc:Ignorable="d"
+        mc:Ignorable="d" WindowState="Maximized"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
+    <DockPanel Margin="5">
         
-    </Grid>
+        <ScrollViewer DockPanel.Dock="Top" CanContentScroll="True"
+                  HorizontalScrollBarVisibility="Visible"
+                  VerticalScrollBarVisibility="Visible">
+            <Grid Name="MapGrid" />
+        </ScrollViewer>
+    </DockPanel>
 </Window>
