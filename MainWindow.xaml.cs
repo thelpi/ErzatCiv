@@ -22,11 +22,16 @@ namespace ErsatzCiv
     public partial class MainWindow : Window
     {
         private const int DEFAULT_SIZE = 50;
+        private const int MENU_HEIGHT = 200;
 
         public MainWindow()
         {
             InitializeComponent();
-            var map = new MapData(MapData.MapSizeEnum.Large, 5, 4);
+
+            MiniMapCanvas.Height = MENU_HEIGHT;
+            MiniMapCanvas.Width = MENU_HEIGHT * MapData.RATIO_WIDTH_HEIGHT;
+
+            var map = new MapData(MapData.MapSizeEnum.VeryLarge, 5, 4);
             for (int i = 0; i < map.Width; i++)
             {
                 MapGrid.ColumnDefinitions.Add(new ColumnDefinition
@@ -41,6 +46,9 @@ namespace ErsatzCiv
                     Height = new GridLength(DEFAULT_SIZE)
                 });
             }
+
+            double minimapSquareSize = (double)MENU_HEIGHT / map.Height;
+
             foreach (var square in map.MapSquareList)
             {
                 Rectangle rct = new Rectangle
@@ -54,6 +62,16 @@ namespace ErsatzCiv
                 rct.SetValue(Grid.RowProperty, square.Row);
                 rct.SetValue(Grid.ColumnProperty, square.Column);
                 MapGrid.Children.Add(rct);
+
+                Rectangle rctMinimap = new Rectangle
+                {
+                    Width = minimapSquareSize,
+                    Height = minimapSquareSize,
+                    Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(square.MapSquareType.RenderColor))
+                };
+                rctMinimap.SetValue(Canvas.TopProperty, square.Row * minimapSquareSize);
+                rctMinimap.SetValue(Canvas.LeftProperty, square.Column * minimapSquareSize);
+                MiniMapCanvas.Children.Add(rctMinimap);
             }
         }
     }

@@ -6,7 +6,7 @@ namespace ErsatzCiv.Model
 {
     public class MapData
     {
-        private const int RATIO_WIDTH_HEIGHT = 2;
+        public const int RATIO_WIDTH_HEIGHT = 2;
         private const int MINIMAL_HEIGHT = 20;
 
         private readonly List<MapSquareData> _mapSquareList = new List<MapSquareData>();
