@@ -57,7 +57,7 @@ namespace ErsatzCiv
                     StrokeThickness = 1,
                     Width = DEFAULT_SIZE,
                     Height = DEFAULT_SIZE,
-                    Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(square.MapSquareType.RenderColor))
+                    Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(square.MapSquareType.RenderValue))
                 };
                 rct.SetValue(Grid.RowProperty, square.Row);
                 rct.SetValue(Grid.ColumnProperty, square.Column);
@@ -67,7 +67,7 @@ namespace ErsatzCiv
                 {
                     Width = minimapSquareSize,
                     Height = minimapSquareSize,
-                    Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(square.MapSquareType.RenderColor))
+                    Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(square.MapSquareType.RenderValue))
                 };
                 rctMinimap.SetValue(Canvas.TopProperty, square.Row * minimapSquareSize);
                 rctMinimap.SetValue(Canvas.LeftProperty, square.Column * minimapSquareSize);

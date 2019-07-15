@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace ErsatzCiv.Model
@@ -14,63 +13,122 @@ namespace ErsatzCiv.Model
         /// </summary>
         public const int RIVER_BONUS = 1;
 
-        private List<MapSquareActionEnum> _actions = new List<MapSquareActionEnum>();
+        private static readonly MapSquareActionEnum[] _alwaysApplicableActions =
+            new[] { MapSquareActionEnum.DestroyRoad, MapSquareActionEnum.DestroyRoad };
+
+        #region Properties
+
+        private List<MapSquareActionEnum> _actions;
         private MapSquareTypeEnum _type;
-        private MapSquareTypeEnum? _underlyingType;
-
-        public string Name { get { return _type.ToString(); } }
-        public int Productivity { get; private set; }
-        public int Commerce { get; private set; }
-        public int Food { get; private set; }
-        public string RenderColor { get; private set; }
-        public RenderTypeEnum RenderType { get; private set; }
-        public bool Riverable { get; private set; }
-
-        // Use 'MapSquareTypeList' instead (even inside this class).
-        private static List<MapSquareTypeData> _mapSquareTypeList = new List<MapSquareTypeData>();
 
         /// <summary>
-        /// List of every instances.
+        /// Default productivity points.
         /// </summary>
-        public static IReadOnlyCollection<MapSquareTypeData> MapSquareTypeList
-        {
-            get
-            {
-                if (_mapSquareTypeList.Count == 0)
-                {
-                    InitializeMapSquareTypeList();
-                }
-                return _mapSquareTypeList;
-            }
-        }
+        public int Productivity { get; private set; }
+        /// <summary>
+        /// Default commerce points.
+        /// </summary>
+        public int Commerce { get; private set; }
+        /// <summary>
+        /// Default food points.
+        /// </summary>
+        public int Food { get; private set; }
+        /// <summary>
+        /// Render value.
+        /// </summary>
+        /// <remarks>Path to image; hexadecimal color code.</remarks>
+        public string RenderValue { get; private set; }
+        /// <summary>
+        /// Type of render.
+        /// </summary>
+        public RenderTypeEnum RenderType { get; private set; }
+        /// <summary>
+        /// Indicates if the square map can be crossed by a river.
+        /// </summary>
+        public bool RiverCrossable { get; private set; }
 
-        private static void InitializeMapSquareTypeList()
+        /// <summary>
+        /// Inferred; available actions.
+        /// </summary>
+        public IReadOnlyCollection<MapSquareActionEnum> Actions
+        {
+            get { return _actions.Concat(_alwaysApplicableActions).ToList(); }
+        }
+        /// <summary>
+        /// Inferred; Name.
+        /// </summary>
+        public string Name { get { return _type.ToString(); } }
+
+        #endregion
+
+        private static readonly List<MapSquareTypeData> _mapSquareTypeList = new List<MapSquareTypeData>
         {
             // sea
-            _mapSquareTypeList.Add(new MapSquareTypeData
+            new MapSquareTypeData
             {
                 _type = MapSquareTypeEnum.Sea,
                 Commerce = 1,
                 Food = 1,
                 Productivity = 0,
-                RenderColor = "#00BFFF",
+                RenderValue = "#00BFFF",
                 RenderType = RenderTypeEnum.PlainBrush,
-                Riverable = false,
-                _underlyingType = null/*,
-                _actions.Add()*/
-            });
+                RiverCrossable = false,
+                _actions = new List<MapSquareActionEnum>()
+            },
             // grassland
-            _mapSquareTypeList.Add(new MapSquareTypeData
+            new MapSquareTypeData
             {
                 _type = MapSquareTypeEnum.Grassland,
                 Commerce = 1,
                 Food = 2,
                 Productivity = 1,
-                RenderColor = "#32CD32",
+                RenderValue = "#32CD32",
                 RenderType = RenderTypeEnum.PlainBrush,
-                Riverable = true
-            });
-        }
+                RiverCrossable = true,
+                _actions = new List<MapSquareActionEnum>
+                {
+                    MapSquareActionEnum.Irrigate,
+                    MapSquareActionEnum.Mine,
+                    MapSquareActionEnum.Plant,
+                    MapSquareActionEnum.RailRoad,
+                    MapSquareActionEnum.Road
+                }
+            },
+            // mountain
+            new MapSquareTypeData
+            {
+                _type = MapSquareTypeEnum.Mountain,
+                Commerce = 0,
+                Food = 0,
+                Productivity = 2,
+                RenderValue = "#A52A2A",
+                RenderType = RenderTypeEnum.PlainBrush,
+                RiverCrossable = true,
+                _actions = new List<MapSquareActionEnum>
+                {
+                    MapSquareActionEnum.Mine,
+                    MapSquareActionEnum.RailRoad,
+                    MapSquareActionEnum.Road
+                }
+            },
+            // forest
+            new MapSquareTypeData
+            {
+                _type = MapSquareTypeEnum.Forest,
+                Commerce = 1,
+                Food = 1,
+                Productivity = 2,
+                RenderValue = "#006400",
+                RenderType = RenderTypeEnum.PlainBrush,
+                RiverCrossable = true,
+                _actions = new List<MapSquareActionEnum>
+                {
+                    MapSquareActionEnum.Clear,
+                    MapSquareActionEnum.RailRoad,
+                    MapSquareActionEnum.Road
+                }
+            }
+        };
 
         private MapSquareTypeData() { }
 
@@ -83,7 +141,7 @@ namespace ErsatzCiv.Model
         {
             get
             {
-                return MapSquareTypeList.Single(x => x._type == MapSquareTypeEnum.Grassland);
+                return _mapSquareTypeList.Single(x => x._type == MapSquareTypeEnum.Grassland);
             }
         }
 
@@ -94,7 +152,7 @@ namespace ErsatzCiv.Model
         {
             get
             {
-                return MapSquareTypeList.Single(x => x._type == MapSquareTypeEnum.Sea);
+                return _mapSquareTypeList.Single(x => x._type == MapSquareTypeEnum.Sea);
             }
         }
 
@@ -105,7 +163,7 @@ namespace ErsatzCiv.Model
         {
             get
             {
-                return MapSquareTypeList.Single(x => x._type == MapSquareTypeEnum.Coast);
+                return _mapSquareTypeList.Single(x => x._type == MapSquareTypeEnum.Coast);
             }
         }
 
@@ -116,7 +174,7 @@ namespace ErsatzCiv.Model
         {
             get
             {
-                return MapSquareTypeList.Single(x => x._type == MapSquareTypeEnum.Ice);
+                return _mapSquareTypeList.Single(x => x._type == MapSquareTypeEnum.Ice);
             }
         }
 
@@ -127,7 +185,7 @@ namespace ErsatzCiv.Model
         {
             get
             {
-                return MapSquareTypeList.Single(x => x._type == MapSquareTypeEnum.Toundra);
+                return _mapSquareTypeList.Single(x => x._type == MapSquareTypeEnum.Toundra);
             }
         }
 
@@ -138,7 +196,7 @@ namespace ErsatzCiv.Model
         {
             get
             {
-                return MapSquareTypeList.Single(x => x._type == MapSquareTypeEnum.Desert);
+                return _mapSquareTypeList.Single(x => x._type == MapSquareTypeEnum.Desert);
             }
         }
 
@@ -149,7 +207,7 @@ namespace ErsatzCiv.Model
         {
             get
             {
-                return MapSquareTypeList.Single(x => x._type == MapSquareTypeEnum.Jungle);
+                return _mapSquareTypeList.Single(x => x._type == MapSquareTypeEnum.Jungle);
             }
         }
 
@@ -160,7 +218,7 @@ namespace ErsatzCiv.Model
         {
             get
             {
-                return MapSquareTypeList.Single(x => x._type == MapSquareTypeEnum.Mountain);
+                return _mapSquareTypeList.Single(x => x._type == MapSquareTypeEnum.Mountain);
             }
         }
 
@@ -171,7 +229,7 @@ namespace ErsatzCiv.Model
         {
             get
             {
-                return MapSquareTypeList.Single(x => x._type == MapSquareTypeEnum.Hill);
+                return _mapSquareTypeList.Single(x => x._type == MapSquareTypeEnum.Hill);
             }
         }
 
@@ -182,7 +240,7 @@ namespace ErsatzCiv.Model
         {
             get
             {
-                return MapSquareTypeList.Single(x => x._type == MapSquareTypeEnum.Swamp);
+                return _mapSquareTypeList.Single(x => x._type == MapSquareTypeEnum.Swamp);
             }
         }
 
@@ -193,7 +251,7 @@ namespace ErsatzCiv.Model
         {
             get
             {
-                return MapSquareTypeList.Single(x => x._type == MapSquareTypeEnum.Forest);
+                return _mapSquareTypeList.Single(x => x._type == MapSquareTypeEnum.Forest);
             }
         }
 
@@ -204,7 +262,7 @@ namespace ErsatzCiv.Model
         {
             get
             {
-                return MapSquareTypeList.Single(x => x._type == MapSquareTypeEnum.Plain);
+                return _mapSquareTypeList.Single(x => x._type == MapSquareTypeEnum.Plain);
             }
         }
 

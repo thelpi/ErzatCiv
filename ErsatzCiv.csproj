@@ -55,6 +55,8 @@
     </ApplicationDefinition>
     <Compile Include="Model\MapSquareActionEnum.cs" />
     <Compile Include="Model\RenderTypeEnum.cs" />
+    <Compile Include="Model\UnitTypeData.cs" />
+    <Compile Include="Model\UnitMapData.cs" />
     <Compile Include="Tools.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

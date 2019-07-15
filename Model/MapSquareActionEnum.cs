@@ -1,7 +1,7 @@
 ﻿namespace ErsatzCiv.Model
 {
     /// <summary>
-    /// Available actions on a <see cref="MapSquareTypeData"/>
+    /// Worker actions on a <see cref="MapSquareTypeData"/>
     /// </summary>
     public enum MapSquareActionEnum
     {
@@ -39,12 +39,26 @@
         /// Clears a forest or a jungle.
         /// </summary>
         /// <remarks>
-        /// Transforms jungle into plain, and forest into grassland or toundra.
+        /// Transforms a <see cref="MapSquareData"/> into its <see cref="MapSquareData._underlyingType"/>.
         /// </remarks>
         Clear,
         /// <summary>
         /// Plants a forest.
         /// </summary>
-        Plant
+        /// <remarks>
+        /// Changes the <see cref="MapSquareTypeData"/> when applied on a <see cref="MapSquareData"/>.
+        /// </remarks>
+        Plant,
+        /// <summary>
+        /// Removes road and railroad.
+        /// </summary>
+        /// <remarks>
+        /// Removes the railroad if applicable, then the road.
+        /// </remarks>
+        DestroyRoad,
+        /// <summary>
+        /// Removes irrigation system or mine.
+        /// </summary>
+        DestroyImprovement
     }
 }
