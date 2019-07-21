@@ -13,12 +13,9 @@ namespace ErsatzCiv.Model
         /// </summary>
         public const int RIVER_BONUS = 1;
 
-        private static readonly MapSquareActionEnum[] _alwaysApplicableActions =
-            new[] { MapSquareActionEnum.DestroyRoad, MapSquareActionEnum.DestroyRoad };
-
         #region Properties
 
-        private List<MapSquareActionEnum> _actions;
+        private List<MapSquareActionPivot> _actions;
         private MapSquareTypeEnum _type;
 
         /// <summary>
@@ -33,6 +30,10 @@ namespace ErsatzCiv.Model
         /// Default food points.
         /// </summary>
         public int Food { get; private set; }
+        /// <summary>
+        /// Default defensive points.
+        /// </summary>
+        public int Defense { get; private set; }
         /// <summary>
         /// Render value.
         /// </summary>
@@ -50,9 +51,9 @@ namespace ErsatzCiv.Model
         /// <summary>
         /// Inferred; available actions.
         /// </summary>
-        public IReadOnlyCollection<MapSquareActionEnum> Actions
+        public IReadOnlyCollection<MapSquareActionPivot> Actions
         {
-            get { return _actions.Concat(_alwaysApplicableActions).ToList(); }
+            get { return _actions; }
         }
         /// <summary>
         /// Inferred; Name.
@@ -70,10 +71,11 @@ namespace ErsatzCiv.Model
                 Commerce = 1,
                 Food = 1,
                 Productivity = 0,
+                Defense = 0,
                 RenderValue = "#00BFFF",
                 RenderType = RenderTypeEnum.PlainBrush,
                 RiverCrossable = false,
-                _actions = new List<MapSquareActionEnum>()
+                _actions = new List<MapSquareActionPivot>()
             },
             // grassland
             new MapSquareTypeData
@@ -82,16 +84,17 @@ namespace ErsatzCiv.Model
                 Commerce = 1,
                 Food = 2,
                 Productivity = 1,
+                Defense = 0,
                 RenderValue = "#32CD32",
                 RenderType = RenderTypeEnum.PlainBrush,
                 RiverCrossable = true,
-                _actions = new List<MapSquareActionEnum>
+                _actions = new List<MapSquareActionPivot>
                 {
-                    MapSquareActionEnum.Irrigate,
-                    MapSquareActionEnum.Mine,
-                    MapSquareActionEnum.Plant,
-                    MapSquareActionEnum.RailRoad,
-                    MapSquareActionEnum.Road
+                    MapSquareActionPivot.Irrigate,
+                    MapSquareActionPivot.Mine,
+                    MapSquareActionPivot.Plant,
+                    MapSquareActionPivot.RailRoad,
+                    MapSquareActionPivot.Road
                 }
             },
             // mountain
@@ -101,14 +104,15 @@ namespace ErsatzCiv.Model
                 Commerce = 0,
                 Food = 0,
                 Productivity = 2,
+                Defense = 2,
                 RenderValue = "#A52A2A",
                 RenderType = RenderTypeEnum.PlainBrush,
                 RiverCrossable = true,
-                _actions = new List<MapSquareActionEnum>
+                _actions = new List<MapSquareActionPivot>
                 {
-                    MapSquareActionEnum.Mine,
-                    MapSquareActionEnum.RailRoad,
-                    MapSquareActionEnum.Road
+                    MapSquareActionPivot.Mine,
+                    MapSquareActionPivot.RailRoad,
+                    MapSquareActionPivot.Road
                 }
             },
             // forest
@@ -118,14 +122,15 @@ namespace ErsatzCiv.Model
                 Commerce = 1,
                 Food = 1,
                 Productivity = 2,
+                Defense = 1,
                 RenderValue = "#006400",
                 RenderType = RenderTypeEnum.PlainBrush,
                 RiverCrossable = true,
-                _actions = new List<MapSquareActionEnum>
+                _actions = new List<MapSquareActionPivot>
                 {
-                    MapSquareActionEnum.Clear,
-                    MapSquareActionEnum.RailRoad,
-                    MapSquareActionEnum.Road
+                    MapSquareActionPivot.Clear,
+                    MapSquareActionPivot.RailRoad,
+                    MapSquareActionPivot.Road
                 }
             }
         };
