@@ -58,10 +58,19 @@ namespace ErsatzCiv.Model
         /// List of <see cref="CurrentActionPivot"/> in progress for this instance.
         /// </summary>
         public IReadOnlyCollection<CurrentActionPivot> CurrentActions { get { return _currentActions; } }
+        /// <summary>
+        /// Indicates if the square is crossed by a river.
+        /// </summary>
+        public bool CrossedByRiver { get; private set; }
+        /// <summary>
+        /// <c>True</c> if render must be recomputed.
+        /// </summary>
+        public bool Redraw { get; private set; }
 
         #endregion
 
-        public MapSquareData(MapSquareTypeData mapSquareType, int row, int column, MapSquareTypeData underlyingType = null)
+        public MapSquareData(MapSquareTypeData mapSquareType, int row, int column,
+            MapSquareTypeData underlyingType = null, bool crossedByRiver = false)
         {
             MapSquareType = mapSquareType ?? throw new ArgumentNullException(nameof(mapSquareType));
             Row = row < 0 ? throw new ArgumentException("Invalid value.", nameof(row)) : row;
@@ -69,6 +78,10 @@ namespace ErsatzCiv.Model
             if (MapSquareType.Actions.Contains(MapSquareActionPivot.Clear))
             {
                 UnderlyingMapSquareType = underlyingType ?? throw new ArgumentNullException(nameof(underlyingType));
+            }
+            if (MapSquareType.RiverCrossable)
+            {
+                CrossedByRiver = crossedByRiver;
             }
         }
 
@@ -180,6 +193,7 @@ namespace ErsatzCiv.Model
                 if (action.IsDone)
                 {
                     removableActions.Add(action);
+                    Redraw = true;
                     if (action.Action == MapSquareActionPivot.BuildFortress)
                     {
                         Fortress = true;
@@ -258,6 +272,14 @@ namespace ErsatzCiv.Model
                 _currentActions.Remove(action);
                 action.Dispose();
             }
+        }
+
+        /// <summary>
+        /// Clears the <see cref="Redraw"/> property.
+        /// </summary>
+        public void ResetRedraw()
+        {
+            Redraw = false;
         }
 
         /// <summary>

@@ -108,7 +108,9 @@ namespace ErsatzCiv.Model
                         {
                             // Picks a random type of square.
                             var rdmTypeSeed = Tools.Randomizer.Next(0, 20);
-                            _mapSquareList.Add(new MapSquareData(rdmTypeSeed < 12 ? MapSquareTypeData.Grassland : (rdmTypeSeed < 18 ? MapSquareTypeData.Forest : MapSquareTypeData.Mountain), j, i));
+                            var squareType = rdmTypeSeed < 12 ? MapSquareTypeData.Grassland : (rdmTypeSeed < 18 ? MapSquareTypeData.Forest : MapSquareTypeData.Mountain);
+                            bool riverCross = Tools.Randomizer.Next(0, 50) == 0;
+                            _mapSquareList.Add(new MapSquareData(squareType, j, i, MapSquareTypeData.Grassland, riverCross));
                         }
                         if (currentSeaHeight > 0)
                         {

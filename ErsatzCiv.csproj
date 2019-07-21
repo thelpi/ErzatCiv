@@ -53,10 +53,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Model\DirectionEnumPivot.cs" />
     <Compile Include="Model\MapSquareActionPivot.cs" />
     <Compile Include="Model\RenderTypeEnum.cs" />
-    <Compile Include="Model\UnitTypeData.cs" />
-    <Compile Include="Model\UnitMapData.cs" />
+    <Compile Include="Model\SettlerPivot.cs" />
+    <Compile Include="Model\UnitPivot.cs" />
     <Compile Include="Model\WorkerPivot.cs" />
     <Compile Include="Tools.cs" />
     <Page Include="MainWindow.xaml">

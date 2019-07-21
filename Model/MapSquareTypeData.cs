@@ -47,6 +47,10 @@ namespace ErsatzCiv.Model
         /// Indicates if the square map can be crossed by a river.
         /// </summary>
         public bool RiverCrossable { get; private set; }
+        /// <summary>
+        /// Indicates of the type is sea navigable (otherwise, it's ground navigable).
+        /// </summary>
+        public bool IsSeaType { get; private set; }
 
         /// <summary>
         /// Inferred; available actions.
@@ -75,7 +79,8 @@ namespace ErsatzCiv.Model
                 RenderValue = "#00BFFF",
                 RenderType = RenderTypeEnum.PlainBrush,
                 RiverCrossable = false,
-                _actions = new List<MapSquareActionPivot>()
+                _actions = new List<MapSquareActionPivot>(),
+                IsSeaType = true
             },
             // grassland
             new MapSquareTypeData
@@ -95,7 +100,8 @@ namespace ErsatzCiv.Model
                     MapSquareActionPivot.Plant,
                     MapSquareActionPivot.RailRoad,
                     MapSquareActionPivot.Road
-                }
+                },
+                IsSeaType = false
             },
             // mountain
             new MapSquareTypeData
@@ -113,7 +119,8 @@ namespace ErsatzCiv.Model
                     MapSquareActionPivot.Mine,
                     MapSquareActionPivot.RailRoad,
                     MapSquareActionPivot.Road
-                }
+                },
+                IsSeaType = false
             },
             // forest
             new MapSquareTypeData
@@ -131,7 +138,8 @@ namespace ErsatzCiv.Model
                     MapSquareActionPivot.Clear,
                     MapSquareActionPivot.RailRoad,
                     MapSquareActionPivot.Road
-                }
+                },
+                IsSeaType = false
             }
         };
 

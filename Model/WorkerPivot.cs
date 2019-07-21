@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ErsatzCiv.Model
+﻿namespace ErsatzCiv.Model
 {
-    public class WorkerPivot
+    public class WorkerPivot : UnitPivot
     {
-        public bool HasMoved;
+        public const int LifePoints = 1;
+
+        public WorkerPivot(int row, int column) : base(row, column, false, true, 0, 0,
+            "unit_worker.png", RenderTypeEnum.Image, LifePoints)
+        {
+
+        }
     }
 }

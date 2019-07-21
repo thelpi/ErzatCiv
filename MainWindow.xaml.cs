@@ -1,16 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 using ErsatzCiv.Model;
 
@@ -23,6 +17,8 @@ namespace ErsatzCiv
     {
         private const int DEFAULT_SIZE = 50;
         private const int MENU_HEIGHT = 200;
+        private Engine _engine;
+        private double _minimapSquareSize;
 
         public MainWindow()
         {
@@ -30,16 +26,16 @@ namespace ErsatzCiv
 
             MiniMapCanvas.Height = MENU_HEIGHT;
             MiniMapCanvas.Width = MENU_HEIGHT * MapData.RATIO_WIDTH_HEIGHT;
-
-            var map = new MapData(MapData.MapSizeEnum.VeryLarge, 5, 4);
-            for (int i = 0; i < map.Width; i++)
+            _engine = new Engine(MapData.MapSizeEnum.VeryLarge, 5, 4);
+            
+            for (int i = 0; i < _engine.Map.Width; i++)
             {
                 MapGrid.ColumnDefinitions.Add(new ColumnDefinition
                 {
                     Width = new GridLength(DEFAULT_SIZE)
                 });
             }
-            for (int j = 0; j < map.Height; j++)
+            for (int j = 0; j < _engine.Map.Height; j++)
             {
                 MapGrid.RowDefinitions.Add(new RowDefinition
                 {
@@ -47,9 +43,42 @@ namespace ErsatzCiv
                 });
             }
 
-            double minimapSquareSize = (double)MENU_HEIGHT / map.Height;
+            _minimapSquareSize = (double)MENU_HEIGHT / _engine.Map.Height;
 
-            foreach (var square in map.MapSquareList)
+            RefreshView(true);
+        }
+
+        private void BtnNextTurn_Click(object sender, RoutedEventArgs e)
+        {
+            _engine.NewTurn();
+            RefreshView(false);
+            _engine.PostTurnClean();
+        }
+
+        private void RefreshView(bool full)
+        {
+            IEnumerable<MapSquareData> toDraw = _engine.Map.MapSquareList;
+            if (!full)
+            {
+                toDraw = toDraw.Where(s => s.Redraw).ToList();
+                var mapSquaresToRemove = MapGrid.Children.OfType<Rectangle>().Where(x => toDraw.Contains(x.Tag)).ToList();
+                var minimapSquaresToRemove = MiniMapCanvas.Children.OfType<Rectangle>().Where(x => toDraw.Contains(x.Tag)).ToList();
+                foreach (var ms in mapSquaresToRemove)
+                {
+                    MapGrid.Children.Remove(ms);
+                }
+                foreach (var ms in minimapSquaresToRemove)
+                {
+                    MiniMapCanvas.Children.Remove(ms);
+                }
+                var spritesToRemove = MapGrid.Children.OfType<Image>().ToList();
+                foreach (var sprite in spritesToRemove)
+                {
+                    MapGrid.Children.Remove(sprite);
+                }
+            }
+
+            foreach (var square in toDraw)
             {
                 Rectangle rct = new Rectangle
                 {
@@ -61,17 +90,88 @@ namespace ErsatzCiv
                 };
                 rct.SetValue(Grid.RowProperty, square.Row);
                 rct.SetValue(Grid.ColumnProperty, square.Column);
+                rct.Tag = square;
                 MapGrid.Children.Add(rct);
+
+                if (square.CrossedByRiver)
+                {
+                    Rectangle rctRiver = new Rectangle
+                    {
+                        Width = DEFAULT_SIZE,
+                        Height = DEFAULT_SIZE / (double)10,
+                        Fill = Brushes.Blue
+                    };
+                    rctRiver.SetValue(Grid.RowProperty, square.Row);
+                    rctRiver.SetValue(Grid.ColumnProperty, square.Column);
+                    rctRiver.Tag = square;
+                    MapGrid.Children.Add(rctRiver);
+                }
 
                 Rectangle rctMinimap = new Rectangle
                 {
-                    Width = minimapSquareSize,
-                    Height = minimapSquareSize,
+                    Width = _minimapSquareSize,
+                    Height = _minimapSquareSize,
                     Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(square.MapSquareType.RenderValue))
                 };
-                rctMinimap.SetValue(Canvas.TopProperty, square.Row * minimapSquareSize);
-                rctMinimap.SetValue(Canvas.LeftProperty, square.Column * minimapSquareSize);
+                rctMinimap.SetValue(Canvas.TopProperty, square.Row * _minimapSquareSize);
+                rctMinimap.SetValue(Canvas.LeftProperty, square.Column * _minimapSquareSize);
+                rctMinimap.Tag = square;
                 MiniMapCanvas.Children.Add(rctMinimap);
+            }
+            
+            foreach (var unit in _engine.Units)
+            {
+                Image img = new Image
+                {
+                    Width = DEFAULT_SIZE,
+                    Height = DEFAULT_SIZE,
+                    Source = new BitmapImage(new Uri(Properties.Settings.Default.imagesPath + unit.RenderValue)),
+                    Stretch = Stretch.Uniform
+                };
+                img.SetValue(Grid.RowProperty, unit.Row);
+                img.SetValue(Grid.ColumnProperty, unit.Column);
+                img.Tag = unit;
+                MapGrid.Children.Add(img);
+            }
+        }
+
+        private void FocusOn(int x, int y)
+        {
+            var newX = ((MapGrid.ActualWidth * x) / _engine.Map.Width) - (MapScroller.ActualWidth / 2);
+            var newY = ((MapGrid.ActualHeight * y) / _engine.Map.Height) - (MapScroller.ActualHeight / 2);
+
+            MapScroller.UpdateLayout();
+            MapScroller.ScrollToHorizontalOffset(newX);
+            MapScroller.ScrollToVerticalOffset(newY);
+            MapScroller.UpdateLayout();
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (_engine.Units.Count > 0)
+            {
+                FocusOn(_engine.Units.First().Column, _engine.Units.First().Row);
+            }
+        }
+
+        private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            var move = e.Key.Move();
+            if (move.HasValue)
+            {
+                var unitToMove = _engine.Units.LastOrDefault(u => !u.Locked);
+                if (unitToMove != null)
+                {
+                    if (unitToMove.Move(_engine, move.Value))
+                    {
+                        var associatedSprite = MapGrid.Children.OfType<Image>().FirstOrDefault(x => x.Tag == unitToMove);
+                        if (associatedSprite != null)
+                        {
+                            associatedSprite.SetValue(Grid.RowProperty, unitToMove.Row);
+                            associatedSprite.SetValue(Grid.ColumnProperty, unitToMove.Column);
+                        }
+                    }
+                }
             }
         }
     }
