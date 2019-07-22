@@ -135,13 +135,10 @@ namespace ErsatzCiv
             }
         }
 
-        private void FocusOn(int x, int y)
+        private void FocusOn(double nexX, double newY)
         {
-            var newX = ((MapGrid.ActualWidth * x) / _engine.Map.Width) - (MapScroller.ActualWidth / 2);
-            var newY = ((MapGrid.ActualHeight * y) / _engine.Map.Height) - (MapScroller.ActualHeight / 2);
-
             MapScroller.UpdateLayout();
-            MapScroller.ScrollToHorizontalOffset(newX);
+            MapScroller.ScrollToHorizontalOffset(nexX);
             MapScroller.ScrollToVerticalOffset(newY);
             MapScroller.UpdateLayout();
         }
@@ -150,7 +147,9 @@ namespace ErsatzCiv
         {
             if (_engine.Units.Count > 0)
             {
-                FocusOn(_engine.Units.First().Column, _engine.Units.First().Row);
+                var newX = ((MapGrid.ActualWidth * _engine.Units.First().Column) / _engine.Map.Width) - (MapScroller.ActualWidth / 2);
+                var newY = ((MapGrid.ActualHeight * _engine.Units.First().Row) / _engine.Map.Height) - (MapScroller.ActualHeight / 2);
+                FocusOn(newX, newY);
             }
         }
 
@@ -173,6 +172,19 @@ namespace ErsatzCiv
                     }
                 }
             }
+        }
+
+        private void MiniMapCanvas_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            Point p = System.Windows.Input.Mouse.GetPosition(MiniMapCanvas);
+
+            var ratioX = p.X / MiniMapCanvas.Width;
+            var ratioY = p.Y / MiniMapCanvas.Height;
+
+            var newX = (MapGrid.ActualWidth * ratioX) - (MapScroller.ActualWidth / 2);
+            var newY = (MapGrid.ActualHeight * ratioY) - (MapScroller.ActualHeight / 2);
+
+            FocusOn(newX, newY);
         }
     }
 }
