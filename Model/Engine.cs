@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ErsatzCiv.Model
@@ -6,10 +7,12 @@ namespace ErsatzCiv.Model
     public class Engine
     {
         private List<UnitPivot> _units = new List<UnitPivot>();
+        private List<CityPivot> _cities = new List<CityPivot>();
 
         public int CurrentTurn { get; private set; }
         public MapData Map { get; private set; }
         public IReadOnlyCollection<UnitPivot> Units { get { return _units; } }
+        public IReadOnlyCollection<CityPivot> Cities { get { return _cities; } }
 
         public Engine(MapData.MapSizeEnum mapSize, int continentsCount, int landRatio1To10)
         {
@@ -28,6 +31,29 @@ namespace ErsatzCiv.Model
             _units.Add(new WorkerPivot(x, y));
 
             CurrentTurn = 1;
+        }
+
+        public CityPivot BuildCity(SettlerPivot settler)
+        {
+            if (settler == null)
+            {
+                throw new ArgumentNullException(nameof(settler));
+            }
+            if (!_units.Contains(settler))
+            {
+                return null;
+            }
+
+            var sq = Map.MapSquareList.FirstOrDefault(ms => ms.Row == settler.Row && ms.Column == settler.Column);
+            if (sq?.MapSquareType?.IsCityBuildable != true)
+            {
+                return null;
+            }
+
+            _cities.Add(new CityPivot(sq.Row, sq.Column));
+
+            _units.Remove(settler);
+            return _cities.Last();
         }
 
         public bool NewTurn()
@@ -50,6 +76,11 @@ namespace ErsatzCiv.Model
             {
                 ms.ResetRedraw();
             }
+        }
+
+        public bool IsCity(int row, int column)
+        {
+            return _cities.Any(c => c.Row == row && c.Column == column);
         }
     }
 }

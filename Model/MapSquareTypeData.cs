@@ -51,6 +51,7 @@ namespace ErsatzCiv.Model
         /// Indicates of the type is sea navigable (otherwise, it's ground navigable).
         /// </summary>
         public bool IsSeaType { get; private set; }
+        public bool IsCityBuildable { get; private set; }
 
         /// <summary>
         /// Inferred; available actions.
@@ -80,7 +81,8 @@ namespace ErsatzCiv.Model
                 RenderType = RenderTypeEnum.PlainBrush,
                 RiverCrossable = false,
                 _actions = new List<MapSquareActionPivot>(),
-                IsSeaType = true
+                IsSeaType = true,
+                IsCityBuildable = false
             },
             // grassland
             new MapSquareTypeData
@@ -101,7 +103,8 @@ namespace ErsatzCiv.Model
                     MapSquareActionPivot.RailRoad,
                     MapSquareActionPivot.Road
                 },
-                IsSeaType = false
+                IsSeaType = false,
+                IsCityBuildable = true
             },
             // mountain
             new MapSquareTypeData
@@ -120,7 +123,8 @@ namespace ErsatzCiv.Model
                     MapSquareActionPivot.RailRoad,
                     MapSquareActionPivot.Road
                 },
-                IsSeaType = false
+                IsSeaType = false,
+                IsCityBuildable = false
             },
             // forest
             new MapSquareTypeData
@@ -139,7 +143,8 @@ namespace ErsatzCiv.Model
                     MapSquareActionPivot.RailRoad,
                     MapSquareActionPivot.Road
                 },
-                IsSeaType = false
+                IsSeaType = false,
+                IsCityBuildable = true
             }
         };
 

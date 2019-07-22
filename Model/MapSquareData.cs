@@ -93,7 +93,7 @@ namespace ErsatzCiv.Model
         /// <returns>
         /// <c>True</c> if the worker actually starts the action; <c>False</c> otherwise.
         /// </returns>
-        public bool? ApplyAction(WorkerPivot worker, MapSquareActionPivot action)
+        public bool? ApplyAction(Engine engine, WorkerPivot worker, MapSquareActionPivot action)
         {
             if (worker == null)
             {
@@ -105,7 +105,7 @@ namespace ErsatzCiv.Model
                 throw new ArgumentNullException(nameof(action));
             }
 
-            if (!action.AlwaysAvailable && !MapSquareType.Actions.Contains(action))
+            if ((!action.AlwaysAvailable && !MapSquareType.Actions.Contains(action)) || engine.IsCity(worker.Row, worker.Column))
             {
                 return false;
             }

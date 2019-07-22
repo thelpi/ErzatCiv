@@ -74,8 +74,8 @@ namespace ErsatzCiv.Model
             var y = direction.Column(Column);
             var square = engine.Map.MapSquareList.FirstOrDefault(ms => ms.Row == x && ms.Column == y);
             if (square == null
-                || (square.MapSquareType.IsSeaType && !SeaNavigate)
-                || (!square.MapSquareType.IsSeaType && !GroundNavigate))
+                || (square.MapSquareType.IsSeaType && !SeaNavigate && !engine.IsCity(x, y))
+                || (!square.MapSquareType.IsSeaType && !GroundNavigate && !engine.IsCity(x, y)))
             {
                 return false;
             }

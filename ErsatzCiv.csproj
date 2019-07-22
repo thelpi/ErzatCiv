@@ -53,6 +53,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Model\CityPivot.cs" />
     <Compile Include="Model\DirectionEnumPivot.cs" />
     <Compile Include="Model\MapSquareActionPivot.cs" />
     <Compile Include="Model\RenderTypeEnum.cs" />
@@ -74,7 +75,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Engine.cs" />
+    <Compile Include="Model\Engine.cs" />
     <Compile Include="Model\MapData.cs" />
     <Compile Include="Model\MapSquareData.cs" />
     <Compile Include="Model\MapSquareTypeData.cs" />

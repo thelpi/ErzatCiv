@@ -15,7 +15,7 @@
                 <Button Name="BtnNextTurn" Content="Next" Width="75" Height="25" Click="BtnNextTurn_Click" />
             </DockPanel>
         </DockPanel>
-        <ScrollViewer DockPanel.Dock="Top" CanContentScroll="True"
+        <ScrollViewer ScrollChanged="MapScroller_ScrollChanged" DockPanel.Dock="Top" CanContentScroll="True"
                   Name="MapScroller"
                       HorizontalScrollBarVisibility="Visible"
                   VerticalScrollBarVisibility="Visible">

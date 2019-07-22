@@ -19,6 +19,7 @@ namespace ErsatzCiv
         private const int MENU_HEIGHT = 200;
         private Engine _engine;
         private double _minimapSquareSize;
+        private Rectangle _rCapture;
 
         public MainWindow()
         {
@@ -133,6 +134,23 @@ namespace ErsatzCiv
                 img.Tag = unit;
                 MapGrid.Children.Add(img);
             }
+
+            foreach (var city in _engine.Cities)
+            {
+                Image img = new Image
+                {
+                    Width = DEFAULT_SIZE * CityPivot.DISPLAY_RATIO,
+                    Height = DEFAULT_SIZE * CityPivot.DISPLAY_RATIO,
+                    Source = new BitmapImage(new Uri(Properties.Settings.Default.imagesPath + city.RenderValue)),
+                    Stretch = Stretch.Uniform,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                img.SetValue(Grid.RowProperty, city.Row);
+                img.SetValue(Grid.ColumnProperty, city.Column);
+                img.Tag = city;
+                MapGrid.Children.Add(img);
+            }
         }
 
         private void FocusOn(double nexX, double newY)
@@ -151,14 +169,36 @@ namespace ErsatzCiv
                 var newY = ((MapGrid.ActualHeight * _engine.Units.First().Row) / _engine.Map.Height) - (MapScroller.ActualHeight / 2);
                 FocusOn(newX, newY);
             }
+
+            var x = MapScroller.ContentHorizontalOffset;
+            var y = MapScroller.ContentVerticalOffset;
+
+            var rX = (x * (MENU_HEIGHT * MapData.RATIO_WIDTH_HEIGHT)) / MapGrid.ActualWidth;
+            var rY = (y * MENU_HEIGHT) / MapGrid.ActualHeight;
+            var rWidth = (MapScroller.ActualWidth * (MENU_HEIGHT * MapData.RATIO_WIDTH_HEIGHT)) / MapGrid.ActualWidth;
+            var rHeight = (MapScroller.ActualHeight * MENU_HEIGHT) / MapGrid.ActualHeight;
+
+            _rCapture = new Rectangle
+            {
+                Fill = Brushes.Transparent,
+                Stroke = Brushes.DarkGray,
+                StrokeThickness = 2,
+                Width = rWidth,
+                Height = rHeight
+            };
+            _rCapture.SetValue(Canvas.LeftProperty, rX);
+            _rCapture.SetValue(Canvas.TopProperty, rY);
+            _rCapture.SetValue(Panel.ZIndexProperty, 2);
+            MiniMapCanvas.Children.Add(_rCapture);
         }
 
         private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
+            var unitToMove = _engine.Units.LastOrDefault(u => !u.Locked);
+
             var move = e.Key.Move();
             if (move.HasValue)
             {
-                var unitToMove = _engine.Units.LastOrDefault(u => !u.Locked);
                 if (unitToMove != null)
                 {
                     if (unitToMove.Move(_engine, move.Value))
@@ -171,6 +211,39 @@ namespace ErsatzCiv
                         }
                     }
                 }
+            }
+            else if (e.Key == System.Windows.Input.Key.B)
+            {
+                if (unitToMove?.GetType() == typeof(SettlerPivot))
+                {
+                    var city = _engine.BuildCity((SettlerPivot)unitToMove);
+                    if (city != null)
+                    {
+                        var associatedSprite = MapGrid.Children.OfType<Image>().FirstOrDefault(x => x.Tag == unitToMove);
+                        if (associatedSprite != null)
+                        {
+                            MapGrid.Children.Remove(associatedSprite);
+
+                            Image rct = new Image
+                            {
+                                Width = DEFAULT_SIZE * CityPivot.DISPLAY_RATIO,
+                                Height = DEFAULT_SIZE * CityPivot.DISPLAY_RATIO,
+                                Source = new BitmapImage(new Uri(Properties.Settings.Default.imagesPath + city.RenderValue)),
+                                Stretch = Stretch.Uniform,
+                                HorizontalAlignment = HorizontalAlignment.Center,
+                                VerticalAlignment = VerticalAlignment.Center
+                            };
+                            rct.SetValue(Grid.RowProperty, unitToMove.Row);
+                            rct.SetValue(Grid.ColumnProperty, unitToMove.Column);
+                            rct.Tag = city;
+                            MapGrid.Children.Add(rct);
+                        }
+                    }
+                }
+            }
+            else if (e.Key == System.Windows.Input.Key.Space)
+            {
+                BtnNextTurn_Click(sender, e);
             }
         }
 
@@ -185,6 +258,22 @@ namespace ErsatzCiv
             var newY = (MapGrid.ActualHeight * ratioY) - (MapScroller.ActualHeight / 2);
 
             FocusOn(newX, newY);
+        }
+
+        private void MapScroller_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+            if (_rCapture != null)
+            {
+                var x = MapScroller.ContentHorizontalOffset;
+                var y = MapScroller.ContentVerticalOffset;
+
+                var rX = (x * (MENU_HEIGHT * MapData.RATIO_WIDTH_HEIGHT)) / MapGrid.ActualWidth;
+                var rY = (y * MENU_HEIGHT) / MapGrid.ActualHeight;
+
+                _rCapture.SetValue(Canvas.LeftProperty, rX);
+                _rCapture.SetValue(Canvas.TopProperty, rY);
+                _rCapture.SetValue(Panel.ZIndexProperty, 2);
+            }
         }
     }
 }
