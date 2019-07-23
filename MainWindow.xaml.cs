@@ -28,7 +28,8 @@ namespace ErsatzCiv
             MiniMapCanvas.Height = MENU_HEIGHT;
             MiniMapCanvas.Width = MENU_HEIGHT * MapData.RATIO_WIDTH_HEIGHT;
             _engine = new Engine(MapData.MapSizeEnum.VeryLarge, 5, 4);
-            
+            _engine.NextUnitEvent += FocusOnUnit;
+
             for (int i = 0; i < _engine.Map.Width; i++)
             {
                 MapGrid.ColumnDefinitions.Add(new ColumnDefinition
@@ -62,7 +63,7 @@ namespace ErsatzCiv
             if (!full)
             {
                 toDraw = toDraw.Where(s => s.Redraw).ToList();
-                var mapSquaresToRemove = MapGrid.Children.OfType<Rectangle>().Where(x => toDraw.Contains(x.Tag)).ToList();
+                var mapSquaresToRemove = GetGraphicRenderList<Rectangle>(toDraw).ToList();
                 var minimapSquaresToRemove = MiniMapCanvas.Children.OfType<Rectangle>().Where(x => toDraw.Contains(x.Tag)).ToList();
                 foreach (var ms in mapSquaresToRemove)
                 {
@@ -163,12 +164,8 @@ namespace ErsatzCiv
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            if (_engine.Units.Count > 0)
-            {
-                var newX = ((MapGrid.ActualWidth * _engine.Units.First().Column) / _engine.Map.Width) - (MapScroller.ActualWidth / 2);
-                var newY = ((MapGrid.ActualHeight * _engine.Units.First().Row) / _engine.Map.Height) - (MapScroller.ActualHeight / 2);
-                FocusOn(newX, newY);
-            }
+            // just in case th event in the constructor doesn't work.
+            FocusOnUnit(null, null);
 
             var x = MapScroller.ContentHorizontalOffset;
             var y = MapScroller.ContentVerticalOffset;
@@ -194,16 +191,15 @@ namespace ErsatzCiv
 
         private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
-            var unitToMove = _engine.Units.LastOrDefault(u => !u.Locked);
-
-            var move = e.Key.Move();
-            if (move.HasValue)
+            // Moves a unit.
+            if (e.Key.Move().HasValue)
             {
-                if (unitToMove != null)
+                if (_engine.CurrentUnit != null)
                 {
-                    if (unitToMove.Move(_engine, move.Value))
+                    var unitToMove = _engine.CurrentUnit;
+                    if (unitToMove.Move(_engine, e.Key.Move().Value))
                     {
-                        var associatedSprite = MapGrid.Children.OfType<Image>().FirstOrDefault(x => x.Tag == unitToMove);
+                        var associatedSprite = GetGraphicRender<Image>(unitToMove);
                         if (associatedSprite != null)
                         {
                             associatedSprite.SetValue(Grid.RowProperty, unitToMove.Row);
@@ -212,14 +208,16 @@ namespace ErsatzCiv
                     }
                 }
             }
+            // Buils city..
             else if (e.Key == System.Windows.Input.Key.B)
             {
-                if (unitToMove?.GetType() == typeof(SettlerPivot))
+                if (_engine.CurrentUnit?.GetType() == typeof(SettlerPivot))
                 {
+                    var unitToMove = _engine.CurrentUnit;
                     var city = _engine.BuildCity((SettlerPivot)unitToMove);
                     if (city != null)
                     {
-                        var associatedSprite = MapGrid.Children.OfType<Image>().FirstOrDefault(x => x.Tag == unitToMove);
+                        Image associatedSprite = GetGraphicRender<Image>(unitToMove);
                         if (associatedSprite != null)
                         {
                             MapGrid.Children.Remove(associatedSprite);
@@ -233,18 +231,39 @@ namespace ErsatzCiv
                                 HorizontalAlignment = HorizontalAlignment.Center,
                                 VerticalAlignment = VerticalAlignment.Center
                             };
-                            rct.SetValue(Grid.RowProperty, unitToMove.Row);
-                            rct.SetValue(Grid.ColumnProperty, unitToMove.Column);
+                            rct.SetValue(Grid.RowProperty, city.Row);
+                            rct.SetValue(Grid.ColumnProperty, city.Column);
                             rct.Tag = city;
                             MapGrid.Children.Add(rct);
                         }
                     }
                 }
             }
+            // Forces next turn.
             else if (e.Key == System.Windows.Input.Key.Space)
             {
                 BtnNextTurn_Click(sender, e);
             }
+            // Centers the screen on current unit.
+            else if (e.Key == System.Windows.Input.Key.C)
+            {
+                FocusOnUnit(null, null);
+            }
+            // Goes to next unit.
+            else if (e.Key == System.Windows.Input.Key.W)
+            {
+                _engine.SetUnitIndex();
+            }
+        }
+
+        private T GetGraphicRender<T>(object tagValue) where T : FrameworkElement
+        {
+            return MapGrid.Children.OfType<T>().FirstOrDefault(x => x.Tag == tagValue);
+        }
+
+        private IEnumerable<T> GetGraphicRenderList<T>(params object[] tagValues) where T : FrameworkElement
+        {
+            return MapGrid.Children.OfType<T>().Where(x => tagValues.Contains(x.Tag));
         }
 
         private void MiniMapCanvas_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -273,6 +292,16 @@ namespace ErsatzCiv
                 _rCapture.SetValue(Canvas.LeftProperty, rX);
                 _rCapture.SetValue(Canvas.TopProperty, rY);
                 _rCapture.SetValue(Panel.ZIndexProperty, 2);
+            }
+        }
+
+        private void FocusOnUnit(object sender, EventArgs eventArgs)
+        {
+            if (_engine.CurrentUnit != null)
+            {
+                var newX = ((MapGrid.ActualWidth * _engine.CurrentUnit.Column) / _engine.Map.Width) - (MapScroller.ActualWidth / 2);
+                var newY = ((MapGrid.ActualHeight * _engine.CurrentUnit.Row) / _engine.Map.Height) - (MapScroller.ActualHeight / 2);
+                FocusOn(newX, newY);
             }
         }
     }

@@ -82,6 +82,7 @@ namespace ErsatzCiv.Model
             Row = x;
             Column = y;
             Locked = true;
+            engine.SetUnitIndex();
             return true;
         }
     }
