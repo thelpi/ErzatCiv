@@ -68,10 +68,17 @@ namespace ErsatzCiv.Model
             CurrentLifePoints = lifePoints;
         }
 
-        public bool Move(Engine engine, DirectionEnumPivot direction)
+        public bool Move(Engine engine, DirectionEnumPivot? direction)
         {
-            var x = direction.Row(Row);
-            var y = direction.Column(Column);
+            if (!direction.HasValue)
+            {
+                Locked = true;
+                engine.SetUnitIndex(false);
+                return true;
+            }
+
+            var x = direction.Value.Row(Row);
+            var y = direction.Value.Column(Column);
             var square = engine.Map.MapSquareList.FirstOrDefault(ms => ms.Row == x && ms.Column == y);
             if (square == null
                 || (square.MapSquareType.IsSeaType && !SeaNavigate && !engine.IsCity(x, y))

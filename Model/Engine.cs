@@ -52,16 +52,14 @@ namespace ErsatzCiv.Model
             CurrentTurn = 1;
         }
 
-        public CityPivot BuildCity(SettlerPivot settler)
+        public CityPivot BuildCity()
         {
-            if (settler == null)
-            {
-                throw new ArgumentNullException(nameof(settler));
-            }
-            if (!_units.Contains(settler))
+            if (CurrentUnit?.GetType() != typeof(SettlerPivot))
             {
                 return null;
             }
+
+            var settler = CurrentUnit as SettlerPivot;
 
             var sq = Map.MapSquareList.FirstOrDefault(ms => ms.Row == settler.Row && ms.Column == settler.Column);
             if (sq?.MapSquareType?.IsCityBuildable != true)
@@ -124,6 +122,29 @@ namespace ErsatzCiv.Model
         public bool IsCity(int row, int column)
         {
             return _cities.Any(c => c.Row == row && c.Column == column);
+        }
+
+        public bool WorkerAction(MapSquareActionPivot actionPivot)
+        {
+            if (CurrentUnit?.GetType() != typeof(WorkerPivot) || actionPivot == null)
+            {
+                return false;
+            }
+
+            var worker = CurrentUnit as WorkerPivot;
+            var sq = Map.MapSquareList.FirstOrDefault(ms => ms.Row == worker.Row && ms.Column == worker.Column);
+            if (sq == null)
+            {
+                return false;
+            }
+
+            var result = sq.ApplyAction(this, worker, actionPivot);
+            if (result)
+            {
+                worker.Move(this, null);
+            }
+
+            return result;
         }
     }
 }

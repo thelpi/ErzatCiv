@@ -10,7 +10,9 @@ namespace ErsatzCiv.Model
     public class MapSquareData
     {
         #region Properties
-        
+
+        public event EventHandler NextUnitEvent;
+
         private List<CurrentActionPivot> _currentActions = new List<CurrentActionPivot>();
 
         /// <summary>
@@ -93,7 +95,7 @@ namespace ErsatzCiv.Model
         /// <returns>
         /// <c>True</c> if the worker actually starts the action; <c>False</c> otherwise.
         /// </returns>
-        public bool? ApplyAction(Engine engine, WorkerPivot worker, MapSquareActionPivot action)
+        public bool ApplyAction(Engine engine, WorkerPivot worker, MapSquareActionPivot action)
         {
             if (worker == null)
             {

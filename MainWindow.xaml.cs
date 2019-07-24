@@ -248,8 +248,8 @@ namespace ErsatzCiv
             {
                 if (_engine.CurrentUnit?.GetType() == typeof(SettlerPivot))
                 {
-                    var unitToMove = _engine.CurrentUnit;
-                    var city = _engine.BuildCity((SettlerPivot)unitToMove);
+                    var unitToMove = _engine.CurrentUnit; // do not remove this line ! ("BuildCity()" changes the value of "CurrentUnit")
+                    var city = _engine.BuildCity();
                     if (city != null)
                     {
                         Image associatedSprite = GetGraphicRender<Image>(unitToMove);
@@ -290,6 +290,44 @@ namespace ErsatzCiv
             else if (e.Key == System.Windows.Input.Key.W)
             {
                 _engine.SetUnitIndex(false);
+            }
+            // Worker actions.
+            else if ((System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LeftShift)
+                || System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.RightShift))
+                && _engine.CurrentUnit?.GetType() == typeof(WorkerPivot))
+            {
+                switch (e.Key)
+                {
+                    case System.Windows.Input.Key.M:
+                        _engine.WorkerAction(MapSquareActionPivot.Mine);
+                        break;
+                    case System.Windows.Input.Key.I:
+                        _engine.WorkerAction(MapSquareActionPivot.Irrigate);
+                        break;
+                    case System.Windows.Input.Key.R:
+                        _engine.WorkerAction(MapSquareActionPivot.RailRoad);
+                        break;
+                    case System.Windows.Input.Key.C:
+                        _engine.WorkerAction(MapSquareActionPivot.Clear);
+                        break;
+                    case System.Windows.Input.Key.D:
+                        _engine.WorkerAction(MapSquareActionPivot.DestroyImprovement);
+                        break;
+                    case System.Windows.Input.Key.F:
+                        _engine.WorkerAction(MapSquareActionPivot.BuildFortress);
+                        break;
+                    case System.Windows.Input.Key.P:
+                        _engine.WorkerAction(MapSquareActionPivot.Plant);
+                        break;
+                    case System.Windows.Input.Key.A:
+                        _engine.WorkerAction(MapSquareActionPivot.ClearPollution);
+                        break;
+                    case System.Windows.Input.Key.X:
+                        _engine.WorkerAction(MapSquareActionPivot.DestroyRoad);
+                        break;
+                }
+                // Ensures a refresh of the blinking current unit.
+                FocusOnUnit(null, null);
             }
         }
 
