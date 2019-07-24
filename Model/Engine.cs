@@ -72,12 +72,12 @@ namespace ErsatzCiv.Model
 
             _cities.Add(city);
             _units.Remove(settler);
-            SetUnitIndex();
+            SetUnitIndex(true);
 
             return city;
         }
 
-        public void SetUnitIndex()
+        public void SetUnitIndex(bool currentJustBeenRemoved)
         {
             for (int i = CurrentUnitIndex + 1; i < _units.Count; i++)
             {
@@ -87,7 +87,7 @@ namespace ErsatzCiv.Model
                     return;
                 }
             }
-            for (int i = 0; i < CurrentUnitIndex; i++)
+            for (int i = 0; i < CurrentUnitIndex + (currentJustBeenRemoved ? 1 : 0); i++)
             {
                 if (!_units[i].Locked)
                 {

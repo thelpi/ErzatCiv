@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using ErsatzCiv.Model;
@@ -20,6 +21,7 @@ namespace ErsatzCiv
         private Engine _engine;
         private double _minimapSquareSize;
         private Rectangle _rCapture;
+        private Image _previousUnitGraphic;
 
         public MainWindow()
         {
@@ -55,6 +57,8 @@ namespace ErsatzCiv
             _engine.NewTurn();
             RefreshView(false);
             _engine.PostTurnClean();
+            // Ensures a refresh of the blinking current unit.
+            FocusOnUnit(null, null);
         }
 
         private void RefreshView(bool full)
@@ -123,17 +127,7 @@ namespace ErsatzCiv
             
             foreach (var unit in _engine.Units)
             {
-                Image img = new Image
-                {
-                    Width = DEFAULT_SIZE,
-                    Height = DEFAULT_SIZE,
-                    Source = new BitmapImage(new Uri(Properties.Settings.Default.imagesPath + unit.RenderValue)),
-                    Stretch = Stretch.Uniform
-                };
-                img.SetValue(Grid.RowProperty, unit.Row);
-                img.SetValue(Grid.ColumnProperty, unit.Column);
-                img.Tag = unit;
-                MapGrid.Children.Add(img);
+                UnitToMap(unit);
             }
 
             foreach (var city in _engine.Cities)
@@ -152,6 +146,47 @@ namespace ErsatzCiv
                 img.Tag = city;
                 MapGrid.Children.Add(img);
             }
+        }
+
+        private Image UnitToMap(UnitPivot unit, bool blinkAndZindex = false)
+        {
+            var currentElem = MapGrid.Children.OfType<Image>().FirstOrDefault(x => x.Tag == unit);
+            if (currentElem != null)
+            {
+                MapGrid.Children.Remove(currentElem);
+            }
+            Image img = new Image
+            {
+                Width = DEFAULT_SIZE,
+                Height = DEFAULT_SIZE,
+                Source = new BitmapImage(new Uri(Properties.Settings.Default.imagesPath + unit.RenderValue)),
+                Stretch = Stretch.Uniform
+            };
+            img.SetValue(Grid.RowProperty, unit.Row);
+            img.SetValue(Grid.ColumnProperty, unit.Column);
+            img.Tag = unit;
+            if (blinkAndZindex)
+            {
+                img.SetValue(Panel.ZIndexProperty, 2);
+
+                var blinkingAnimation = new DoubleAnimation
+                {
+                    From = 1.0,
+                    To = 0.0,
+                    RepeatBehavior = RepeatBehavior.Forever,
+                    AutoReverse = true,
+                    Duration = new Duration(TimeSpan.FromMilliseconds(500))
+                };
+
+                var blinkingStoryboard = new Storyboard();
+                blinkingStoryboard.Children.Add(blinkingAnimation);
+                Storyboard.SetTargetProperty(blinkingAnimation, new PropertyPath("(Image.Opacity)"));
+
+                Storyboard.SetTarget(blinkingAnimation, img);
+                blinkingStoryboard.Begin();
+            }
+            MapGrid.Children.Add(img);
+            return img;
         }
 
         private void FocusOn(double nexX, double newY)
@@ -208,7 +243,7 @@ namespace ErsatzCiv
                     }
                 }
             }
-            // Buils city..
+            // Buils city.
             else if (e.Key == System.Windows.Input.Key.B)
             {
                 if (_engine.CurrentUnit?.GetType() == typeof(SettlerPivot))
@@ -236,6 +271,8 @@ namespace ErsatzCiv
                             rct.Tag = city;
                             MapGrid.Children.Add(rct);
                         }
+                        // Ensures a refresh of the blinking current unit.
+                        FocusOnUnit(null, null);
                     }
                 }
             }
@@ -252,7 +289,7 @@ namespace ErsatzCiv
             // Goes to next unit.
             else if (e.Key == System.Windows.Input.Key.W)
             {
-                _engine.SetUnitIndex();
+                _engine.SetUnitIndex(false);
             }
         }
 
@@ -297,11 +334,18 @@ namespace ErsatzCiv
 
         private void FocusOnUnit(object sender, EventArgs eventArgs)
         {
+            if (_previousUnitGraphic != null)
+            {
+                UnitToMap(_previousUnitGraphic.Tag as UnitPivot);
+                _previousUnitGraphic = null;
+            }
+
             if (_engine.CurrentUnit != null)
             {
                 var newX = ((MapGrid.ActualWidth * _engine.CurrentUnit.Column) / _engine.Map.Width) - (MapScroller.ActualWidth / 2);
                 var newY = ((MapGrid.ActualHeight * _engine.CurrentUnit.Row) / _engine.Map.Height) - (MapScroller.ActualHeight / 2);
                 FocusOn(newX, newY);
+                _previousUnitGraphic = UnitToMap(_engine.CurrentUnit, true);
             }
         }
     }
