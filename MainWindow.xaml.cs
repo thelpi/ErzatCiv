@@ -18,6 +18,8 @@ namespace ErsatzCiv
     {
         private const int DEFAULT_SIZE = 50;
         private const int MENU_HEIGHT = 200;
+        private const int UNIT_ZINDEX = 50;
+
         private Engine _engine;
         private double _minimapSquareSize;
         private Rectangle _rCapture;
@@ -25,30 +27,7 @@ namespace ErsatzCiv
         public MainWindow()
         {
             InitializeComponent();
-
-            MiniMapCanvas.Height = MENU_HEIGHT;
-            MiniMapCanvas.Width = MENU_HEIGHT * MapData.RATIO_WIDTH_HEIGHT;
-            _engine = new Engine(MapData.MapSizeEnum.VeryLarge, 5, 4);
-            _engine.NextUnitEvent += FocusOnUnit;
-            _engine.SubscribeToMapSquareChangeEvent(UpdateSquareMap);
-
-            for (int i = 0; i < _engine.Map.Width; i++)
-            {
-                MapGrid.ColumnDefinitions.Add(new ColumnDefinition
-                {
-                    Width = new GridLength(DEFAULT_SIZE)
-                });
-            }
-            for (int j = 0; j < _engine.Map.Height; j++)
-            {
-                MapGrid.RowDefinitions.Add(new RowDefinition
-                {
-                    Height = new GridLength(DEFAULT_SIZE)
-                });
-            }
-
-            _minimapSquareSize = (double)MENU_HEIGHT / _engine.Map.Height;
-
+            InitializeEngine();
             DrawFullMapAndMiniMap();
             RefreshDynamicView();
         }
@@ -75,11 +54,6 @@ namespace ErsatzCiv
             // just in case th event in the constructor doesn't work.
             RecomputeFocus();
 
-            var x = MapScroller.ContentHorizontalOffset;
-            var y = MapScroller.ContentVerticalOffset;
-
-            var rX = (x * (MENU_HEIGHT * MapData.RATIO_WIDTH_HEIGHT)) / MapGrid.ActualWidth;
-            var rY = (y * MENU_HEIGHT) / MapGrid.ActualHeight;
             var rWidth = (MapScroller.ActualWidth * (MENU_HEIGHT * MapData.RATIO_WIDTH_HEIGHT)) / MapGrid.ActualWidth;
             var rHeight = (MapScroller.ActualHeight * MENU_HEIGHT) / MapGrid.ActualHeight;
 
@@ -91,10 +65,9 @@ namespace ErsatzCiv
                 Width = rWidth,
                 Height = rHeight
             };
-            _rCapture.SetValue(Canvas.LeftProperty, rX);
-            _rCapture.SetValue(Canvas.TopProperty, rY);
-            _rCapture.SetValue(Panel.ZIndexProperty, 2);
             MiniMapCanvas.Children.Add(_rCapture);
+
+            RefreshMiniMapSelector();
         }
 
         private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
@@ -107,11 +80,11 @@ namespace ErsatzCiv
                     var unitToMove = _engine.CurrentUnit; // do not remove this line ! ("MoveCurrentUnit()" changes the value of "CurrentUnit")
                     if (_engine.MoveCurrentUnit(e.Key.Move().Value))
                     {
-                        var associatedSprite = GetGraphicRender<Image>(unitToMove);
-                        if (associatedSprite != null)
+                        var associatedSprites = GetGraphicRenders(unitToMove);
+                        if (associatedSprites.Count > 0)
                         {
-                            associatedSprite.SetValue(Grid.RowProperty, unitToMove.Row);
-                            associatedSprite.SetValue(Grid.ColumnProperty, unitToMove.Column);
+                            associatedSprites.First().SetValue(Grid.RowProperty, unitToMove.Row);
+                            associatedSprites.First().SetValue(Grid.ColumnProperty, unitToMove.Column);
                         }
                     }
                 }
@@ -125,10 +98,10 @@ namespace ErsatzCiv
                     var city = _engine.BuildCity();
                     if (city != null)
                     {
-                        Image associatedSprite = GetGraphicRender<Image>(unitToMove);
-                        if (associatedSprite != null)
+                        var associatedSprites = GetGraphicRenders(unitToMove);
+                        if (associatedSprites.Count > 0)
                         {
-                            MapGrid.Children.Remove(associatedSprite);
+                            MapGrid.Children.Remove(associatedSprites.First());
 
                             DrawMapCity(city, true);
                         }
@@ -208,6 +181,20 @@ namespace ErsatzCiv
 
         private void MapScroller_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
+            RefreshMiniMapSelector();
+        }
+
+        private void FocusOnUnit(object sender, EventArgs eventArgs)
+        {
+            RecomputeFocus();
+        }
+
+        #endregion
+
+        #region Draw methods
+
+        private void RefreshMiniMapSelector()
+        {
             if (_rCapture != null)
             {
                 var x = MapScroller.ContentHorizontalOffset;
@@ -222,17 +209,28 @@ namespace ErsatzCiv
             }
         }
 
-        private void FocusOnUnit(object sender, EventArgs eventArgs)
-        {
-            RecomputeFocus();
-        }
-
-        #endregion
-
-        #region Draw methods
-
         private void DrawFullMapAndMiniMap()
         {
+            MiniMapCanvas.Height = MENU_HEIGHT;
+            MiniMapCanvas.Width = MENU_HEIGHT * MapData.RATIO_WIDTH_HEIGHT;
+
+            for (int i = 0; i < _engine.Map.Width; i++)
+            {
+                MapGrid.ColumnDefinitions.Add(new ColumnDefinition
+                {
+                    Width = new GridLength(DEFAULT_SIZE)
+                });
+            }
+            for (int j = 0; j < _engine.Map.Height; j++)
+            {
+                MapGrid.RowDefinitions.Add(new RowDefinition
+                {
+                    Height = new GridLength(DEFAULT_SIZE)
+                });
+            }
+
+            _minimapSquareSize = (double)MENU_HEIGHT / _engine.Map.Height;
+
             foreach (var square in _engine.Map.MapSquareList)
             {
                 DrawSingleMapAndMiniMapSquare(square, true);
@@ -243,18 +241,18 @@ namespace ErsatzCiv
         {
             if (!skipPreviousCheck)
             {
-                var rect = GetGraphicRender<Rectangle>(square);
-                if (rect != null)
+                var elements = GetGraphicRenders(square);
+                foreach (var elem in elements)
                 {
                     // also deletes the river layer (same tag)
-                    MapGrid.Children.Remove(rect);
+                    MapGrid.Children.Remove(elem);
                 }
 
-                var rectMini = GetMiniGraphicRender<Rectangle>(square);
-                if (rectMini != null)
+                var elementsMiniMap = GetMiniGraphicRenders(square);
+                foreach (var elem in elementsMiniMap)
                 {
                     // also deletes the river layer (same tag)
-                    MiniMapCanvas.Children.Remove(rectMini);
+                    MiniMapCanvas.Children.Remove(elem);
                 }
             }
 
@@ -306,22 +304,110 @@ namespace ErsatzCiv
                 rctRiverMinimap.Tag = square;
                 MiniMapCanvas.Children.Add(rctRiverMinimap);
             }
+
+            var newElementsWithZIndex = new Dictionary<FrameworkElement, int>();
+            if (square.RailRoad)
+            {
+                Line l1 = new Line { X1 = 0, Y1 = 0, X2 = DEFAULT_SIZE, Y2 = DEFAULT_SIZE, StrokeThickness = 1, Stroke = Brushes.Black };
+                Line l2 = new Line { X1 = 0, Y1 = DEFAULT_SIZE / 2, X2 = DEFAULT_SIZE, Y2 = DEFAULT_SIZE / 2, StrokeThickness = 1, Stroke = Brushes.Black };
+                Line l3 = new Line { X1 = 0, Y1 = DEFAULT_SIZE, X2 = DEFAULT_SIZE, Y2 = 0, StrokeThickness = 1, Stroke = Brushes.Black };
+                Line l4 = new Line { X1 = DEFAULT_SIZE / 2, Y1 = 0, X2 = DEFAULT_SIZE / 2, Y2 = DEFAULT_SIZE, StrokeThickness = 1, Stroke = Brushes.Black };
+                newElementsWithZIndex.Add(l1, 1);
+                newElementsWithZIndex.Add(l2, 1);
+                newElementsWithZIndex.Add(l3, 1);
+                newElementsWithZIndex.Add(l4, 1);
+            }
+            else if (square.Road)
+            {
+                Line l1 = new Line { X1 = 0, Y1 = 0, X2 = DEFAULT_SIZE, Y2 = DEFAULT_SIZE, StrokeThickness = 1, Stroke = Brushes.Tan };
+                Line l2 = new Line { X1 = 0, Y1 = DEFAULT_SIZE / 2, X2 = DEFAULT_SIZE, Y2 = DEFAULT_SIZE / 2, StrokeThickness = 1, Stroke = Brushes.Tan };
+                Line l3 = new Line { X1 = 0, Y1 = DEFAULT_SIZE, X2 = DEFAULT_SIZE, Y2 = 0, StrokeThickness = 1, Stroke = Brushes.Tan };
+                Line l4 = new Line { X1 = DEFAULT_SIZE / 2, Y1 = 0, X2 = DEFAULT_SIZE / 2, Y2 = DEFAULT_SIZE, StrokeThickness = 1, Stroke = Brushes.Tan };
+                newElementsWithZIndex.Add(l1, 1);
+                newElementsWithZIndex.Add(l2, 1);
+                newElementsWithZIndex.Add(l3, 1);
+                newElementsWithZIndex.Add(l4, 1);
+            }
+            if (square.Irrigate)
+            {
+                Line l1 = new Line
+                {
+                    X1 = 1,
+                    Y1 = (DEFAULT_SIZE / (double)3) - 1,
+                    X2 = DEFAULT_SIZE - 1,
+                    Y2 = (DEFAULT_SIZE / (double)3) - 1,
+                    StrokeThickness = 2,
+                    Stroke = Brushes.Aquamarine
+                };
+                Line l2 = new Line
+                {
+                    X1 = 1,
+                    Y1 = ((DEFAULT_SIZE / (double)3) * 2) - 1,
+                    X2 = DEFAULT_SIZE - 1,
+                    Y2 = ((DEFAULT_SIZE / (double)3) * 2) - 1,
+                    StrokeThickness = 2,
+                    Stroke = Brushes.Aquamarine
+                };
+                Line l3 = new Line
+                {
+                    X1 = (DEFAULT_SIZE / (double)3) - 1,
+                    Y1 = 1,
+                    X2 = (DEFAULT_SIZE / (double)3) - 1,
+                    Y2 = DEFAULT_SIZE - 1,
+                    StrokeThickness = 2,
+                    Stroke = Brushes.Aquamarine
+                };
+                Line l4 = new Line
+                {
+                    X1 = ((DEFAULT_SIZE / (double)3) * 2) - 1,
+                    Y1 = 1,
+                    X2 = ((DEFAULT_SIZE / (double)3) * 2) - 1,
+                    Y2 = DEFAULT_SIZE - 1,
+                    StrokeThickness = 2,
+                    Stroke = Brushes.Aquamarine
+                };
+                newElementsWithZIndex.Add(l1, 2);
+                newElementsWithZIndex.Add(l2, 2);
+                newElementsWithZIndex.Add(l3, 2);
+                newElementsWithZIndex.Add(l4, 2);
+            }
+            if (square.Mine)
+            {
+                // zindex 2
+            }
+            if (square.Pollution)
+            {
+                // zindex 3
+            }
+            if (square.Fortress)
+            {
+                // zindex 4
+            }
+
+            foreach (var element in newElementsWithZIndex.Keys)
+            {
+                element.SetValue(Grid.RowProperty, square.Row);
+                element.SetValue(Grid.ColumnProperty, square.Column);
+                element.SetValue(Panel.ZIndexProperty, newElementsWithZIndex[element]);
+                element.Tag = square;
+                MapGrid.Children.Add(element);
+            }
         }
 
         private void DrawMapCity(CityPivot city, bool skipPreviousCheck)
         {
             if (!skipPreviousCheck)
             {
-                var currentElem = GetGraphicRender<Image>(city);
-                if (currentElem != null)
+                var elements = GetGraphicRenders(city);
+                foreach (var element in elements)
                 {
-                    MapGrid.Children.Remove(currentElem);
+                    MapGrid.Children.Remove(element);
                 }
 
-                var currentElemMiniMap = GetMiniGraphicRender<Rectangle>(city);
-                if (currentElemMiniMap != null)
+                var elementsMiniMap = GetMiniGraphicRenders(city);
+                foreach (var element in elementsMiniMap)
                 {
-                    MiniMapCanvas.Children.Remove(currentElemMiniMap);
+                    MiniMapCanvas.Children.Remove(element);
                 }
             }
 
@@ -367,10 +453,11 @@ namespace ErsatzCiv
             };
             img.SetValue(Grid.RowProperty, unit.Row);
             img.SetValue(Grid.ColumnProperty, unit.Column);
+            img.SetValue(Panel.ZIndexProperty, UNIT_ZINDEX);
             img.Tag = unit;
             if (blinkAndZindex)
             {
-                img.SetValue(Panel.ZIndexProperty, 2);
+                img.SetValue(Panel.ZIndexProperty, UNIT_ZINDEX + 1);
 
                 var blinkingAnimation = new DoubleAnimation
                 {
@@ -391,19 +478,26 @@ namespace ErsatzCiv
             MapGrid.Children.Add(img);
         }
 
-        private T GetGraphicRender<T>(object tagValue) where T : FrameworkElement
+        private List<FrameworkElement> GetGraphicRenders(object tagValue)
         {
-            return MapGrid.Children.OfType<T>().FirstOrDefault(x => x.Tag == tagValue);
+            return MapGrid.Children.OfType<FrameworkElement>().Where(x => x.Tag == tagValue).ToList();
         }
 
-        private T GetMiniGraphicRender<T>(object tagValue) where T : FrameworkElement
+        private List<FrameworkElement> GetMiniGraphicRenders(object tagValue)
         {
-            return MiniMapCanvas.Children.OfType<T>().FirstOrDefault(x => x.Tag == tagValue);
+            return MiniMapCanvas.Children.OfType<FrameworkElement>().Where(x => x.Tag == tagValue).ToList();
         }
 
         #endregion
 
         #region Other methods
+
+        private void InitializeEngine()
+        {
+            _engine = new Engine(MapData.MapSizeEnum.VeryLarge, 5, 4);
+            _engine.NextUnitEvent += FocusOnUnit;
+            _engine.SubscribeToMapSquareChangeEvent(UpdateSquareMap);
+        }
 
         private void RefreshDynamicView()
         {

@@ -85,7 +85,9 @@ namespace ErsatzCiv.Model
 
             for (int i = _currentUnitIndex + 1; i < _units.Count; i++)
             {
-                if (!_units[i].Locked)
+                if (!_units[i].Locked && !(
+                    _units[i].GetType() == typeof(WorkerPivot) && MapSquareData.CurrentActionPivot.WorkerIsBusy((WorkerPivot)_units[i])
+                ))
                 {
                     _currentUnitIndex = i;
                     NextUnitEvent?.Invoke(this, new EventArgs());
@@ -94,7 +96,9 @@ namespace ErsatzCiv.Model
             }
             for (int i = 0; i < _currentUnitIndex + (currentJustBeenRemoved ? 1 : 0); i++)
             {
-                if (!_units[i].Locked)
+                if (!_units[i].Locked && !(
+                    _units[i].GetType() == typeof(WorkerPivot) && MapSquareData.CurrentActionPivot.WorkerIsBusy((WorkerPivot)_units[i])
+                ))
                 {
                     _currentUnitIndex = i;
                     NextUnitEvent?.Invoke(this, new EventArgs());
@@ -137,6 +141,11 @@ namespace ErsatzCiv.Model
             if (sq == null)
             {
                 return false;
+            }
+
+            if (actionPivot == MapSquareActionPivot.RailRoad && !sq.Road)
+            {
+                actionPivot = MapSquareActionPivot.Road;
             }
 
             var result = sq.ApplyAction(this, worker, actionPivot);

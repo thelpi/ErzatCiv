@@ -188,10 +188,18 @@ namespace ErsatzCiv.Model
             var removableActions = new List<CurrentActionPivot>();
             foreach (var action in _currentActions)
             {
+                if (!action.HasWorkers)
+                {
+                    removableActions.Add(action);
+                }
+                else
+                {
+                    action.ForwardProgression();
+                }
+
                 if (action.IsDone)
                 {
                     removableActions.Add(action);
-                    SquareChangeEvent?.Invoke(this, new EventArgs());
                     if (action.Action == MapSquareActionPivot.BuildFortress)
                     {
                         Fortress = true;
@@ -254,18 +262,11 @@ namespace ErsatzCiv.Model
                     {
                         Road = true;
                     }
-                }
-                else if (!action.HasWorkers)
-                {
-                    removableActions.Add(action);
-                }
-                else
-                {
-                    action.ForwardProgression();
+                    SquareChangeEvent?.Invoke(this, new EventArgs());
                 }
             }
 
-            foreach (var action in _currentActions)
+            foreach (var action in removableActions.Distinct())
             {
                 _currentActions.Remove(action);
                 action.Dispose();
@@ -298,6 +299,11 @@ namespace ErsatzCiv.Model
             /// Inferred; indicates if the action is done.
             /// </summary>
             public bool IsDone { get { return TurnsCount >= Action.TurnCost; } }
+
+            public static bool WorkerIsBusy(WorkerPivot worker)
+            {
+                return _globalActions.Any(a => a._workers.Contains(worker));
+            }
 
             /// <summary>
             /// Constructor.
