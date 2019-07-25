@@ -11,8 +11,6 @@ namespace ErsatzCiv.Model
     {
         #region Properties
 
-        public event EventHandler NextUnitEvent;
-
         private List<CurrentActionPivot> _currentActions = new List<CurrentActionPivot>();
 
         /// <summary>

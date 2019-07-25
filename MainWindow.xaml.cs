@@ -21,7 +21,6 @@ namespace ErsatzCiv
         private Engine _engine;
         private double _minimapSquareSize;
         private Rectangle _rCapture;
-        private Image _previousUnitGraphic;
 
         public MainWindow()
         {
@@ -148,7 +147,7 @@ namespace ErsatzCiv
             }
         }
 
-        private Image UnitToMap(UnitPivot unit, bool blinkAndZindex = false)
+        private void UnitToMap(UnitPivot unit, bool blinkAndZindex = false)
         {
             var currentElem = MapGrid.Children.OfType<Image>().FirstOrDefault(x => x.Tag == unit);
             if (currentElem != null)
@@ -186,7 +185,6 @@ namespace ErsatzCiv
                 blinkingStoryboard.Begin();
             }
             MapGrid.Children.Add(img);
-            return img;
         }
 
         private void FocusOn(double nexX, double newY)
@@ -289,7 +287,7 @@ namespace ErsatzCiv
             // Goes to next unit.
             else if (e.Key == System.Windows.Input.Key.W)
             {
-                _engine.SetUnitIndex(false);
+                _engine.ToNextUnit();
             }
             // Worker actions.
             else if ((System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LeftShift)
@@ -372,10 +370,9 @@ namespace ErsatzCiv
 
         private void FocusOnUnit(object sender, EventArgs eventArgs)
         {
-            if (_previousUnitGraphic != null)
+            if (_engine.PreviousUnit != null)
             {
-                UnitToMap(_previousUnitGraphic.Tag as UnitPivot);
-                _previousUnitGraphic = null;
+                UnitToMap(_engine.PreviousUnit);
             }
 
             if (_engine.CurrentUnit != null)
@@ -383,7 +380,7 @@ namespace ErsatzCiv
                 var newX = ((MapGrid.ActualWidth * _engine.CurrentUnit.Column) / _engine.Map.Width) - (MapScroller.ActualWidth / 2);
                 var newY = ((MapGrid.ActualHeight * _engine.CurrentUnit.Row) / _engine.Map.Height) - (MapScroller.ActualHeight / 2);
                 FocusOn(newX, newY);
-                _previousUnitGraphic = UnitToMap(_engine.CurrentUnit, true);
+                UnitToMap(_engine.CurrentUnit, true);
             }
         }
     }

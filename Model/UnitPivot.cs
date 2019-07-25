@@ -73,7 +73,7 @@ namespace ErsatzCiv.Model
             if (!direction.HasValue)
             {
                 Locked = true;
-                engine.SetUnitIndex(false);
+                engine.ToNextUnit();
                 return true;
             }
 
@@ -89,7 +89,7 @@ namespace ErsatzCiv.Model
             Row = x;
             Column = y;
             Locked = true;
-            engine.SetUnitIndex(false);
+            engine.ToNextUnit();
             return true;
         }
     }

@@ -11,25 +11,15 @@ namespace ErsatzCiv.Model
 
         public event EventHandler NextUnitEvent;
 
-        private int _currentUnitIndex_DO_NOT_USE;
-        private int CurrentUnitIndex
-        {
-            get
-            {
-                return _currentUnitIndex_DO_NOT_USE;
-            }
-            set
-            {
-                _currentUnitIndex_DO_NOT_USE = value;
-                NextUnitEvent?.Invoke(this, new EventArgs());
-            }
-        }
+        private int _currentUnitIndex;
+        private int _previousUnitIndex;
 
         public int CurrentTurn { get; private set; }
         public MapData Map { get; private set; }
         public IReadOnlyCollection<UnitPivot> Units { get { return _units; } }
         public IReadOnlyCollection<CityPivot> Cities { get { return _cities; } }
-        public UnitPivot CurrentUnit { get { return CurrentUnitIndex >= 0 ? _units[CurrentUnitIndex] : null; } }
+        public UnitPivot CurrentUnit { get { return _currentUnitIndex >= 0 ? _units[_currentUnitIndex] : null; } }
+        public UnitPivot PreviousUnit { get { return _previousUnitIndex >= 0 && _previousUnitIndex != _currentUnitIndex ? _units[_previousUnitIndex] : null; } }
 
         public Engine(MapData.MapSizeEnum mapSize, int continentsCount, int landRatio1To10)
         {
@@ -47,7 +37,7 @@ namespace ErsatzCiv.Model
             _units.Add(new SettlerPivot(x, y));
             _units.Add(new WorkerPivot(x, y));
 
-            CurrentUnitIndex = 0;
+            SetUnitIndex(false, true);
 
             CurrentTurn = 1;
         }
@@ -70,30 +60,48 @@ namespace ErsatzCiv.Model
 
             _cities.Add(city);
             _units.Remove(settler);
-            SetUnitIndex(true);
+            SetUnitIndex(true, false);
 
             return city;
         }
 
-        public void SetUnitIndex(bool currentJustBeenRemoved)
+        public void ToNextUnit()
         {
-            for (int i = CurrentUnitIndex + 1; i < _units.Count; i++)
+            SetUnitIndex(false, false);
+        }
+
+        private void SetUnitIndex(bool currentJustBeenRemoved, bool reset)
+        {
+            if (reset)
+            {
+                _currentUnitIndex = _units.Count > 0 ? 0 : -1;
+                _previousUnitIndex = -1;
+                NextUnitEvent?.Invoke(this, new EventArgs());
+                return;
+            }
+
+            _previousUnitIndex = _currentUnitIndex;
+
+            for (int i = _currentUnitIndex + 1; i < _units.Count; i++)
             {
                 if (!_units[i].Locked)
                 {
-                    CurrentUnitIndex = i;
+                    _currentUnitIndex = i;
+                    NextUnitEvent?.Invoke(this, new EventArgs());
                     return;
                 }
             }
-            for (int i = 0; i < CurrentUnitIndex + (currentJustBeenRemoved ? 1 : 0); i++)
+            for (int i = 0; i < _currentUnitIndex + (currentJustBeenRemoved ? 1 : 0); i++)
             {
                 if (!_units[i].Locked)
                 {
-                    CurrentUnitIndex = i;
+                    _currentUnitIndex = i;
+                    NextUnitEvent?.Invoke(this, new EventArgs());
                     return;
                 }
             }
-            CurrentUnitIndex = -1;
+            _currentUnitIndex = -1;
+            NextUnitEvent?.Invoke(this, new EventArgs());
         }
 
         public bool NewTurn()
@@ -107,7 +115,7 @@ namespace ErsatzCiv.Model
                 u.Release();
             }
             CurrentTurn++;
-            CurrentUnitIndex = 0;
+            SetUnitIndex(false, true);
             return true;
         }
 
