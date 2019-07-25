@@ -101,7 +101,8 @@ namespace ErsatzCiv.Model
                     MapSquareActionPivot.Mine,
                     MapSquareActionPivot.Plant,
                     MapSquareActionPivot.RailRoad,
-                    MapSquareActionPivot.Road
+                    MapSquareActionPivot.Road,
+                    MapSquareActionPivot.BuildFortress
                 },
                 IsSeaType = false,
                 IsCityBuildable = true
@@ -121,7 +122,8 @@ namespace ErsatzCiv.Model
                 {
                     MapSquareActionPivot.Mine,
                     MapSquareActionPivot.RailRoad,
-                    MapSquareActionPivot.Road
+                    MapSquareActionPivot.Road,
+                    MapSquareActionPivot.BuildFortress
                 },
                 IsSeaType = false,
                 IsCityBuildable = false
@@ -141,7 +143,8 @@ namespace ErsatzCiv.Model
                 {
                     MapSquareActionPivot.Clear,
                     MapSquareActionPivot.RailRoad,
-                    MapSquareActionPivot.Road
+                    MapSquareActionPivot.Road,
+                    MapSquareActionPivot.BuildFortress
                 },
                 IsSeaType = false,
                 IsCityBuildable = true

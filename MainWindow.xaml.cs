@@ -72,8 +72,46 @@ namespace ErsatzCiv
 
         private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
+            // Worker actions.
+            if ((System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LeftShift)
+                || System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.RightShift))
+                && _engine.CurrentUnit?.GetType() == typeof(WorkerPivot))
+            {
+                switch (e.Key)
+                {
+                    case System.Windows.Input.Key.M:
+                        _engine.WorkerAction(MapSquareActionPivot.Mine);
+                        break;
+                    case System.Windows.Input.Key.I:
+                        _engine.WorkerAction(MapSquareActionPivot.Irrigate);
+                        break;
+                    case System.Windows.Input.Key.R:
+                        _engine.WorkerAction(MapSquareActionPivot.RailRoad);
+                        break;
+                    case System.Windows.Input.Key.C:
+                        _engine.WorkerAction(MapSquareActionPivot.Clear);
+                        break;
+                    case System.Windows.Input.Key.D:
+                        _engine.WorkerAction(MapSquareActionPivot.DestroyImprovement);
+                        break;
+                    case System.Windows.Input.Key.F:
+                        _engine.WorkerAction(MapSquareActionPivot.BuildFortress);
+                        break;
+                    case System.Windows.Input.Key.P:
+                        _engine.WorkerAction(MapSquareActionPivot.Plant);
+                        break;
+                    case System.Windows.Input.Key.A:
+                        _engine.WorkerAction(MapSquareActionPivot.ClearPollution);
+                        break;
+                    case System.Windows.Input.Key.X:
+                        _engine.WorkerAction(MapSquareActionPivot.DestroyRoad);
+                        break;
+                }
+                // Ensures a refresh of the blinking current unit.
+                RecomputeFocus();
+            }
             // Moves a unit.
-            if (e.Key.Move().HasValue)
+            else if (e.Key.Move().HasValue)
             {
                 if (_engine.CurrentUnit != null)
                 {
@@ -125,44 +163,6 @@ namespace ErsatzCiv
             else if (e.Key == System.Windows.Input.Key.W)
             {
                 _engine.ToNextUnit();
-            }
-            // Worker actions.
-            else if ((System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LeftShift)
-                || System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.RightShift))
-                && _engine.CurrentUnit?.GetType() == typeof(WorkerPivot))
-            {
-                switch (e.Key)
-                {
-                    case System.Windows.Input.Key.M:
-                        _engine.WorkerAction(MapSquareActionPivot.Mine);
-                        break;
-                    case System.Windows.Input.Key.I:
-                        _engine.WorkerAction(MapSquareActionPivot.Irrigate);
-                        break;
-                    case System.Windows.Input.Key.R:
-                        _engine.WorkerAction(MapSquareActionPivot.RailRoad);
-                        break;
-                    case System.Windows.Input.Key.C:
-                        _engine.WorkerAction(MapSquareActionPivot.Clear);
-                        break;
-                    case System.Windows.Input.Key.D:
-                        _engine.WorkerAction(MapSquareActionPivot.DestroyImprovement);
-                        break;
-                    case System.Windows.Input.Key.F:
-                        _engine.WorkerAction(MapSquareActionPivot.BuildFortress);
-                        break;
-                    case System.Windows.Input.Key.P:
-                        _engine.WorkerAction(MapSquareActionPivot.Plant);
-                        break;
-                    case System.Windows.Input.Key.A:
-                        _engine.WorkerAction(MapSquareActionPivot.ClearPollution);
-                        break;
-                    case System.Windows.Input.Key.X:
-                        _engine.WorkerAction(MapSquareActionPivot.DestroyRoad);
-                        break;
-                }
-                // Ensures a refresh of the blinking current unit.
-                RecomputeFocus();
             }
         }
 
@@ -373,15 +373,43 @@ namespace ErsatzCiv
             }
             if (square.Mine)
             {
-                // zindex 2
+                Image img = new Image
+                {
+                    Width = DEFAULT_SIZE * 0.5,
+                    Height = DEFAULT_SIZE * 0.5,
+                    Source = new BitmapImage(new Uri(Properties.Settings.Default.imagesPath + "mine.png")),
+                    Stretch = Stretch.Uniform,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                newElementsWithZIndex.Add(img, 2);
             }
             if (square.Pollution)
             {
-                // zindex 3
+                Image img = new Image
+                {
+                    Width = DEFAULT_SIZE * 0.8,
+                    Height = DEFAULT_SIZE * 0.8,
+                    Source = new BitmapImage(new Uri(Properties.Settings.Default.imagesPath + "pollution.png")),
+                    Stretch = Stretch.Uniform,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                newElementsWithZIndex.Add(img, 3);
             }
             if (square.Fortress)
             {
-                // zindex 4
+                var rect = new Rectangle
+                {
+                    Width = DEFAULT_SIZE * 0.7,
+                    Height = DEFAULT_SIZE * 0.7,
+                    Fill = Brushes.Transparent,
+                    Stroke = Brushes.Maroon,
+                    StrokeThickness = 2,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                newElementsWithZIndex.Add(rect, 4);
             }
 
             foreach (var element in newElementsWithZIndex.Keys)
