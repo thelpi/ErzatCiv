@@ -52,7 +52,8 @@ namespace ErsatzCiv.Model
             var settler = CurrentUnit as SettlerPivot;
 
             var sq = Map.MapSquareList.FirstOrDefault(ms => ms.Row == settler.Row && ms.Column == settler.Column);
-            if (sq?.MapSquareType?.IsCityBuildable != true)
+            if (sq?.MapSquareType?.IsCityBuildable != true
+                && !_cities.Any(c => c.Row == settler.Row && c.Column == settler.Column))
             {
                 return null;
             }
@@ -119,14 +120,6 @@ namespace ErsatzCiv.Model
             return true;
         }
 
-        public void PostTurnClean()
-        {
-            foreach (var ms in Map.MapSquareList.Where(s => s.Redraw))
-            {
-                ms.ResetRedraw();
-            }
-        }
-
         public bool IsCity(int row, int column)
         {
             return _cities.Any(c => c.Row == row && c.Column == column);
@@ -153,6 +146,19 @@ namespace ErsatzCiv.Model
             }
 
             return result;
+        }
+
+        public void SubscribeToMapSquareChangeEvent(EventHandler handler)
+        {
+            foreach (var ms in Map.MapSquareList)
+            {
+                ms.SquareChangeEvent += handler;
+            }
+        }
+
+        public bool MoveCurrentUnit(DirectionEnumPivot direction)
+        {
+            return CurrentUnit.Move(this, direction);
         }
     }
 }

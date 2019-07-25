@@ -11,6 +11,8 @@ namespace ErsatzCiv.Model
     {
         #region Properties
 
+        public event EventHandler SquareChangeEvent;
+
         private List<CurrentActionPivot> _currentActions = new List<CurrentActionPivot>();
 
         /// <summary>
@@ -62,10 +64,6 @@ namespace ErsatzCiv.Model
         /// Indicates if the square is crossed by a river.
         /// </summary>
         public bool CrossedByRiver { get; private set; }
-        /// <summary>
-        /// <c>True</c> if render must be recomputed.
-        /// </summary>
-        public bool Redraw { get; private set; }
 
         #endregion
 
@@ -193,7 +191,7 @@ namespace ErsatzCiv.Model
                 if (action.IsDone)
                 {
                     removableActions.Add(action);
-                    Redraw = true;
+                    SquareChangeEvent?.Invoke(this, new EventArgs());
                     if (action.Action == MapSquareActionPivot.BuildFortress)
                     {
                         Fortress = true;
@@ -272,14 +270,6 @@ namespace ErsatzCiv.Model
                 _currentActions.Remove(action);
                 action.Dispose();
             }
-        }
-
-        /// <summary>
-        /// Clears the <see cref="Redraw"/> property.
-        /// </summary>
-        public void ResetRedraw()
-        {
-            Redraw = false;
         }
 
         /// <summary>
