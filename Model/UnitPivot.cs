@@ -37,9 +37,9 @@ namespace ErsatzCiv.Model
         /// Offensive points.
         /// </summary>
         public int OffensePoints { get; private set; }
-        public bool Locked { get; private set; }
+        public bool Locked { get; protected set; }
 
-        public void Release()
+        public virtual void Release()
         {
             Locked = false;
         }

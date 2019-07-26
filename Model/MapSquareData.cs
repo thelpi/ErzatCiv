@@ -326,21 +326,12 @@ namespace ErsatzCiv.Model
             /// <returns><c>True</c> if success; <c>False</c> otherwise.</returns>
             public bool AddWorker(WorkerPivot worker)
             {
-                if (!_globalActions.Any(a => a._workers.Contains(worker)))
+                bool canWork = !WorkerIsBusy(worker);
+                if (canWork)
                 {
                     _workers.Add(worker);
-                    return true;
                 }
-                return false;
-            }
-
-            /// <summary>
-            /// Removes a worker from the action.
-            /// </summary>
-            /// <param name="worker">The worker.</param>
-            public static void RemoveWorker(WorkerPivot worker)
-            {
-                _globalActions.ForEach(a => a._workers.Remove(worker));
+                return canWork;
             }
 
             /// <summary>

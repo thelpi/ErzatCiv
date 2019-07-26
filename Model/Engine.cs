@@ -75,7 +75,7 @@ namespace ErsatzCiv.Model
         {
             if (reset)
             {
-                _currentUnitIndex = _units.Count > 0 ? 0 : -1;
+                _currentUnitIndex = _units.IndexOf(_units.FirstOrDefault(u => !u.Locked));
                 _previousUnitIndex = -1;
                 NextUnitEvent?.Invoke(this, new EventArgs());
                 return;
@@ -85,9 +85,7 @@ namespace ErsatzCiv.Model
 
             for (int i = _currentUnitIndex + 1; i < _units.Count; i++)
             {
-                if (!_units[i].Locked && !(
-                    _units[i].GetType() == typeof(WorkerPivot) && MapSquareData.CurrentActionPivot.WorkerIsBusy((WorkerPivot)_units[i])
-                ))
+                if (!_units[i].Locked)
                 {
                     _currentUnitIndex = i;
                     NextUnitEvent?.Invoke(this, new EventArgs());
@@ -96,9 +94,7 @@ namespace ErsatzCiv.Model
             }
             for (int i = 0; i < _currentUnitIndex + (currentJustBeenRemoved ? 1 : 0); i++)
             {
-                if (!_units[i].Locked && !(
-                    _units[i].GetType() == typeof(WorkerPivot) && MapSquareData.CurrentActionPivot.WorkerIsBusy((WorkerPivot)_units[i])
-                ))
+                if (!_units[i].Locked)
                 {
                     _currentUnitIndex = i;
                     NextUnitEvent?.Invoke(this, new EventArgs());

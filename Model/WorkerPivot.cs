@@ -9,5 +9,10 @@
         {
 
         }
+
+        public override void Release()
+        {
+            Locked = MapSquareData.CurrentActionPivot.WorkerIsBusy(this);
+        }
     }
 }
