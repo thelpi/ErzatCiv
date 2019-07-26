@@ -1,7 +1,6 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 
-namespace ErsatzCiv.Model
+namespace ErsatzCivLib.Model
 {
     /// <summary>
     /// Represents an unit.
@@ -39,7 +38,7 @@ namespace ErsatzCiv.Model
         public int OffensePoints { get; private set; }
         public bool Locked { get; protected set; }
 
-        public virtual void Release()
+        internal virtual void Release()
         {
             Locked = false;
         }
@@ -68,7 +67,7 @@ namespace ErsatzCiv.Model
             CurrentLifePoints = lifePoints;
         }
 
-        public bool Move(Engine engine, DirectionEnumPivot? direction)
+        internal bool Move(Engine engine, DirectionEnumPivot? direction)
         {
             if (!direction.HasValue)
             {

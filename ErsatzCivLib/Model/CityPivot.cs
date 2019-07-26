@@ -1,4 +1,4 @@
-﻿namespace ErsatzCiv.Model
+﻿namespace ErsatzCivLib.Model
 {
     public class CityPivot
     {
@@ -10,7 +10,7 @@
         public int Column { get; private set; }
         public string RenderValue { get; private set; }
 
-        public CityPivot(int row, int column)
+        internal CityPivot(int row, int column)
         {
             Row = row;
             Column = column;

@@ -53,14 +53,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Model\CityPivot.cs" />
-    <Compile Include="Model\DirectionEnumPivot.cs" />
-    <Compile Include="Model\MapSquareActionPivot.cs" />
-    <Compile Include="Model\RenderTypeEnum.cs" />
-    <Compile Include="Model\SettlerPivot.cs" />
-    <Compile Include="Model\UnitPivot.cs" />
-    <Compile Include="Model\WorkerPivot.cs" />
-    <Compile Include="Tools.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -75,10 +67,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Model\Engine.cs" />
-    <Compile Include="Model\MapData.cs" />
-    <Compile Include="Model\MapSquareData.cs" />
-    <Compile Include="Model\MapSquareTypeData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -103,6 +91,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="ErsatzCivLib\ErsatzCivLib.csproj">
+      <Project>{c8d51508-6972-469c-860f-3b6ea3fdb86b}</Project>
+      <Name>ErsatzCivLib</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace ErsatzCiv.Model
+namespace ErsatzCivLib.Model
 {
     /// <summary>
     /// Represents a type of square on the map.

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ErsatzCiv.Model
+namespace ErsatzCivLib.Model
 {
     public class MapData
     {
@@ -26,7 +26,7 @@ namespace ErsatzCiv.Model
             get { return _mapSquareList.Single(x => x.Column == j && x.Row == i); }
         }
 
-        public MapData(MapSizeEnum mapSize, int continentCount, int landRatio1To10)
+        internal MapData(MapSizeEnum mapSize, int continentCount, int landRatio1To10)
         {
             // Ensures correct values.
             continentCount = CapProperty(continentCount, maxExcluded: 11);

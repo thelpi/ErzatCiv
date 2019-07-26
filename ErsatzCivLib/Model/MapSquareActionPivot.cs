@@ -1,4 +1,4 @@
-﻿namespace ErsatzCiv.Model
+﻿namespace ErsatzCivLib.Model
 {
     /// <summary>
     /// Represents a worker action.

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ErsatzCiv.Model
+namespace ErsatzCivLib.Model
 {
     /// <summary>
     /// Represents a map square.
@@ -67,7 +67,7 @@ namespace ErsatzCiv.Model
 
         #endregion
 
-        public MapSquareData(MapSquareTypeData mapSquareType, int row, int column,
+        internal MapSquareData(MapSquareTypeData mapSquareType, int row, int column,
             MapSquareTypeData underlyingType = null, bool crossedByRiver = false)
         {
             MapSquareType = mapSquareType ?? throw new ArgumentNullException(nameof(mapSquareType));
@@ -91,7 +91,7 @@ namespace ErsatzCiv.Model
         /// <returns>
         /// <c>True</c> if the worker actually starts the action; <c>False</c> otherwise.
         /// </returns>
-        public bool ApplyAction(Engine engine, WorkerPivot worker, MapSquareActionPivot action)
+        internal bool ApplyAction(Engine engine, WorkerPivot worker, MapSquareActionPivot action)
         {
             if (worker == null)
             {
@@ -183,7 +183,7 @@ namespace ErsatzCiv.Model
         /// This method need to be called at the end of each turn.
         /// If two opposed actions ends on the same turn, latest added is applied.
         /// </summary>
-        public void UpdateActionsProgress()
+        internal void UpdateActionsProgress()
         {
             var removableActions = new List<CurrentActionPivot>();
             foreach (var action in _currentActions)
@@ -300,7 +300,7 @@ namespace ErsatzCiv.Model
             /// </summary>
             public bool IsDone { get { return TurnsCount >= Action.TurnCost; } }
 
-            public static bool WorkerIsBusy(WorkerPivot worker)
+            internal static bool WorkerIsBusy(WorkerPivot worker)
             {
                 return _globalActions.Any(a => a._workers.Contains(worker));
             }
@@ -311,7 +311,7 @@ namespace ErsatzCiv.Model
             /// <remarks>The task has no worker by default.</remarks>
             /// <param name="guid">Caller key.</param>
             /// <param name="action">The action to start.</param>
-            public CurrentActionPivot(MapSquareActionPivot action)
+            internal CurrentActionPivot(MapSquareActionPivot action)
             {
                 Action = action ?? throw new ArgumentNullException(nameof(action));
                 _workers = new List<WorkerPivot>();
@@ -324,7 +324,7 @@ namespace ErsatzCiv.Model
             /// </summary>
             /// <param name="worker">The worker.</param>
             /// <returns><c>True</c> if success; <c>False</c> otherwise.</returns>
-            public bool AddWorker(WorkerPivot worker)
+            internal bool AddWorker(WorkerPivot worker)
             {
                 bool canWork = !WorkerIsBusy(worker);
                 if (canWork)
@@ -337,7 +337,7 @@ namespace ErsatzCiv.Model
             /// <summary>
             /// Recomputes <see cref="TurnsCount"/>.
             /// </summary>
-            public void ForwardProgression()
+            internal void ForwardProgression()
             {
                 TurnsCount += _workers.Count;
             }

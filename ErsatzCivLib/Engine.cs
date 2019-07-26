@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ErsatzCivLib.Model;
 
-namespace ErsatzCiv.Model
+namespace ErsatzCivLib
 {
     public class Engine
     {
@@ -120,7 +121,7 @@ namespace ErsatzCiv.Model
             return true;
         }
 
-        public bool IsCity(int row, int column)
+        internal bool IsCity(int row, int column)
         {
             return _cities.Any(c => c.Row == row && c.Column == column);
         }

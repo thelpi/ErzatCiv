@@ -7,7 +7,8 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using ErsatzCiv.Model;
+using ErsatzCivLib;
+using ErsatzCivLib.Model;
 
 namespace ErsatzCiv
 {
@@ -111,12 +112,12 @@ namespace ErsatzCiv
                 RecomputeFocus();
             }
             // Moves a unit.
-            else if (e.Key.Move().HasValue)
+            else if (Move(e.Key).HasValue)
             {
                 if (_engine.CurrentUnit != null)
                 {
                     var unitToMove = _engine.CurrentUnit; // do not remove this line ! ("MoveCurrentUnit()" changes the value of "CurrentUnit")
-                    if (_engine.MoveCurrentUnit(e.Key.Move().Value))
+                    if (_engine.MoveCurrentUnit(Move(e.Key).Value))
                     {
                         var associatedSprites = GetGraphicRenders(unitToMove);
                         if (associatedSprites.Count > 0)
@@ -564,6 +565,31 @@ namespace ErsatzCiv
                 var newY = ((MapGrid.ActualHeight * _engine.CurrentUnit.Row) / _engine.Map.Height) - (MapScroller.ActualHeight / 2);
                 FocusOn(newX, newY);
                 DrawUnit(_engine.CurrentUnit, true);
+            }
+        }
+
+        public static DirectionEnumPivot? Move(System.Windows.Input.Key key)
+        {
+            switch (key)
+            {
+                case System.Windows.Input.Key.NumPad1:
+                    return DirectionEnumPivot.BottomLeft;
+                case System.Windows.Input.Key.NumPad2:
+                    return DirectionEnumPivot.Bottom;
+                case System.Windows.Input.Key.NumPad3:
+                    return DirectionEnumPivot.BottomRight;
+                case System.Windows.Input.Key.NumPad6:
+                    return DirectionEnumPivot.Right;
+                case System.Windows.Input.Key.NumPad9:
+                    return DirectionEnumPivot.TopRight;
+                case System.Windows.Input.Key.NumPad8:
+                    return DirectionEnumPivot.Top;
+                case System.Windows.Input.Key.NumPad7:
+                    return DirectionEnumPivot.TopLeft;
+                case System.Windows.Input.Key.NumPad4:
+                    return DirectionEnumPivot.Left;
+                default:
+                    return null;
             }
         }
 
