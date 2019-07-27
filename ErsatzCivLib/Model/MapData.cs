@@ -149,41 +149,56 @@ namespace ErsatzCivLib.Model
                 var leftX = continentLand.Min(x => x.Column);
                 var bottomY = continentLand.Max(x => x.Row);
                 var rightX = continentLand.Max(x => x.Column);
+                // Squares count in height for one square in width
+                var ratioHeightWidth = (int)Math.Round((bottomY - topY + 1) / (double)(rightX - leftX + 1));
 
                 for (int i = 0; i < rivers; i++)
                 {
                     var river = new List<Tuple<int, int>>();
                     var x = Tools.Randomizer.Next(leftX, rightX + 1);
                     var y = Tools.Randomizer.Next(topY, bottomY + 1);
-                    var dir = Tools.Randomizer.Next(1, 5);
-                    switch (dir)
+                    // 0 : left to right / top to bottom, 1 : opposite
+                    var reverseDir = Tools.Randomizer.Next(0, 2) == 0;
+                    var vertical = Tools.Randomizer.Next(0, (1 * (ratioHeightWidth)) + 1) >= ratioHeightWidth;
+                    if (vertical)
                     {
-                        case 1: // to the right
-                            for (int curX = x; curX <= rightX; curX++)
-                            {
-                                river.Add(new Tuple<int, int>(y, curX));
-                            }
-                            break;
-                        case 2: // to the bottom
-                            for (int curY = y; curY <= bottomY; curY++)
-                            {
-                                river.Add(new Tuple<int, int>(curY, x));
-                            }
-                            break;
-                        case 3: // to the left
-                            for (int curX = x; curX >= leftX; curX--)
-                            {
-                                river.Add(new Tuple<int, int>(y, curX));
-                            }
-                            break;
-                        case 4: // to the top
+                        if (reverseDir)
+                        {
+                            // to the top
                             for (int curY = y; curY >= topY; curY--)
                             {
                                 river.Add(new Tuple<int, int>(curY, x));
                             }
-                            break;
+                        }
+                        else
+                        {
+                            // to the bottom
+                            for (int curY = y; curY <= bottomY; curY++)
+                            {
+                                river.Add(new Tuple<int, int>(curY, x));
+                            }
+                        }
                     }
-                    riverSquares.Add(river, dir % 2 == 0);
+                    else
+                    {
+                        if (reverseDir)
+                        {
+                            // to the left
+                            for (int curX = x; curX >= leftX; curX--)
+                            {
+                                river.Add(new Tuple<int, int>(y, curX));
+                            }
+                        }
+                        else
+                        {
+                            // to the right
+                            for (int curX = x; curX <= rightX; curX++)
+                            {
+                                river.Add(new Tuple<int, int>(y, curX));
+                            }
+                        }
+                    }
+                    riverSquares.Add(river, vertical);
                 }
             }
 
