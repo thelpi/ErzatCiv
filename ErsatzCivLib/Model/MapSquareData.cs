@@ -79,6 +79,15 @@ namespace ErsatzCivLib.Model
             }
         }
 
+        internal void ChangeMapSquareType(MapSquareTypeData mapSquareType, MapSquareTypeData underlyingType = null)
+        {
+            MapSquareType = mapSquareType ?? throw new ArgumentNullException(nameof(mapSquareType));
+            if (MapSquareType.Actions.Contains(MapSquareActionPivot.Clear))
+            {
+                UnderlyingMapSquareType = underlyingType ?? throw new ArgumentNullException(nameof(underlyingType));
+            }
+        }
+
         internal void SetRiver(bool riverTopToBottom)
         {
             if (MapSquareType.RiverCrossable)
