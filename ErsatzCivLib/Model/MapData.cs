@@ -8,6 +8,8 @@ namespace ErsatzCivLib.Model
     {
         public const int RATIO_WIDTH_HEIGHT = 2;
         private const int MINIMAL_HEIGHT = 20;
+        // Multiply the continent squares count by this number to obtain the rivers count
+        private const double RIVER_COUNT_RATIO = 0.005;
 
         private readonly List<MapSquareData> _mapSquareList = new List<MapSquareData>();
 
@@ -65,13 +67,14 @@ namespace ErsatzCivLib.Model
             var continentWidth = Convert.ToInt32(squareRatioAire);
             var continentHeight = Convert.ToInt32(squareRatioAire / minimalContainerHeightWidthRatio);
 
-            // Randomize columns if multiple sizes
-            // TODO
+            var continentInfos = new List<List<MapSquareData>>();
 
             // Puts each continent inside each column of the map.
             int iRect = 0;
             while (iRect < mapRectanglesDim.Length)
             {
+                continentInfos.Add(new List<MapSquareData>());
+
                 // Number of sea squares before the continent appears (horizontal).
                 var seaWidth = (mapRectanglesDim[iRect].Item1 - continentWidth) / 2;
                 if (((mapRectanglesDim[iRect].Item1 - continentWidth) % 2) > 0)
@@ -109,8 +112,9 @@ namespace ErsatzCivLib.Model
                             // Picks a random type of square.
                             var rdmTypeSeed = Tools.Randomizer.Next(0, 20);
                             var squareType = rdmTypeSeed < 12 ? MapSquareTypeData.Grassland : (rdmTypeSeed < 18 ? MapSquareTypeData.Forest : MapSquareTypeData.Mountain);
-                            bool riverCross = Tools.Randomizer.Next(0, 50) == 0;
-                            _mapSquareList.Add(new MapSquareData(squareType, j, i, MapSquareTypeData.Grassland, riverCross));
+                            var sq = new MapSquareData(squareType, j, i, MapSquareTypeData.Grassland);
+                            _mapSquareList.Add(sq);
+                            continentInfos.Last().Add(sq);
                         }
                         if (currentSeaHeight > 0)
                         {
@@ -132,6 +136,63 @@ namespace ErsatzCivLib.Model
                 }
 
                 iRect++;
+            }
+
+            // Rivers count by continent
+            var rivers = (int)Math.Round(landSquaresByContinent * RIVER_COUNT_RATIO);
+
+            // sets rivers
+            var riverSquares = new Dictionary<List<Tuple<int, int>>, bool>();
+            foreach (var continentLand in continentInfos)
+            {
+                var topY = continentLand.Min(x => x.Row);
+                var leftX = continentLand.Min(x => x.Column);
+                var bottomY = continentLand.Max(x => x.Row);
+                var rightX = continentLand.Max(x => x.Column);
+
+                for (int i = 0; i < rivers; i++)
+                {
+                    var river = new List<Tuple<int, int>>();
+                    var x = Tools.Randomizer.Next(leftX, rightX + 1);
+                    var y = Tools.Randomizer.Next(topY, bottomY + 1);
+                    var dir = Tools.Randomizer.Next(1, 5);
+                    switch (dir)
+                    {
+                        case 1: // to the right
+                            for (int curX = x; curX <= rightX; curX++)
+                            {
+                                river.Add(new Tuple<int, int>(y, curX));
+                            }
+                            break;
+                        case 2: // to the bottom
+                            for (int curY = y; curY <= bottomY; curY++)
+                            {
+                                river.Add(new Tuple<int, int>(curY, x));
+                            }
+                            break;
+                        case 3: // to the left
+                            for (int curX = x; curX >= leftX; curX--)
+                            {
+                                river.Add(new Tuple<int, int>(y, curX));
+                            }
+                            break;
+                        case 4: // to the top
+                            for (int curY = y; curY >= topY; curY--)
+                            {
+                                river.Add(new Tuple<int, int>(curY, x));
+                            }
+                            break;
+                    }
+                    riverSquares.Add(river, dir % 2 == 0);
+                }
+            }
+
+            foreach (var river in riverSquares.Keys)
+            {
+                foreach (var riverSq in river)
+                {
+                    MapSquareList.Single(sq => sq.Column == riverSq.Item2 && sq.Row == riverSq.Item1).SetRiver(riverSquares[river]);
+                }
             }
         }
 

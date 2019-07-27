@@ -284,27 +284,76 @@ namespace ErsatzCiv
 
             if (square.CrossedByRiver)
             {
-                Rectangle rctRiver = new Rectangle
+                if (!square.RiverTopToBottom.HasValue)
                 {
-                    Width = DEFAULT_SIZE,
-                    Height = DEFAULT_SIZE / (double)10,
-                    Fill = Brushes.Blue
-                };
-                rctRiver.SetValue(Grid.RowProperty, square.Row);
-                rctRiver.SetValue(Grid.ColumnProperty, square.Column);
-                rctRiver.Tag = square;
-                MapGrid.Children.Add(rctRiver);
+                    Rectangle rctRiver1 = new Rectangle
+                    {
+                        Width = DEFAULT_SIZE,
+                        Height = DEFAULT_SIZE / (double)10,
+                        Fill = Brushes.Blue
+                    };
+                    rctRiver1.SetValue(Grid.RowProperty, square.Row);
+                    rctRiver1.SetValue(Grid.ColumnProperty, square.Column);
+                    rctRiver1.Tag = square;
+                    MapGrid.Children.Add(rctRiver1);
 
-                Rectangle rctRiverMinimap = new Rectangle
+                    Rectangle rctRiver2 = new Rectangle
+                    {
+                        Width = DEFAULT_SIZE / (double)10,
+                        Height = DEFAULT_SIZE,
+                        Fill = Brushes.Blue
+                    };
+                    rctRiver2.SetValue(Grid.RowProperty, square.Row);
+                    rctRiver2.SetValue(Grid.ColumnProperty, square.Column);
+                    rctRiver2.Tag = square;
+                    MapGrid.Children.Add(rctRiver2);
+
+                    Rectangle rctRiverMinimap1 = new Rectangle
+                    {
+                        Width = _minimapSquareSize,
+                        Height = _minimapSquareSize / 10,
+                        Fill = Brushes.Blue
+                    };
+                    rctRiverMinimap1.SetValue(Canvas.TopProperty, square.Row * _minimapSquareSize);
+                    rctRiverMinimap1.SetValue(Canvas.LeftProperty, square.Column * _minimapSquareSize);
+                    rctRiverMinimap1.Tag = square;
+                    MiniMapCanvas.Children.Add(rctRiverMinimap1);
+
+                    Rectangle rctRiverMinimap2 = new Rectangle
+                    {
+                        Width = _minimapSquareSize / 10,
+                        Height = _minimapSquareSize ,
+                        Fill = Brushes.Blue
+                    };
+                    rctRiverMinimap2.SetValue(Canvas.TopProperty, square.Row * _minimapSquareSize);
+                    rctRiverMinimap2.SetValue(Canvas.LeftProperty, square.Column * _minimapSquareSize);
+                    rctRiverMinimap2.Tag = square;
+                    MiniMapCanvas.Children.Add(rctRiverMinimap2);
+                }
+                else
                 {
-                    Width = _minimapSquareSize,
-                    Height = _minimapSquareSize / 10,
-                    Fill = Brushes.Blue
-                };
-                rctRiverMinimap.SetValue(Canvas.TopProperty, square.Row * _minimapSquareSize);
-                rctRiverMinimap.SetValue(Canvas.LeftProperty, square.Column * _minimapSquareSize);
-                rctRiverMinimap.Tag = square;
-                MiniMapCanvas.Children.Add(rctRiverMinimap);
+                    Rectangle rctRiver = new Rectangle
+                    {
+                        Width = square.RiverTopToBottom.Value ? DEFAULT_SIZE / (double)10 : DEFAULT_SIZE,
+                        Height = square.RiverTopToBottom.Value ? DEFAULT_SIZE : DEFAULT_SIZE / (double)10,
+                        Fill = Brushes.Blue
+                    };
+                    rctRiver.SetValue(Grid.RowProperty, square.Row);
+                    rctRiver.SetValue(Grid.ColumnProperty, square.Column);
+                    rctRiver.Tag = square;
+                    MapGrid.Children.Add(rctRiver);
+
+                    Rectangle rctRiverMinimap = new Rectangle
+                    {
+                        Width = square.RiverTopToBottom.Value ? _minimapSquareSize / 10 : _minimapSquareSize,
+                        Height = square.RiverTopToBottom.Value ? _minimapSquareSize : _minimapSquareSize / 10,
+                        Fill = Brushes.Blue
+                    };
+                    rctRiverMinimap.SetValue(Canvas.TopProperty, square.Row * _minimapSquareSize);
+                    rctRiverMinimap.SetValue(Canvas.LeftProperty, square.Column * _minimapSquareSize);
+                    rctRiverMinimap.Tag = square;
+                    MiniMapCanvas.Children.Add(rctRiverMinimap);
+                }
             }
 
             var newElementsWithZIndex = new Dictionary<FrameworkElement, int>();

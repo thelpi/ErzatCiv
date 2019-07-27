@@ -64,11 +64,11 @@ namespace ErsatzCivLib.Model
         /// Indicates if the square is crossed by a river.
         /// </summary>
         public bool CrossedByRiver { get; private set; }
+        public bool? RiverTopToBottom { get; private set; }
 
         #endregion
 
-        internal MapSquareData(MapSquareTypeData mapSquareType, int row, int column,
-            MapSquareTypeData underlyingType = null, bool crossedByRiver = false)
+        internal MapSquareData(MapSquareTypeData mapSquareType, int row, int column, MapSquareTypeData underlyingType = null)
         {
             MapSquareType = mapSquareType ?? throw new ArgumentNullException(nameof(mapSquareType));
             Row = row < 0 ? throw new ArgumentException("Invalid value.", nameof(row)) : row;
@@ -77,9 +77,14 @@ namespace ErsatzCivLib.Model
             {
                 UnderlyingMapSquareType = underlyingType ?? throw new ArgumentNullException(nameof(underlyingType));
             }
+        }
+
+        internal void SetRiver(bool riverTopToBottom)
+        {
             if (MapSquareType.RiverCrossable)
             {
-                CrossedByRiver = crossedByRiver;
+                RiverTopToBottom = CrossedByRiver ? (bool?)null : riverTopToBottom;
+                CrossedByRiver = true;
             }
         }
 
