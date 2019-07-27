@@ -41,7 +41,7 @@ namespace ErsatzCiv
             if (sender?.GetType() == typeof(MapSquareData))
             {
                 var ms = (MapSquareData)sender;
-                DrawSingleMapAndMiniMapSquare(ms, false);
+                DrawSingleMapAndMiniMapSquare(ms, true);
             }
         }
 
@@ -235,27 +235,15 @@ namespace ErsatzCiv
 
             foreach (var square in _engine.Map.MapSquareList)
             {
-                DrawSingleMapAndMiniMapSquare(square, true);
+                DrawSingleMapAndMiniMapSquare(square, false);
             }
         }
 
-        private void DrawSingleMapAndMiniMapSquare(MapSquareData square, bool skipPreviousCheck)
+        private void DrawSingleMapAndMiniMapSquare(MapSquareData square, bool cleanPreviousSquare)
         {
-            if (!skipPreviousCheck)
+            if (cleanPreviousSquare)
             {
-                var elements = GetGraphicRenders(square);
-                foreach (var elem in elements)
-                {
-                    // also deletes the river layer (same tag)
-                    MapGrid.Children.Remove(elem);
-                }
-
-                var elementsMiniMap = GetMiniGraphicRenders(square);
-                foreach (var elem in elementsMiniMap)
-                {
-                    // also deletes the river layer (same tag)
-                    MiniMapCanvas.Children.Remove(elem);
-                }
+                CleanPreviousRenderOnMapAndMiniMap(square);
             }
 
             Rectangle rct = new Rectangle
@@ -284,183 +272,69 @@ namespace ErsatzCiv
 
             if (square.CrossedByRiver)
             {
-                if (!square.RiverTopToBottom.HasValue)
-                {
-                    Rectangle rctRiver1 = new Rectangle
-                    {
-                        Width = DEFAULT_SIZE,
-                        Height = DEFAULT_SIZE / (double)10,
-                        Fill = Brushes.Blue
-                    };
-                    rctRiver1.SetValue(Grid.RowProperty, square.Row);
-                    rctRiver1.SetValue(Grid.ColumnProperty, square.Column);
-                    rctRiver1.Tag = square;
-                    MapGrid.Children.Add(rctRiver1);
-
-                    Rectangle rctRiver2 = new Rectangle
-                    {
-                        Width = DEFAULT_SIZE / (double)10,
-                        Height = DEFAULT_SIZE,
-                        Fill = Brushes.Blue
-                    };
-                    rctRiver2.SetValue(Grid.RowProperty, square.Row);
-                    rctRiver2.SetValue(Grid.ColumnProperty, square.Column);
-                    rctRiver2.Tag = square;
-                    MapGrid.Children.Add(rctRiver2);
-
-                    Rectangle rctRiverMinimap1 = new Rectangle
-                    {
-                        Width = _minimapSquareSize,
-                        Height = _minimapSquareSize / 10,
-                        Fill = Brushes.Blue
-                    };
-                    rctRiverMinimap1.SetValue(Canvas.TopProperty, square.Row * _minimapSquareSize);
-                    rctRiverMinimap1.SetValue(Canvas.LeftProperty, square.Column * _minimapSquareSize);
-                    rctRiverMinimap1.Tag = square;
-                    MiniMapCanvas.Children.Add(rctRiverMinimap1);
-
-                    Rectangle rctRiverMinimap2 = new Rectangle
-                    {
-                        Width = _minimapSquareSize / 10,
-                        Height = _minimapSquareSize ,
-                        Fill = Brushes.Blue
-                    };
-                    rctRiverMinimap2.SetValue(Canvas.TopProperty, square.Row * _minimapSquareSize);
-                    rctRiverMinimap2.SetValue(Canvas.LeftProperty, square.Column * _minimapSquareSize);
-                    rctRiverMinimap2.Tag = square;
-                    MiniMapCanvas.Children.Add(rctRiverMinimap2);
-                }
-                else
-                {
-                    Rectangle rctRiver = new Rectangle
-                    {
-                        Width = square.RiverTopToBottom.Value ? DEFAULT_SIZE / (double)10 : DEFAULT_SIZE,
-                        Height = square.RiverTopToBottom.Value ? DEFAULT_SIZE : DEFAULT_SIZE / (double)10,
-                        Fill = Brushes.Blue
-                    };
-                    rctRiver.SetValue(Grid.RowProperty, square.Row);
-                    rctRiver.SetValue(Grid.ColumnProperty, square.Column);
-                    rctRiver.Tag = square;
-                    MapGrid.Children.Add(rctRiver);
-
-                    Rectangle rctRiverMinimap = new Rectangle
-                    {
-                        Width = square.RiverTopToBottom.Value ? _minimapSquareSize / 10 : _minimapSquareSize,
-                        Height = square.RiverTopToBottom.Value ? _minimapSquareSize : _minimapSquareSize / 10,
-                        Fill = Brushes.Blue
-                    };
-                    rctRiverMinimap.SetValue(Canvas.TopProperty, square.Row * _minimapSquareSize);
-                    rctRiverMinimap.SetValue(Canvas.LeftProperty, square.Column * _minimapSquareSize);
-                    rctRiverMinimap.Tag = square;
-                    MiniMapCanvas.Children.Add(rctRiverMinimap);
-                }
+                DrawSquareRivers(square);
             }
 
+            DrawSquareImprovements(square);
+        }
+
+        private void CleanPreviousRenderOnMapAndMiniMap(MapSquareData square)
+        {
+            var elements = GetGraphicRenders(square);
+            foreach (var elem in elements)
+            {
+                MapGrid.Children.Remove(elem);
+            }
+
+            var elementsMiniMap = GetMiniGraphicRenders(square);
+            foreach (var elem in elementsMiniMap)
+            {
+                MiniMapCanvas.Children.Remove(elem);
+            }
+        }
+
+        private void DrawSquareRivers(MapSquareData square)
+        {
+            if (!square.RiverTopToBottom.HasValue)
+            {
+                DrawRiver(square, false, false);
+                DrawRiver(square, true, false);
+                DrawRiver(square, false, true);
+                DrawRiver(square, true, true);
+            }
+            else
+            {
+                DrawRiver(square, square.RiverTopToBottom.Value, false);
+                DrawRiver(square, square.RiverTopToBottom.Value, true);
+            }
+        }
+
+        private void DrawSquareImprovements(MapSquareData square)
+        {
             var newElementsWithZIndex = new Dictionary<FrameworkElement, int>();
             if (square.RailRoad)
             {
-                Line l1 = new Line { X1 = 0, Y1 = 0, X2 = DEFAULT_SIZE, Y2 = DEFAULT_SIZE, StrokeThickness = 1, Stroke = Brushes.Black };
-                Line l2 = new Line { X1 = 0, Y1 = DEFAULT_SIZE / 2, X2 = DEFAULT_SIZE, Y2 = DEFAULT_SIZE / 2, StrokeThickness = 1, Stroke = Brushes.Black };
-                Line l3 = new Line { X1 = 0, Y1 = DEFAULT_SIZE, X2 = DEFAULT_SIZE, Y2 = 0, StrokeThickness = 1, Stroke = Brushes.Black };
-                Line l4 = new Line { X1 = DEFAULT_SIZE / 2, Y1 = 0, X2 = DEFAULT_SIZE / 2, Y2 = DEFAULT_SIZE, StrokeThickness = 1, Stroke = Brushes.Black };
-                newElementsWithZIndex.Add(l1, 1);
-                newElementsWithZIndex.Add(l2, 1);
-                newElementsWithZIndex.Add(l3, 1);
-                newElementsWithZIndex.Add(l4, 1);
+                DrawRoad(newElementsWithZIndex, true);
             }
             else if (square.Road)
             {
-                Line l1 = new Line { X1 = 0, Y1 = 0, X2 = DEFAULT_SIZE, Y2 = DEFAULT_SIZE, StrokeThickness = 1, Stroke = Brushes.Tan };
-                Line l2 = new Line { X1 = 0, Y1 = DEFAULT_SIZE / 2, X2 = DEFAULT_SIZE, Y2 = DEFAULT_SIZE / 2, StrokeThickness = 1, Stroke = Brushes.Tan };
-                Line l3 = new Line { X1 = 0, Y1 = DEFAULT_SIZE, X2 = DEFAULT_SIZE, Y2 = 0, StrokeThickness = 1, Stroke = Brushes.Tan };
-                Line l4 = new Line { X1 = DEFAULT_SIZE / 2, Y1 = 0, X2 = DEFAULT_SIZE / 2, Y2 = DEFAULT_SIZE, StrokeThickness = 1, Stroke = Brushes.Tan };
-                newElementsWithZIndex.Add(l1, 1);
-                newElementsWithZIndex.Add(l2, 1);
-                newElementsWithZIndex.Add(l3, 1);
-                newElementsWithZIndex.Add(l4, 1);
+                DrawRoad(newElementsWithZIndex, false);
             }
             if (square.Irrigate)
             {
-                Line l1 = new Line
-                {
-                    X1 = 1,
-                    Y1 = (DEFAULT_SIZE / (double)3) - 1,
-                    X2 = DEFAULT_SIZE - 1,
-                    Y2 = (DEFAULT_SIZE / (double)3) - 1,
-                    StrokeThickness = 2,
-                    Stroke = Brushes.Aquamarine
-                };
-                Line l2 = new Line
-                {
-                    X1 = 1,
-                    Y1 = ((DEFAULT_SIZE / (double)3) * 2) - 1,
-                    X2 = DEFAULT_SIZE - 1,
-                    Y2 = ((DEFAULT_SIZE / (double)3) * 2) - 1,
-                    StrokeThickness = 2,
-                    Stroke = Brushes.Aquamarine
-                };
-                Line l3 = new Line
-                {
-                    X1 = (DEFAULT_SIZE / (double)3) - 1,
-                    Y1 = 1,
-                    X2 = (DEFAULT_SIZE / (double)3) - 1,
-                    Y2 = DEFAULT_SIZE - 1,
-                    StrokeThickness = 2,
-                    Stroke = Brushes.Aquamarine
-                };
-                Line l4 = new Line
-                {
-                    X1 = ((DEFAULT_SIZE / (double)3) * 2) - 1,
-                    Y1 = 1,
-                    X2 = ((DEFAULT_SIZE / (double)3) * 2) - 1,
-                    Y2 = DEFAULT_SIZE - 1,
-                    StrokeThickness = 2,
-                    Stroke = Brushes.Aquamarine
-                };
-                newElementsWithZIndex.Add(l1, 2);
-                newElementsWithZIndex.Add(l2, 2);
-                newElementsWithZIndex.Add(l3, 2);
-                newElementsWithZIndex.Add(l4, 2);
+                DrawIrrigationSystem(newElementsWithZIndex);
             }
             if (square.Mine)
             {
-                Image img = new Image
-                {
-                    Width = DEFAULT_SIZE * 0.5,
-                    Height = DEFAULT_SIZE * 0.5,
-                    Source = new BitmapImage(new Uri(Properties.Settings.Default.imagesPath + "mine.png")),
-                    Stretch = Stretch.Uniform,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center
-                };
-                newElementsWithZIndex.Add(img, 2);
+                DrawImageOnSquare(newElementsWithZIndex, 0.5, "mine.png", 2);
             }
             if (square.Pollution)
             {
-                Image img = new Image
-                {
-                    Width = DEFAULT_SIZE * 0.8,
-                    Height = DEFAULT_SIZE * 0.8,
-                    Source = new BitmapImage(new Uri(Properties.Settings.Default.imagesPath + "pollution.png")),
-                    Stretch = Stretch.Uniform,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center
-                };
-                newElementsWithZIndex.Add(img, 3);
+                DrawImageOnSquare(newElementsWithZIndex, 0.8, "pollution.png", 3);
             }
             if (square.Fortress)
             {
-                var rect = new Rectangle
-                {
-                    Width = DEFAULT_SIZE * 0.7,
-                    Height = DEFAULT_SIZE * 0.7,
-                    Fill = Brushes.Transparent,
-                    Stroke = Brushes.Maroon,
-                    StrokeThickness = 2,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center
-                };
-                newElementsWithZIndex.Add(rect, 4);
+                DrawFortress(newElementsWithZIndex);
             }
 
             foreach (var element in newElementsWithZIndex.Keys)
@@ -471,6 +345,90 @@ namespace ErsatzCiv
                 element.Tag = square;
                 MapGrid.Children.Add(element);
             }
+        }
+
+        private static void DrawFortress(Dictionary<FrameworkElement, int> newElementsWithZIndex)
+        {
+            var rect = new Rectangle
+            {
+                Width = DEFAULT_SIZE * 0.7,
+                Height = DEFAULT_SIZE * 0.7,
+                Fill = Brushes.Transparent,
+                Stroke = Brushes.Maroon,
+                StrokeThickness = 2,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            newElementsWithZIndex.Add(rect, 4);
+        }
+
+        private static void DrawImageOnSquare(Dictionary<FrameworkElement, int> newElementsWithZIndex, double ratio, string imgName, int zIndex)
+        {
+            Image img = new Image
+            {
+                Width = DEFAULT_SIZE * ratio,
+                Height = DEFAULT_SIZE * ratio,
+                Source = new BitmapImage(new Uri(Properties.Settings.Default.imagesPath + imgName)),
+                Stretch = Stretch.Uniform,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            newElementsWithZIndex.Add(img, zIndex);
+        }
+
+        private static void DrawIrrigationSystem(Dictionary<FrameworkElement, int> newElementsWithZIndex)
+        {
+            var firstThird = (DEFAULT_SIZE / (double)3) - 1;
+            var secondThird = ((DEFAULT_SIZE / (double)3) * 2) - 1;
+            for (int i = 0; i < 4; i++)
+            {
+                var line = new Line
+                {
+                    X1 = (i == 3 ? secondThird : (i == 2 ? firstThird : 1)),
+                    Y1 = (i == 0 ? firstThird : (i == 1 ? secondThird : 1)),
+                    X2 = (i == 3 ? secondThird : (i == 2 ? firstThird : DEFAULT_SIZE - 1)),
+                    Y2 = (i == 0 ? firstThird : (i == 1 ? secondThird : DEFAULT_SIZE - 1)),
+                    StrokeThickness = 2,
+                    Stroke = Brushes.Aquamarine
+                };
+                newElementsWithZIndex.Add(line, 2);
+            }
+        }
+
+        private void DrawRiver(MapSquareData square, bool topToBottom, bool miniMap)
+        {
+            Rectangle riverRect = new Rectangle
+            {
+                Width = (miniMap ? _minimapSquareSize : DEFAULT_SIZE) / (topToBottom ? 10 : 1),
+                Height = (miniMap ? _minimapSquareSize : DEFAULT_SIZE) / (topToBottom ? 1 : 10),
+                Fill = Brushes.Blue
+            };
+
+            if (miniMap)
+            {
+                riverRect.SetValue(Canvas.TopProperty, square.Row * _minimapSquareSize);
+                riverRect.SetValue(Canvas.LeftProperty, square.Column * _minimapSquareSize);
+            }
+            else
+            {
+                riverRect.SetValue(Grid.RowProperty, square.Row);
+                riverRect.SetValue(Grid.ColumnProperty, square.Column);
+            }
+
+            riverRect.Tag = square;
+            (miniMap ? (Panel)MiniMapCanvas : MapGrid).Children.Add(riverRect);
+        }
+
+        private static void DrawRoad(Dictionary<FrameworkElement, int> newElementsWithZIndex, bool railRoad)
+        {
+            Line l1 = new Line { X1 = 0, Y1 = 0, X2 = DEFAULT_SIZE, Y2 = DEFAULT_SIZE, StrokeThickness = 1, Stroke = railRoad ? Brushes.Black : Brushes.Tan };
+            Line l2 = new Line { X1 = 0, Y1 = DEFAULT_SIZE / 2, X2 = DEFAULT_SIZE, Y2 = DEFAULT_SIZE / 2, StrokeThickness = 1, Stroke = railRoad ? Brushes.Black : Brushes.Tan };
+            Line l3 = new Line { X1 = 0, Y1 = DEFAULT_SIZE, X2 = DEFAULT_SIZE, Y2 = 0, StrokeThickness = 1, Stroke = railRoad ? Brushes.Black : Brushes.Tan };
+            Line l4 = new Line { X1 = DEFAULT_SIZE / 2, Y1 = 0, X2 = DEFAULT_SIZE / 2, Y2 = DEFAULT_SIZE, StrokeThickness = 1, Stroke = railRoad ? Brushes.Black : Brushes.Tan };
+            newElementsWithZIndex.Add(l1, 1);
+            newElementsWithZIndex.Add(l2, 1);
+            newElementsWithZIndex.Add(l3, 1);
+            newElementsWithZIndex.Add(l4, 1);
         }
 
         private void DrawMapCity(CityPivot city, bool skipPreviousCheck)
