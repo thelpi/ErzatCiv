@@ -20,6 +20,7 @@ namespace ErsatzCiv
         private const int DEFAULT_SIZE = 50;
         private const int MENU_HEIGHT = 200;
         private const int UNIT_ZINDEX = 50;
+        private const int CITY_ZINDEX = 25;
 
         private Engine _engine;
         private double _minimapSquareSize;
@@ -451,6 +452,7 @@ namespace ErsatzCiv
             };
             img.SetValue(Grid.RowProperty, city.Row);
             img.SetValue(Grid.ColumnProperty, city.Column);
+            img.SetValue(Panel.ZIndexProperty, CITY_ZINDEX);
             img.Tag = city;
             MapGrid.Children.Add(img);
 

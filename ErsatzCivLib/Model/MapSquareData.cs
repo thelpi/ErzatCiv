@@ -83,6 +83,18 @@ namespace ErsatzCivLib.Model
             }
         }
 
+        internal void ApplyCityActions(CityPivot city)
+        {
+            if (city.Row != Row || city.Column != Column)
+            {
+                return;
+            }
+
+            Road = true;
+            RailRoad = true;
+            SquareChangeEvent?.Invoke(this, new EventArgs());
+        }
+
         /// <summary>
         /// Tries to apply a <see cref="MapSquareActionPivot"/> on the current instance.
         /// </summary>

@@ -54,11 +54,13 @@ namespace ErsatzCivLib
 
             var sq = Map.MapSquareList.FirstOrDefault(ms => ms.Row == settler.Row && ms.Column == settler.Column);
             if (sq?.MapSquareType?.IsCityBuildable != true
-                && !_cities.Any(c => c.Row == settler.Row && c.Column == settler.Column))
+                || _cities.Any(c => c.Row == settler.Row && c.Column == settler.Column)
+                || sq?.Pollution == true)
             {
                 return null;
             }
             var city = new CityPivot(sq.Row, sq.Column);
+            sq.ApplyCityActions(city);
 
             _cities.Add(city);
             _units.Remove(settler);
