@@ -299,6 +299,13 @@ namespace ErsatzCivLib.Model
             }
         }
 
+        internal bool IsClose(MapSquareData other)
+        {
+            return (Math.Abs(Row - other.Row) == 1 && Column == other.Column) ||
+                (Math.Abs(Column - other.Column) == 1 && Row == other.Row) ||
+                (Math.Abs(Row - other.Row) == 1 && Math.Abs(Column - other.Column) == 1);
+        }
+
         /// <summary>
         /// Represents a <see cref="MapSquareActionPivot"/> in progress.
         /// </summary>

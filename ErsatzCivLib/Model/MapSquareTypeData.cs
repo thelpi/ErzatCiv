@@ -78,7 +78,7 @@ namespace ErsatzCivLib.Model
                 Food = 1,
                 Productivity = 0,
                 Defense = 0,
-                RenderValue = "#00BFFF",
+                RenderValue = "#1E90FF",
                 RenderType = RenderTypeEnum.PlainBrush,
                 RiverCrossable = false,
                 _actions = new List<MapSquareActionPivot>(),
@@ -152,6 +152,181 @@ namespace ErsatzCivLib.Model
                 },
                 IsSeaType = false,
                 IsCityBuildable = true,
+                SpeedCost = 2
+            },
+            // plain
+            new MapSquareTypeData
+            {
+                _type = MapSquareTypeEnum.Plain,
+                Commerce = 1,
+                Food = 1,
+                Productivity = 1,
+                Defense = 0,
+                RenderValue = "#EEE8AA",
+                RenderType = RenderTypeEnum.PlainBrush,
+                RiverCrossable = true,
+                _actions = new List<MapSquareActionPivot>
+                {
+                    MapSquareActionPivot.Irrigate,
+                    MapSquareActionPivot.Mine,
+                    MapSquareActionPivot.Plant,
+                    MapSquareActionPivot.RailRoad,
+                    MapSquareActionPivot.Road,
+                    MapSquareActionPivot.BuildFortress
+                },
+                IsSeaType = false,
+                IsCityBuildable = true,
+                SpeedCost = 1
+            },
+            // ice
+            new MapSquareTypeData
+            {
+                _type = MapSquareTypeEnum.Ice,
+                Commerce = 0,
+                Food = 0,
+                Productivity = 0,
+                Defense = 1,
+                RenderValue = "#FFFAF0",
+                RenderType = RenderTypeEnum.PlainBrush,
+                RiverCrossable = true,
+                _actions = new List<MapSquareActionPivot>
+                {
+                    MapSquareActionPivot.Mine,
+                    MapSquareActionPivot.RailRoad,
+                    MapSquareActionPivot.Road,
+                    MapSquareActionPivot.BuildFortress
+                },
+                IsSeaType = false,
+                IsCityBuildable = false,
+                SpeedCost = 2
+            },
+            // coast
+            new MapSquareTypeData
+            {
+                _type = MapSquareTypeEnum.Coast,
+                Commerce = 1,
+                Food = 1,
+                Productivity = 0,
+                Defense = 0,
+                RenderValue = "#00BFFF",
+                RenderType = RenderTypeEnum.PlainBrush,
+                RiverCrossable = false,
+                _actions = new List<MapSquareActionPivot>(),
+                IsSeaType = true,
+                IsCityBuildable = false,
+                SpeedCost = 1
+            },
+            // toundra
+            new MapSquareTypeData
+            {
+                _type = MapSquareTypeEnum.Toundra,
+                Commerce = 0,
+                Food = 1,
+                Productivity = 1,
+                Defense = 0,
+                RenderValue = "#2F4F4F",
+                RenderType = RenderTypeEnum.PlainBrush,
+                RiverCrossable = true,
+                _actions = new List<MapSquareActionPivot>
+                {
+                    MapSquareActionPivot.Irrigate,
+                    MapSquareActionPivot.Mine,
+                    MapSquareActionPivot.Plant,
+                    MapSquareActionPivot.RailRoad,
+                    MapSquareActionPivot.Road,
+                    MapSquareActionPivot.BuildFortress
+                },
+                IsSeaType = false,
+                IsCityBuildable = true,
+                SpeedCost = 1
+            },
+            // desert
+            new MapSquareTypeData
+            {
+                _type = MapSquareTypeEnum.Desert,
+                Commerce = 0,
+                Food = 0,
+                Productivity = 1,
+                Defense = 1,
+                RenderValue = "#FF7F50",
+                RenderType = RenderTypeEnum.PlainBrush,
+                RiverCrossable = true,
+                _actions = new List<MapSquareActionPivot>
+                {
+                    MapSquareActionPivot.Irrigate,
+                    MapSquareActionPivot.Mine,
+                    MapSquareActionPivot.RailRoad,
+                    MapSquareActionPivot.Road,
+                    MapSquareActionPivot.BuildFortress
+                },
+                IsSeaType = false,
+                IsCityBuildable = true,
+                SpeedCost = 2
+            },
+            // jungle
+            new MapSquareTypeData
+            {
+                _type = MapSquareTypeEnum.Jungle,
+                Commerce = 0,
+                Food = 1,
+                Productivity = 0,
+                Defense = 2,
+                RenderValue = "#9ACD32",
+                RenderType = RenderTypeEnum.PlainBrush,
+                RiverCrossable = true,
+                _actions = new List<MapSquareActionPivot>
+                {
+                    MapSquareActionPivot.Clear,
+                    MapSquareActionPivot.RailRoad,
+                    MapSquareActionPivot.Road,
+                    MapSquareActionPivot.BuildFortress
+                },
+                IsSeaType = false,
+                IsCityBuildable = false,
+                SpeedCost = 3
+            },
+            // hill
+            new MapSquareTypeData
+            {
+                _type = MapSquareTypeEnum.Plain,
+                Commerce = 1,
+                Food = 1,
+                Productivity = 1,
+                Defense = 1,
+                RenderValue = "#556B2F",
+                RenderType = RenderTypeEnum.PlainBrush,
+                RiverCrossable = true,
+                _actions = new List<MapSquareActionPivot>
+                {
+                    MapSquareActionPivot.Mine,
+                    MapSquareActionPivot.RailRoad,
+                    MapSquareActionPivot.Road,
+                    MapSquareActionPivot.BuildFortress
+                },
+                IsSeaType = false,
+                IsCityBuildable = true,
+                SpeedCost = 2
+            },
+            // swamp
+            new MapSquareTypeData
+            {
+                _type = MapSquareTypeEnum.Swamp,
+                Commerce = 0,
+                Food = 1,
+                Productivity = 0,
+                Defense = 1,
+                RenderValue = "#3CB371",
+                RenderType = RenderTypeEnum.PlainBrush,
+                RiverCrossable = true,
+                _actions = new List<MapSquareActionPivot>
+                {
+                    MapSquareActionPivot.RailRoad,
+                    MapSquareActionPivot.Road,
+                    MapSquareActionPivot.BuildFortress,
+                    MapSquareActionPivot.Clear
+                },
+                IsSeaType = false,
+                IsCityBuildable = false,
                 SpeedCost = 2
             }
         };

@@ -235,6 +235,13 @@ namespace ErsatzCivLib.Model
                     MapSquareList.Single(sq => sq.Column == forest.Item2 && sq.Row == forest.Item1).ChangeMapSquareType(MapSquareTypeData.Forest, MapSquareTypeData.Grassland);
                 }
             }
+
+            var grdList = MapSquareList.Where(ms => !ms.MapSquareType.IsSeaType).ToList();
+            var coastList = MapSquareList.Where(ms => ms.MapSquareType == MapSquareTypeData.Sea && grdList.Any(grd => grd.IsClose(ms))).ToList();
+            foreach (var coastSq in coastList)
+            {
+                coastSq.ChangeMapSquareType(MapSquareTypeData.Coast);
+            }
         }
 
         private static List<List<Tuple<int, int>>> CreateContinentChunksOFType(int chunksCount, int chunkCountSquare, int topY, int leftX, int bottomY, int rightX, int ratioHeightWidth)

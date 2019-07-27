@@ -126,7 +126,7 @@
             }
         }
         /// <summary>
-        /// Clears a forest or a jungle.
+        /// Clears a forest, a swamp or a jungle.
         /// </summary>
         /// <remarks>
         /// Transforms a <see cref="MapSquareData"/> into its <see cref="MapSquareData._underlyingType"/>.
