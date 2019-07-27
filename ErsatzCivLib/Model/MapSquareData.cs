@@ -92,7 +92,7 @@ namespace ErsatzCivLib.Model
         {
             if (MapSquareType.RiverCrossable)
             {
-                RiverTopToBottom = CrossedByRiver ? (bool?)null : riverTopToBottom;
+                RiverTopToBottom = CrossedByRiver && (RiverTopToBottom != riverTopToBottom || !RiverTopToBottom.HasValue) ? (bool?)null : riverTopToBottom;
                 CrossedByRiver = true;
             }
         }
