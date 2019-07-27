@@ -78,7 +78,7 @@ namespace ErsatzCivLib
         {
             if (reset)
             {
-                _currentUnitIndex = _units.IndexOf(_units.FirstOrDefault(u => !u.Locked));
+                _currentUnitIndex = _units.IndexOf(_units.FirstOrDefault(u => u.RemainingMoves > 0));
                 _previousUnitIndex = -1;
                 NextUnitEvent?.Invoke(this, new EventArgs());
                 return;
@@ -88,7 +88,7 @@ namespace ErsatzCivLib
 
             for (int i = _currentUnitIndex + 1; i < _units.Count; i++)
             {
-                if (!_units[i].Locked)
+                if (_units[i].RemainingMoves > 0)
                 {
                     _currentUnitIndex = i;
                     NextUnitEvent?.Invoke(this, new EventArgs());
@@ -97,7 +97,7 @@ namespace ErsatzCivLib
             }
             for (int i = 0; i < _currentUnitIndex + (currentJustBeenRemoved ? 1 : 0); i++)
             {
-                if (!_units[i].Locked)
+                if (_units[i].RemainingMoves > 0)
                 {
                     _currentUnitIndex = i;
                     NextUnitEvent?.Invoke(this, new EventArgs());

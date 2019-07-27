@@ -52,6 +52,7 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public bool IsSeaType { get; private set; }
         public bool IsCityBuildable { get; private set; }
+        public int SpeedCost { get; private set; }
 
         /// <summary>
         /// Inferred; available actions.
@@ -82,7 +83,8 @@ namespace ErsatzCivLib.Model
                 RiverCrossable = false,
                 _actions = new List<MapSquareActionPivot>(),
                 IsSeaType = true,
-                IsCityBuildable = false
+                IsCityBuildable = false,
+                SpeedCost = 1
             },
             // grassland
             new MapSquareTypeData
@@ -105,7 +107,8 @@ namespace ErsatzCivLib.Model
                     MapSquareActionPivot.BuildFortress
                 },
                 IsSeaType = false,
-                IsCityBuildable = true
+                IsCityBuildable = true,
+                SpeedCost = 1
             },
             // mountain
             new MapSquareTypeData
@@ -126,7 +129,8 @@ namespace ErsatzCivLib.Model
                     MapSquareActionPivot.BuildFortress
                 },
                 IsSeaType = false,
-                IsCityBuildable = false
+                IsCityBuildable = false,
+                SpeedCost = 3
             },
             // forest
             new MapSquareTypeData
@@ -147,7 +151,8 @@ namespace ErsatzCivLib.Model
                     MapSquareActionPivot.BuildFortress
                 },
                 IsSeaType = false,
-                IsCityBuildable = true
+                IsCityBuildable = true,
+                SpeedCost = 2
             }
         };
 
