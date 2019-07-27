@@ -10,12 +10,43 @@ namespace ErsatzCivLib.Model
         private const int MINIMAL_HEIGHT = 20;
         // Multiply the continent squares count by this number to obtain the rivers count
         private const double RIVER_COUNT_RATIO = 0.005;
-        private const double MOUNTAIN_COVER_RATIO = 0.2;
-        private const double FOREST_COVER_RATIO = 0.3;
-        // THIS VALUE MUST BE DIVISABLE BY 3 !
-        private const int MOUNTAIN_CHUNK_COUNT_SQUARE = 6; // 3, 6, 9
-        // THIS VALUE MUST BE DIVISABLE BY 3 !
-        private const int FOREST_CHUNK_COUNT_SQUARE = 9; // 6, 9, 12
+
+        // for each type of square, except grassland, sea and cost :
+        // - ratio (0,1) of appearance
+        // - medium chunk squares count (must be divisible by 3)
+        // - true if "hot", false if "cold", null otherwise
+        // - underlying type, if "Clear" action available
+        private static readonly Dictionary<MapSquareTypeData, Tuple<double, int, bool?, MapSquareTypeData>> CHUNK_TYPE_PROPERTIES =
+            new Dictionary<MapSquareTypeData, Tuple<double, int, bool?, MapSquareTypeData>>
+            {
+                {
+                    MapSquareTypeData.Mountain, new Tuple<double, int, bool?, MapSquareTypeData>(0.1, 6, null, null)
+                },
+                {
+                    MapSquareTypeData.Forest, new Tuple<double, int, bool?, MapSquareTypeData>(0.1, 6, null, MapSquareTypeData.Grassland)
+                },
+                {
+                    MapSquareTypeData.Desert, new Tuple<double, int, bool?, MapSquareTypeData>(0.1, 9, null, null)
+                },
+                {
+                    MapSquareTypeData.Jungle, new Tuple<double, int, bool?, MapSquareTypeData>(0.1, 6, null, MapSquareTypeData.Plain)
+                },
+                {
+                    MapSquareTypeData.Swamp, new Tuple<double, int, bool?, MapSquareTypeData>(0.02, 3, null, MapSquareTypeData.Grassland)
+                },
+                {
+                    MapSquareTypeData.Ice, new Tuple<double, int, bool?, MapSquareTypeData>(0.1, 9, null, null)
+                },
+                {
+                    MapSquareTypeData.Toundra, new Tuple<double, int, bool?, MapSquareTypeData>(0.1, 6, null, null)
+                },
+                {
+                    MapSquareTypeData.Hill, new Tuple<double, int, bool?, MapSquareTypeData>(0.1, 3, null, null)
+                },
+                {
+                    MapSquareTypeData.Plain, new Tuple<double, int, bool?, MapSquareTypeData>(0.1, 6, null, null)
+                }
+            };
 
         private readonly List<MapSquareData> _mapSquareList = new List<MapSquareData>();
 
@@ -141,14 +172,13 @@ namespace ErsatzCivLib.Model
                 iRect++;
             }
 
-            var mountainChunksCount = (int)Math.Round((landSquaresByContinent * MOUNTAIN_COVER_RATIO) / MOUNTAIN_CHUNK_COUNT_SQUARE);
-            var forestChunksCount = (int)Math.Round((landSquaresByContinent * FOREST_COVER_RATIO) / FOREST_CHUNK_COUNT_SQUARE);
-            var riversChunksCount = (int)Math.Round(landSquaresByContinent * RIVER_COUNT_RATIO);
-
-            // sets moutains and forests
-            var mountainChunks = new List<List<Tuple<int, int>>>();
-            var forestChunks = new List<List<Tuple<int, int>>>();
+            // sets chunks and rivers
+            var chunksByType = CHUNK_TYPE_PROPERTIES.ToDictionary(x => x.Key, x => new List<List<Tuple<int, int>>>());
             var riverChunks = new Dictionary<List<Tuple<int, int>>, bool>();
+
+            var chunksCountByType = CHUNK_TYPE_PROPERTIES.ToDictionary(x => x.Key, x =>
+                (int)Math.Round((landSquaresByContinent * x.Value.Item1) / x.Value.Item2));
+            var riversChunksCount = (int)Math.Round(landSquaresByContinent * RIVER_COUNT_RATIO);
 
             foreach (var continentLand in continentInfos)
             {
@@ -159,8 +189,13 @@ namespace ErsatzCivLib.Model
                 // Squares count in height for one square in width
                 var ratioHeightWidth = (int)Math.Round((bottomY - topY + 1) / (double)(rightX - leftX + 1));
 
-                mountainChunks.AddRange(CreateContinentChunksOFType(mountainChunksCount, MOUNTAIN_CHUNK_COUNT_SQUARE, topY, leftX, bottomY, rightX, ratioHeightWidth));
-                forestChunks.AddRange(CreateContinentChunksOFType(forestChunksCount, FOREST_CHUNK_COUNT_SQUARE, topY, leftX, bottomY, rightX, ratioHeightWidth));
+                foreach (var chunkType in chunksByType.Keys)
+                {
+                    chunksByType[chunkType].AddRange(CreateContinentChunksOFType(
+                        chunksCountByType[chunkType],
+                        CHUNK_TYPE_PROPERTIES[chunkType].Item2,
+                        topY, leftX, bottomY, rightX, ratioHeightWidth));
+                }
 
                 for (int i = 0; i < riversChunksCount; i++)
                 {
@@ -220,19 +255,16 @@ namespace ErsatzCivLib.Model
                 }
             }
 
-            foreach (var mountainChunk in mountainChunks)
+            foreach (var type in chunksByType.Keys)
             {
-                foreach (var mountain in mountainChunk)
+                foreach (var chunkOfType in chunksByType[type])
                 {
-                    MapSquareList.Single(sq => sq.Column == mountain.Item2 && sq.Row == mountain.Item1).ChangeMapSquareType(MapSquareTypeData.Mountain);
-                }
-            }
-
-            foreach (var forestChunk in forestChunks)
-            {
-                foreach (var forest in forestChunk)
-                {
-                    MapSquareList.Single(sq => sq.Column == forest.Item2 && sq.Row == forest.Item1).ChangeMapSquareType(MapSquareTypeData.Forest, MapSquareTypeData.Grassland);
+                    foreach (var ofType in chunkOfType)
+                    {
+                        MapSquareList
+                            .Single(sq => sq.Column == ofType.Item2 && sq.Row == ofType.Item1)
+                            .ChangeMapSquareType(type, CHUNK_TYPE_PROPERTIES[type].Item4);
+                    }
                 }
             }
 
@@ -256,8 +288,13 @@ namespace ErsatzCivLib.Model
                 var vertical = Tools.Randomizer.Next(0, (1 * (ratioHeightWidth)) + 1) >= ratioHeightWidth;
                 var chunkSizeSeed = Tools.Randomizer.Next(-1, 2);
                 var chunkSize = chunkCountSquare + (chunkSizeSeed * 3);
-                var chunkHeight = chunkSize / 3;
-                var chunkWidth = chunkSize / chunkHeight;
+                var chunkHeight = 1;
+                var chunkWidth = chunkSize;
+                if (chunkSize >= 3)
+                {
+                    chunkHeight = chunkSize / 3;
+                    chunkWidth = chunkSize / chunkHeight;
+                }
                 if (vertical || (!vertical && chunkWidth < chunkHeight))
                 {
                     var tmpWidth = chunkWidth;

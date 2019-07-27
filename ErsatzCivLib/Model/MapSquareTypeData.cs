@@ -288,7 +288,7 @@ namespace ErsatzCivLib.Model
             // hill
             new MapSquareTypeData
             {
-                _type = MapSquareTypeEnum.Plain,
+                _type = MapSquareTypeEnum.Hill,
                 Commerce = 1,
                 Food = 1,
                 Productivity = 1,
