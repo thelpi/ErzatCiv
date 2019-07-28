@@ -65,123 +65,67 @@ namespace ErsatzCivLib.Model
             get { return _mapSquareList.Single(x => x.Column == j && x.Row == i); }
         }
 
-        internal MapData(MapSizeEnum mapSize, int continentCount, int landRatio1To10)
+        internal MapData(MapSizeEnum mapSize, int continentCount, double landRatio)
         {
             // Ensures correct values.
             continentCount = CapProperty(continentCount, maxExcluded: 11);
-            landRatio1To10 = CapProperty(landRatio1To10);
+            landRatio = landRatio >= 0.2 && landRatio <= 0.8 ? landRatio : throw new ArgumentException("Should between 0.2 et 0.8 !", nameof(landRatio));
 
             // General map properties.
             Height = MINIMAL_HEIGHT * (int)mapSize;
             Width = Height * RATIO_WIDTH_HEIGHT;
 
-            // Squares count for land overall.
-            var landSquares = Convert.ToInt32(Math.Floor((landRatio1To10 / (double)10) * Aire));
-
-            // Squares count by continent. Must be a rectangle. Every continents have the same count.
-            var restOfSquares = landSquares % continentCount;
-            var landSquaresByContinent = (restOfSquares == 0 ? landSquares : landSquares - restOfSquares) / continentCount;
-            landSquaresByContinent = landSquaresByContinent % 2 == 0 ? landSquaresByContinent : landSquaresByContinent - 1;
-
-            // Divides the map into columns.
-            var mapRectanglesDim = new Tuple<int, int>[continentCount];
-            var restOfWidth = Width % continentCount;
-            double minimalContainerHeightWidthRatio = double.NaN;
-            for (int i = 0; i < continentCount; i++)
+            var continentInfos = new List<List<MapSquareData>>();
+            var coastSquares = new List<MapSquareData>();
+            
+            var continentsBoundaries = new List<ContSquare>();
+            for (int i = 1; i <= continentCount; i++)
             {
-                bool extraWidth = restOfWidth > 0;
-                var currentWidth = (Width / continentCount) + (extraWidth ? 1 : 0);
-                mapRectanglesDim[i] = new Tuple<int, int>(currentWidth, Height);
-                if (!extraWidth || minimalContainerHeightWidthRatio == double.NaN)
+                if (continentsBoundaries.Count == 0)
                 {
-                    minimalContainerHeightWidthRatio = currentWidth / (double)Height;
+                    continentsBoundaries.Add(new ContSquare(Width, Height, 0, 0));
                 }
-                restOfWidth--;
+                else if (continentsBoundaries.Count == 1)
+                {
+                    var splitX = Tools.Randomizer.Next((int)Math.Floor(0.35 * continentsBoundaries[0].Width), (int)Math.Floor(0.65 * continentsBoundaries[0].Width));
+                    continentsBoundaries.Add(new ContSquare(splitX, continentsBoundaries[0].Height, 0, 0));
+                    continentsBoundaries.Add(new ContSquare(continentsBoundaries[0].Width - splitX, continentsBoundaries[0].Height, splitX, 0));
+                    continentsBoundaries.RemoveAt(0);
+                }
+                else if (continentsBoundaries.Count == 2)
+                {
+                    var contPick = continentsBoundaries[Tools.Randomizer.Next(0, 2)];
+                    var splitY = Tools.Randomizer.Next((int)Math.Floor(0.35 * contPick.Height), (int)Math.Floor(0.65 * contPick.Height));
+                    continentsBoundaries.Add(new ContSquare(contPick.Width, splitY, contPick.StartX, 0));
+                    continentsBoundaries.Add(new ContSquare(contPick.Width, contPick.Height - splitY, contPick.StartX, splitY));
+                    continentsBoundaries.Remove(contPick);
+                }
+                else if (continentsBoundaries.Count == 3)
+                {
+
+                }
             }
 
-            // Sets continent dimensions on the same ratio width/height as the minimal container.
-            var squareRatioAire = Math.Sqrt(minimalContainerHeightWidthRatio * landSquaresByContinent);
-            var continentWidth = Convert.ToInt32(squareRatioAire);
-            var continentHeight = Convert.ToInt32(squareRatioAire / minimalContainerHeightWidthRatio);
-
-            var continentInfos = new List<List<MapSquareData>>();
-
-            // Puts each continent inside each column of the map.
-            int iRect = 0;
-            while (iRect < mapRectanglesDim.Length)
+            foreach (var continentBoundaries in continentsBoundaries)
             {
-                continentInfos.Add(new List<MapSquareData>());
-
-                // Number of sea squares before the continent appears (horizontal).
-                var seaWidth = (mapRectanglesDim[iRect].Item1 - continentWidth) / 2;
-                if (((mapRectanglesDim[iRect].Item1 - continentWidth) % 2) > 0)
-                {
-                    seaWidth++;
-                }
-
-                // Number of sea squares before the continent appears (vertical).
-                // Note : this number is the same for each rectangle.
-                var seaHeight = (mapRectanglesDim[iRect].Item2 - continentHeight) / 2;
-                if (((mapRectanglesDim[iRect].Item2 - continentHeight) % 2) > 0)
-                {
-                    seaHeight++;
-                }
-
-                // Fills square list.
-                var currentContinentWidth = continentWidth;
-                var widthFromPreviousRect = mapRectanglesDim.Take(iRect).Sum(x => x.Item1);
-                for (int i = widthFromPreviousRect; i < (mapRectanglesDim[iRect].Item1 + widthFromPreviousRect); i++)
-                {
-                    var currentSeaHeight = seaHeight;
-                    var currentContinentHeight = continentHeight;
-                    for (int j = 0; j < Height; j++)
-                    {
-                        if (seaWidth > 0 || currentSeaHeight > 0)
-                        {
-                            _mapSquareList.Add(new MapSquareData(MapSquareTypeData.Sea, j, i));
-                        }
-                        else if (currentContinentWidth <= 0 || currentContinentHeight <= 0)
-                        {
-                            _mapSquareList.Add(new MapSquareData(MapSquareTypeData.Sea, j, i));
-                        }
-                        else
-                        {
-                            var sq = new MapSquareData(MapSquareTypeData.Grassland, j, i, MapSquareTypeData.Grassland);
-                            _mapSquareList.Add(sq);
-                            continentInfos.Last().Add(sq);
-                        }
-                        if (currentSeaHeight > 0)
-                        {
-                            currentSeaHeight--;
-                        }
-                        else if (currentContinentHeight > 0)
-                        {
-                            currentContinentHeight--;
-                        }
-                    }
-                    if (seaWidth > 0)
-                    {
-                        seaWidth--;
-                    }
-                    else if (currentContinentWidth > 0)
-                    {
-                        currentContinentWidth--;
-                    }
-                }
-
-                iRect++;
+                var tmpCoastSquares = new List<MapSquareData>();
+                continentInfos.Add(CreateContinentChunks(landRatio, continentBoundaries, out tmpCoastSquares));
+                coastSquares.AddRange(tmpCoastSquares);
             }
 
             // sets chunks and rivers
             var chunksByType = CHUNK_TYPE_PROPERTIES.ToDictionary(x => x.Key, x => new List<List<Tuple<int, int>>>());
             var riverChunks = new Dictionary<List<Tuple<int, int>>, bool>();
 
-            var chunksCountByType = CHUNK_TYPE_PROPERTIES.ToDictionary(x => x.Key, x =>
-                (int)Math.Round((landSquaresByContinent * x.Value.Item1) / x.Value.Item2));
-            var riversChunksCount = (int)Math.Round(landSquaresByContinent * RIVER_COUNT_RATIO);
-
-            foreach (var continentLand in continentInfos)
+            foreach (var fullLand in continentInfos)
             {
+                _mapSquareList.AddRange(fullLand);
+                var continentLand = fullLand.Where(ms => !ms.MapSquareType.IsSeaType).ToList();
+
+                var chunksCountByType = CHUNK_TYPE_PROPERTIES.ToDictionary(x => x.Key, x =>
+                    (int)Math.Round((continentLand.Count * x.Value.Item1) / x.Value.Item2));
+                var riversChunksCount = (int)Math.Round(continentLand.Count * RIVER_COUNT_RATIO);
+
                 var topY = continentLand.Min(x => x.Row);
                 var leftX = continentLand.Min(x => x.Column);
                 var bottomY = continentLand.Max(x => x.Row);
@@ -268,12 +212,58 @@ namespace ErsatzCivLib.Model
                 }
             }
 
-            var grdList = MapSquareList.Where(ms => !ms.MapSquareType.IsSeaType).ToList();
-            var coastList = MapSquareList.Where(ms => ms.MapSquareType == MapSquareTypeData.Sea && grdList.Any(grd => grd.IsClose(ms))).ToList();
-            foreach (var coastSq in coastList)
+            coastSquares.ForEach(ms => ms.ChangeMapSquareType(MapSquareTypeData.Coast));
+        }
+
+        private static List<MapSquareData> CreateContinentChunks(double landRatio, ContSquare contBound, out List<MapSquareData> costSquares)
+        {
+            costSquares = new List<MapSquareData>();
+            var startChunkX = 0;
+            var startChunkY = 0;
+            var continentWidth = 0;
+            var continentHeight = 0;
+            do
             {
-                coastSq.ChangeMapSquareType(MapSquareTypeData.Coast);
+                var maxStartChunkX = (int)Math.Floor((1 - landRatio) * contBound.Width);
+                var maxStartChunkY = (int)Math.Floor((1 - landRatio) * contBound.Height);
+                startChunkX = Tools.Randomizer.Next(0, maxStartChunkX);
+                startChunkY = Tools.Randomizer.Next(0, maxStartChunkY);
+                
+                continentWidth = (int)Math.Floor(contBound.Width * landRatio);
+                continentHeight = (int)Math.Floor(contBound.Height * landRatio);
             }
+            while (startChunkX + continentWidth > contBound.Width || startChunkY + continentHeight > contBound.Height);
+
+            Func<int, bool> IsGroundXFunc = delegate(int x) { return x >= startChunkX + (contBound.StartX - 1) && x <= (startChunkX + (contBound.StartX - 1) + continentWidth); };
+            Func<int, bool> IsGroundYFunc = delegate(int y) { return y >= startChunkY + (contBound.StartY - 1) && y <= (startChunkY + (contBound.StartY - 1) + continentHeight); };
+            Func<int, int, bool> IsGroundFunc = delegate (int x, int y) { return IsGroundXFunc(x) && IsGroundYFunc(y); };
+
+            var continentSquares = new List<MapSquareData>();
+            for (var x = contBound.StartX; x <= contBound.LastX; x++)
+            {
+                for (var y = contBound.StartY; y <= contBound.LastY; y++)
+                {
+                    var squareType = MapSquareTypeData.Sea;
+                    bool isCoast = false;
+                    if (IsGroundFunc(x, y))
+                    {
+                        squareType = MapSquareTypeData.Grassland;
+                    }
+                    else if (IsGroundFunc(x + 1, y) || IsGroundFunc(x - 1, y) || IsGroundFunc(x, y + 1) || IsGroundFunc(x, y - 1)
+                        || IsGroundFunc(x - 1, y - 1) || IsGroundFunc(x + 1, y + 1) || IsGroundFunc(x - 1, y + 1) || IsGroundFunc(x + 1, y - 1))
+                    {
+                        isCoast = true;
+                    }
+                    var newSquare = new MapSquareData(squareType, y, x, null);
+                    continentSquares.Add(newSquare);
+                    if (isCoast)
+                    {
+                        costSquares.Add(newSquare);
+                    }
+                }
+            }
+
+            return continentSquares;
         }
 
         private static List<List<Tuple<int, int>>> CreateContinentChunksOFType(int chunksCount, int chunkCountSquare, int topY, int leftX, int bottomY, int rightX, int ratioHeightWidth)
@@ -333,6 +323,24 @@ namespace ErsatzCivLib.Model
             Medium,
             Large,
             VeryLarge
+        }
+
+        private struct ContSquare
+        {
+            public int Width { get; private set; }
+            public int Height { get; private set; }
+            public int StartX { get; private set; }
+            public int StartY { get; private set; }
+            public int LastX { get { return StartX + Width - 1; } }
+            public int LastY { get { return StartY + Height - 1; } }
+
+            public ContSquare(int width, int height, int startX, int startY)
+            {
+                Width = width;
+                Height = height;
+                StartX = startX;
+                StartY = startY;
+            }
         }
     }
 }

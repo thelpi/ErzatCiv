@@ -22,7 +22,7 @@ namespace ErsatzCivLib
         public UnitPivot CurrentUnit { get { return _currentUnitIndex >= 0 ? _units[_currentUnitIndex] : null; } }
         public UnitPivot PreviousUnit { get { return _previousUnitIndex >= 0 && _previousUnitIndex != _currentUnitIndex ? _units[_previousUnitIndex] : null; } }
 
-        public Engine(MapData.MapSizeEnum mapSize, int continentsCount, int landRatio1To10)
+        public Engine(MapData.MapSizeEnum mapSize, int continentsCount, double landRatio1To10)
         {
             Map = new MapData(mapSize, continentsCount, landRatio1To10);
 
