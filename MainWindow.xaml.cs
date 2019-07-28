@@ -57,7 +57,7 @@ namespace ErsatzCiv
             // just in case th event in the constructor doesn't work.
             RecomputeFocus();
 
-            var rWidth = (MapScroller.ActualWidth * (MENU_HEIGHT * MapPivot.RATIO_WIDTH_HEIGHT)) / MapGrid.ActualWidth;
+            var rWidth = (MapScroller.ActualWidth * (MENU_HEIGHT * _engine.Map.WidthHeighRatio)) / MapGrid.ActualWidth;
             var rHeight = (MapScroller.ActualHeight * MENU_HEIGHT) / MapGrid.ActualHeight;
 
             _rCapture = new Rectangle
@@ -198,7 +198,7 @@ namespace ErsatzCiv
                 var x = MapScroller.ContentHorizontalOffset;
                 var y = MapScroller.ContentVerticalOffset;
 
-                var rX = (x * (MENU_HEIGHT * MapPivot.RATIO_WIDTH_HEIGHT)) / MapGrid.ActualWidth;
+                var rX = (x * (MENU_HEIGHT * _engine.Map.WidthHeighRatio)) / MapGrid.ActualWidth;
                 var rY = (y * MENU_HEIGHT) / MapGrid.ActualHeight;
 
                 _rCapture.SetValue(Canvas.LeftProperty, rX);
@@ -210,7 +210,7 @@ namespace ErsatzCiv
         private void DrawFullMapAndMiniMap()
         {
             MiniMapCanvas.Height = MENU_HEIGHT;
-            MiniMapCanvas.Width = MENU_HEIGHT * MapPivot.RATIO_WIDTH_HEIGHT;
+            MiniMapCanvas.Width = MENU_HEIGHT * _engine.Map.WidthHeighRatio;
 
             for (int i = 0; i < _engine.Map.Width; i++)
             {
@@ -528,7 +528,7 @@ namespace ErsatzCiv
 
         private void InitializeEngine()
         {
-            _engine = new Engine(MapPivot.MapSizeEnum.VeryLarge, MapPivot.MapLandShape.Pangaea, MapPivot.MapLandCoverage.VeryHigh, TemperaturePivot.Temperate);
+            _engine = new Engine(MapPivot.SizePivot.Large, MapPivot.LandShapePivot.Continent, MapPivot.LandCoveragePivot.High, MapPivot.TemperaturePivot.Temperate);
             _engine.NextUnitEvent += FocusOnUnit;
             _engine.SubscribeToMapSquareChangeEvent(UpdateSquareMap);
         }

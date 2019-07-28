@@ -17,8 +17,8 @@ namespace ErsatzCivLib.Model
         #region Properties
 
         private List<WorkerActionPivot> _actions;
-        private List<TemperaturePivot> _temperatures;
-        private Dictionary<TemperaturePivot, BiomePivot> _underlyingBiomes;
+        private List<MapPivot.TemperaturePivot> _temperatures;
+        private Dictionary<MapPivot.TemperaturePivot, BiomePivot> _underlyingBiomes;
 
         /// <summary>
         /// Default productivity points.
@@ -73,7 +73,7 @@ namespace ErsatzCivLib.Model
         /// <summary>
         /// List of <see cref="TemperaturePivot"/> (depending on latitude) where the biome can appears.
         /// </summary>
-        public IReadOnlyCollection<TemperaturePivot> Temperatures
+        public IReadOnlyCollection<MapPivot.TemperaturePivot> Temperatures
         {
             get { return _temperatures; }
         }
@@ -92,7 +92,7 @@ namespace ErsatzCivLib.Model
         /// <summary>
         /// Underlying biome by temperature (if <see cref="WorkerActionPivot.Clear"/> available).
         /// </summary>
-        internal IReadOnlyDictionary<TemperaturePivot, BiomePivot> UnderlyingBiomes
+        internal IReadOnlyDictionary<MapPivot.TemperaturePivot, BiomePivot> UnderlyingBiomes
         {
             get { return _underlyingBiomes; }
         }
@@ -121,12 +121,12 @@ namespace ErsatzCivLib.Model
                     WorkerActionPivot.Road,
                     WorkerActionPivot.BuildFortress
                 },
-            _temperatures = new List<TemperaturePivot>
+            _temperatures = new List<MapPivot.TemperaturePivot>
             {
-                TemperaturePivot.Hot,
-                TemperaturePivot.Temperate
+                MapPivot.TemperaturePivot.Hot,
+                MapPivot.TemperaturePivot.Temperate
             },
-            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
+            _underlyingBiomes = new Dictionary<MapPivot.TemperaturePivot, BiomePivot>(),
             IsSeaType = false,
             IsCityBuildable = true,
             SpeedCost = 1,
@@ -143,8 +143,8 @@ namespace ErsatzCivLib.Model
             RenderType = RenderTypePivot.PlainBrush,
             RiverCrossable = false,
             _actions = new List<WorkerActionPivot>(),
-            _temperatures = new List<TemperaturePivot>(),
-            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
+            _temperatures = new List<MapPivot.TemperaturePivot>(),
+            _underlyingBiomes = new Dictionary<MapPivot.TemperaturePivot, BiomePivot>(),
             IsSeaType = true,
             IsCityBuildable = false,
             SpeedCost = 1,
@@ -167,11 +167,11 @@ namespace ErsatzCivLib.Model
                     WorkerActionPivot.Road,
                     WorkerActionPivot.BuildFortress
                 },
-            _temperatures = new List<TemperaturePivot>
+            _temperatures = new List<MapPivot.TemperaturePivot>
             {
-                TemperaturePivot.Cold
+                MapPivot.TemperaturePivot.Cold
             },
-            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
+            _underlyingBiomes = new Dictionary<MapPivot.TemperaturePivot, BiomePivot>(),
             IsSeaType = false,
             IsCityBuildable = false,
             SpeedCost = 2,
@@ -196,11 +196,11 @@ namespace ErsatzCivLib.Model
                     WorkerActionPivot.Road,
                     WorkerActionPivot.BuildFortress
                 },
-            _temperatures = new List<TemperaturePivot>
+            _temperatures = new List<MapPivot.TemperaturePivot>
             {
-                TemperaturePivot.Cold
+                MapPivot.TemperaturePivot.Cold
             },
-            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
+            _underlyingBiomes = new Dictionary<MapPivot.TemperaturePivot, BiomePivot>(),
             IsSeaType = false,
             IsCityBuildable = true,
             SpeedCost = 1,
@@ -224,11 +224,11 @@ namespace ErsatzCivLib.Model
                     WorkerActionPivot.Road,
                     WorkerActionPivot.BuildFortress
                 },
-            _temperatures = new List<TemperaturePivot>
+            _temperatures = new List<MapPivot.TemperaturePivot>
             {
-                TemperaturePivot.Hot
+                MapPivot.TemperaturePivot.Hot
             },
-            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
+            _underlyingBiomes = new Dictionary<MapPivot.TemperaturePivot, BiomePivot>(),
             IsSeaType = false,
             IsCityBuildable = true,
             SpeedCost = 2,
@@ -251,13 +251,13 @@ namespace ErsatzCivLib.Model
                     WorkerActionPivot.Road,
                     WorkerActionPivot.BuildFortress
                 },
-            _temperatures = new List<TemperaturePivot>
+            _temperatures = new List<MapPivot.TemperaturePivot>
             {
-                TemperaturePivot.Hot
+                MapPivot.TemperaturePivot.Hot
             },
-            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>
+            _underlyingBiomes = new Dictionary<MapPivot.TemperaturePivot, BiomePivot>
             {
-                { TemperaturePivot.Hot, Plain }
+                { MapPivot.TemperaturePivot.Hot, Plain }
             },
             IsSeaType = false,
             IsCityBuildable = false,
@@ -281,13 +281,13 @@ namespace ErsatzCivLib.Model
                     WorkerActionPivot.Road,
                     WorkerActionPivot.BuildFortress
                 },
-            _temperatures = new List<TemperaturePivot>
+            _temperatures = new List<MapPivot.TemperaturePivot>
             {
-                TemperaturePivot.Cold,
-                TemperaturePivot.Hot,
-                TemperaturePivot.Temperate
+                MapPivot.TemperaturePivot.Cold,
+                MapPivot.TemperaturePivot.Hot,
+                MapPivot.TemperaturePivot.Temperate
             },
-            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
+            _underlyingBiomes = new Dictionary<MapPivot.TemperaturePivot, BiomePivot>(),
             IsSeaType = false,
             IsCityBuildable = false,
             SpeedCost = 3,
@@ -310,13 +310,13 @@ namespace ErsatzCivLib.Model
                     WorkerActionPivot.Road,
                     WorkerActionPivot.BuildFortress
                 },
-            _temperatures = new List<TemperaturePivot>
+            _temperatures = new List<MapPivot.TemperaturePivot>
             {
-                TemperaturePivot.Cold,
-                TemperaturePivot.Hot,
-                TemperaturePivot.Temperate
+                MapPivot.TemperaturePivot.Cold,
+                MapPivot.TemperaturePivot.Hot,
+                MapPivot.TemperaturePivot.Temperate
             },
-            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
+            _underlyingBiomes = new Dictionary<MapPivot.TemperaturePivot, BiomePivot>(),
             IsSeaType = false,
             IsCityBuildable = true,
             SpeedCost = 2,
@@ -339,17 +339,17 @@ namespace ErsatzCivLib.Model
                     WorkerActionPivot.BuildFortress,
                     WorkerActionPivot.Clear
                 },
-            _temperatures = new List<TemperaturePivot>
+            _temperatures = new List<MapPivot.TemperaturePivot>
             {
-                TemperaturePivot.Cold,
-                TemperaturePivot.Hot,
-                TemperaturePivot.Temperate
+                MapPivot.TemperaturePivot.Cold,
+                MapPivot.TemperaturePivot.Hot,
+                MapPivot.TemperaturePivot.Temperate
             },
-            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>
+            _underlyingBiomes = new Dictionary<MapPivot.TemperaturePivot, BiomePivot>
             {
-                { TemperaturePivot.Cold, Toundra },
-                { TemperaturePivot.Temperate, Grassland },
-                { TemperaturePivot.Hot, Plain }
+                { MapPivot.TemperaturePivot.Cold, Toundra },
+                { MapPivot.TemperaturePivot.Temperate, Grassland },
+                { MapPivot.TemperaturePivot.Hot, Plain }
             },
             IsSeaType = false,
             IsCityBuildable = false,
@@ -373,15 +373,15 @@ namespace ErsatzCivLib.Model
                     WorkerActionPivot.Road,
                     WorkerActionPivot.BuildFortress
                 },
-            _temperatures = new List<TemperaturePivot>
+            _temperatures = new List<MapPivot.TemperaturePivot>
             {
-                TemperaturePivot.Cold,
-                TemperaturePivot.Temperate
+                MapPivot.TemperaturePivot.Cold,
+                MapPivot.TemperaturePivot.Temperate
             },
-            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>
+            _underlyingBiomes = new Dictionary<MapPivot.TemperaturePivot, BiomePivot>
             {
-                { TemperaturePivot.Cold, Toundra },
-                { TemperaturePivot.Temperate, Grassland }
+                { MapPivot.TemperaturePivot.Cold, Toundra },
+                { MapPivot.TemperaturePivot.Temperate, Grassland }
             },
             IsSeaType = false,
             IsCityBuildable = true,
@@ -407,13 +407,13 @@ namespace ErsatzCivLib.Model
                     WorkerActionPivot.Road,
                     WorkerActionPivot.BuildFortress
                 },
-            _temperatures = new List<TemperaturePivot>
+            _temperatures = new List<MapPivot.TemperaturePivot>
             {
-                TemperaturePivot.Cold,
-                TemperaturePivot.Hot,
-                TemperaturePivot.Temperate
+                MapPivot.TemperaturePivot.Cold,
+                MapPivot.TemperaturePivot.Hot,
+                MapPivot.TemperaturePivot.Temperate
             },
-            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
+            _underlyingBiomes = new Dictionary<MapPivot.TemperaturePivot, BiomePivot>(),
             IsSeaType = false,
             IsCityBuildable = true,
             SpeedCost = 1,
@@ -430,8 +430,8 @@ namespace ErsatzCivLib.Model
             RenderType = RenderTypePivot.PlainBrush,
             RiverCrossable = false,
             _actions = new List<WorkerActionPivot>(),
-            _temperatures = new List<TemperaturePivot>(),
-            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
+            _temperatures = new List<MapPivot.TemperaturePivot>(),
+            _underlyingBiomes = new Dictionary<MapPivot.TemperaturePivot, BiomePivot>(),
             IsSeaType = true,
             IsCityBuildable = false,
             SpeedCost = 1,

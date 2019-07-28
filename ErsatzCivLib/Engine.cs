@@ -23,10 +23,10 @@ namespace ErsatzCivLib
         public UnitPivot CurrentUnit { get { return _currentUnitIndex >= 0 ? _units[_currentUnitIndex] : null; } }
         public UnitPivot PreviousUnit { get { return _previousUnitIndex >= 0 && _previousUnitIndex != _currentUnitIndex ? _units[_previousUnitIndex] : null; } }
 
-        public Engine(MapPivot.MapSizeEnum mapSize,
-            MapPivot.MapLandShape mapShape,
-            MapPivot.MapLandCoverage landCoverage,
-            TemperaturePivot temperature)
+        public Engine(MapPivot.SizePivot mapSize,
+            MapPivot.LandShapePivot mapShape,
+            MapPivot.LandCoveragePivot landCoverage,
+            MapPivot.TemperaturePivot temperature)
         {
             Map = new MapPivot(mapSize, mapShape, landCoverage, temperature);
 

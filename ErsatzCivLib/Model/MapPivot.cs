@@ -6,15 +6,35 @@ namespace ErsatzCivLib.Model
 {
     public class MapPivot
     {
-        public const int MAX_CONTINENT_COUNT = 16;
+        #region Constants (private)
 
-        public const int RATIO_WIDTH_HEIGHT = 2;
+        private const int RATIO_WIDTH_HEIGHT = 2;
         private const int MINIMAL_HEIGHT = 20;
         private const int CHUNK_SIZE_RATIO = 5;
+        private const double MAX_RATIO_TEMPERATURE = 0.4;
+        private const double MIN_RATIO_TEMPERATURE = 0.1;
+        private const double AVG_RATIO_TEMPERATURE = 0.25;
+        private const double RIVER_STARTER_RATIO = 0.005;
+        private const int CONTINENT_COUNT_MIN = 3;
+        private const int CONTINENT_COUNT_MAX = 6;
+        private const int ISLAND_COUNT_MIN = 10;
+        private const int ISLAND_COUNT_MAX = 16; // ALWAYS A 2^X !!!
+        private const double MIN_SPLIT_RATIO = 0.35;
+        private const double MAX_SPLIT_RATIO = 0.65;
+        private static readonly Dictionary<LandCoveragePivot, double> LAND_COVERAGE_RATIOS = new Dictionary<LandCoveragePivot, double>
+        {
+            { LandCoveragePivot.VeryLow, 0.3 },
+            { LandCoveragePivot.Low, 0.45 },
+            { LandCoveragePivot.Medium, 0.6 },
+            { LandCoveragePivot.High, 0.75 },
+            { LandCoveragePivot.VeryHigh, 0.9 }
+        };
 
-        private const double RIVER_COUNT_RATIO = 0.005; // Multiply the continent squares count by this number to obtain the rivers count
+        #endregion
 
         private readonly List<MapSquarePivot> _mapSquareList = new List<MapSquarePivot>();
+
+        #region Properties (public)
 
         public IReadOnlyCollection<MapSquarePivot> MapSquareList
         {
@@ -26,26 +46,31 @@ namespace ErsatzCivLib.Model
         public int Width { get; private set; }
         public int Height { get; private set; }
         public TemperaturePivot GlobalTemperature { get; private set; }
-
-        public double ColdRatio { get { return GlobalTemperature == TemperaturePivot.Temperate ? 0.25 : (GlobalTemperature == TemperaturePivot.Cold ? 0.4 : 0.1); } }
-        public double HotRatio { get { return GlobalTemperature == TemperaturePivot.Temperate ? 0.25 : (GlobalTemperature == TemperaturePivot.Hot ? 0.4 : 0.1); } }
+        public int WidthHeighRatio { get { return Width / Height; } }
+        public double ColdRatio { get { return GlobalTemperature == TemperaturePivot.Temperate ? AVG_RATIO_TEMPERATURE : (GlobalTemperature == TemperaturePivot.Cold ? MAX_RATIO_TEMPERATURE : MIN_RATIO_TEMPERATURE); } }
+        public double HotRatio { get { return GlobalTemperature == TemperaturePivot.Temperate ? AVG_RATIO_TEMPERATURE : (GlobalTemperature == TemperaturePivot.Hot ? MAX_RATIO_TEMPERATURE : MIN_RATIO_TEMPERATURE); } }
         public double TemperateRatio { get { return 1 - (ColdRatio + HotRatio); } }
-
         public int TemperateNorthTopBorder { get { return (int)Math.Round(Height * (ColdRatio / 2)); } }
         public int HotTopBorder { get { return (int)Math.Round(Height * (TemperateRatio / 2)) + TemperateNorthTopBorder; } }
         public int TemperateSouthTopBorder { get { return (int)Math.Round(Height * HotRatio) + HotTopBorder; } }
         public int ColdSouthTopBorder { get { return (int)Math.Round(Height * (TemperateRatio / 2)) + TemperateSouthTopBorder; } }
 
-        internal MapPivot(MapSizeEnum mapSize, MapLandShape mapShape, MapLandCoverage landCoverage, TemperaturePivot temperature)
+        #endregion
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="mapSize"><see cref="SizePivot"/></param>
+        /// <param name="mapShape"><see cref="LandShapePivot"/></param>
+        /// <param name="landCoverage"><see cref="LandCoveragePivot"/></param>
+        /// <param name="temperature"><see cref="TemperaturePivot"/></param>
+        internal MapPivot(SizePivot mapSize, LandShapePivot mapShape, LandCoveragePivot landCoverage, TemperaturePivot temperature)
         {
-            // Values can be changed, but not over MAX_CONTINENT_COUNT
-            var continentCount = mapShape == MapLandShape.Pangaea ? 1 : (
-                mapShape == MapLandShape.Continent ? Tools.Randomizer.Next(3, 6) : Tools.Randomizer.Next(10, 15)
+            var continentCount = mapShape == LandShapePivot.Pangaea ? 1 : (
+                mapShape == LandShapePivot.Continent ? Tools.Randomizer.Next(CONTINENT_COUNT_MIN, CONTINENT_COUNT_MAX + 1) :
+                    Tools.Randomizer.Next(ISLAND_COUNT_MIN, ISLAND_COUNT_MAX + 1)
             );
-            var landRatio = landCoverage == MapLandCoverage.VeryLow ? 0.3 : (
-                landCoverage == MapLandCoverage.Low ? 0.45 : (
-                    landCoverage == MapLandCoverage.Medium ? 0.6 : (
-                        landCoverage == MapLandCoverage.High ? 0.75 : 0.9)));
+            var landRatio = LAND_COVERAGE_RATIOS[landCoverage];
             
             Height = MINIMAL_HEIGHT * (int)mapSize;
             Width = Height * RATIO_WIDTH_HEIGHT;
@@ -54,18 +79,18 @@ namespace ErsatzCivLib.Model
             var continentInfos = new List<List<MapSquarePivot>>();
             var coastSquares = new List<MapSquarePivot>();
             
-            var boundaries = new List<ContSquare>();
-            Action<ContSquare> SplitX = delegate (ContSquare contPick)
+            var boundaries = new List<ContinentBlueprint>();
+            Action<ContinentBlueprint> SplitX = delegate (ContinentBlueprint contPick)
             {
-                var splitX = Tools.Randomizer.Next((int)Math.Floor(0.35 * contPick.Width), (int)Math.Floor(0.65 * contPick.Width));
-                boundaries.Add(new ContSquare(splitX, contPick.Height, contPick.StartX, contPick.StartY));
-                boundaries.Add(new ContSquare(contPick.Width - splitX, contPick.Height, contPick.StartX + splitX, contPick.StartY));
+                var splitX = Tools.Randomizer.Next((int)Math.Floor(MIN_SPLIT_RATIO * contPick.Width), (int)Math.Floor(MAX_SPLIT_RATIO * contPick.Width));
+                boundaries.Add(new ContinentBlueprint(splitX, contPick.Height, contPick.StartX, contPick.StartY));
+                boundaries.Add(new ContinentBlueprint(contPick.Width - splitX, contPick.Height, contPick.StartX + splitX, contPick.StartY));
             };
-            Action<ContSquare> SplitY = delegate (ContSquare contPick)
+            Action<ContinentBlueprint> SplitY = delegate (ContinentBlueprint contPick)
             {
-                var splitY = Tools.Randomizer.Next((int)Math.Floor(0.35 * contPick.Height), (int)Math.Floor(0.65 * contPick.Height));
-                boundaries.Add(new ContSquare(contPick.Width, splitY, contPick.StartX, contPick.StartY));
-                boundaries.Add(new ContSquare(contPick.Width, contPick.Height - splitY, contPick.StartX, contPick.StartY + splitY));
+                var splitY = Tools.Randomizer.Next((int)Math.Floor(MIN_SPLIT_RATIO * contPick.Height), (int)Math.Floor(MAX_SPLIT_RATIO * contPick.Height));
+                boundaries.Add(new ContinentBlueprint(contPick.Width, splitY, contPick.StartX, contPick.StartY));
+                boundaries.Add(new ContinentBlueprint(contPick.Width, contPick.Height - splitY, contPick.StartX, contPick.StartY + splitY));
             };
             Action<int, bool> Split = delegate (int pickIndex, bool inY)
             {
@@ -82,7 +107,7 @@ namespace ErsatzCivLib.Model
             };
 
             List<int> ranges = new List<int>();
-            var cpt = MAX_CONTINENT_COUNT;
+            var cpt = ISLAND_COUNT_MAX;
             while (cpt > 1)
             {
                 ranges.Add(cpt);
@@ -93,7 +118,7 @@ namespace ErsatzCivLib.Model
             {
                 if (boundaries.Count == 0)
                 {
-                    boundaries.Add(new ContSquare(Width, Height, 0, 0));
+                    boundaries.Add(new ContinentBlueprint(Width, Height, 0, 0));
                 }
                 else
                 {
@@ -108,7 +133,7 @@ namespace ErsatzCivLib.Model
             foreach (var boundary in boundaries)
             {
                 var tmpCoastSquares = new List<MapSquarePivot>();
-                continentInfos.Add(CreateContinentChunks(landRatio, boundary, out tmpCoastSquares));
+                continentInfos.Add(ConvertContinentBlueprintToMapSquares(landRatio, boundary, out tmpCoastSquares));
                 coastSquares.AddRange(tmpCoastSquares);
             }
 
@@ -123,7 +148,7 @@ namespace ErsatzCivLib.Model
 
                 var chunksCountByType = BiomePivot.NonSeaAndNonDefaultBiomes
                                             .ToDictionary(b => b, b => b.ChunkSquaresCount(continentLand.Count, CHUNK_SIZE_RATIO));
-                var riversChunksCount = (int)Math.Round(continentLand.Count * RIVER_COUNT_RATIO);
+                var riversChunksCount = (int)Math.Round(continentLand.Count * RIVER_STARTER_RATIO);
 
                 var topY = continentLand.Min(x => x.Row);
                 var leftX = continentLand.Min(x => x.Column);
@@ -134,7 +159,7 @@ namespace ErsatzCivLib.Model
 
                 foreach (var chunkType in chunksByType.Keys)
                 {
-                    chunksByType[chunkType].AddRange(CreateContinentChunksOFType(
+                    chunksByType[chunkType].AddRange(FiilContinentBlueprintWithBiomeChunks(
                         chunksCountByType[chunkType],
                         (int)chunkType.Size * CHUNK_SIZE_RATIO,
                         topY, leftX, bottomY, rightX, ratioHeightWidth, chunkType.Temperatures));
@@ -214,7 +239,12 @@ namespace ErsatzCivLib.Model
             coastSquares.ForEach(ms => ms.ChangeBiome(BiomePivot.Coast));
         }
 
-        public TemperaturePivot TemperatureAt(int y)
+        /// <summary>
+        /// Computes the <see cref="TemperaturePivot"/> at a specified height.
+        /// </summary>
+        /// <param name="y">The height.</param>
+        /// <returns>The level of temperature.</returns>
+        internal TemperaturePivot TemperatureAt(int y)
         {
             if (y >= HotTopBorder && y < TemperateSouthTopBorder)
             {
@@ -230,7 +260,7 @@ namespace ErsatzCivLib.Model
             }
         }
 
-        private static List<MapSquarePivot> CreateContinentChunks(double landRatio, ContSquare contBound, out List<MapSquarePivot> costSquares)
+        private static List<MapSquarePivot> ConvertContinentBlueprintToMapSquares(double landRatio, ContinentBlueprint contBound, out List<MapSquarePivot> costSquares)
         {
             costSquares = new List<MapSquarePivot>();
             var startChunkX = 0;
@@ -281,7 +311,7 @@ namespace ErsatzCivLib.Model
             return continentSquares;
         }
 
-        private List<List<Tuple<int, int>>> CreateContinentChunksOFType(int chunksCount, int chunkCountSquare,
+        private List<List<Tuple<int, int>>> FiilContinentBlueprintWithBiomeChunks(int chunksCount, int chunkCountSquare,
             int topY, int leftX, int bottomY, int rightX, int ratioHeightWidth, IReadOnlyCollection<TemperaturePivot> temperatures)
         {
             var chunksList = new List<List<Tuple<int, int>>>();
@@ -328,16 +358,100 @@ namespace ErsatzCivLib.Model
             return chunksList;
         }
 
-        public enum MapSizeEnum
+        /// <summary>
+        /// Represents the map size.
+        /// </summary>
+        public enum SizePivot
         {
-            VerySmall = 1,
+            /// <summary>
+            /// Very small.
+            /// </summary>
+            VerySmall = 1, // do not change the indice !
+            /// <summary>
+            /// Small.
+            /// </summary>
             Small,
+            /// <summary>
+            /// Medium.
+            /// </summary>
             Medium,
+            /// <summary>
+            /// Large.
+            /// </summary>
             Large,
+            /// <summary>
+            /// Very large.
+            /// </summary>
             VeryLarge
         }
 
-        private class ContSquare
+        /// <summary>
+        /// Represents the land coverage of the map.
+        /// </summary>
+        public enum LandCoveragePivot
+        {
+            /// <summary>
+            /// Very low.
+            /// </summary>
+            VeryLow,
+            /// <summary>
+            /// Low.
+            /// </summary>
+            Low,
+            /// <summary>
+            /// Medium.
+            /// </summary>
+            Medium,
+            /// <summary>
+            /// High.
+            /// </summary>
+            High,
+            /// <summary>
+            /// Very high.
+            /// </summary>
+            VeryHigh
+        }
+
+        /// <summary>
+        /// Represents the land organization inside the map.
+        /// </summary>
+        public enum LandShapePivot
+        {
+            /// <summary>
+            /// Single pangaea.
+            /// </summary>
+            Pangaea,
+            /// <summary>
+            /// Few continents.
+            /// </summary>
+            Continent,
+            /// <summary>
+            /// Several islands.
+            /// </summary>
+            Island
+        }
+
+        /// <summary>
+        /// Levels of temperature.
+        /// </summary>
+        public enum TemperaturePivot
+        {
+            /// <summary>
+            /// Cold.
+            /// </summary>
+            Cold,
+            /// <summary>
+            /// Temperate.
+            /// </summary>
+            Temperate,
+            /// <summary>
+            /// Hot.
+            /// </summary>
+            Hot
+        }
+
+        // Tool to represent a continent square.
+        private class ContinentBlueprint
         {
             public int Width { get; private set; }
             public int Height { get; private set; }
@@ -346,34 +460,13 @@ namespace ErsatzCivLib.Model
             public int LastX { get { return StartX + Width - 1; } }
             public int LastY { get { return StartY + Height - 1; } }
 
-            public ContSquare(int width, int height, int startX, int startY)
+            public ContinentBlueprint(int width, int height, int startX, int startY)
             {
                 Width = width;
                 Height = height;
                 StartX = startX;
                 StartY = startY;
             }
-
-            public override string ToString()
-            {
-                return string.Concat(Width, " - ", Height);
-            }
-        }
-
-        public enum MapLandCoverage
-        {
-            VeryLow = 1,
-            Low,
-            Medium,
-            High,
-            VeryHigh
-        }
-
-        public enum MapLandShape
-        {
-            Pangaea = 1,
-            Continent,
-            Island
         }
     }
 }

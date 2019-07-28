@@ -51,7 +51,6 @@
     <Compile Include="Model\BiomePivot.cs" />
     <Compile Include="Model\RenderTypePivot.cs" />
     <Compile Include="Model\Units\SettlerPivot.cs" />
-    <Compile Include="Model\TemperaturePivot.cs" />
     <Compile Include="Model\UnitPivot.cs" />
     <Compile Include="Model\Units\WorkerPivot.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
