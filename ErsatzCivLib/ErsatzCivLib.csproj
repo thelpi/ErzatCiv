@@ -43,6 +43,7 @@
     <Compile Include="Model\CityPivot.cs" />
     <Compile Include="Model\DirectionPivot.cs" />
     <Compile Include="Engine.cs" />
+    <Compile Include="Model\IOnMapPivot.cs" />
     <Compile Include="Model\MapPivot.cs" />
     <Compile Include="Model\WorkerActionPivot.cs" />
     <Compile Include="Model\MapSquarePivot.cs" />

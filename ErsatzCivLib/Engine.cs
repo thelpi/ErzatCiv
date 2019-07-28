@@ -34,7 +34,7 @@ namespace ErsatzCivLib
                 x = Tools.Randomizer.Next(0, Map.Width);
                 y = Tools.Randomizer.Next(0, Map.Height);
             }
-            while (!Map.MapSquareList.Any(ms => ms.Row == x && ms.Column == y && !ms.Biome.IsSeaType));
+            while (!Map.MapSquareList.Any(ms => ms.Same(x, y) && !ms.Biome.IsSeaType));
 
             _units.Add(new SettlerPivot(x, y));
             _units.Add(new WorkerPivot(x, y));
@@ -53,14 +53,14 @@ namespace ErsatzCivLib
 
             var settler = CurrentUnit as SettlerPivot;
 
-            var sq = Map.MapSquareList.FirstOrDefault(ms => ms.Row == settler.Row && ms.Column == settler.Column);
+            var sq = Map.MapSquareList.FirstOrDefault(ms => ms.Same(settler));
             if (sq?.Biome?.IsCityBuildable != true
-                || _cities.Any(c => c.Row == settler.Row && c.Column == settler.Column)
+                || _cities.Any(c => c.Same(settler))
                 || sq?.Pollution == true)
             {
                 return null;
             }
-            var city = new CityPivot(sq.Row, sq.Column);
+            var city = new CityPivot(sq);
             sq.ApplyCityActions(city);
 
             _cities.Add(city);
@@ -124,9 +124,14 @@ namespace ErsatzCivLib
             return true;
         }
 
+        internal bool IsCity(IOnMapPivot onMapInstance)
+        {
+            return _cities.Any(c => c.Same(onMapInstance));
+        }
+
         internal bool IsCity(int row, int column)
         {
-            return _cities.Any(c => c.Row == row && c.Column == column);
+            return _cities.Any(c => c.Same(row, column));
         }
 
         public bool WorkerAction(WorkerActionPivot actionPivot)
@@ -137,7 +142,7 @@ namespace ErsatzCivLib
             }
 
             var worker = CurrentUnit as WorkerPivot;
-            var sq = Map.MapSquareList.FirstOrDefault(ms => ms.Row == worker.Row && ms.Column == worker.Column);
+            var sq = Map.MapSquareList.FirstOrDefault(ms => ms.Same(worker));
             if (sq == null)
             {
                 return false;

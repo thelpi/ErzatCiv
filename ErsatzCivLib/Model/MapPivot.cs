@@ -61,11 +61,6 @@ namespace ErsatzCivLib.Model
         }
         public int Width { get; private set; }
         public int Height { get; private set; }
-        public int Aire { get { return Width * Height; } }
-        public MapSquarePivot this[int i, int j]
-        {
-            get { return _mapSquareList.Single(x => x.Column == j && x.Row == i); }
-        }
 
         internal MapPivot(MapSizeEnum mapSize, int continentCount, double landRatio, TemperaturePivot temperature)
         {
@@ -220,7 +215,7 @@ namespace ErsatzCivLib.Model
             {
                 foreach (var river in riverChunk)
                 {
-                    MapSquareList.Single(sq => sq.Column == river.Item2 && sq.Row == river.Item1).SetRiver(riverChunks[riverChunk]);
+                    MapSquareList.Single(sq => sq.Same(river)).SetRiver(riverChunks[riverChunk]);
                 }
             }
 
@@ -231,7 +226,7 @@ namespace ErsatzCivLib.Model
                     foreach (var ofType in chunkOfType)
                     {
                         MapSquareList
-                            .Single(sq => sq.Column == ofType.Item2 && sq.Row == ofType.Item1)
+                            .Single(sq => sq.Same(ofType))
                             .ChangeBiome(type, CHUNK_TYPE_PROPERTIES[type].Item4);
                     }
                 }

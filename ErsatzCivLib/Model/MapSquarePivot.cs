@@ -8,22 +8,13 @@ namespace ErsatzCivLib.Model
     /// <summary>
     /// Represents a map square.
     /// </summary>
-    public class MapSquarePivot
+    public class MapSquarePivot : IOnMapPivot
     {
         #region Properties
 
         public event EventHandler SquareChangeEvent;
 
         private List<CurrentActionPivot> _currentActions = new List<CurrentActionPivot>();
-
-        /// <summary>
-        /// Row on the map grid.
-        /// </summary>
-        public int Row { get; private set; }
-        /// <summary>
-        /// Column on the map grid.
-        /// </summary>
-        public int Column { get; private set; }
 
         /// <summary>
         /// Square type.
@@ -69,11 +60,9 @@ namespace ErsatzCivLib.Model
 
         #endregion
 
-        internal MapSquarePivot(BiomePivot biome, int row, int column, BiomePivot underlyingType = null)
+        internal MapSquarePivot(BiomePivot biome, int row, int column, BiomePivot underlyingType = null) : base(row, column)
         {
             Biome = biome ?? throw new ArgumentNullException(nameof(biome));
-            Row = row < 0 ? throw new ArgumentException("Invalid value.", nameof(row)) : row;
-            Column = column < 0 ? throw new ArgumentException("Invalid value.", nameof(column)) : column;
             if (Biome.Actions.Contains(WorkerActionPivot.Clear))
             {
                 UnderlyingBiome = underlyingType ?? throw new ArgumentNullException(nameof(underlyingType));
@@ -100,7 +89,7 @@ namespace ErsatzCivLib.Model
 
         internal void ApplyCityActions(CityPivot city)
         {
-            if (city.Row != Row || city.Column != Column)
+            if (!Same(city))
             {
                 return;
             }
@@ -130,7 +119,7 @@ namespace ErsatzCivLib.Model
                 throw new ArgumentNullException(nameof(action));
             }
 
-            if ((!action.AlwaysAvailable && !Biome.Actions.Contains(action)) || engine.IsCity(worker.Row, worker.Column))
+            if ((!action.AlwaysAvailable && !Biome.Actions.Contains(action)) || engine.IsCity(worker))
             {
                 return false;
             }
@@ -298,13 +287,6 @@ namespace ErsatzCivLib.Model
                 _currentActions.Remove(action);
                 action.Dispose();
             }
-        }
-
-        internal bool IsClose(MapSquarePivot other)
-        {
-            return (Math.Abs(Row - other.Row) == 1 && Column == other.Column) ||
-                (Math.Abs(Column - other.Column) == 1 && Row == other.Row) ||
-                (Math.Abs(Row - other.Row) == 1 && Math.Abs(Column - other.Column) == 1);
         }
 
         /// <summary>
