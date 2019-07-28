@@ -5,5 +5,8 @@
     <Setting Name="imagesPath" Type="System.String" Scope="User">
       <Value Profile="(Default)">D:\Ma programmation\csharp\Projects\ErsatzCiv\datas\</Value>
     </Setting>
+    <Setting Name="squareImageSubFolder" Type="System.String" Scope="User">
+      <Value Profile="(Default)">square\</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

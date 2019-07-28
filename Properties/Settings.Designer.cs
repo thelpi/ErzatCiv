@@ -34,5 +34,17 @@ namespace ErsatzCiv.Properties {
                 this["imagesPath"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("square\\")]
+        public string squareImageSubFolder {
+            get {
+                return ((string)(this["squareImageSubFolder"]));
+            }
+            set {
+                this["squareImageSubFolder"] = value;
+            }
+        }
     }
 }

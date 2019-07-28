@@ -36,6 +36,9 @@ namespace ErsatzCivLib.Model
 
         #region Properties (public)
 
+        /// <summary>
+        /// List of every <see cref="MapSquarePivot"/>.
+        /// </summary>
         public IReadOnlyCollection<MapSquarePivot> MapSquareList
         {
             get
@@ -43,17 +46,34 @@ namespace ErsatzCivLib.Model
                 return _mapSquareList;
             }
         }
+        /// <summary>
+        /// Width.
+        /// </summary>
         public int Width { get; private set; }
+        /// <summary>
+        /// Height.
+        /// </summary>
         public int Height { get; private set; }
+        /// <summary>
+        /// Global temperature.
+        /// </summary>
         public TemperaturePivot GlobalTemperature { get; private set; }
+        /// <summary>
+        /// Inferred; <see cref="Width"/> to <see cref="Height"/> ratio.
+        /// </summary>
         public int WidthHeighRatio { get { return Width / Height; } }
-        public double ColdRatio { get { return GlobalTemperature == TemperaturePivot.Temperate ? AVG_RATIO_TEMPERATURE : (GlobalTemperature == TemperaturePivot.Cold ? MAX_RATIO_TEMPERATURE : MIN_RATIO_TEMPERATURE); } }
-        public double HotRatio { get { return GlobalTemperature == TemperaturePivot.Temperate ? AVG_RATIO_TEMPERATURE : (GlobalTemperature == TemperaturePivot.Hot ? MAX_RATIO_TEMPERATURE : MIN_RATIO_TEMPERATURE); } }
-        public double TemperateRatio { get { return 1 - (ColdRatio + HotRatio); } }
-        public int TemperateNorthTopBorder { get { return (int)Math.Round(Height * (ColdRatio / 2)); } }
-        public int HotTopBorder { get { return (int)Math.Round(Height * (TemperateRatio / 2)) + TemperateNorthTopBorder; } }
-        public int TemperateSouthTopBorder { get { return (int)Math.Round(Height * HotRatio) + HotTopBorder; } }
-        public int ColdSouthTopBorder { get { return (int)Math.Round(Height * (TemperateRatio / 2)) + TemperateSouthTopBorder; } }
+
+        #endregion
+
+        #region Properties (private)
+
+        private double ColdRatio { get { return GlobalTemperature == TemperaturePivot.Temperate ? AVG_RATIO_TEMPERATURE : (GlobalTemperature == TemperaturePivot.Cold ? MAX_RATIO_TEMPERATURE : MIN_RATIO_TEMPERATURE); } }
+        private double HotRatio { get { return GlobalTemperature == TemperaturePivot.Temperate ? AVG_RATIO_TEMPERATURE : (GlobalTemperature == TemperaturePivot.Hot ? MAX_RATIO_TEMPERATURE : MIN_RATIO_TEMPERATURE); } }
+        private double TemperateRatio { get { return 1 - (ColdRatio + HotRatio); } }
+        private int TemperateNorthTopBorder { get { return (int)Math.Round(Height * (ColdRatio / 2)); } }
+        private int HotTopBorder { get { return (int)Math.Round(Height * (TemperateRatio / 2)) + TemperateNorthTopBorder; } }
+        private int TemperateSouthTopBorder { get { return (int)Math.Round(Height * HotRatio) + HotTopBorder; } }
+        private int ColdSouthTopBorder { get { return (int)Math.Round(Height * (TemperateRatio / 2)) + TemperateSouthTopBorder; } }
 
         #endregion
 

@@ -14,12 +14,16 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public const int RIVER_BONUS = 1;
 
-        #region Properties
-
         private List<WorkerActionPivot> _actions;
         private List<MapPivot.TemperaturePivot> _temperatures;
         private Dictionary<MapPivot.TemperaturePivot, BiomePivot> _underlyingBiomes;
 
+        #region Properties
+
+        /// <summary>
+        /// Name.
+        /// </summary>
+        public string Name { get; private set; }
         /// <summary>
         /// Default productivity points.
         /// </summary>
@@ -37,14 +41,9 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public int Defense { get; private set; }
         /// <summary>
-        /// Render value.
+        /// Hexadecimal code of the color.
         /// </summary>
-        /// <remarks>Path to image; hexadecimal color code.</remarks>
-        public string RenderValue { get; private set; }
-        /// <summary>
-        /// Type of render.
-        /// </summary>
-        public RenderTypePivot RenderType { get; private set; }
+        public string ColorValue { get; private set; }
         /// <summary>
         /// Indicates if the square map can be crossed by a river.
         /// </summary>
@@ -105,12 +104,12 @@ namespace ErsatzCivLib.Model
 
         public static BiomePivot Grassland { get; } = new BiomePivot
         {
+            Name = "Grassland",
             Commerce = 1,
             Food = 2,
             Productivity = 1,
             Defense = 0,
-            RenderValue = "#32CD32",
-            RenderType = RenderTypePivot.PlainBrush,
+            ColorValue = "#32CD32",
             RiverCrossable = true,
             _actions = new List<WorkerActionPivot>
                 {
@@ -135,12 +134,12 @@ namespace ErsatzCivLib.Model
         };
         public static BiomePivot Sea { get; } = new BiomePivot
         {
+            Name = "Sea",
             Commerce = 1,
             Food = 1,
             Productivity = 0,
             Defense = 0,
-            RenderValue = "#1E90FF",
-            RenderType = RenderTypePivot.PlainBrush,
+            ColorValue = "#1E90FF",
             RiverCrossable = false,
             _actions = new List<WorkerActionPivot>(),
             _temperatures = new List<MapPivot.TemperaturePivot>(),
@@ -153,12 +152,12 @@ namespace ErsatzCivLib.Model
         };
         public static BiomePivot Ice { get; } = new BiomePivot
         {
+            Name = "Ice",
             Commerce = 0,
             Food = 0,
             Productivity = 0,
             Defense = 1,
-            RenderValue = "#FFFAF0",
-            RenderType = RenderTypePivot.PlainBrush,
+            ColorValue = "#FFFAF0",
             RiverCrossable = true,
             _actions = new List<WorkerActionPivot>
                 {
@@ -180,12 +179,12 @@ namespace ErsatzCivLib.Model
         };
         public static BiomePivot Toundra { get; } = new BiomePivot
         {
+            Name = "Toundra",
             Commerce = 0,
             Food = 1,
             Productivity = 1,
             Defense = 0,
-            RenderValue = "#2F4F4F",
-            RenderType = RenderTypePivot.PlainBrush,
+            ColorValue = "#2F4F4F",
             RiverCrossable = true,
             _actions = new List<WorkerActionPivot>
                 {
@@ -209,12 +208,12 @@ namespace ErsatzCivLib.Model
         };
         public static BiomePivot Desert { get; } = new BiomePivot
         {
+            Name = "Desert",
             Commerce = 0,
             Food = 0,
             Productivity = 1,
             Defense = 1,
-            RenderValue = "#FF7F50",
-            RenderType = RenderTypePivot.PlainBrush,
+            ColorValue = "#FF7F50",
             RiverCrossable = true,
             _actions = new List<WorkerActionPivot>
                 {
@@ -237,12 +236,12 @@ namespace ErsatzCivLib.Model
         };
         public static BiomePivot Jungle { get; } = new BiomePivot
         {
+            Name = "Jungle",
             Commerce = 0,
             Food = 1,
             Productivity = 0,
             Defense = 2,
-            RenderValue = "#9ACD32",
-            RenderType = RenderTypePivot.PlainBrush,
+            ColorValue = "#9ACD32",
             RiverCrossable = true,
             _actions = new List<WorkerActionPivot>
                 {
@@ -267,12 +266,12 @@ namespace ErsatzCivLib.Model
         };
         public static BiomePivot Mountain { get; } = new BiomePivot
         {
+            Name = "Mountain",
             Commerce = 0,
             Food = 0,
             Productivity = 2,
             Defense = 2,
-            RenderValue = "#A52A2A",
-            RenderType = RenderTypePivot.PlainBrush,
+            ColorValue = "#A52A2A",
             RiverCrossable = true,
             _actions = new List<WorkerActionPivot>
                 {
@@ -296,12 +295,12 @@ namespace ErsatzCivLib.Model
         };
         public static BiomePivot Hill { get; } = new BiomePivot
         {
+            Name = "Hill",
             Commerce = 1,
             Food = 1,
             Productivity = 1,
             Defense = 1,
-            RenderValue = "#556B2F",
-            RenderType = RenderTypePivot.PlainBrush,
+            ColorValue = "#556B2F",
             RiverCrossable = true,
             _actions = new List<WorkerActionPivot>
                 {
@@ -325,12 +324,12 @@ namespace ErsatzCivLib.Model
         };
         public static BiomePivot Swamp { get; } = new BiomePivot
         {
+            Name = "Swamp",
             Commerce = 0,
             Food = 1,
             Productivity = 0,
             Defense = 1,
-            RenderValue = "#3CB371",
-            RenderType = RenderTypePivot.PlainBrush,
+            ColorValue = "#3CB371",
             RiverCrossable = true,
             _actions = new List<WorkerActionPivot>
                 {
@@ -359,12 +358,12 @@ namespace ErsatzCivLib.Model
         };
         public static BiomePivot Forest { get; } = new BiomePivot
         {
+            Name = "Forest",
             Commerce = 1,
             Food = 1,
             Productivity = 2,
             Defense = 1,
-            RenderValue = "#006400",
-            RenderType = RenderTypePivot.PlainBrush,
+            ColorValue = "#006400",
             RiverCrossable = true,
             _actions = new List<WorkerActionPivot>
                 {
@@ -391,12 +390,12 @@ namespace ErsatzCivLib.Model
         };
         public static BiomePivot Plain { get; } = new BiomePivot
         {
+            Name = "Plain",
             Commerce = 1,
             Food = 1,
             Productivity = 1,
             Defense = 0,
-            RenderValue = "#EEE8AA",
-            RenderType = RenderTypePivot.PlainBrush,
+            ColorValue = "#EEE8AA",
             RiverCrossable = true,
             _actions = new List<WorkerActionPivot>
                 {
@@ -422,12 +421,12 @@ namespace ErsatzCivLib.Model
         };
         public static BiomePivot Coast { get; } = new BiomePivot
         {
+            Name = "Coast",
             Commerce = 1,
             Food = 1,
             Productivity = 0,
             Defense = 0,
-            RenderValue = "#00BFFF",
-            RenderType = RenderTypePivot.PlainBrush,
+            ColorValue = "#00BFFF",
             RiverCrossable = false,
             _actions = new List<WorkerActionPivot>(),
             _temperatures = new List<MapPivot.TemperaturePivot>(),

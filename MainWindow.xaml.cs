@@ -8,6 +8,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using ErsatzCiv.Properties;
 using ErsatzCivLib;
 using ErsatzCivLib.Model;
 
@@ -242,24 +243,47 @@ namespace ErsatzCiv
                 CleanPreviousRenderOnMapAndMiniMap(square);
             }
 
-            Rectangle rct = new Rectangle
+            FrameworkElement squareRender;
+            string imgPath = Settings.Default.imagesPath + Settings.Default.squareImageSubFolder + $"{square.Biome.Name}.jpg";
+            if (System.IO.File.Exists(imgPath))
             {
-                Stroke = Brushes.DarkGray,
-                StrokeThickness = 1,
-                Width = DEFAULT_SIZE,
-                Height = DEFAULT_SIZE,
-                Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(square.Biome.RenderValue))
-            };
-            rct.SetValue(Grid.RowProperty, square.Row);
-            rct.SetValue(Grid.ColumnProperty, square.Column);
-            rct.Tag = square;
-            MapGrid.Children.Add(rct);
+                squareRender = new Border
+                {
+                    Child = new Image
+                    {
+                        Width = DEFAULT_SIZE,
+                        Height = DEFAULT_SIZE,
+                        Source = new BitmapImage(new Uri(imgPath)),
+                        Stretch = Stretch.Uniform,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center
+                    },
+                    BorderBrush = Brushes.DarkGray,
+                    BorderThickness = new Thickness(1)
+                };
+            }
+            else
+            {
+                squareRender = new Rectangle
+                {
+                    Stroke = Brushes.DarkGray,
+                    StrokeThickness = 1,
+                    Width = DEFAULT_SIZE,
+                    Height = DEFAULT_SIZE,
+                    Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(square.Biome.ColorValue))
+                };
+            }
+
+            squareRender.SetValue(Grid.RowProperty, square.Row);
+            squareRender.SetValue(Grid.ColumnProperty, square.Column);
+            squareRender.Tag = square;
+            MapGrid.Children.Add(squareRender);
 
             Rectangle rctMinimap = new Rectangle
             {
                 Width = _minimapSquareSize,
                 Height = _minimapSquareSize,
-                Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(square.Biome.RenderValue))
+                Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(square.Biome.ColorValue))
             };
             rctMinimap.SetValue(Canvas.TopProperty, square.Row * _minimapSquareSize);
             rctMinimap.SetValue(Canvas.LeftProperty, square.Column * _minimapSquareSize);
@@ -364,7 +388,7 @@ namespace ErsatzCiv
             {
                 Width = DEFAULT_SIZE * ratio,
                 Height = DEFAULT_SIZE * ratio,
-                Source = new BitmapImage(new Uri(Properties.Settings.Default.imagesPath + imgName)),
+                Source = new BitmapImage(new Uri(Settings.Default.imagesPath + imgName)),
                 Stretch = Stretch.Uniform,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center
@@ -448,7 +472,7 @@ namespace ErsatzCiv
             {
                 Width = DEFAULT_SIZE * CityPivot.DISPLAY_RATIO,
                 Height = DEFAULT_SIZE * CityPivot.DISPLAY_RATIO,
-                Source = new BitmapImage(new Uri(Properties.Settings.Default.imagesPath + city.RenderValue)),
+                Source = new BitmapImage(new Uri(Settings.Default.imagesPath + city.RenderValue)),
                 Stretch = Stretch.Uniform,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center
@@ -482,7 +506,7 @@ namespace ErsatzCiv
             {
                 Width = DEFAULT_SIZE,
                 Height = DEFAULT_SIZE,
-                Source = new BitmapImage(new Uri(Properties.Settings.Default.imagesPath + unit.RenderValue)),
+                Source = new BitmapImage(new Uri(Settings.Default.imagesPath + unit.RenderValue)),
                 Stretch = Stretch.Uniform
             };
             img.SetValue(Grid.RowProperty, unit.Row);
