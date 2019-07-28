@@ -6,6 +6,8 @@ namespace ErsatzCivLib.Model
 {
     public class MapData
     {
+        public const int MAX_CONTINENT_COUNT = 16;
+
         public const int RATIO_WIDTH_HEIGHT = 2;
         private const int MINIMAL_HEIGHT = 20;
         // Multiply the continent squares count by this number to obtain the rivers count
@@ -67,49 +69,72 @@ namespace ErsatzCivLib.Model
 
         internal MapData(MapSizeEnum mapSize, int continentCount, double landRatio)
         {
-            // Ensures correct values.
-            continentCount = CapProperty(continentCount, maxExcluded: 11);
-            landRatio = landRatio >= 0.2 && landRatio <= 0.8 ? landRatio : throw new ArgumentException("Should between 0.2 et 0.8 !", nameof(landRatio));
-
-            // General map properties.
+            continentCount = continentCount > 0 && continentCount <= MAX_CONTINENT_COUNT ?
+                continentCount : throw new ArgumentException($"Continents count should be between 1 and {MAX_CONTINENT_COUNT} !", nameof(continentCount));
+            landRatio = landRatio >= 0.2 && landRatio <= 0.8 ?
+                landRatio : throw new ArgumentException("Should between 0.2 et 0.8 !", nameof(landRatio));
+            
             Height = MINIMAL_HEIGHT * (int)mapSize;
             Width = Height * RATIO_WIDTH_HEIGHT;
 
             var continentInfos = new List<List<MapSquareData>>();
             var coastSquares = new List<MapSquareData>();
             
-            var continentsBoundaries = new List<ContSquare>();
+            var boundaries = new List<ContSquare>();
+            Action<ContSquare> SplitX = delegate (ContSquare contPick)
+            {
+                var splitX = Tools.Randomizer.Next((int)Math.Floor(0.35 * contPick.Width), (int)Math.Floor(0.65 * contPick.Width));
+                boundaries.Add(new ContSquare(splitX, contPick.Height, contPick.StartX, contPick.StartY));
+                boundaries.Add(new ContSquare(contPick.Width - splitX, contPick.Height, contPick.StartX + splitX, contPick.StartY));
+            };
+            Action<ContSquare> SplitY = delegate (ContSquare contPick)
+            {
+                var splitY = Tools.Randomizer.Next((int)Math.Floor(0.35 * contPick.Height), (int)Math.Floor(0.65 * contPick.Height));
+                boundaries.Add(new ContSquare(contPick.Width, splitY, contPick.StartX, contPick.StartY));
+                boundaries.Add(new ContSquare(contPick.Width, contPick.Height - splitY, contPick.StartX, contPick.StartY + splitY));
+            };
+            Action<int, bool> Split = delegate (int pickIndex, bool inY)
+            {
+                var contPick = boundaries[pickIndex];
+                if (inY)
+                {
+                    SplitY(contPick);
+                }
+                else
+                {
+                    SplitX(contPick);
+                }
+                boundaries.Remove(contPick);
+            };
+
+            List<int> ranges = new List<int>();
+            var cpt = MAX_CONTINENT_COUNT;
+            while (cpt > 1)
+            {
+                ranges.Add(cpt);
+                cpt /= 2;
+            }
+
             for (int i = 1; i <= continentCount; i++)
             {
-                if (continentsBoundaries.Count == 0)
+                if (boundaries.Count == 0)
                 {
-                    continentsBoundaries.Add(new ContSquare(Width, Height, 0, 0));
+                    boundaries.Add(new ContSquare(Width, Height, 0, 0));
                 }
-                else if (continentsBoundaries.Count == 1)
+                else
                 {
-                    var splitX = Tools.Randomizer.Next((int)Math.Floor(0.35 * continentsBoundaries[0].Width), (int)Math.Floor(0.65 * continentsBoundaries[0].Width));
-                    continentsBoundaries.Add(new ContSquare(splitX, continentsBoundaries[0].Height, 0, 0));
-                    continentsBoundaries.Add(new ContSquare(continentsBoundaries[0].Width - splitX, continentsBoundaries[0].Height, splitX, 0));
-                    continentsBoundaries.RemoveAt(0);
-                }
-                else if (continentsBoundaries.Count == 2)
-                {
-                    var contPick = continentsBoundaries[Tools.Randomizer.Next(0, 2)];
-                    var splitY = Tools.Randomizer.Next((int)Math.Floor(0.35 * contPick.Height), (int)Math.Floor(0.65 * contPick.Height));
-                    continentsBoundaries.Add(new ContSquare(contPick.Width, splitY, contPick.StartX, 0));
-                    continentsBoundaries.Add(new ContSquare(contPick.Width, contPick.Height - splitY, contPick.StartX, splitY));
-                    continentsBoundaries.Remove(contPick);
-                }
-                else if (continentsBoundaries.Count == 3)
-                {
-
+                    var nextTypeI = ranges.Where(x => x > boundaries.Count).Min();
+                    Split(
+                        Tools.Randomizer.Next(0, nextTypeI - boundaries.Count),
+                        ranges.Any(x => x == Math.Sqrt(nextTypeI))
+                    );
                 }
             }
 
-            foreach (var continentBoundaries in continentsBoundaries)
+            foreach (var boundary in boundaries)
             {
                 var tmpCoastSquares = new List<MapSquareData>();
-                continentInfos.Add(CreateContinentChunks(landRatio, continentBoundaries, out tmpCoastSquares));
+                continentInfos.Add(CreateContinentChunks(landRatio, boundary, out tmpCoastSquares));
                 coastSquares.AddRange(tmpCoastSquares);
             }
 
@@ -304,18 +329,6 @@ namespace ErsatzCivLib.Model
             return chunksList;
         }
 
-        private int CapProperty(int value, int minIncluded = 1, int maxExcluded = 6)
-        {
-            if (minIncluded > maxExcluded)
-            {
-                var tempSwitch = minIncluded;
-                minIncluded = maxExcluded;
-                maxExcluded = tempSwitch;
-            }
-
-            return value < 1 ? 1 : (value >= maxExcluded ? maxExcluded - 1 : value);
-        }
-
         public enum MapSizeEnum
         {
             VerySmall = 1,
@@ -325,7 +338,7 @@ namespace ErsatzCivLib.Model
             VeryLarge
         }
 
-        private struct ContSquare
+        private class ContSquare
         {
             public int Width { get; private set; }
             public int Height { get; private set; }
@@ -340,6 +353,11 @@ namespace ErsatzCivLib.Model
                 Height = height;
                 StartX = startX;
                 StartY = startY;
+            }
+
+            public override string ToString()
+            {
+                return string.Concat(Width, " - ", Height);
             }
         }
     }
