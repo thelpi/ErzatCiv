@@ -532,7 +532,7 @@ namespace ErsatzCiv
 
         private void InitializeEngine()
         {
-            _engine = new Engine(MapData.MapSizeEnum.VeryLarge, 5, 0.6);
+            _engine = new Engine(MapData.MapSizeEnum.VeryLarge, 5, 0.6, TemperaturePivot.Temperate);
             _engine.NextUnitEvent += FocusOnUnit;
             _engine.SubscribeToMapSquareChangeEvent(UpdateSquareMap);
         }

@@ -50,6 +50,7 @@
     <Compile Include="Model\MapSquareTypeData.cs" />
     <Compile Include="Model\RenderTypeEnum.cs" />
     <Compile Include="Model\SettlerPivot.cs" />
+    <Compile Include="Model\TemperaturePivot.cs" />
     <Compile Include="Model\UnitPivot.cs" />
     <Compile Include="Model\WorkerPivot.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

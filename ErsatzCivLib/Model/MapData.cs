@@ -67,7 +67,7 @@ namespace ErsatzCivLib.Model
             get { return _mapSquareList.Single(x => x.Column == j && x.Row == i); }
         }
 
-        internal MapData(MapSizeEnum mapSize, int continentCount, double landRatio)
+        internal MapData(MapSizeEnum mapSize, int continentCount, double landRatio, TemperaturePivot temperature)
         {
             continentCount = continentCount > 0 && continentCount <= MAX_CONTINENT_COUNT ?
                 continentCount : throw new ArgumentException($"Continents count should be between 1 and {MAX_CONTINENT_COUNT} !", nameof(continentCount));
