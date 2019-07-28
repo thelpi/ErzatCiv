@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ErsatzCivLib.Model
 {
@@ -16,6 +18,7 @@ namespace ErsatzCivLib.Model
 
         private List<WorkerActionPivot> _actions;
         private List<TemperaturePivot> _temperatures;
+        private Dictionary<TemperaturePivot, BiomePivot> _underlyingBiomes;
 
         /// <summary>
         /// Default productivity points.
@@ -58,6 +61,7 @@ namespace ErsatzCivLib.Model
         /// Indicates the speed cost when a unit walks through it.
         /// </summary>
         public int SpeedCost { get; private set; }
+
         /// <summary>
         /// Available <see cref="WorkerActionPivot"/>.
         /// Doesn't include <see cref="WorkerActionPivot.AlwaysAvailable"/>.
@@ -72,6 +76,25 @@ namespace ErsatzCivLib.Model
         public IReadOnlyCollection<TemperaturePivot> Temperatures
         {
             get { return _temperatures; }
+        }
+
+        /// <summary>
+        /// Appearance ratio on map (between 0 and 1).
+        /// Is ignored for <see cref="IsSeaType"/> biomes and <see cref="Default"/>.
+        /// </summary>
+        internal double AppearanceRatio { get; private set; }
+        /// <summary>
+        /// Medium size of a chunk of this biome.
+        /// Is ignored for <see cref="IsSeaType"/> biomes and <see cref="Default"/>.
+        /// </summary>
+        internal BiomeSizePivot Size { get; private set; }
+
+        /// <summary>
+        /// Underlying biome by temperature (if <see cref="WorkerActionPivot.Clear"/> available).
+        /// </summary>
+        internal IReadOnlyDictionary<TemperaturePivot, BiomePivot> UnderlyingBiomes
+        {
+            get { return _underlyingBiomes; }
         }
 
         #endregion
@@ -98,9 +121,17 @@ namespace ErsatzCivLib.Model
                     WorkerActionPivot.Road,
                     WorkerActionPivot.BuildFortress
                 },
+            _temperatures = new List<TemperaturePivot>
+            {
+                TemperaturePivot.Hot,
+                TemperaturePivot.Temperate
+            },
+            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
             IsSeaType = false,
             IsCityBuildable = true,
-            SpeedCost = 1
+            SpeedCost = 1,
+            AppearanceRatio = 0.1,
+            Size = BiomeSizePivot.Medium
         };
         public static BiomePivot Sea { get; } = new BiomePivot
         {
@@ -112,9 +143,13 @@ namespace ErsatzCivLib.Model
             RenderType = RenderTypePivot.PlainBrush,
             RiverCrossable = false,
             _actions = new List<WorkerActionPivot>(),
+            _temperatures = new List<TemperaturePivot>(),
+            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
             IsSeaType = true,
             IsCityBuildable = false,
-            SpeedCost = 1
+            SpeedCost = 1,
+            AppearanceRatio = 0.1,
+            Size = BiomeSizePivot.Large
         };
         public static BiomePivot Ice { get; } = new BiomePivot
         {
@@ -132,9 +167,16 @@ namespace ErsatzCivLib.Model
                     WorkerActionPivot.Road,
                     WorkerActionPivot.BuildFortress
                 },
+            _temperatures = new List<TemperaturePivot>
+            {
+                TemperaturePivot.Cold
+            },
+            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
             IsSeaType = false,
             IsCityBuildable = false,
-            SpeedCost = 2
+            SpeedCost = 2,
+            AppearanceRatio = 0.1,
+            Size = BiomeSizePivot.Large
         };
         public static BiomePivot Toundra { get; } = new BiomePivot
         {
@@ -154,9 +196,16 @@ namespace ErsatzCivLib.Model
                     WorkerActionPivot.Road,
                     WorkerActionPivot.BuildFortress
                 },
+            _temperatures = new List<TemperaturePivot>
+            {
+                TemperaturePivot.Cold
+            },
+            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
             IsSeaType = false,
             IsCityBuildable = true,
-            SpeedCost = 1
+            SpeedCost = 1,
+            AppearanceRatio = 0.1,
+            Size = BiomeSizePivot.Medium
         };
         public static BiomePivot Desert { get; } = new BiomePivot
         {
@@ -175,9 +224,16 @@ namespace ErsatzCivLib.Model
                     WorkerActionPivot.Road,
                     WorkerActionPivot.BuildFortress
                 },
+            _temperatures = new List<TemperaturePivot>
+            {
+                TemperaturePivot.Hot
+            },
+            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
             IsSeaType = false,
             IsCityBuildable = true,
-            SpeedCost = 2
+            SpeedCost = 2,
+            AppearanceRatio = 0.1,
+            Size = BiomeSizePivot.Large
         };
         public static BiomePivot Jungle { get; } = new BiomePivot
         {
@@ -195,9 +251,19 @@ namespace ErsatzCivLib.Model
                     WorkerActionPivot.Road,
                     WorkerActionPivot.BuildFortress
                 },
+            _temperatures = new List<TemperaturePivot>
+            {
+                TemperaturePivot.Hot
+            },
+            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>
+            {
+                { TemperaturePivot.Hot, Plain }
+            },
             IsSeaType = false,
             IsCityBuildable = false,
-            SpeedCost = 3
+            SpeedCost = 3,
+            AppearanceRatio = 0.1,
+            Size = BiomeSizePivot.Medium
         };
         public static BiomePivot Mountain { get; } = new BiomePivot
         {
@@ -215,9 +281,18 @@ namespace ErsatzCivLib.Model
                     WorkerActionPivot.Road,
                     WorkerActionPivot.BuildFortress
                 },
+            _temperatures = new List<TemperaturePivot>
+            {
+                TemperaturePivot.Cold,
+                TemperaturePivot.Hot,
+                TemperaturePivot.Temperate
+            },
+            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
             IsSeaType = false,
             IsCityBuildable = false,
-            SpeedCost = 3
+            SpeedCost = 3,
+            AppearanceRatio = 0.1,
+            Size = BiomeSizePivot.Medium
         };
         public static BiomePivot Hill { get; } = new BiomePivot
         {
@@ -235,9 +310,18 @@ namespace ErsatzCivLib.Model
                     WorkerActionPivot.Road,
                     WorkerActionPivot.BuildFortress
                 },
+            _temperatures = new List<TemperaturePivot>
+            {
+                TemperaturePivot.Cold,
+                TemperaturePivot.Hot,
+                TemperaturePivot.Temperate
+            },
+            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
             IsSeaType = false,
             IsCityBuildable = true,
-            SpeedCost = 2
+            SpeedCost = 2,
+            AppearanceRatio = 0.1,
+            Size = BiomeSizePivot.Small
         };
         public static BiomePivot Swamp { get; } = new BiomePivot
         {
@@ -255,9 +339,23 @@ namespace ErsatzCivLib.Model
                     WorkerActionPivot.BuildFortress,
                     WorkerActionPivot.Clear
                 },
+            _temperatures = new List<TemperaturePivot>
+            {
+                TemperaturePivot.Cold,
+                TemperaturePivot.Hot,
+                TemperaturePivot.Temperate
+            },
+            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>
+            {
+                { TemperaturePivot.Cold, Toundra },
+                { TemperaturePivot.Temperate, Grassland },
+                { TemperaturePivot.Hot, Plain }
+            },
             IsSeaType = false,
             IsCityBuildable = false,
-            SpeedCost = 2
+            SpeedCost = 2,
+            AppearanceRatio = 0.02,
+            Size = BiomeSizePivot.Small
         };
         public static BiomePivot Forest { get; } = new BiomePivot
         {
@@ -275,9 +373,21 @@ namespace ErsatzCivLib.Model
                     WorkerActionPivot.Road,
                     WorkerActionPivot.BuildFortress
                 },
+            _temperatures = new List<TemperaturePivot>
+            {
+                TemperaturePivot.Cold,
+                TemperaturePivot.Temperate
+            },
+            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>
+            {
+                { TemperaturePivot.Cold, Toundra },
+                { TemperaturePivot.Temperate, Grassland }
+            },
             IsSeaType = false,
             IsCityBuildable = true,
-            SpeedCost = 2
+            SpeedCost = 2,
+            AppearanceRatio = 0.1,
+            Size = BiomeSizePivot.Medium
         };
         public static BiomePivot Plain { get; } = new BiomePivot
         {
@@ -297,9 +407,18 @@ namespace ErsatzCivLib.Model
                     WorkerActionPivot.Road,
                     WorkerActionPivot.BuildFortress
                 },
+            _temperatures = new List<TemperaturePivot>
+            {
+                TemperaturePivot.Cold,
+                TemperaturePivot.Hot,
+                TemperaturePivot.Temperate
+            },
+            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
             IsSeaType = false,
             IsCityBuildable = true,
-            SpeedCost = 1
+            SpeedCost = 1,
+            AppearanceRatio = 0.1,
+            Size = BiomeSizePivot.Large
         };
         public static BiomePivot Coast { get; } = new BiomePivot
         {
@@ -311,11 +430,71 @@ namespace ErsatzCivLib.Model
             RenderType = RenderTypePivot.PlainBrush,
             RiverCrossable = false,
             _actions = new List<WorkerActionPivot>(),
+            _temperatures = new List<TemperaturePivot>(),
+            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
             IsSeaType = true,
             IsCityBuildable = false,
-            SpeedCost = 1
+            SpeedCost = 1,
+            AppearanceRatio = 0.1,
+            Size = BiomeSizePivot.Small
         };
 
+        /// <summary>
+        /// The biome by default when the map is built.
+        /// </summary>
+        public static BiomePivot Default = Plain;
+
         #endregion
+
+        private static List<BiomePivot> _biomes = null;
+        /// <summary>
+        /// List of every biomes.
+        /// </summary>
+        public static IReadOnlyCollection<BiomePivot> Biomes
+        {
+            get
+            {
+                if (_biomes == null)
+                {
+                    _biomes = new List<BiomePivot>
+                    {
+                        Sea,
+                        Coast,
+                        Jungle,
+                        Desert,
+                        Swamp,
+                        Forest,
+                        Toundra,
+                        Ice,
+                        Mountain,
+                        Hill,
+                        Grassland,
+                        Plain
+                    };
+                }
+                return _biomes;
+            }
+        }
+        /// <summary>
+        /// List of every biomes except <see cref="IsSeaType"/> ones and <see cref="Default"/> one.
+        /// </summary>
+        internal static IReadOnlyCollection<BiomePivot> NonSeaAndNonDefaultBiomes
+        {
+            get
+            {
+                return Biomes.Where(b => !b.IsSeaType && b != Default).ToList();
+            }
+        }
+
+        /// <summary>
+        /// Number of 
+        /// </summary>
+        /// <param name="totalSquaresCount">Total count of squares in the continent.</param>
+        /// <param name="chunkCoeff">Number real of squares in a <see cref="BiomeSizePivot.Small"/> chunk.</param>
+        /// <returns>Number of squares </returns>
+        internal int ChunkSquaresCount(int totalSquaresCount, int chunkCoeff)
+        {
+            return (int)Math.Round((totalSquaresCount * (AppearanceRatio * 3)) / ((int)Size * chunkCoeff));
+        }
     }
 }

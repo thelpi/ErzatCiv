@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\BiomeSizePivot.cs" />
     <Compile Include="Model\CityPivot.cs" />
     <Compile Include="Model\DirectionPivot.cs" />
     <Compile Include="Engine.cs" />

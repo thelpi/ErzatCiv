@@ -10,45 +10,9 @@ namespace ErsatzCivLib.Model
 
         public const int RATIO_WIDTH_HEIGHT = 2;
         private const int MINIMAL_HEIGHT = 20;
-        // Multiply the continent squares count by this number to obtain the rivers count
-        private const double RIVER_COUNT_RATIO = 0.005;
+        private const int CHUNK_SIZE_RATIO = 5;
 
-        // for each type of square, except grassland, sea and cost :
-        // - ratio (0,1) of appearance
-        // - medium chunk squares count (must be divisible by 3)
-        // - true if "hot", false if "cold", null otherwise
-        // - underlying type, if "Clear" action available
-        private static readonly Dictionary<BiomePivot, Tuple<double, int, bool?, BiomePivot>> CHUNK_TYPE_PROPERTIES =
-            new Dictionary<BiomePivot, Tuple<double, int, bool?, BiomePivot>>
-            {
-                {
-                    BiomePivot.Mountain, new Tuple<double, int, bool?, BiomePivot>(0.1, 6, null, null)
-                },
-                {
-                    BiomePivot.Forest, new Tuple<double, int, bool?, BiomePivot>(0.1, 6, null, BiomePivot.Grassland)
-                },
-                {
-                    BiomePivot.Desert, new Tuple<double, int, bool?, BiomePivot>(0.1, 9, null, null)
-                },
-                {
-                    BiomePivot.Jungle, new Tuple<double, int, bool?, BiomePivot>(0.1, 6, null, BiomePivot.Plain)
-                },
-                {
-                    BiomePivot.Swamp, new Tuple<double, int, bool?, BiomePivot>(0.02, 3, null, BiomePivot.Grassland)
-                },
-                {
-                    BiomePivot.Ice, new Tuple<double, int, bool?, BiomePivot>(0.1, 9, null, null)
-                },
-                {
-                    BiomePivot.Toundra, new Tuple<double, int, bool?, BiomePivot>(0.1, 6, null, null)
-                },
-                {
-                    BiomePivot.Hill, new Tuple<double, int, bool?, BiomePivot>(0.1, 3, null, null)
-                },
-                {
-                    BiomePivot.Plain, new Tuple<double, int, bool?, BiomePivot>(0.1, 6, null, null)
-                }
-            };
+        private const double RIVER_COUNT_RATIO = 0.005; // Multiply the continent squares count by this number to obtain the rivers count
 
         private readonly List<MapSquarePivot> _mapSquareList = new List<MapSquarePivot>();
 
@@ -61,16 +25,31 @@ namespace ErsatzCivLib.Model
         }
         public int Width { get; private set; }
         public int Height { get; private set; }
+        public TemperaturePivot GlobalTemperature { get; private set; }
 
-        internal MapPivot(MapSizeEnum mapSize, int continentCount, double landRatio, TemperaturePivot temperature)
+        public double ColdRatio { get { return GlobalTemperature == TemperaturePivot.Temperate ? 0.25 : (GlobalTemperature == TemperaturePivot.Cold ? 0.4 : 0.1); } }
+        public double HotRatio { get { return GlobalTemperature == TemperaturePivot.Temperate ? 0.25 : (GlobalTemperature == TemperaturePivot.Hot ? 0.4 : 0.1); } }
+        public double TemperateRatio { get { return 1 - (ColdRatio + HotRatio); } }
+
+        public int TemperateNorthTopBorder { get { return (int)Math.Round(Height * (ColdRatio / 2)); } }
+        public int HotTopBorder { get { return (int)Math.Round(Height * (TemperateRatio / 2)) + TemperateNorthTopBorder; } }
+        public int TemperateSouthTopBorder { get { return (int)Math.Round(Height * HotRatio) + HotTopBorder; } }
+        public int ColdSouthTopBorder { get { return (int)Math.Round(Height * (TemperateRatio / 2)) + TemperateSouthTopBorder; } }
+
+        internal MapPivot(MapSizeEnum mapSize, MapLandShape mapShape, MapLandCoverage landCoverage, TemperaturePivot temperature)
         {
-            continentCount = continentCount > 0 && continentCount <= MAX_CONTINENT_COUNT ?
-                continentCount : throw new ArgumentException($"Continents count should be between 1 and {MAX_CONTINENT_COUNT} !", nameof(continentCount));
-            landRatio = landRatio >= 0.2 && landRatio <= 0.8 ?
-                landRatio : throw new ArgumentException("Should between 0.2 et 0.8 !", nameof(landRatio));
+            // Values can be changed, but not over MAX_CONTINENT_COUNT
+            var continentCount = mapShape == MapLandShape.Pangaea ? 1 : (
+                mapShape == MapLandShape.Continent ? Tools.Randomizer.Next(3, 6) : Tools.Randomizer.Next(10, 15)
+            );
+            var landRatio = landCoverage == MapLandCoverage.VeryLow ? 0.3 : (
+                landCoverage == MapLandCoverage.Low ? 0.45 : (
+                    landCoverage == MapLandCoverage.Medium ? 0.6 : (
+                        landCoverage == MapLandCoverage.High ? 0.75 : 0.9)));
             
             Height = MINIMAL_HEIGHT * (int)mapSize;
             Width = Height * RATIO_WIDTH_HEIGHT;
+            GlobalTemperature = temperature;
 
             var continentInfos = new List<List<MapSquarePivot>>();
             var coastSquares = new List<MapSquarePivot>();
@@ -134,7 +113,7 @@ namespace ErsatzCivLib.Model
             }
 
             // sets chunks and rivers
-            var chunksByType = CHUNK_TYPE_PROPERTIES.ToDictionary(x => x.Key, x => new List<List<Tuple<int, int>>>());
+            var chunksByType = BiomePivot.NonSeaAndNonDefaultBiomes.ToDictionary(b => b, b => new List<List<Tuple<int, int>>>());
             var riverChunks = new Dictionary<List<Tuple<int, int>>, bool>();
 
             foreach (var fullLand in continentInfos)
@@ -142,8 +121,8 @@ namespace ErsatzCivLib.Model
                 _mapSquareList.AddRange(fullLand);
                 var continentLand = fullLand.Where(ms => !ms.Biome.IsSeaType).ToList();
 
-                var chunksCountByType = CHUNK_TYPE_PROPERTIES.ToDictionary(x => x.Key, x =>
-                    (int)Math.Round((continentLand.Count * x.Value.Item1) / x.Value.Item2));
+                var chunksCountByType = BiomePivot.NonSeaAndNonDefaultBiomes
+                                            .ToDictionary(b => b, b => b.ChunkSquaresCount(continentLand.Count, CHUNK_SIZE_RATIO));
                 var riversChunksCount = (int)Math.Round(continentLand.Count * RIVER_COUNT_RATIO);
 
                 var topY = continentLand.Min(x => x.Row);
@@ -157,8 +136,8 @@ namespace ErsatzCivLib.Model
                 {
                     chunksByType[chunkType].AddRange(CreateContinentChunksOFType(
                         chunksCountByType[chunkType],
-                        CHUNK_TYPE_PROPERTIES[chunkType].Item2,
-                        topY, leftX, bottomY, rightX, ratioHeightWidth));
+                        (int)chunkType.Size * CHUNK_SIZE_RATIO,
+                        topY, leftX, bottomY, rightX, ratioHeightWidth, chunkType.Temperatures));
                 }
 
                 for (int i = 0; i < riversChunksCount; i++)
@@ -225,14 +204,30 @@ namespace ErsatzCivLib.Model
                 {
                     foreach (var ofType in chunkOfType)
                     {
-                        MapSquareList
-                            .Single(sq => sq.Same(ofType))
-                            .ChangeBiome(type, CHUNK_TYPE_PROPERTIES[type].Item4);
+                        var currSq = MapSquareList.Single(sq => sq.Same(ofType));
+                        type.UnderlyingBiomes.TryGetValue(TemperatureAt(currSq.Row), out BiomePivot underlyingBiome);
+                        currSq.ChangeBiome(type, underlyingBiome ?? BiomePivot.Default);
                     }
                 }
             }
 
             coastSquares.ForEach(ms => ms.ChangeBiome(BiomePivot.Coast));
+        }
+
+        public TemperaturePivot TemperatureAt(int y)
+        {
+            if (y >= HotTopBorder && y < TemperateSouthTopBorder)
+            {
+                return TemperaturePivot.Hot;
+            }
+            else if (y < TemperateNorthTopBorder || y >= ColdSouthTopBorder)
+            {
+                return TemperaturePivot.Cold;
+            }
+            else
+            {
+                return TemperaturePivot.Temperate;
+            }
         }
 
         private static List<MapSquarePivot> CreateContinentChunks(double landRatio, ContSquare contBound, out List<MapSquarePivot> costSquares)
@@ -267,7 +262,7 @@ namespace ErsatzCivLib.Model
                     bool isCoast = false;
                     if (IsGroundFunc(x, y))
                     {
-                        biome = BiomePivot.Grassland;
+                        biome = BiomePivot.Default;
                     }
                     else if (IsGroundFunc(x + 1, y) || IsGroundFunc(x - 1, y) || IsGroundFunc(x, y + 1) || IsGroundFunc(x, y - 1)
                         || IsGroundFunc(x - 1, y - 1) || IsGroundFunc(x + 1, y + 1) || IsGroundFunc(x - 1, y + 1) || IsGroundFunc(x + 1, y - 1))
@@ -286,7 +281,8 @@ namespace ErsatzCivLib.Model
             return continentSquares;
         }
 
-        private static List<List<Tuple<int, int>>> CreateContinentChunksOFType(int chunksCount, int chunkCountSquare, int topY, int leftX, int bottomY, int rightX, int ratioHeightWidth)
+        private List<List<Tuple<int, int>>> CreateContinentChunksOFType(int chunksCount, int chunkCountSquare,
+            int topY, int leftX, int bottomY, int rightX, int ratioHeightWidth, IReadOnlyCollection<TemperaturePivot> temperatures)
         {
             var chunksList = new List<List<Tuple<int, int>>>();
 
@@ -297,12 +293,12 @@ namespace ErsatzCivLib.Model
                 var y = Tools.Randomizer.Next(topY, bottomY + 1);
                 var vertical = Tools.Randomizer.Next(0, (1 * (ratioHeightWidth)) + 1) >= ratioHeightWidth;
                 var chunkSizeSeed = Tools.Randomizer.Next(-1, 2);
-                var chunkSize = chunkCountSquare + (chunkSizeSeed * 3);
+                var chunkSize = chunkCountSquare + (chunkSizeSeed * CHUNK_SIZE_RATIO);
                 var chunkHeight = 1;
                 var chunkWidth = chunkSize;
-                if (chunkSize >= 3)
+                if (chunkSize >= CHUNK_SIZE_RATIO)
                 {
-                    chunkHeight = chunkSize / 3;
+                    chunkHeight = chunkSize / CHUNK_SIZE_RATIO;
                     chunkWidth = chunkSize / chunkHeight;
                 }
                 if (vertical || (!vertical && chunkWidth < chunkHeight))
@@ -311,9 +307,17 @@ namespace ErsatzCivLib.Model
                     chunkWidth = chunkHeight;
                     chunkHeight = tmpWidth;
                 }
-                for (int xI = x; xI < (chunkWidth + x > rightX ? rightX : chunkWidth + x); xI++)
+
+                var endX = chunkWidth + x > rightX ? rightX : chunkWidth + x;
+                var endY = chunkHeight + y > bottomY ? bottomY : chunkHeight + y;
+                if (!temperatures.Contains(TemperatureAt(endY)) && !temperatures.Contains(TemperatureAt(y)))
                 {
-                    for (int yI = y; yI < (chunkHeight + y > bottomY ? bottomY : chunkHeight + y); yI++)
+                    continue;
+                }
+
+                for (int xI = x; xI < endX; xI++)
+                {
+                    for (int yI = y; yI < endY; yI++)
                     {
                         chunk.Add(new Tuple<int, int>(yI, xI));
                     }
@@ -354,6 +358,22 @@ namespace ErsatzCivLib.Model
             {
                 return string.Concat(Width, " - ", Height);
             }
+        }
+
+        public enum MapLandCoverage
+        {
+            VeryLow = 1,
+            Low,
+            Medium,
+            High,
+            VeryHigh
+        }
+
+        public enum MapLandShape
+        {
+            Pangaea = 1,
+            Continent,
+            Island
         }
     }
 }
