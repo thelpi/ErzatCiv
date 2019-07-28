@@ -8,34 +8,34 @@ namespace ErsatzCivLib
         internal static readonly Random Randomizer =
             new Random(DateTime.Now.Millisecond * DateTime.Now.Second * DateTime.Now.Minute * DateTime.Now.Hour);
 
-        internal static int Column(this DirectionEnumPivot direction, int column)
+        internal static int Column(this DirectionPivot direction, int column)
         {
             switch (direction)
             {
-                case DirectionEnumPivot.BottomLeft:
-                case DirectionEnumPivot.Left:
-                case DirectionEnumPivot.TopLeft:
+                case DirectionPivot.BottomLeft:
+                case DirectionPivot.Left:
+                case DirectionPivot.TopLeft:
                     return column - 1;
-                case DirectionEnumPivot.BottomRight:
-                case DirectionEnumPivot.Right:
-                case DirectionEnumPivot.TopRight:
+                case DirectionPivot.BottomRight:
+                case DirectionPivot.Right:
+                case DirectionPivot.TopRight:
                     return column + 1;
             }
 
             return column;
         }
 
-        internal static int Row(this DirectionEnumPivot direction, int row)
+        internal static int Row(this DirectionPivot direction, int row)
         {
             switch (direction)
             {
-                case DirectionEnumPivot.Top:
-                case DirectionEnumPivot.TopLeft:
-                case DirectionEnumPivot.TopRight:
+                case DirectionPivot.Top:
+                case DirectionPivot.TopLeft:
+                case DirectionPivot.TopRight:
                     return row - 1;
-                case DirectionEnumPivot.Bottom:
-                case DirectionEnumPivot.BottomLeft:
-                case DirectionEnumPivot.BottomRight:
+                case DirectionPivot.Bottom:
+                case DirectionPivot.BottomLeft:
+                case DirectionPivot.BottomRight:
                     return row + 1;
             }
 

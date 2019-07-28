@@ -1,6 +1,6 @@
 ﻿namespace ErsatzCivLib.Model
 {
-    public enum DirectionEnumPivot
+    public enum DirectionPivot
     {
         Top,
         Bottom,

@@ -5,7 +5,7 @@ namespace ErsatzCivLib.Model
     /// <summary>
     /// Represents a type of square on the map.
     /// </summary>
-    public class MapSquareTypeData
+    public class BiomePivot
     {
         /// <summary>
         /// Productivity, food and commerce bonus when the square is through by a river.
@@ -14,7 +14,8 @@ namespace ErsatzCivLib.Model
 
         #region Properties
 
-        private List<MapSquareActionPivot> _actions;
+        private List<WorkerActionPivot> _actions;
+        private List<TemperaturePivot> _temperatures;
 
         /// <summary>
         /// Default productivity points.
@@ -40,7 +41,7 @@ namespace ErsatzCivLib.Model
         /// <summary>
         /// Type of render.
         /// </summary>
-        public RenderTypeEnum RenderType { get; private set; }
+        public RenderTypePivot RenderType { get; private set; }
         /// <summary>
         /// Indicates if the square map can be crossed by a river.
         /// </summary>
@@ -57,253 +58,259 @@ namespace ErsatzCivLib.Model
         /// Indicates the speed cost when a unit walks through it.
         /// </summary>
         public int SpeedCost { get; private set; }
-
         /// <summary>
-        /// Available <see cref="MapSquareActionPivot"/>.
-        /// Doesn't include <see cref="MapSquareActionPivot.AlwaysAvailable"/>.
+        /// Available <see cref="WorkerActionPivot"/>.
+        /// Doesn't include <see cref="WorkerActionPivot.AlwaysAvailable"/>.
         /// </summary>
-        public IReadOnlyCollection<MapSquareActionPivot> Actions
+        public IReadOnlyCollection<WorkerActionPivot> Actions
         {
             get { return _actions; }
+        }
+        /// <summary>
+        /// List of <see cref="TemperaturePivot"/> (depending on latitude) where the biome can appears.
+        /// </summary>
+        public IReadOnlyCollection<TemperaturePivot> Temperatures
+        {
+            get { return _temperatures; }
         }
 
         #endregion
 
-        private MapSquareTypeData() { }
+        private BiomePivot() { }
 
         #region Direct access to instances
 
-        public static MapSquareTypeData Grassland { get; } = new MapSquareTypeData
+        public static BiomePivot Grassland { get; } = new BiomePivot
         {
             Commerce = 1,
             Food = 2,
             Productivity = 1,
             Defense = 0,
             RenderValue = "#32CD32",
-            RenderType = RenderTypeEnum.PlainBrush,
+            RenderType = RenderTypePivot.PlainBrush,
             RiverCrossable = true,
-            _actions = new List<MapSquareActionPivot>
+            _actions = new List<WorkerActionPivot>
                 {
-                    MapSquareActionPivot.Irrigate,
-                    MapSquareActionPivot.Mine,
-                    MapSquareActionPivot.Plant,
-                    MapSquareActionPivot.RailRoad,
-                    MapSquareActionPivot.Road,
-                    MapSquareActionPivot.BuildFortress
+                    WorkerActionPivot.Irrigate,
+                    WorkerActionPivot.Mine,
+                    WorkerActionPivot.Plant,
+                    WorkerActionPivot.RailRoad,
+                    WorkerActionPivot.Road,
+                    WorkerActionPivot.BuildFortress
                 },
             IsSeaType = false,
             IsCityBuildable = true,
             SpeedCost = 1
         };
-        public static MapSquareTypeData Sea { get; } = new MapSquareTypeData
+        public static BiomePivot Sea { get; } = new BiomePivot
         {
             Commerce = 1,
             Food = 1,
             Productivity = 0,
             Defense = 0,
             RenderValue = "#1E90FF",
-            RenderType = RenderTypeEnum.PlainBrush,
+            RenderType = RenderTypePivot.PlainBrush,
             RiverCrossable = false,
-            _actions = new List<MapSquareActionPivot>(),
+            _actions = new List<WorkerActionPivot>(),
             IsSeaType = true,
             IsCityBuildable = false,
             SpeedCost = 1
         };
-        public static MapSquareTypeData Ice { get; } = new MapSquareTypeData
+        public static BiomePivot Ice { get; } = new BiomePivot
         {
             Commerce = 0,
             Food = 0,
             Productivity = 0,
             Defense = 1,
             RenderValue = "#FFFAF0",
-            RenderType = RenderTypeEnum.PlainBrush,
+            RenderType = RenderTypePivot.PlainBrush,
             RiverCrossable = true,
-            _actions = new List<MapSquareActionPivot>
+            _actions = new List<WorkerActionPivot>
                 {
-                    MapSquareActionPivot.Mine,
-                    MapSquareActionPivot.RailRoad,
-                    MapSquareActionPivot.Road,
-                    MapSquareActionPivot.BuildFortress
+                    WorkerActionPivot.Mine,
+                    WorkerActionPivot.RailRoad,
+                    WorkerActionPivot.Road,
+                    WorkerActionPivot.BuildFortress
                 },
             IsSeaType = false,
             IsCityBuildable = false,
             SpeedCost = 2
         };
-        public static MapSquareTypeData Toundra { get; } = new MapSquareTypeData
+        public static BiomePivot Toundra { get; } = new BiomePivot
         {
             Commerce = 0,
             Food = 1,
             Productivity = 1,
             Defense = 0,
             RenderValue = "#2F4F4F",
-            RenderType = RenderTypeEnum.PlainBrush,
+            RenderType = RenderTypePivot.PlainBrush,
             RiverCrossable = true,
-            _actions = new List<MapSquareActionPivot>
+            _actions = new List<WorkerActionPivot>
                 {
-                    MapSquareActionPivot.Irrigate,
-                    MapSquareActionPivot.Mine,
-                    MapSquareActionPivot.Plant,
-                    MapSquareActionPivot.RailRoad,
-                    MapSquareActionPivot.Road,
-                    MapSquareActionPivot.BuildFortress
+                    WorkerActionPivot.Irrigate,
+                    WorkerActionPivot.Mine,
+                    WorkerActionPivot.Plant,
+                    WorkerActionPivot.RailRoad,
+                    WorkerActionPivot.Road,
+                    WorkerActionPivot.BuildFortress
                 },
             IsSeaType = false,
             IsCityBuildable = true,
             SpeedCost = 1
         };
-        public static MapSquareTypeData Desert { get; } = new MapSquareTypeData
+        public static BiomePivot Desert { get; } = new BiomePivot
         {
             Commerce = 0,
             Food = 0,
             Productivity = 1,
             Defense = 1,
             RenderValue = "#FF7F50",
-            RenderType = RenderTypeEnum.PlainBrush,
+            RenderType = RenderTypePivot.PlainBrush,
             RiverCrossable = true,
-            _actions = new List<MapSquareActionPivot>
+            _actions = new List<WorkerActionPivot>
                 {
-                    MapSquareActionPivot.Irrigate,
-                    MapSquareActionPivot.Mine,
-                    MapSquareActionPivot.RailRoad,
-                    MapSquareActionPivot.Road,
-                    MapSquareActionPivot.BuildFortress
+                    WorkerActionPivot.Irrigate,
+                    WorkerActionPivot.Mine,
+                    WorkerActionPivot.RailRoad,
+                    WorkerActionPivot.Road,
+                    WorkerActionPivot.BuildFortress
                 },
             IsSeaType = false,
             IsCityBuildable = true,
             SpeedCost = 2
         };
-        public static MapSquareTypeData Jungle { get; } = new MapSquareTypeData
+        public static BiomePivot Jungle { get; } = new BiomePivot
         {
             Commerce = 0,
             Food = 1,
             Productivity = 0,
             Defense = 2,
             RenderValue = "#9ACD32",
-            RenderType = RenderTypeEnum.PlainBrush,
+            RenderType = RenderTypePivot.PlainBrush,
             RiverCrossable = true,
-            _actions = new List<MapSquareActionPivot>
+            _actions = new List<WorkerActionPivot>
                 {
-                    MapSquareActionPivot.Clear,
-                    MapSquareActionPivot.RailRoad,
-                    MapSquareActionPivot.Road,
-                    MapSquareActionPivot.BuildFortress
+                    WorkerActionPivot.Clear,
+                    WorkerActionPivot.RailRoad,
+                    WorkerActionPivot.Road,
+                    WorkerActionPivot.BuildFortress
                 },
             IsSeaType = false,
             IsCityBuildable = false,
             SpeedCost = 3
         };
-        public static MapSquareTypeData Mountain { get; } = new MapSquareTypeData
+        public static BiomePivot Mountain { get; } = new BiomePivot
         {
             Commerce = 0,
             Food = 0,
             Productivity = 2,
             Defense = 2,
             RenderValue = "#A52A2A",
-            RenderType = RenderTypeEnum.PlainBrush,
+            RenderType = RenderTypePivot.PlainBrush,
             RiverCrossable = true,
-            _actions = new List<MapSquareActionPivot>
+            _actions = new List<WorkerActionPivot>
                 {
-                    MapSquareActionPivot.Mine,
-                    MapSquareActionPivot.RailRoad,
-                    MapSquareActionPivot.Road,
-                    MapSquareActionPivot.BuildFortress
+                    WorkerActionPivot.Mine,
+                    WorkerActionPivot.RailRoad,
+                    WorkerActionPivot.Road,
+                    WorkerActionPivot.BuildFortress
                 },
             IsSeaType = false,
             IsCityBuildable = false,
             SpeedCost = 3
         };
-        public static MapSquareTypeData Hill { get; } = new MapSquareTypeData
+        public static BiomePivot Hill { get; } = new BiomePivot
         {
             Commerce = 1,
             Food = 1,
             Productivity = 1,
             Defense = 1,
             RenderValue = "#556B2F",
-            RenderType = RenderTypeEnum.PlainBrush,
+            RenderType = RenderTypePivot.PlainBrush,
             RiverCrossable = true,
-            _actions = new List<MapSquareActionPivot>
+            _actions = new List<WorkerActionPivot>
                 {
-                    MapSquareActionPivot.Mine,
-                    MapSquareActionPivot.RailRoad,
-                    MapSquareActionPivot.Road,
-                    MapSquareActionPivot.BuildFortress
+                    WorkerActionPivot.Mine,
+                    WorkerActionPivot.RailRoad,
+                    WorkerActionPivot.Road,
+                    WorkerActionPivot.BuildFortress
                 },
             IsSeaType = false,
             IsCityBuildable = true,
             SpeedCost = 2
         };
-        public static MapSquareTypeData Swamp { get; } = new MapSquareTypeData
+        public static BiomePivot Swamp { get; } = new BiomePivot
         {
             Commerce = 0,
             Food = 1,
             Productivity = 0,
             Defense = 1,
             RenderValue = "#3CB371",
-            RenderType = RenderTypeEnum.PlainBrush,
+            RenderType = RenderTypePivot.PlainBrush,
             RiverCrossable = true,
-            _actions = new List<MapSquareActionPivot>
+            _actions = new List<WorkerActionPivot>
                 {
-                    MapSquareActionPivot.RailRoad,
-                    MapSquareActionPivot.Road,
-                    MapSquareActionPivot.BuildFortress,
-                    MapSquareActionPivot.Clear
+                    WorkerActionPivot.RailRoad,
+                    WorkerActionPivot.Road,
+                    WorkerActionPivot.BuildFortress,
+                    WorkerActionPivot.Clear
                 },
             IsSeaType = false,
             IsCityBuildable = false,
             SpeedCost = 2
         };
-        public static MapSquareTypeData Forest { get; } = new MapSquareTypeData
+        public static BiomePivot Forest { get; } = new BiomePivot
         {
             Commerce = 1,
             Food = 1,
             Productivity = 2,
             Defense = 1,
             RenderValue = "#006400",
-            RenderType = RenderTypeEnum.PlainBrush,
+            RenderType = RenderTypePivot.PlainBrush,
             RiverCrossable = true,
-            _actions = new List<MapSquareActionPivot>
+            _actions = new List<WorkerActionPivot>
                 {
-                    MapSquareActionPivot.Clear,
-                    MapSquareActionPivot.RailRoad,
-                    MapSquareActionPivot.Road,
-                    MapSquareActionPivot.BuildFortress
+                    WorkerActionPivot.Clear,
+                    WorkerActionPivot.RailRoad,
+                    WorkerActionPivot.Road,
+                    WorkerActionPivot.BuildFortress
                 },
             IsSeaType = false,
             IsCityBuildable = true,
             SpeedCost = 2
         };
-        public static MapSquareTypeData Plain { get; } = new MapSquareTypeData
+        public static BiomePivot Plain { get; } = new BiomePivot
         {
             Commerce = 1,
             Food = 1,
             Productivity = 1,
             Defense = 0,
             RenderValue = "#EEE8AA",
-            RenderType = RenderTypeEnum.PlainBrush,
+            RenderType = RenderTypePivot.PlainBrush,
             RiverCrossable = true,
-            _actions = new List<MapSquareActionPivot>
+            _actions = new List<WorkerActionPivot>
                 {
-                    MapSquareActionPivot.Irrigate,
-                    MapSquareActionPivot.Mine,
-                    MapSquareActionPivot.Plant,
-                    MapSquareActionPivot.RailRoad,
-                    MapSquareActionPivot.Road,
-                    MapSquareActionPivot.BuildFortress
+                    WorkerActionPivot.Irrigate,
+                    WorkerActionPivot.Mine,
+                    WorkerActionPivot.Plant,
+                    WorkerActionPivot.RailRoad,
+                    WorkerActionPivot.Road,
+                    WorkerActionPivot.BuildFortress
                 },
             IsSeaType = false,
             IsCityBuildable = true,
             SpeedCost = 1
         };
-        public static MapSquareTypeData Coast { get; } = new MapSquareTypeData
+        public static BiomePivot Coast { get; } = new BiomePivot
         {
             Commerce = 1,
             Food = 1,
             Productivity = 0,
             Defense = 0,
             RenderValue = "#00BFFF",
-            RenderType = RenderTypeEnum.PlainBrush,
+            RenderType = RenderTypePivot.PlainBrush,
             RiverCrossable = false,
-            _actions = new List<MapSquareActionPivot>(),
+            _actions = new List<WorkerActionPivot>(),
             IsSeaType = true,
             IsCityBuildable = false,
             SpeedCost = 1

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
@@ -38,9 +39,9 @@ namespace ErsatzCiv
 
         private void UpdateSquareMap(object sender, EventArgs evt)
         {
-            if (sender?.GetType() == typeof(MapSquareData))
+            if (sender?.GetType() == typeof(MapSquarePivot))
             {
-                var ms = (MapSquareData)sender;
+                var ms = (MapSquarePivot)sender;
                 DrawSingleMapAndMiniMapSquare(ms, true);
             }
         }
@@ -56,7 +57,7 @@ namespace ErsatzCiv
             // just in case th event in the constructor doesn't work.
             RecomputeFocus();
 
-            var rWidth = (MapScroller.ActualWidth * (MENU_HEIGHT * MapData.RATIO_WIDTH_HEIGHT)) / MapGrid.ActualWidth;
+            var rWidth = (MapScroller.ActualWidth * (MENU_HEIGHT * MapPivot.RATIO_WIDTH_HEIGHT)) / MapGrid.ActualWidth;
             var rHeight = (MapScroller.ActualHeight * MENU_HEIGHT) / MapGrid.ActualHeight;
 
             _rCapture = new Rectangle
@@ -72,41 +73,39 @@ namespace ErsatzCiv
             RefreshMiniMapSelector();
         }
 
-        private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        private void Window_KeyDown(object sender, KeyEventArgs e)
         {
             // Worker actions.
-            if ((System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.LeftShift)
-                || System.Windows.Input.Keyboard.IsKeyDown(System.Windows.Input.Key.RightShift))
-                && _engine.CurrentUnit?.GetType() == typeof(WorkerPivot))
+            if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
             {
                 switch (e.Key)
                 {
-                    case System.Windows.Input.Key.M:
-                        _engine.WorkerAction(MapSquareActionPivot.Mine);
+                    case Key.M:
+                        _engine.WorkerAction(WorkerActionPivot.Mine);
                         break;
-                    case System.Windows.Input.Key.I:
-                        _engine.WorkerAction(MapSquareActionPivot.Irrigate);
+                    case Key.I:
+                        _engine.WorkerAction(WorkerActionPivot.Irrigate);
                         break;
-                    case System.Windows.Input.Key.R:
-                        _engine.WorkerAction(MapSquareActionPivot.RailRoad);
+                    case Key.R:
+                        _engine.WorkerAction(WorkerActionPivot.RailRoad);
                         break;
-                    case System.Windows.Input.Key.C:
-                        _engine.WorkerAction(MapSquareActionPivot.Clear);
+                    case Key.C:
+                        _engine.WorkerAction(WorkerActionPivot.Clear);
                         break;
-                    case System.Windows.Input.Key.D:
-                        _engine.WorkerAction(MapSquareActionPivot.DestroyImprovement);
+                    case Key.D:
+                        _engine.WorkerAction(WorkerActionPivot.DestroyImprovement);
                         break;
-                    case System.Windows.Input.Key.F:
-                        _engine.WorkerAction(MapSquareActionPivot.BuildFortress);
+                    case Key.F:
+                        _engine.WorkerAction(WorkerActionPivot.BuildFortress);
                         break;
-                    case System.Windows.Input.Key.P:
-                        _engine.WorkerAction(MapSquareActionPivot.Plant);
+                    case Key.P:
+                        _engine.WorkerAction(WorkerActionPivot.Plant);
                         break;
-                    case System.Windows.Input.Key.A:
-                        _engine.WorkerAction(MapSquareActionPivot.ClearPollution);
+                    case Key.A:
+                        _engine.WorkerAction(WorkerActionPivot.ClearPollution);
                         break;
-                    case System.Windows.Input.Key.X:
-                        _engine.WorkerAction(MapSquareActionPivot.DestroyRoad);
+                    case Key.X:
+                        _engine.WorkerAction(WorkerActionPivot.DestroyRoad);
                         break;
                 }
                 // Ensures a refresh of the blinking current unit.
@@ -130,47 +129,44 @@ namespace ErsatzCiv
                 }
             }
             // Buils city.
-            else if (e.Key == System.Windows.Input.Key.B)
+            else if (e.Key == Key.B)
             {
-                if (_engine.CurrentUnit?.GetType() == typeof(SettlerPivot))
+                var unitToMove = _engine.CurrentUnit; // do not remove this line ! ("BuildCity()" changes the value of "CurrentUnit")
+                var city = _engine.BuildCity();
+                if (city != null)
                 {
-                    var unitToMove = _engine.CurrentUnit; // do not remove this line ! ("BuildCity()" changes the value of "CurrentUnit")
-                    var city = _engine.BuildCity();
-                    if (city != null)
+                    var associatedSprites = GetGraphicRenders(unitToMove);
+                    if (associatedSprites.Count > 0)
                     {
-                        var associatedSprites = GetGraphicRenders(unitToMove);
-                        if (associatedSprites.Count > 0)
-                        {
-                            MapGrid.Children.Remove(associatedSprites.First());
+                        MapGrid.Children.Remove(associatedSprites.First());
 
-                            DrawMapCity(city, true);
-                        }
-                        // Ensures a refresh of the blinking current unit.
-                        RecomputeFocus();
+                        DrawMapCity(city, true);
                     }
+                    // Ensures a refresh of the blinking current unit.
+                    RecomputeFocus();
                 }
             }
             // Forces next turn.
-            else if (e.Key == System.Windows.Input.Key.Space)
+            else if (e.Key == Key.Space)
             {
                 _engine.NewTurn();
                 RefreshDynamicView();
             }
             // Centers the screen on current unit.
-            else if (e.Key == System.Windows.Input.Key.C)
+            else if (e.Key == Key.C)
             {
                 RecomputeFocus();
             }
             // Goes to next unit.
-            else if (e.Key == System.Windows.Input.Key.W)
+            else if (e.Key == Key.W)
             {
                 _engine.ToNextUnit();
             }
         }
 
-        private void MiniMapCanvas_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void MiniMapCanvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            Point p = System.Windows.Input.Mouse.GetPosition(MiniMapCanvas);
+            Point p = Mouse.GetPosition(MiniMapCanvas);
 
             var ratioX = p.X / MiniMapCanvas.Width;
             var ratioY = p.Y / MiniMapCanvas.Height;
@@ -202,7 +198,7 @@ namespace ErsatzCiv
                 var x = MapScroller.ContentHorizontalOffset;
                 var y = MapScroller.ContentVerticalOffset;
 
-                var rX = (x * (MENU_HEIGHT * MapData.RATIO_WIDTH_HEIGHT)) / MapGrid.ActualWidth;
+                var rX = (x * (MENU_HEIGHT * MapPivot.RATIO_WIDTH_HEIGHT)) / MapGrid.ActualWidth;
                 var rY = (y * MENU_HEIGHT) / MapGrid.ActualHeight;
 
                 _rCapture.SetValue(Canvas.LeftProperty, rX);
@@ -214,7 +210,7 @@ namespace ErsatzCiv
         private void DrawFullMapAndMiniMap()
         {
             MiniMapCanvas.Height = MENU_HEIGHT;
-            MiniMapCanvas.Width = MENU_HEIGHT * MapData.RATIO_WIDTH_HEIGHT;
+            MiniMapCanvas.Width = MENU_HEIGHT * MapPivot.RATIO_WIDTH_HEIGHT;
 
             for (int i = 0; i < _engine.Map.Width; i++)
             {
@@ -239,7 +235,7 @@ namespace ErsatzCiv
             }
         }
 
-        private void DrawSingleMapAndMiniMapSquare(MapSquareData square, bool cleanPreviousSquare)
+        private void DrawSingleMapAndMiniMapSquare(MapSquarePivot square, bool cleanPreviousSquare)
         {
             if (cleanPreviousSquare)
             {
@@ -252,7 +248,7 @@ namespace ErsatzCiv
                 StrokeThickness = 1,
                 Width = DEFAULT_SIZE,
                 Height = DEFAULT_SIZE,
-                Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(square.MapSquareType.RenderValue))
+                Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(square.Biome.RenderValue))
             };
             rct.SetValue(Grid.RowProperty, square.Row);
             rct.SetValue(Grid.ColumnProperty, square.Column);
@@ -263,7 +259,7 @@ namespace ErsatzCiv
             {
                 Width = _minimapSquareSize,
                 Height = _minimapSquareSize,
-                Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(square.MapSquareType.RenderValue))
+                Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(square.Biome.RenderValue))
             };
             rctMinimap.SetValue(Canvas.TopProperty, square.Row * _minimapSquareSize);
             rctMinimap.SetValue(Canvas.LeftProperty, square.Column * _minimapSquareSize);
@@ -278,7 +274,7 @@ namespace ErsatzCiv
             DrawSquareImprovements(square);
         }
 
-        private void CleanPreviousRenderOnMapAndMiniMap(MapSquareData square)
+        private void CleanPreviousRenderOnMapAndMiniMap(MapSquarePivot square)
         {
             var elements = GetGraphicRenders(square);
             foreach (var elem in elements)
@@ -293,7 +289,7 @@ namespace ErsatzCiv
             }
         }
 
-        private void DrawSquareRivers(MapSquareData square)
+        private void DrawSquareRivers(MapSquarePivot square)
         {
             if (!square.RiverTopToBottom.HasValue)
             {
@@ -309,7 +305,7 @@ namespace ErsatzCiv
             }
         }
 
-        private void DrawSquareImprovements(MapSquareData square)
+        private void DrawSquareImprovements(MapSquarePivot square)
         {
             var newElementsWithZIndex = new Dictionary<FrameworkElement, int>();
             if (square.RailRoad)
@@ -395,7 +391,7 @@ namespace ErsatzCiv
             }
         }
 
-        private void DrawRiver(MapSquareData square, bool topToBottom, bool miniMap)
+        private void DrawRiver(MapSquarePivot square, bool topToBottom, bool miniMap)
         {
             Rectangle riverRect = new Rectangle
             {
@@ -532,7 +528,7 @@ namespace ErsatzCiv
 
         private void InitializeEngine()
         {
-            _engine = new Engine(MapData.MapSizeEnum.VeryLarge, 5, 0.6, TemperaturePivot.Temperate);
+            _engine = new Engine(MapPivot.MapSizeEnum.VeryLarge, 5, 0.6, TemperaturePivot.Temperate);
             _engine.NextUnitEvent += FocusOnUnit;
             _engine.SubscribeToMapSquareChangeEvent(UpdateSquareMap);
         }
@@ -577,26 +573,26 @@ namespace ErsatzCiv
             }
         }
 
-        public static DirectionEnumPivot? Move(System.Windows.Input.Key key)
+        public static DirectionPivot? Move(Key key)
         {
             switch (key)
             {
-                case System.Windows.Input.Key.NumPad1:
-                    return DirectionEnumPivot.BottomLeft;
-                case System.Windows.Input.Key.NumPad2:
-                    return DirectionEnumPivot.Bottom;
-                case System.Windows.Input.Key.NumPad3:
-                    return DirectionEnumPivot.BottomRight;
-                case System.Windows.Input.Key.NumPad6:
-                    return DirectionEnumPivot.Right;
-                case System.Windows.Input.Key.NumPad9:
-                    return DirectionEnumPivot.TopRight;
-                case System.Windows.Input.Key.NumPad8:
-                    return DirectionEnumPivot.Top;
-                case System.Windows.Input.Key.NumPad7:
-                    return DirectionEnumPivot.TopLeft;
-                case System.Windows.Input.Key.NumPad4:
-                    return DirectionEnumPivot.Left;
+                case Key.NumPad1:
+                    return DirectionPivot.BottomLeft;
+                case Key.NumPad2:
+                    return DirectionPivot.Bottom;
+                case Key.NumPad3:
+                    return DirectionPivot.BottomRight;
+                case Key.NumPad6:
+                    return DirectionPivot.Right;
+                case Key.NumPad9:
+                    return DirectionPivot.TopRight;
+                case Key.NumPad8:
+                    return DirectionPivot.Top;
+                case Key.NumPad7:
+                    return DirectionPivot.TopLeft;
+                case Key.NumPad4:
+                    return DirectionPivot.Left;
                 default:
                     return null;
             }

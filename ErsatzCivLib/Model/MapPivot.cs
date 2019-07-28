@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace ErsatzCivLib.Model
 {
-    public class MapData
+    public class MapPivot
     {
         public const int MAX_CONTINENT_COUNT = 16;
 
@@ -18,41 +18,41 @@ namespace ErsatzCivLib.Model
         // - medium chunk squares count (must be divisible by 3)
         // - true if "hot", false if "cold", null otherwise
         // - underlying type, if "Clear" action available
-        private static readonly Dictionary<MapSquareTypeData, Tuple<double, int, bool?, MapSquareTypeData>> CHUNK_TYPE_PROPERTIES =
-            new Dictionary<MapSquareTypeData, Tuple<double, int, bool?, MapSquareTypeData>>
+        private static readonly Dictionary<BiomePivot, Tuple<double, int, bool?, BiomePivot>> CHUNK_TYPE_PROPERTIES =
+            new Dictionary<BiomePivot, Tuple<double, int, bool?, BiomePivot>>
             {
                 {
-                    MapSquareTypeData.Mountain, new Tuple<double, int, bool?, MapSquareTypeData>(0.1, 6, null, null)
+                    BiomePivot.Mountain, new Tuple<double, int, bool?, BiomePivot>(0.1, 6, null, null)
                 },
                 {
-                    MapSquareTypeData.Forest, new Tuple<double, int, bool?, MapSquareTypeData>(0.1, 6, null, MapSquareTypeData.Grassland)
+                    BiomePivot.Forest, new Tuple<double, int, bool?, BiomePivot>(0.1, 6, null, BiomePivot.Grassland)
                 },
                 {
-                    MapSquareTypeData.Desert, new Tuple<double, int, bool?, MapSquareTypeData>(0.1, 9, null, null)
+                    BiomePivot.Desert, new Tuple<double, int, bool?, BiomePivot>(0.1, 9, null, null)
                 },
                 {
-                    MapSquareTypeData.Jungle, new Tuple<double, int, bool?, MapSquareTypeData>(0.1, 6, null, MapSquareTypeData.Plain)
+                    BiomePivot.Jungle, new Tuple<double, int, bool?, BiomePivot>(0.1, 6, null, BiomePivot.Plain)
                 },
                 {
-                    MapSquareTypeData.Swamp, new Tuple<double, int, bool?, MapSquareTypeData>(0.02, 3, null, MapSquareTypeData.Grassland)
+                    BiomePivot.Swamp, new Tuple<double, int, bool?, BiomePivot>(0.02, 3, null, BiomePivot.Grassland)
                 },
                 {
-                    MapSquareTypeData.Ice, new Tuple<double, int, bool?, MapSquareTypeData>(0.1, 9, null, null)
+                    BiomePivot.Ice, new Tuple<double, int, bool?, BiomePivot>(0.1, 9, null, null)
                 },
                 {
-                    MapSquareTypeData.Toundra, new Tuple<double, int, bool?, MapSquareTypeData>(0.1, 6, null, null)
+                    BiomePivot.Toundra, new Tuple<double, int, bool?, BiomePivot>(0.1, 6, null, null)
                 },
                 {
-                    MapSquareTypeData.Hill, new Tuple<double, int, bool?, MapSquareTypeData>(0.1, 3, null, null)
+                    BiomePivot.Hill, new Tuple<double, int, bool?, BiomePivot>(0.1, 3, null, null)
                 },
                 {
-                    MapSquareTypeData.Plain, new Tuple<double, int, bool?, MapSquareTypeData>(0.1, 6, null, null)
+                    BiomePivot.Plain, new Tuple<double, int, bool?, BiomePivot>(0.1, 6, null, null)
                 }
             };
 
-        private readonly List<MapSquareData> _mapSquareList = new List<MapSquareData>();
+        private readonly List<MapSquarePivot> _mapSquareList = new List<MapSquarePivot>();
 
-        public IReadOnlyCollection<MapSquareData> MapSquareList
+        public IReadOnlyCollection<MapSquarePivot> MapSquareList
         {
             get
             {
@@ -62,12 +62,12 @@ namespace ErsatzCivLib.Model
         public int Width { get; private set; }
         public int Height { get; private set; }
         public int Aire { get { return Width * Height; } }
-        public MapSquareData this[int i, int j]
+        public MapSquarePivot this[int i, int j]
         {
             get { return _mapSquareList.Single(x => x.Column == j && x.Row == i); }
         }
 
-        internal MapData(MapSizeEnum mapSize, int continentCount, double landRatio, TemperaturePivot temperature)
+        internal MapPivot(MapSizeEnum mapSize, int continentCount, double landRatio, TemperaturePivot temperature)
         {
             continentCount = continentCount > 0 && continentCount <= MAX_CONTINENT_COUNT ?
                 continentCount : throw new ArgumentException($"Continents count should be between 1 and {MAX_CONTINENT_COUNT} !", nameof(continentCount));
@@ -77,8 +77,8 @@ namespace ErsatzCivLib.Model
             Height = MINIMAL_HEIGHT * (int)mapSize;
             Width = Height * RATIO_WIDTH_HEIGHT;
 
-            var continentInfos = new List<List<MapSquareData>>();
-            var coastSquares = new List<MapSquareData>();
+            var continentInfos = new List<List<MapSquarePivot>>();
+            var coastSquares = new List<MapSquarePivot>();
             
             var boundaries = new List<ContSquare>();
             Action<ContSquare> SplitX = delegate (ContSquare contPick)
@@ -133,7 +133,7 @@ namespace ErsatzCivLib.Model
 
             foreach (var boundary in boundaries)
             {
-                var tmpCoastSquares = new List<MapSquareData>();
+                var tmpCoastSquares = new List<MapSquarePivot>();
                 continentInfos.Add(CreateContinentChunks(landRatio, boundary, out tmpCoastSquares));
                 coastSquares.AddRange(tmpCoastSquares);
             }
@@ -145,7 +145,7 @@ namespace ErsatzCivLib.Model
             foreach (var fullLand in continentInfos)
             {
                 _mapSquareList.AddRange(fullLand);
-                var continentLand = fullLand.Where(ms => !ms.MapSquareType.IsSeaType).ToList();
+                var continentLand = fullLand.Where(ms => !ms.Biome.IsSeaType).ToList();
 
                 var chunksCountByType = CHUNK_TYPE_PROPERTIES.ToDictionary(x => x.Key, x =>
                     (int)Math.Round((continentLand.Count * x.Value.Item1) / x.Value.Item2));
@@ -232,17 +232,17 @@ namespace ErsatzCivLib.Model
                     {
                         MapSquareList
                             .Single(sq => sq.Column == ofType.Item2 && sq.Row == ofType.Item1)
-                            .ChangeMapSquareType(type, CHUNK_TYPE_PROPERTIES[type].Item4);
+                            .ChangeBiome(type, CHUNK_TYPE_PROPERTIES[type].Item4);
                     }
                 }
             }
 
-            coastSquares.ForEach(ms => ms.ChangeMapSquareType(MapSquareTypeData.Coast));
+            coastSquares.ForEach(ms => ms.ChangeBiome(BiomePivot.Coast));
         }
 
-        private static List<MapSquareData> CreateContinentChunks(double landRatio, ContSquare contBound, out List<MapSquareData> costSquares)
+        private static List<MapSquarePivot> CreateContinentChunks(double landRatio, ContSquare contBound, out List<MapSquarePivot> costSquares)
         {
-            costSquares = new List<MapSquareData>();
+            costSquares = new List<MapSquarePivot>();
             var startChunkX = 0;
             var startChunkY = 0;
             var continentWidth = 0;
@@ -263,23 +263,23 @@ namespace ErsatzCivLib.Model
             Func<int, bool> IsGroundYFunc = delegate(int y) { return y >= startChunkY + (contBound.StartY - 1) && y <= (startChunkY + (contBound.StartY - 1) + continentHeight); };
             Func<int, int, bool> IsGroundFunc = delegate (int x, int y) { return IsGroundXFunc(x) && IsGroundYFunc(y); };
 
-            var continentSquares = new List<MapSquareData>();
+            var continentSquares = new List<MapSquarePivot>();
             for (var x = contBound.StartX; x <= contBound.LastX; x++)
             {
                 for (var y = contBound.StartY; y <= contBound.LastY; y++)
                 {
-                    var squareType = MapSquareTypeData.Sea;
+                    var biome = BiomePivot.Sea;
                     bool isCoast = false;
                     if (IsGroundFunc(x, y))
                     {
-                        squareType = MapSquareTypeData.Grassland;
+                        biome = BiomePivot.Grassland;
                     }
                     else if (IsGroundFunc(x + 1, y) || IsGroundFunc(x - 1, y) || IsGroundFunc(x, y + 1) || IsGroundFunc(x, y - 1)
                         || IsGroundFunc(x - 1, y - 1) || IsGroundFunc(x + 1, y + 1) || IsGroundFunc(x - 1, y + 1) || IsGroundFunc(x + 1, y - 1))
                     {
                         isCoast = true;
                     }
-                    var newSquare = new MapSquareData(squareType, y, x, null);
+                    var newSquare = new MapSquarePivot(biome, y, x, null);
                     continentSquares.Add(newSquare);
                     if (isCoast)
                     {

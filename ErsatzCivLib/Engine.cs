@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using ErsatzCivLib.Model;
+using ErsatzCivLib.Model.Units;
 
 namespace ErsatzCivLib
 {
@@ -16,15 +17,15 @@ namespace ErsatzCivLib
         private int _previousUnitIndex;
 
         public int CurrentTurn { get; private set; }
-        public MapData Map { get; private set; }
+        public MapPivot Map { get; private set; }
         public IReadOnlyCollection<UnitPivot> Units { get { return _units; } }
         public IReadOnlyCollection<CityPivot> Cities { get { return _cities; } }
         public UnitPivot CurrentUnit { get { return _currentUnitIndex >= 0 ? _units[_currentUnitIndex] : null; } }
         public UnitPivot PreviousUnit { get { return _previousUnitIndex >= 0 && _previousUnitIndex != _currentUnitIndex ? _units[_previousUnitIndex] : null; } }
 
-        public Engine(MapData.MapSizeEnum mapSize, int continentsCount, double landRatio1To10, TemperaturePivot temperature)
+        public Engine(MapPivot.MapSizeEnum mapSize, int continentsCount, double landRatio1To10, TemperaturePivot temperature)
         {
-            Map = new MapData(mapSize, continentsCount, landRatio1To10, temperature);
+            Map = new MapPivot(mapSize, continentsCount, landRatio1To10, temperature);
 
             int x = 0;
             int y = 0;
@@ -33,7 +34,7 @@ namespace ErsatzCivLib
                 x = Tools.Randomizer.Next(0, Map.Width);
                 y = Tools.Randomizer.Next(0, Map.Height);
             }
-            while (!Map.MapSquareList.Any(ms => ms.Row == x && ms.Column == y && !ms.MapSquareType.IsSeaType));
+            while (!Map.MapSquareList.Any(ms => ms.Row == x && ms.Column == y && !ms.Biome.IsSeaType));
 
             _units.Add(new SettlerPivot(x, y));
             _units.Add(new WorkerPivot(x, y));
@@ -53,7 +54,7 @@ namespace ErsatzCivLib
             var settler = CurrentUnit as SettlerPivot;
 
             var sq = Map.MapSquareList.FirstOrDefault(ms => ms.Row == settler.Row && ms.Column == settler.Column);
-            if (sq?.MapSquareType?.IsCityBuildable != true
+            if (sq?.Biome?.IsCityBuildable != true
                 || _cities.Any(c => c.Row == settler.Row && c.Column == settler.Column)
                 || sq?.Pollution == true)
             {
@@ -128,7 +129,7 @@ namespace ErsatzCivLib
             return _cities.Any(c => c.Row == row && c.Column == column);
         }
 
-        public bool WorkerAction(MapSquareActionPivot actionPivot)
+        public bool WorkerAction(WorkerActionPivot actionPivot)
         {
             if (CurrentUnit?.GetType() != typeof(WorkerPivot) || actionPivot == null)
             {
@@ -142,9 +143,9 @@ namespace ErsatzCivLib
                 return false;
             }
 
-            if (actionPivot == MapSquareActionPivot.RailRoad && !sq.Road)
+            if (actionPivot == WorkerActionPivot.RailRoad && !sq.Road)
             {
-                actionPivot = MapSquareActionPivot.Road;
+                actionPivot = WorkerActionPivot.Road;
             }
 
             var result = sq.ApplyAction(this, worker, actionPivot);
@@ -164,7 +165,7 @@ namespace ErsatzCivLib
             }
         }
 
-        public bool MoveCurrentUnit(DirectionEnumPivot direction)
+        public bool MoveCurrentUnit(DirectionPivot direction)
         {
             return CurrentUnit.Move(this, direction);
         }

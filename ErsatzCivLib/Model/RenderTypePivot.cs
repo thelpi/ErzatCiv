@@ -3,7 +3,7 @@
     /// <summary>
     /// Types of render.
     /// </summary>
-    public enum RenderTypeEnum
+    public enum RenderTypePivot
     {
         /// <summary>
         /// Plain brush.

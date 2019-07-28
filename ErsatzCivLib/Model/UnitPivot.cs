@@ -55,10 +55,10 @@ namespace ErsatzCivLib.Model
         /// <summary>
         /// Type of render.
         /// </summary>
-        public RenderTypeEnum RenderType { get; private set; }
+        public RenderTypePivot RenderType { get; private set; }
 
         protected UnitPivot(int row, int column, bool seaNavigate, bool groundNavigate, int defensePoints, int offensePoints,
-            string renderValue, RenderTypeEnum renderType, int lifePoints, int speed)
+            string renderValue, RenderTypePivot renderType, int lifePoints, int speed)
         {
             Row = row;
             Column = column;
@@ -73,7 +73,7 @@ namespace ErsatzCivLib.Model
             RemainingMoves = Speed;
         }
 
-        internal bool Move(Engine engine, DirectionEnumPivot? direction)
+        internal bool Move(Engine engine, DirectionPivot? direction)
         {
             if (RemainingMoves == 0)
             {
@@ -93,8 +93,8 @@ namespace ErsatzCivLib.Model
             var prevSq = engine.Map.MapSquareList.FirstOrDefault(ms => ms.Row == Row && ms.Column == Column);
             bool isCity = engine.IsCity(x, y);
             if (square == null
-                || (square.MapSquareType.IsSeaType && !SeaNavigate && !isCity)
-                || (!square.MapSquareType.IsSeaType && !GroundNavigate && !isCity))
+                || (square.Biome.IsSeaType && !SeaNavigate && !isCity)
+                || (!square.Biome.IsSeaType && !GroundNavigate && !isCity))
             {
                 return false;
             }
@@ -102,8 +102,8 @@ namespace ErsatzCivLib.Model
             if (!prevSq.RailRoad || !square.RailRoad)
             {
                 RemainingMoves -=
-                    (isCity ? Constants.CITY_SPEED_COST : square.MapSquareType.SpeedCost)
-                    * (prevSq.Road && square.Road ? Constants.ROAD_RATIO : 1);
+                    (isCity ? CityPivot.CITY_SPEED_COST : square.Biome.SpeedCost)
+                    * (prevSq.Road && square.Road ? WorkerActionPivot.ROAD_RATIO : 1);
             }
 
             Row = x;

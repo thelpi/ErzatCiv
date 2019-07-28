@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ErsatzCivLib.Model.Units;
 
 namespace ErsatzCivLib.Model
 {
     /// <summary>
     /// Represents a map square.
     /// </summary>
-    public class MapSquareData
+    public class MapSquarePivot
     {
         #region Properties
 
@@ -27,11 +28,11 @@ namespace ErsatzCivLib.Model
         /// <summary>
         /// Square type.
         /// </summary>
-        public MapSquareTypeData MapSquareType { get; private set; }
+        public BiomePivot Biome { get; private set; }
         /// <summary>
         /// Underlying type in case of clearage (forest, jungle...).
         /// </summary>
-        public MapSquareTypeData UnderlyingMapSquareType { get; private set; }
+        public BiomePivot UnderlyingBiome { get; private set; }
         /// <summary>
         /// Mine built y/n.
         /// </summary>
@@ -68,29 +69,29 @@ namespace ErsatzCivLib.Model
 
         #endregion
 
-        internal MapSquareData(MapSquareTypeData mapSquareType, int row, int column, MapSquareTypeData underlyingType = null)
+        internal MapSquarePivot(BiomePivot biome, int row, int column, BiomePivot underlyingType = null)
         {
-            MapSquareType = mapSquareType ?? throw new ArgumentNullException(nameof(mapSquareType));
+            Biome = biome ?? throw new ArgumentNullException(nameof(biome));
             Row = row < 0 ? throw new ArgumentException("Invalid value.", nameof(row)) : row;
             Column = column < 0 ? throw new ArgumentException("Invalid value.", nameof(column)) : column;
-            if (MapSquareType.Actions.Contains(MapSquareActionPivot.Clear))
+            if (Biome.Actions.Contains(WorkerActionPivot.Clear))
             {
-                UnderlyingMapSquareType = underlyingType ?? throw new ArgumentNullException(nameof(underlyingType));
+                UnderlyingBiome = underlyingType ?? throw new ArgumentNullException(nameof(underlyingType));
             }
         }
 
-        internal void ChangeMapSquareType(MapSquareTypeData mapSquareType, MapSquareTypeData underlyingType = null)
+        internal void ChangeBiome(BiomePivot biome, BiomePivot underlyingType = null)
         {
-            MapSquareType = mapSquareType ?? throw new ArgumentNullException(nameof(mapSquareType));
-            if (MapSquareType.Actions.Contains(MapSquareActionPivot.Clear))
+            Biome = biome ?? throw new ArgumentNullException(nameof(biome));
+            if (Biome.Actions.Contains(WorkerActionPivot.Clear))
             {
-                UnderlyingMapSquareType = underlyingType ?? throw new ArgumentNullException(nameof(underlyingType));
+                UnderlyingBiome = underlyingType ?? throw new ArgumentNullException(nameof(underlyingType));
             }
         }
 
         internal void SetRiver(bool riverTopToBottom)
         {
-            if (MapSquareType.RiverCrossable)
+            if (Biome.RiverCrossable)
             {
                 RiverTopToBottom = CrossedByRiver && (RiverTopToBottom != riverTopToBottom || !RiverTopToBottom.HasValue) ? (bool?)null : riverTopToBottom;
                 CrossedByRiver = true;
@@ -110,14 +111,14 @@ namespace ErsatzCivLib.Model
         }
 
         /// <summary>
-        /// Tries to apply a <see cref="MapSquareActionPivot"/> on the current instance.
+        /// Tries to apply a <see cref="WorkerActionPivot"/> on the current instance.
         /// </summary>
         /// <param name="worker">The worker</param>
         /// <param name="action">The action to apply.</param>
         /// <returns>
         /// <c>True</c> if the worker actually starts the action; <c>False</c> otherwise.
         /// </returns>
-        internal bool ApplyAction(Engine engine, WorkerPivot worker, MapSquareActionPivot action)
+        internal bool ApplyAction(Engine engine, WorkerPivot worker, WorkerActionPivot action)
         {
             if (worker == null)
             {
@@ -129,57 +130,57 @@ namespace ErsatzCivLib.Model
                 throw new ArgumentNullException(nameof(action));
             }
 
-            if ((!action.AlwaysAvailable && !MapSquareType.Actions.Contains(action)) || engine.IsCity(worker.Row, worker.Column))
+            if ((!action.AlwaysAvailable && !Biome.Actions.Contains(action)) || engine.IsCity(worker.Row, worker.Column))
             {
                 return false;
             }
 
-            if (action == MapSquareActionPivot.Irrigate)
+            if (action == WorkerActionPivot.Irrigate)
             {
                 return ApplyActionInternal(worker, action, Irrigate);
             }
 
-            if (action == MapSquareActionPivot.Mine)
+            if (action == WorkerActionPivot.Mine)
             {
                 return ApplyActionInternal(worker, action, Mine);
             }
 
-            if (action == MapSquareActionPivot.Road)
+            if (action == WorkerActionPivot.Road)
             {
                 return ApplyActionInternal(worker, action, Road);
             }
 
-            if (action == MapSquareActionPivot.DestroyImprovement)
+            if (action == WorkerActionPivot.DestroyImprovement)
             {
                 return ApplyActionInternal(worker, action, !Irrigate && !Mine && !Fortress);
             }
 
-            if (action == MapSquareActionPivot.DestroyRoad)
+            if (action == WorkerActionPivot.DestroyRoad)
             {
                 return ApplyActionInternal(worker, action, !Road && !RailRoad);
             }
 
-            if (action == MapSquareActionPivot.BuildFortress)
+            if (action == WorkerActionPivot.BuildFortress)
             {
                 return ApplyActionInternal(worker, action, Fortress);
             }
 
-            if (action == MapSquareActionPivot.Clear)
+            if (action == WorkerActionPivot.Clear)
             {
                 return ApplyActionInternal(worker, action, false);
             }
 
-            if (action == MapSquareActionPivot.ClearPollution)
+            if (action == WorkerActionPivot.ClearPollution)
             {
                 return ApplyActionInternal(worker, action, Pollution);
             }
 
-            if (action == MapSquareActionPivot.Plant)
+            if (action == WorkerActionPivot.Plant)
             {
                 return ApplyActionInternal(worker, action, false);
             }
 
-            if (action == MapSquareActionPivot.RailRoad)
+            if (action == WorkerActionPivot.RailRoad)
             {
                 return ApplyActionInternal(worker, action, RailRoad);
             }
@@ -187,7 +188,7 @@ namespace ErsatzCivLib.Model
             return false;
         }
 
-        private bool ApplyActionInternal(WorkerPivot worker, MapSquareActionPivot action, bool currentApplianceValue)
+        private bool ApplyActionInternal(WorkerPivot worker, WorkerActionPivot action, bool currentApplianceValue)
         {
             if (currentApplianceValue)
             {
@@ -226,21 +227,21 @@ namespace ErsatzCivLib.Model
                 if (action.IsDone)
                 {
                     removableActions.Add(action);
-                    if (action.Action == MapSquareActionPivot.BuildFortress)
+                    if (action.Action == WorkerActionPivot.BuildFortress)
                     {
                         Fortress = true;
                     }
-                    if (action.Action == MapSquareActionPivot.Clear)
+                    if (action.Action == WorkerActionPivot.Clear)
                     {
-                        MapSquareType = UnderlyingMapSquareType;
+                        ChangeBiome(UnderlyingBiome, null);
                         Mine = false;
                         Irrigate = false;
                     }
-                    if (action.Action == MapSquareActionPivot.ClearPollution)
+                    if (action.Action == WorkerActionPivot.ClearPollution)
                     {
                         Pollution = false;
                     }
-                    if (action.Action == MapSquareActionPivot.DestroyImprovement)
+                    if (action.Action == WorkerActionPivot.DestroyImprovement)
                     {
                         if (Fortress)
                         {
@@ -253,7 +254,7 @@ namespace ErsatzCivLib.Model
                             Irrigate = false;
                         }
                     }
-                    if (action.Action == MapSquareActionPivot.DestroyRoad)
+                    if (action.Action == WorkerActionPivot.DestroyRoad)
                     {
                         if (RailRoad)
                         {
@@ -264,27 +265,27 @@ namespace ErsatzCivLib.Model
                             Road = false;
                         }
                     }
-                    if (action.Action == MapSquareActionPivot.Irrigate)
+                    if (action.Action == WorkerActionPivot.Irrigate)
                     {
                         Mine = false;
                         Irrigate = true;
                     }
-                    if (action.Action == MapSquareActionPivot.Mine)
+                    if (action.Action == WorkerActionPivot.Mine)
                     {
                         Mine = true;
                         Irrigate = false;
                     }
-                    if (action.Action == MapSquareActionPivot.Plant)
+                    if (action.Action == WorkerActionPivot.Plant)
                     {
-                        MapSquareType = MapSquareTypeData.Forest;
+                        Biome = BiomePivot.Forest;
                         Mine = false;
                         Irrigate = false;
                     }
-                    if (action.Action == MapSquareActionPivot.RailRoad)
+                    if (action.Action == WorkerActionPivot.RailRoad)
                     {
                         RailRoad = true;
                     }
-                    if (action.Action == MapSquareActionPivot.Road)
+                    if (action.Action == WorkerActionPivot.Road)
                     {
                         Road = true;
                     }
@@ -299,7 +300,7 @@ namespace ErsatzCivLib.Model
             }
         }
 
-        internal bool IsClose(MapSquareData other)
+        internal bool IsClose(MapSquarePivot other)
         {
             return (Math.Abs(Row - other.Row) == 1 && Column == other.Column) ||
                 (Math.Abs(Column - other.Column) == 1 && Row == other.Row) ||
@@ -307,7 +308,7 @@ namespace ErsatzCivLib.Model
         }
 
         /// <summary>
-        /// Represents a <see cref="MapSquareActionPivot"/> in progress.
+        /// Represents a <see cref="WorkerActionPivot"/> in progress.
         /// </summary>
         public class CurrentActionPivot : IDisposable
         {
@@ -316,9 +317,9 @@ namespace ErsatzCivLib.Model
             private List<WorkerPivot> _workers;
 
             /// <summary>
-            /// Related <see cref="MapSquareActionPivot"/>.
+            /// Related <see cref="WorkerActionPivot"/>.
             /// </summary>
-            public MapSquareActionPivot Action { get; private set; }
+            public WorkerActionPivot Action { get; private set; }
             /// <summary>
             /// Number of turns already spent.
             /// </summary>
@@ -344,7 +345,7 @@ namespace ErsatzCivLib.Model
             /// <remarks>The task has no worker by default.</remarks>
             /// <param name="guid">Caller key.</param>
             /// <param name="action">The action to start.</param>
-            internal CurrentActionPivot(MapSquareActionPivot action)
+            internal CurrentActionPivot(WorkerActionPivot action)
             {
                 Action = action ?? throw new ArgumentNullException(nameof(action));
                 _workers = new List<WorkerPivot>();

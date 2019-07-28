@@ -40,19 +40,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Constants.cs" />
     <Compile Include="Model\CityPivot.cs" />
-    <Compile Include="Model\DirectionEnumPivot.cs" />
+    <Compile Include="Model\DirectionPivot.cs" />
     <Compile Include="Engine.cs" />
-    <Compile Include="Model\MapData.cs" />
-    <Compile Include="Model\MapSquareActionPivot.cs" />
-    <Compile Include="Model\MapSquareData.cs" />
-    <Compile Include="Model\MapSquareTypeData.cs" />
-    <Compile Include="Model\RenderTypeEnum.cs" />
-    <Compile Include="Model\SettlerPivot.cs" />
+    <Compile Include="Model\MapPivot.cs" />
+    <Compile Include="Model\WorkerActionPivot.cs" />
+    <Compile Include="Model\MapSquarePivot.cs" />
+    <Compile Include="Model\BiomePivot.cs" />
+    <Compile Include="Model\RenderTypePivot.cs" />
+    <Compile Include="Model\Units\SettlerPivot.cs" />
     <Compile Include="Model\TemperaturePivot.cs" />
     <Compile Include="Model\UnitPivot.cs" />
-    <Compile Include="Model\WorkerPivot.cs" />
+    <Compile Include="Model\Units\WorkerPivot.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tools.cs" />
   </ItemGroup>

@@ -3,8 +3,10 @@
     /// <summary>
     /// Represents a worker action.
     /// </summary>
-    public class MapSquareActionPivot
+    public class WorkerActionPivot
     {
+        internal const double ROAD_RATIO = 0.3;
+
         #region Properties
 
         /// <summary>
@@ -22,18 +24,18 @@
 
         #endregion
 
-        private MapSquareActionPivot() { }
+        private WorkerActionPivot() { }
 
-        private static MapSquareActionPivot _mine = null;
-        private static MapSquareActionPivot _irrigate = null;
-        private static MapSquareActionPivot _road = null;
-        private static MapSquareActionPivot _railRoad = null;
-        private static MapSquareActionPivot _clear = null;
-        private static MapSquareActionPivot _plant = null;
-        private static MapSquareActionPivot _clearPollution = null;
-        private static MapSquareActionPivot _buildFortress = null;
-        private static MapSquareActionPivot _destroyRoad = null;
-        private static MapSquareActionPivot _destroyImprovement = null;
+        private static WorkerActionPivot _mine = null;
+        private static WorkerActionPivot _irrigate = null;
+        private static WorkerActionPivot _road = null;
+        private static WorkerActionPivot _railRoad = null;
+        private static WorkerActionPivot _clear = null;
+        private static WorkerActionPivot _plant = null;
+        private static WorkerActionPivot _clearPollution = null;
+        private static WorkerActionPivot _buildFortress = null;
+        private static WorkerActionPivot _destroyRoad = null;
+        private static WorkerActionPivot _destroyImprovement = null;
 
         /// <summary>
         /// Mines.
@@ -42,13 +44,13 @@
         /// Doubles the productivity value (or makes it 1 if 0).
         /// Not cumulable with <see cref="Irrigate"/>.
         /// </remarks>
-        public static MapSquareActionPivot Mine
+        public static WorkerActionPivot Mine
         {
             get
             {
                 if (_mine == null)
                 {
-                    _mine = new MapSquareActionPivot
+                    _mine = new WorkerActionPivot
                     {
                         Name = "Mine",
                         TurnCost = 2,
@@ -65,13 +67,13 @@
         /// Doubles the food value (or makes it 1 if 0).
         /// Not cumulable with <see cref="Mine"/>.
         /// </remarks>
-        public static MapSquareActionPivot Irrigate
+        public static WorkerActionPivot Irrigate
         {
             get
             {
                 if (_irrigate == null)
                 {
-                    _irrigate = new MapSquareActionPivot
+                    _irrigate = new WorkerActionPivot
                     {
                         Name = "Irrigate",
                         TurnCost = 2,
@@ -87,13 +89,13 @@
         /// <remarks>
         /// Increase the unit speed (x2), and the commerce by one unit.
         /// </remarks>
-        public static MapSquareActionPivot Road
+        public static WorkerActionPivot Road
         {
             get
             {
                 if (_road == null)
                 {
-                    _road = new MapSquareActionPivot
+                    _road = new WorkerActionPivot
                     {
                         Name = "Road",
                         TurnCost = 1,
@@ -109,13 +111,13 @@
         /// <remarks>
         /// Increase the unit speed (no cost), and the commerce and productivity by one unit.
         /// </remarks>
-        public static MapSquareActionPivot RailRoad
+        public static WorkerActionPivot RailRoad
         {
             get
             {
                 if (_railRoad == null)
                 {
-                    _railRoad = new MapSquareActionPivot
+                    _railRoad = new WorkerActionPivot
                     {
                         Name = "RailRoad",
                         TurnCost = 2,
@@ -129,15 +131,15 @@
         /// Clears a forest, a swamp or a jungle.
         /// </summary>
         /// <remarks>
-        /// Transforms a <see cref="MapSquareData"/> into its <see cref="MapSquareData._underlyingType"/>.
+        /// Transforms a <see cref="MapSquarePivot"/> into its <see cref="MapSquarePivot._underlyingType"/>.
         /// </remarks>
-        public static MapSquareActionPivot Clear
+        public static WorkerActionPivot Clear
         {
             get
             {
                 if (_clear == null)
                 {
-                    _clear = new MapSquareActionPivot
+                    _clear = new WorkerActionPivot
                     {
                         Name = "Clear",
                         TurnCost = 2,
@@ -151,15 +153,15 @@
         /// Plants a forest.
         /// </summary>
         /// <remarks>
-        /// Changes the <see cref="MapSquareTypeData"/> when applied on a <see cref="MapSquareData"/>.
+        /// Changes the <see cref="BiomePivot"/> when applied on a <see cref="MapSquarePivot"/>.
         /// </remarks>
-        public static MapSquareActionPivot Plant
+        public static WorkerActionPivot Plant
         {
             get
             {
                 if (_plant == null)
                 {
-                    _plant = new MapSquareActionPivot
+                    _plant = new WorkerActionPivot
                     {
                         Name = "Plant forest",
                         TurnCost = 3,
@@ -172,13 +174,13 @@
         /// <summary>
         /// Clears pollution.
         /// </summary>
-        public static MapSquareActionPivot ClearPollution
+        public static WorkerActionPivot ClearPollution
         {
             get
             {
                 if (_clearPollution == null)
                 {
-                    _clearPollution = new MapSquareActionPivot
+                    _clearPollution = new WorkerActionPivot
                     {
                         Name = "Clear pollution",
                         TurnCost = 3,
@@ -192,13 +194,13 @@
         /// Builds a fortress.
         /// </summary>
         /// <remarks>Fortress triple the defensive value of a map square.</remarks>
-        public static MapSquareActionPivot BuildFortress
+        public static WorkerActionPivot BuildFortress
         {
             get
             {
                 if (_buildFortress == null)
                 {
-                    _buildFortress = new MapSquareActionPivot
+                    _buildFortress = new WorkerActionPivot
                     {
                         Name = "Build fortress",
                         TurnCost = 3,
@@ -214,13 +216,13 @@
         /// <remarks>
         /// Removes the railroad if applicable, then the road.
         /// </remarks>
-        public static MapSquareActionPivot DestroyRoad
+        public static WorkerActionPivot DestroyRoad
         {
             get
             {
                 if (_destroyRoad == null)
                 {
-                    _destroyRoad = new MapSquareActionPivot
+                    _destroyRoad = new WorkerActionPivot
                     {
                         Name = "Destroy road",
                         TurnCost = 1,
@@ -234,13 +236,13 @@
         /// Destroys irrigation system, mine and fortress.
         /// </summary>
         /// <remarks>Fortress comes first.</remarks>
-        public static MapSquareActionPivot DestroyImprovement
+        public static WorkerActionPivot DestroyImprovement
         {
             get
             {
                 if (_destroyImprovement == null)
                 {
-                    _destroyImprovement = new MapSquareActionPivot
+                    _destroyImprovement = new WorkerActionPivot
                     {
                         Name = "Destroy improvement",
                         TurnCost = 1,
