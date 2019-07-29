@@ -33,6 +33,8 @@ namespace ErsatzCiv
             InitializeComponent();
 
             _engine = engine;
+            CheckBoxWaitTurn.IsChecked = Settings.Default.waitEndTurn;
+
             InitializeEngineEvents();
 
             DrawFullMapAndMiniMap();
@@ -186,9 +188,23 @@ namespace ErsatzCiv
             RefreshMiniMapSelector();
         }
 
-        private void FocusOnUnit(object sender, EventArgs eventArgs)
+        private void FocusOnUnit(object sender, Engine.NextUnitEventArgs eventArgs)
         {
-            RecomputeFocus();
+            if (!eventArgs.MoreUnit && !Settings.Default.waitEndTurn)
+            {
+                _engine.NewTurn();
+                RefreshDynamicView();
+            }
+            else
+            {
+                RecomputeFocus();
+            }
+        }
+
+        private void CheckBoxWaitTurn_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.Default.waitEndTurn = !Settings.Default.waitEndTurn;
+            Settings.Default.Save();
         }
 
         #endregion

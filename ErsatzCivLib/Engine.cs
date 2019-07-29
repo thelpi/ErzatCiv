@@ -11,7 +11,7 @@ namespace ErsatzCivLib
         private List<UnitPivot> _units = new List<UnitPivot>();
         private List<CityPivot> _cities = new List<CityPivot>();
 
-        public event EventHandler NextUnitEvent;
+        public event EventHandler<NextUnitEventArgs> NextUnitEvent;
 
         private int _currentUnitIndex;
         private int _previousUnitIndex;
@@ -56,9 +56,9 @@ namespace ErsatzCivLib
 
             var settler = CurrentUnit as SettlerPivot;
 
-            var sq = Map.MapSquareList.FirstOrDefault(ms => ms.Same(settler));
+            var sq = Map.MapSquareList.FirstOrDefault(ms => ms.Same(settler.Row, settler.Column));
             if (sq?.Biome?.IsCityBuildable != true
-                || _cities.Any(c => c.Same(settler))
+                || _cities.Any(c => settler.Row == c.Row && settler.Column == c.Column)
                 || sq?.Pollution == true)
             {
                 return null;
@@ -84,32 +84,32 @@ namespace ErsatzCivLib
             {
                 _currentUnitIndex = _units.IndexOf(_units.FirstOrDefault(u => u.RemainingMoves > 0));
                 _previousUnitIndex = -1;
-                NextUnitEvent?.Invoke(this, new EventArgs());
-                return;
             }
-
-            _previousUnitIndex = _currentUnitIndex;
-
-            for (int i = _currentUnitIndex + 1; i < _units.Count; i++)
+            else
             {
-                if (_units[i].RemainingMoves > 0)
+                _previousUnitIndex = _currentUnitIndex;
+
+                for (int i = _currentUnitIndex + 1; i < _units.Count; i++)
                 {
-                    _currentUnitIndex = i;
-                    NextUnitEvent?.Invoke(this, new EventArgs());
-                    return;
+                    if (_units[i].RemainingMoves > 0)
+                    {
+                        _currentUnitIndex = i;
+                        NextUnitEvent?.Invoke(this, new NextUnitEventArgs(true));
+                        return;
+                    }
                 }
-            }
-            for (int i = 0; i < _currentUnitIndex + (currentJustBeenRemoved ? 1 : 0); i++)
-            {
-                if (_units[i].RemainingMoves > 0)
+                for (int i = 0; i < _currentUnitIndex + (currentJustBeenRemoved ? 1 : 0); i++)
                 {
-                    _currentUnitIndex = i;
-                    NextUnitEvent?.Invoke(this, new EventArgs());
-                    return;
+                    if (_units[i].RemainingMoves > 0)
+                    {
+                        _currentUnitIndex = i;
+                        NextUnitEvent?.Invoke(this, new NextUnitEventArgs(true));
+                        return;
+                    }
                 }
+                _currentUnitIndex = -1;
             }
-            _currentUnitIndex = -1;
-            NextUnitEvent?.Invoke(this, new EventArgs());
+            NextUnitEvent?.Invoke(this, new NextUnitEventArgs(_currentUnitIndex >= 0));
         }
 
         public bool NewTurn()
@@ -127,14 +127,9 @@ namespace ErsatzCivLib
             return true;
         }
 
-        internal bool IsCity(IOnMapPivot onMapInstance)
-        {
-            return _cities.Any(c => c.Same(onMapInstance));
-        }
-
         internal bool IsCity(int row, int column)
         {
-            return _cities.Any(c => c.Same(row, column));
+            return _cities.Any(c => c.Row == row && c.Column == column);
         }
 
         public bool WorkerAction(WorkerActionPivot actionPivot)
@@ -145,7 +140,7 @@ namespace ErsatzCivLib
             }
 
             var worker = CurrentUnit as WorkerPivot;
-            var sq = Map.MapSquareList.FirstOrDefault(ms => ms.Same(worker));
+            var sq = Map.MapSquareList.FirstOrDefault(ms => ms.Same(worker.Row, worker.Column));
             if (sq == null)
             {
                 return false;
@@ -176,6 +171,16 @@ namespace ErsatzCivLib
         public bool MoveCurrentUnit(DirectionPivot direction)
         {
             return CurrentUnit.Move(this, direction);
+        }
+
+        public class NextUnitEventArgs : EventArgs
+        {
+            public bool MoreUnit { get; private set; }
+
+            internal NextUnitEventArgs(bool moreUnit)
+            {
+                MoreUnit = moreUnit;
+            }
         }
     }
 }

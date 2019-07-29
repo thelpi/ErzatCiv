@@ -23,27 +23,33 @@ namespace ErsatzCiv.Properties {
             }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("D:\\Ma programmation\\csharp\\Projects\\ErsatzCiv\\datas\\")]
         public string imagesPath {
             get {
                 return ((string)(this["imagesPath"]));
             }
-            set {
-                this["imagesPath"] = value;
-            }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("square\\")]
         public string squareImageSubFolder {
             get {
                 return ((string)(this["squareImageSubFolder"]));
             }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool waitEndTurn {
+            get {
+                return ((bool)(this["waitEndTurn"]));
+            }
             set {
-                this["squareImageSubFolder"] = value;
+                this["waitEndTurn"] = value;
             }
         }
     }

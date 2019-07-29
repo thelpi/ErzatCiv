@@ -89,7 +89,7 @@ namespace ErsatzCivLib.Model
 
         internal void ApplyCityActions(CityPivot city)
         {
-            if (!Same(city))
+            if (!Same(city.Row, city.Column))
             {
                 return;
             }
@@ -119,7 +119,7 @@ namespace ErsatzCivLib.Model
                 throw new ArgumentNullException(nameof(action));
             }
 
-            if ((!action.AlwaysAvailable && !Biome.Actions.Contains(action)) || engine.IsCity(worker))
+            if ((!action.AlwaysAvailable && !Biome.Actions.Contains(action)) || engine.IsCity(worker.Row, worker.Column))
             {
                 return false;
             }

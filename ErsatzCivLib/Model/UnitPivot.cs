@@ -5,8 +5,16 @@ namespace ErsatzCivLib.Model
     /// <summary>
     /// Represents an unit.
     /// </summary>
-    public abstract class UnitPivot : IOnMapPivot
+    public abstract class UnitPivot
     {
+        /// <summary>
+        /// Row on the map grid.
+        /// </summary>
+        public int Row { get; private set; }
+        /// <summary>
+        /// Column on the map grid.
+        /// </summary>
+        public int Column { get; private set; }
         /// <summary>
         /// Current life points.
         /// </summary>
@@ -49,8 +57,10 @@ namespace ErsatzCivLib.Model
         public RenderTypePivot RenderType { get; private set; }
 
         protected UnitPivot(int row, int column, bool seaNavigate, bool groundNavigate, int defensePoints, int offensePoints,
-            string renderValue, RenderTypePivot renderType, int lifePoints, int speed) : base(row, column)
+            string renderValue, RenderTypePivot renderType, int lifePoints, int speed)
         {
+            Row = row;
+            Column = column;
             SeaNavigate = seaNavigate;
             GroundNavigate = groundNavigate;
             DefensePoints = defensePoints;
@@ -79,7 +89,7 @@ namespace ErsatzCivLib.Model
             var x = direction.Value.Row(Row);
             var y = direction.Value.Column(Column);
             var square = engine.Map.MapSquareList.FirstOrDefault(ms => ms.Same(x, y));
-            var prevSq = engine.Map.MapSquareList.FirstOrDefault(ms => ms.Same(this));
+            var prevSq = engine.Map.MapSquareList.FirstOrDefault(ms => ms.Same(Row, Column));
             bool isCity = engine.IsCity(x, y);
             if (square == null
                 || (square.Biome.IsSeaType && !SeaNavigate && !isCity)
@@ -95,7 +105,8 @@ namespace ErsatzCivLib.Model
                     * (prevSq.Road && square.Road ? WorkerActionPivot.ROAD_RATIO : 1);
             }
 
-            base.Move(x, y);
+            Row = x;
+            Column = y;
 
             if (RemainingMoves <= 0)
             {

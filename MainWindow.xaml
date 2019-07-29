@@ -11,9 +11,10 @@
     <DockPanel Margin="5">
         <DockPanel Name="MenuDock" DockPanel.Dock="Bottom">
             <Canvas Margin="2" Name="MiniMapCanvas" DockPanel.Dock="Right" MouseDown="MiniMapCanvas_MouseDown" />
-            <DockPanel DockPanel.Dock="Left">
-                <Button Name="BtnNextTurn" Content="Next" Width="75" Height="25" Click="BtnNextTurn_Click" />
-            </DockPanel>
+            <StackPanel Orientation="Vertical" DockPanel.Dock="Left">
+                <CheckBox Margin="0, 5, 0, 0" Name="CheckBoxWaitTurn" Click="CheckBoxWaitTurn_Click" Content="Attendre à la fin du tout" HorizontalAlignment="Center" />
+                <Button Margin="0, 5, 0, 0" Name="BtnNextTurn" Content="Next" Width="75" Height="25" Click="BtnNextTurn_Click" />
+            </StackPanel>
         </DockPanel>
         <ScrollViewer ScrollChanged="MapScroller_ScrollChanged" DockPanel.Dock="Top" CanContentScroll="True"
                   Name="MapScroller"

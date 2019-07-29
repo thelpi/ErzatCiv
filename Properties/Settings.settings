@@ -2,11 +2,14 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ErsatzCiv.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="imagesPath" Type="System.String" Scope="User">
+    <Setting Name="imagesPath" Type="System.String" Scope="Application">
       <Value Profile="(Default)">D:\Ma programmation\csharp\Projects\ErsatzCiv\datas\</Value>
     </Setting>
-    <Setting Name="squareImageSubFolder" Type="System.String" Scope="User">
+    <Setting Name="squareImageSubFolder" Type="System.String" Scope="Application">
       <Value Profile="(Default)">square\</Value>
+    </Setting>
+    <Setting Name="waitEndTurn" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>
 </SettingsFile>

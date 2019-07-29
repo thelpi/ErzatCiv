@@ -1,7 +1,16 @@
 ﻿namespace ErsatzCivLib.Model
 {
-    public class CityPivot : IOnMapPivot
+    public class CityPivot
     {
+        /// <summary>
+        /// Row on the map grid.
+        /// </summary>
+        public int Row { get; private set; }
+        /// <summary>
+        /// Column on the map grid.
+        /// </summary>
+        public int Column { get; private set; }
+
         public const double DISPLAY_RATIO = 0.8;
         internal const int CITY_SPEED_COST = 1;
 
@@ -9,8 +18,10 @@
 
         public string RenderValue { get; private set; }
 
-        internal CityPivot(MapSquarePivot mapSquare) : base(mapSquare.Row, mapSquare.Column)
+        internal CityPivot(MapSquarePivot mapSquare)
         {
+            Row = mapSquare.Row;
+            Column = mapSquare.Column;
             RenderValue = CITY_RENDER_PATH;
         }
     }
