@@ -249,9 +249,12 @@ namespace ErsatzCiv
 
             _minimapSquareSize = (double)MENU_HEIGHT / _engine.Map.Height;
 
-            foreach (var square in _engine.Map.MapSquareList)
+            for (int i = 0; i < _engine.Map.Height; i++)
             {
-                DrawSingleMapAndMiniMapSquare(square, false);
+                for (var j = 0; j < _engine.Map.Width; j++)
+                {
+                    DrawSingleMapAndMiniMapSquare(_engine.Map[i, j], false);
+                }
             }
         }
 

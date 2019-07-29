@@ -88,8 +88,8 @@ namespace ErsatzCivLib.Model
 
             var x = direction.Value.Row(Row);
             var y = direction.Value.Column(Column);
-            var square = engine.Map.MapSquareList.FirstOrDefault(ms => ms.Same(x, y));
-            var prevSq = engine.Map.MapSquareList.FirstOrDefault(ms => ms.Same(Row, Column));
+            var square = engine.Map[x, y];
+            var prevSq = engine.Map[Row, Column];
             bool isCity = engine.IsCity(x, y);
             if (square == null
                 || (square.Biome.IsSeaType && !SeaNavigate && !isCity)

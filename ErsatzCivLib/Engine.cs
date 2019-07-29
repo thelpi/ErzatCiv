@@ -37,7 +37,7 @@ namespace ErsatzCivLib
                 x = Tools.Randomizer.Next(0, Map.Width);
                 y = Tools.Randomizer.Next(0, Map.Height);
             }
-            while (!Map.MapSquareList.Any(ms => ms.Same(x, y) && !ms.Biome.IsSeaType));
+            while (Map[x, y] == null || Map[x, y].Biome.IsSeaType);
 
             _units.Add(new SettlerPivot(x, y));
             _units.Add(new WorkerPivot(x, y));
@@ -56,7 +56,7 @@ namespace ErsatzCivLib
 
             var settler = CurrentUnit as SettlerPivot;
 
-            var sq = Map.MapSquareList.FirstOrDefault(ms => ms.Same(settler.Row, settler.Column));
+            var sq = Map[settler.Row, settler.Column];
             if (sq?.Biome?.IsCityBuildable != true
                 || _cities.Any(c => settler.Row == c.Row && settler.Column == c.Column)
                 || sq?.Pollution == true)
@@ -114,9 +114,12 @@ namespace ErsatzCivLib
 
         public bool NewTurn()
         {
-            foreach (var ms in Map.MapSquareList)
+            for (int i = 0; i < Map.Height; i++)
             {
-                ms.UpdateActionsProgress();
+                for (var j = 0; j < Map.Width; j++)
+                {
+                    Map[i, j].UpdateActionsProgress();
+                }
             }
             foreach (var u in _units)
             {
@@ -140,7 +143,7 @@ namespace ErsatzCivLib
             }
 
             var worker = CurrentUnit as WorkerPivot;
-            var sq = Map.MapSquareList.FirstOrDefault(ms => ms.Same(worker.Row, worker.Column));
+            var sq = Map[worker.Row, worker.Column];
             if (sq == null)
             {
                 return false;
@@ -162,9 +165,12 @@ namespace ErsatzCivLib
 
         public void SubscribeToMapSquareChangeEvent(EventHandler handler)
         {
-            foreach (var ms in Map.MapSquareList)
+            for (int i = 0; i < Map.Height; i++)
             {
-                ms.SquareChangeEvent += handler;
+                for (var j = 0; j < Map.Width; j++)
+                {
+                    Map[i, j].SquareChangeEvent += handler;
+                }
             }
         }
 
