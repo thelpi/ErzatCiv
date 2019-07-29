@@ -178,10 +178,10 @@ namespace ErsatzCivLib.Model
                                             .ToDictionary(b => b, b => b.ChunkSquaresCount(continentLand.Count, CHUNK_SIZE_RATIO));
                 var riversChunksCount = (int)Math.Round(continentLand.Count * RIVER_STARTER_RATIO);
 
-                var topY = continentLand.Min(x => x.Item1.Row);
-                var leftX = continentLand.Min(x => x.Item1.Column);
-                var bottomY = continentLand.Max(x => x.Item1.Row);
-                var rightX = continentLand.Max(x => x.Item1.Column);
+                var topY = continentLand.Min(x => x.Item2);
+                var leftX = continentLand.Min(x => x.Item3);
+                var bottomY = continentLand.Max(x => x.Item2);
+                var rightX = continentLand.Max(x => x.Item3);
                 // Squares count in height for one square in width
                 var ratioHeightWidth = (int)Math.Round((bottomY - topY + 1) / (double)(rightX - leftX + 1));
 
@@ -258,7 +258,7 @@ namespace ErsatzCivLib.Model
                     foreach (var ofType in chunkOfType)
                     {
                         var currSq = _mapSquareList[ofType.Item1, ofType.Item2];
-                        type.UnderlyingBiomes.TryGetValue(TemperatureAt(currSq.Row), out BiomePivot underlyingBiome);
+                        type.UnderlyingBiomes.TryGetValue(TemperatureAt(ofType.Item1), out BiomePivot underlyingBiome);
                         currSq.ChangeBiome(type, underlyingBiome ?? BiomePivot.Default);
                     }
                 }
@@ -288,7 +288,7 @@ namespace ErsatzCivLib.Model
             }
         }
 
-        private static List<Tuple<MapSquarePivot, int, int>> ConvertContinentBlueprintToMapSquares(double landRatio, ContinentBlueprint contBound, out List<MapSquarePivot> costSquares)
+        private List<Tuple<MapSquarePivot, int, int>> ConvertContinentBlueprintToMapSquares(double landRatio, ContinentBlueprint contBound, out List<MapSquarePivot> costSquares)
         {
             costSquares = new List<MapSquarePivot>();
             var startChunkX = 0;
@@ -327,7 +327,7 @@ namespace ErsatzCivLib.Model
                     {
                         isCoast = true;
                     }
-                    var newSquare = new MapSquarePivot(biome, y, x, null);
+                    var newSquare = new MapSquarePivot(biome, this, null);
                     continentSquares.Add(new Tuple<MapSquarePivot, int, int>(newSquare, y, x));
                     if (isCoast)
                     {

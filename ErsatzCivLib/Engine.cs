@@ -63,7 +63,7 @@ namespace ErsatzCivLib
             {
                 return null;
             }
-            var city = new CityPivot(sq);
+            var city = new CityPivot(settler.Row, settler.Column);
             sq.ApplyCityActions(city);
 
             _cities.Add(city);
@@ -118,7 +118,7 @@ namespace ErsatzCivLib
             {
                 for (var j = 0; j < Map.Width; j++)
                 {
-                    Map[i, j].UpdateActionsProgress();
+                    Map[i, j].UpdateActionsProgress(i, j);
                 }
             }
             foreach (var u in _units)
@@ -163,7 +163,7 @@ namespace ErsatzCivLib
             return result;
         }
 
-        public void SubscribeToMapSquareChangeEvent(EventHandler handler)
+        public void SubscribeToMapSquareChangeEvent(EventHandler<MapSquarePivot.SquareChangedEventArgs> handler)
         {
             for (int i = 0; i < Map.Height; i++)
             {

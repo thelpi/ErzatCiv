@@ -18,10 +18,10 @@
 
         public string RenderValue { get; private set; }
 
-        internal CityPivot(MapSquarePivot mapSquare)
+        internal CityPivot(int row, int column)
         {
-            Row = mapSquare.Row;
-            Column = mapSquare.Column;
+            Row = row;
+            Column = column;
             RenderValue = CITY_RENDER_PATH;
         }
     }

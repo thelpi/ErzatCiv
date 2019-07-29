@@ -8,11 +8,11 @@ namespace ErsatzCivLib.Model
     /// <summary>
     /// Represents a map square.
     /// </summary>
-    public class MapSquarePivot : IOnMapPivot
+    public class MapSquarePivot
     {
         #region Properties
 
-        public event EventHandler SquareChangeEvent;
+        public event EventHandler<SquareChangedEventArgs> SquareChangeEvent;
 
         private List<CurrentActionPivot> _currentActions = new List<CurrentActionPivot>();
 
@@ -57,12 +57,14 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public bool CrossedByRiver { get; private set; }
         public bool? RiverTopToBottom { get; private set; }
+        internal MapPivot Parent { get; private set; }
 
         #endregion
 
-        internal MapSquarePivot(BiomePivot biome, int row, int column, BiomePivot underlyingType = null) : base(row, column)
+        internal MapSquarePivot(BiomePivot biome, MapPivot parent, BiomePivot underlyingType = null)
         {
             Biome = biome ?? throw new ArgumentNullException(nameof(biome));
+            Parent = parent;
             if (Biome.Actions.Contains(WorkerActionPivot.Clear))
             {
                 UnderlyingBiome = underlyingType ?? throw new ArgumentNullException(nameof(underlyingType));
@@ -89,14 +91,14 @@ namespace ErsatzCivLib.Model
 
         internal void ApplyCityActions(CityPivot city)
         {
-            if (!Same(city.Row, city.Column))
+            if (Parent[city.Row, city.Column] != this)
             {
                 return;
             }
 
             Road = true;
             RailRoad = true;
-            SquareChangeEvent?.Invoke(this, new EventArgs());
+            SquareChangeEvent?.Invoke(this, new SquareChangedEventArgs(this, city.Row, city.Column));
         }
 
         /// <summary>
@@ -199,7 +201,7 @@ namespace ErsatzCivLib.Model
         /// This method need to be called at the end of each turn.
         /// If two opposed actions ends on the same turn, latest added is applied.
         /// </summary>
-        internal void UpdateActionsProgress()
+        internal void UpdateActionsProgress(int row, int column)
         {
             var removableActions = new List<CurrentActionPivot>();
             foreach (var action in _currentActions)
@@ -278,7 +280,7 @@ namespace ErsatzCivLib.Model
                     {
                         Road = true;
                     }
-                    SquareChangeEvent?.Invoke(this, new EventArgs());
+                    SquareChangeEvent?.Invoke(this, new SquareChangedEventArgs(this, row, column));
                 }
             }
 
@@ -364,6 +366,20 @@ namespace ErsatzCivLib.Model
             public void Dispose()
             {
                 _globalActions.Remove(this);
+            }
+        }
+
+        public class SquareChangedEventArgs : EventArgs
+        {
+            public MapSquarePivot MapSquare { get; private set; }
+            public int Row { get; private set; }
+            public int Column { get; private set; }
+
+            public SquareChangedEventArgs(MapSquarePivot mapSquare, int row, int column)
+            {
+                MapSquare = mapSquare;
+                Row = row;
+                Column = column;
             }
         }
     }
