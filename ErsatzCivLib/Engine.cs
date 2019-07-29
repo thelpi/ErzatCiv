@@ -13,6 +13,7 @@ namespace ErsatzCivLib
     {
         private List<UnitPivot> _units = new List<UnitPivot>();
         private List<CityPivot> _cities = new List<CityPivot>();
+        private List<InProgressWorkerActionPivot> _globalActions = new List<InProgressWorkerActionPivot>();
 
         [field: NonSerialized]
         public event EventHandler<NextUnitEventArgs> NextUnitEvent;
@@ -67,7 +68,7 @@ namespace ErsatzCivLib
             {
                 return null;
             }
-            var city = new CityPivot(settler.Row, settler.Column);
+            var city = new CityPivot(this, settler.Row, settler.Column);
             sq.ApplyCityActions(city);
 
             _cities.Add(city);
@@ -122,12 +123,12 @@ namespace ErsatzCivLib
             {
                 for (var j = 0; j < Map.Width; j++)
                 {
-                    Map[i, j].UpdateActionsProgress(i, j);
+                    Map[i, j].UpdateActionsProgress(this, i, j);
                 }
             }
             foreach (var u in _units)
             {
-                u.Release();
+                u.Release(this);
             }
             CurrentTurn++;
             SetUnitIndex(false, true);
@@ -246,6 +247,26 @@ namespace ErsatzCivLib
             {
                 return ex.Message;
             }
+        }
+
+        internal bool OccupiedByAnotherCity(CityPivot currentCity, int row, int column)
+        {
+            return !_cities.Any(c => c != currentCity && c.Citizens.Any(cc => cc.Row == row && cc.Column == column));
+        }
+
+        internal bool WorkerIsBusy(WorkerPivot worker)
+        {
+            return _globalActions.Any(a => a.ContainsWorker(worker));
+        }
+
+        internal void AddWorkerAction(InProgressWorkerActionPivot action)
+        {
+            _globalActions.Add(action);
+        }
+
+        internal void RemoveWorkerAction(InProgressWorkerActionPivot action)
+        {
+            _globalActions.Remove(action);
         }
 
         public class NextUnitEventArgs : EventArgs

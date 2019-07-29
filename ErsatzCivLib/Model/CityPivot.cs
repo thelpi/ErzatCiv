@@ -18,6 +18,7 @@ namespace ErsatzCivLib.Model
         public int Row { get; private set; }
         public int Column { get; private set; }
         public string RenderValue { get; private set; }
+        internal MapPivot Map { get; private set; }
         public IReadOnlyCollection<CitizenPivot> Citizens { get { return _citizens; } }
         public int Population
         {
@@ -27,12 +28,45 @@ namespace ErsatzCivLib.Model
             }
         }
 
-        internal CityPivot(int row, int column)
+        internal CityPivot(Engine engine, int row, int column)
         {
+            Map = engine.Map;
             Row = row;
             Column = column;
             RenderValue = CITY_RENDER_PATH;
-            //_citizens.Add(new CitizenPivot());
+
+            var coordinates = BestCoordinates(engine);
+            _citizens.Add(new CitizenPivot(coordinates.Item1, coordinates.Item2));
+        }
+
+        private Tuple<int, int> BestCoordinates(Engine engine)
+        {
+            var bestCoord = new Tuple<int, int>(-1, -1);
+            var currentBestValue = -1;
+
+            for (int x = Row - 2; x <= Row + 2; x++)
+            {
+                for (int y = Column - 2; y <= Column + 2; y++)
+                {
+                    var currentSquare = Map[x, y];
+                    if (currentSquare != null
+                        && !(x == Row && y == Column)
+                        && !(x == Row - 2 && y == Column - 2)
+                        && !(x == Row + 2 && y == Column - 2)
+                        && !(x == Row - 2 && y == Column + 2)
+                        && !(x == Row + 2 && y == Column + 2)
+                        && !engine.OccupiedByAnotherCity(this, x, y))
+                    {
+                        if (currentBestValue < currentSquare.TotalValue)
+                        {
+                            currentBestValue = currentSquare.TotalValue;
+                            bestCoord = new Tuple<int, int>(x, y);
+                        }
+                    }
+                }
+            }
+
+            return bestCoord;
         }
 
         [Serializable]

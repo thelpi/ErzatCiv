@@ -42,7 +42,7 @@ namespace ErsatzCivLib.Model
         public int Speed { get; private set; }
         public double RemainingMoves { get; protected set; }
 
-        internal virtual void Release()
+        internal virtual void Release(Engine engine)
         {
             RemainingMoves = Speed;
         }

@@ -16,7 +16,7 @@ namespace ErsatzCivLib.Model
         [field: NonSerialized]
         public event EventHandler<SquareChangedEventArgs> SquareChangeEvent;
 
-        private List<CurrentActionPivot> _currentActions = new List<CurrentActionPivot>();
+        private List<InProgressWorkerActionPivot> _currentActions = new List<InProgressWorkerActionPivot>();
 
         /// <summary>
         /// Square type.
@@ -51,9 +51,9 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public bool Fortress { get; private set; }
         /// <summary>
-        /// List of <see cref="CurrentActionPivot"/> in progress for this instance.
+        /// List of <see cref="InProgressWorkerActionPivot"/> in progress for this instance.
         /// </summary>
-        public IReadOnlyCollection<CurrentActionPivot> CurrentActions { get { return _currentActions; } }
+        public IReadOnlyCollection<InProgressWorkerActionPivot> CurrentActions { get { return _currentActions; } }
         /// <summary>
         /// Indicates if the square is crossed by a river.
         /// </summary>
@@ -199,58 +199,58 @@ namespace ErsatzCivLib.Model
 
             if (action == WorkerActionPivot.Irrigate)
             {
-                return ApplyActionInternal(worker, action, Irrigate);
+                return ApplyActionInternal(engine, worker, action, Irrigate);
             }
 
             if (action == WorkerActionPivot.Mine)
             {
-                return ApplyActionInternal(worker, action, Mine);
+                return ApplyActionInternal(engine, worker, action, Mine);
             }
 
             if (action == WorkerActionPivot.Road)
             {
-                return ApplyActionInternal(worker, action, Road);
+                return ApplyActionInternal(engine, worker, action, Road);
             }
 
             if (action == WorkerActionPivot.DestroyImprovement)
             {
-                return ApplyActionInternal(worker, action, !Irrigate && !Mine && !Fortress);
+                return ApplyActionInternal(engine, worker, action, !Irrigate && !Mine && !Fortress);
             }
 
             if (action == WorkerActionPivot.DestroyRoad)
             {
-                return ApplyActionInternal(worker, action, !Road && !RailRoad);
+                return ApplyActionInternal(engine, worker, action, !Road && !RailRoad);
             }
 
             if (action == WorkerActionPivot.BuildFortress)
             {
-                return ApplyActionInternal(worker, action, Fortress);
+                return ApplyActionInternal(engine, worker, action, Fortress);
             }
 
             if (action == WorkerActionPivot.Clear)
             {
-                return ApplyActionInternal(worker, action, false);
+                return ApplyActionInternal(engine, worker, action, false);
             }
 
             if (action == WorkerActionPivot.ClearPollution)
             {
-                return ApplyActionInternal(worker, action, Pollution);
+                return ApplyActionInternal(engine, worker, action, Pollution);
             }
 
             if (action == WorkerActionPivot.Plant)
             {
-                return ApplyActionInternal(worker, action, false);
+                return ApplyActionInternal(engine, worker, action, false);
             }
 
             if (action == WorkerActionPivot.RailRoad)
             {
-                return ApplyActionInternal(worker, action, RailRoad);
+                return ApplyActionInternal(engine, worker, action, RailRoad);
             }
 
             return false;
         }
 
-        private bool ApplyActionInternal(WorkerPivot worker, WorkerActionPivot action, bool currentApplianceValue)
+        private bool ApplyActionInternal(Engine engine, WorkerPivot worker, WorkerActionPivot action, bool currentApplianceValue)
         {
             if (currentApplianceValue)
             {
@@ -260,11 +260,11 @@ namespace ErsatzCivLib.Model
             var actionInProgress = CurrentActions.SingleOrDefault(a => a.Action == action);
             if (actionInProgress == null)
             {
-                actionInProgress = new CurrentActionPivot(action);
+                actionInProgress = new InProgressWorkerActionPivot(engine, action);
                 _currentActions.Add(actionInProgress);
             }
 
-            return actionInProgress.AddWorker(worker);
+            return actionInProgress.AddWorker(engine, worker);
         }
 
         /// <summary>
@@ -272,9 +272,9 @@ namespace ErsatzCivLib.Model
         /// This method need to be called at the end of each turn.
         /// If two opposed actions ends on the same turn, latest added is applied.
         /// </summary>
-        internal void UpdateActionsProgress(int row, int column)
+        internal void UpdateActionsProgress(Engine engine, int row, int column)
         {
-            var removableActions = new List<CurrentActionPivot>();
+            var removableActions = new List<InProgressWorkerActionPivot>();
             foreach (var action in _currentActions)
             {
                 if (!action.HasWorkers)
@@ -358,86 +358,7 @@ namespace ErsatzCivLib.Model
             foreach (var action in removableActions.Distinct())
             {
                 _currentActions.Remove(action);
-                action.Dispose();
-            }
-        }
-
-        /// <summary>
-        /// Represents a <see cref="WorkerActionPivot"/> in progress.
-        /// </summary>
-        [Serializable]
-        public class CurrentActionPivot : IDisposable
-        {
-            private static List<CurrentActionPivot> _globalActions = new List<CurrentActionPivot>();
-
-            private List<WorkerPivot> _workers;
-
-            /// <summary>
-            /// Related <see cref="WorkerActionPivot"/>.
-            /// </summary>
-            public WorkerActionPivot Action { get; private set; }
-            /// <summary>
-            /// Number of turns already spent.
-            /// </summary>
-            public int TurnsCount { get; private set; }
-
-            /// <summary>
-            /// Inferred; indicates if the action has at least one worker.
-            /// </summary>
-            public bool HasWorkers { get { return _workers.Count > 0; } }
-            /// <summary>
-            /// Inferred; indicates if the action is done.
-            /// </summary>
-            public bool IsDone { get { return TurnsCount >= Action.TurnCost; } }
-
-            internal static bool WorkerIsBusy(WorkerPivot worker)
-            {
-                return _globalActions.Any(a => a._workers.Contains(worker));
-            }
-
-            /// <summary>
-            /// Constructor.
-            /// </summary>
-            /// <remarks>The task has no worker by default.</remarks>
-            /// <param name="guid">Caller key.</param>
-            /// <param name="action">The action to start.</param>
-            internal CurrentActionPivot(WorkerActionPivot action)
-            {
-                Action = action ?? throw new ArgumentNullException(nameof(action));
-                _workers = new List<WorkerPivot>();
-                TurnsCount = 0;
-                _globalActions.Add(this);
-            }
-
-            /// <summary>
-            /// Adds a worker to the action.
-            /// </summary>
-            /// <param name="worker">The worker.</param>
-            /// <returns><c>True</c> if success; <c>False</c> otherwise.</returns>
-            internal bool AddWorker(WorkerPivot worker)
-            {
-                bool canWork = !WorkerIsBusy(worker);
-                if (canWork)
-                {
-                    _workers.Add(worker);
-                }
-                return canWork;
-            }
-
-            /// <summary>
-            /// Recomputes <see cref="TurnsCount"/>.
-            /// </summary>
-            internal void ForwardProgression()
-            {
-                TurnsCount += _workers.Count;
-            }
-
-            /// <summary>
-            /// Disposes the instance.
-            /// </summary>
-            public void Dispose()
-            {
-                _globalActions.Remove(this);
+                engine.RemoveWorkerAction(action);
             }
         }
 

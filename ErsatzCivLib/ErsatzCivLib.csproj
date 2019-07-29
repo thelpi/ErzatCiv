@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="Model\BiomeSizePivot.cs" />
     <Compile Include="Model\CityPivot.cs" />
+    <Compile Include="Model\CurrentWorkerActionPivot.cs" />
     <Compile Include="Model\DirectionPivot.cs" />
     <Compile Include="Engine.cs" />
     <Compile Include="Model\MapPivot.cs" />

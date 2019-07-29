@@ -13,9 +13,9 @@ namespace ErsatzCivLib.Model.Units
 
         }
 
-        internal override void Release()
+        internal override void Release(Engine engine)
         {
-            RemainingMoves = MapSquarePivot.CurrentActionPivot.WorkerIsBusy(this) ? 0 : Speed;
+            RemainingMoves = engine.WorkerIsBusy(this) ? 0 : Speed;
         }
     }
 }
