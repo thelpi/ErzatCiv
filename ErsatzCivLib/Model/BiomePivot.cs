@@ -11,7 +11,7 @@ namespace ErsatzCivLib.Model
     public class BiomePivot
     {
         /// <summary>
-        /// Productivity, food and commerce bonus when the square is through by a river.
+        /// Food and commerce bonus when the square is through by a river.
         /// </summary>
         public const int RIVER_BONUS = 1;
 

@@ -103,7 +103,7 @@ namespace ErsatzCivLib.Model
             {
                 RemainingMoves -=
                     (isCity ? CityPivot.CITY_SPEED_COST : square.Biome.SpeedCost)
-                    * (prevSq.Road && square.Road ? WorkerActionPivot.ROAD_RATIO : 1);
+                    * (prevSq.Road && square.Road ? WorkerActionPivot.ROAD_SPEED_COST_RATIO : 1);
             }
 
             Row = x;

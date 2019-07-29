@@ -8,7 +8,15 @@ namespace ErsatzCivLib.Model
     [Serializable]
     public class WorkerActionPivot
     {
-        internal const double ROAD_RATIO = 0.3;
+        internal const double ROAD_SPEED_COST_RATIO = 0.3;
+
+        internal const int RAILROAD_PRODUCTIVITY_BONUS = 1;
+        internal const int RAILROAD_COMMERCE_BONUS = 1;
+        internal const int ROAD_COMMERCE_BONUS = 1;
+        internal const int MINE_PRODUCTIVITY_MULTIPLE = 2;
+        internal const int MINE_PRODUCTIVITY_BONUS_IF_ZERO = 1;
+        internal const int IRRIGATE_FOOD_MULTIPLE = 2;
+        internal const int IRRIGATE_FOOD_BONUS_IF_ZERO = 1;
 
         #region Properties
 
@@ -90,7 +98,7 @@ namespace ErsatzCivLib.Model
         /// Builds a road.
         /// </summary>
         /// <remarks>
-        /// Increase the unit speed (x2), and the commerce by one unit.
+        /// Increase the unit speed (x3), and the commerce by one unit.
         /// </remarks>
         public static WorkerActionPivot Road
         {

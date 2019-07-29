@@ -60,6 +60,75 @@ namespace ErsatzCivLib.Model
         public bool CrossedByRiver { get; private set; }
         public bool? RiverTopToBottom { get; private set; }
         internal MapPivot Parent { get; private set; }
+        public int Food
+        {
+            get
+            {
+                var baseValue = 0;
+                if (!Pollution)
+                {
+                    baseValue = Biome.Food;
+                    if (CrossedByRiver)
+                    {
+                        baseValue += BiomePivot.RIVER_BONUS;
+                    }
+                    if (Irrigate)
+                    {
+                        baseValue = baseValue == 0 ?
+                            WorkerActionPivot.IRRIGATE_FOOD_BONUS_IF_ZERO :
+                            baseValue * WorkerActionPivot.IRRIGATE_FOOD_MULTIPLE;
+                    }
+                }
+                return baseValue;
+            }
+        }
+        public int Productivity
+        {
+            get
+            {
+                var baseValue = 0;
+                if (!Pollution)
+                {
+                    baseValue = Biome.Productivity;
+                    if (Mine)
+                    {
+                        baseValue = baseValue == 0 ?
+                            WorkerActionPivot.MINE_PRODUCTIVITY_BONUS_IF_ZERO :
+                            baseValue * WorkerActionPivot.MINE_PRODUCTIVITY_MULTIPLE;
+                    }
+                    if (RailRoad && baseValue > 0)
+                    {
+                        baseValue += WorkerActionPivot.RAILROAD_PRODUCTIVITY_BONUS;
+                    }
+                }
+                return baseValue;
+            }
+        }
+        public int Commerce
+        {
+            get
+            {
+                var baseValue = 0;
+                if (!Pollution)
+                {
+                    baseValue = Biome.Commerce;
+                    if (CrossedByRiver)
+                    {
+                        baseValue += BiomePivot.RIVER_BONUS;
+                    }
+                    if (Road)
+                    {
+                        baseValue += WorkerActionPivot.ROAD_COMMERCE_BONUS;
+                    }
+                    if (RailRoad)
+                    {
+                        baseValue += WorkerActionPivot.RAILROAD_COMMERCE_BONUS;
+                    }
+                }
+                return baseValue;
+            }
+        }
+        public int TotalValue { get { return Food + Productivity + Commerce; } }
 
         #endregion
 
