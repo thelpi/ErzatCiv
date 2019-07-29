@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ErsatzCivLib.Model.Persistent;
 using ErsatzCivLib.Model.Units;
 
 namespace ErsatzCivLib.Model
@@ -8,7 +9,7 @@ namespace ErsatzCivLib.Model
     /// Represents a <see cref="WorkerActionPivot"/> in progress.
     /// </summary>
     [Serializable]
-    public class InProgressWorkerActionPivot
+    public class InProgressWorkerActionPivot : BasePivot
     {
         private List<WorkerPivot> _workers;
 
@@ -36,12 +37,12 @@ namespace ErsatzCivLib.Model
         /// <remarks>The task has no worker by default.</remarks>
         /// <param name="guid">Caller key.</param>
         /// <param name="action">The action to start.</param>
-        internal InProgressWorkerActionPivot(Engine engine, WorkerActionPivot action)
+        internal InProgressWorkerActionPivot(Engine owner, WorkerActionPivot action) : base(owner)
         {
             Action = action ?? throw new ArgumentNullException(nameof(action));
             _workers = new List<WorkerPivot>();
             TurnsCount = 0;
-            engine.AddWorkerAction(this);
+            Owner.AddWorkerAction(this);
         }
 
         /// <summary>
@@ -49,9 +50,9 @@ namespace ErsatzCivLib.Model
         /// </summary>
         /// <param name="worker">The worker.</param>
         /// <returns><c>True</c> if success; <c>False</c> otherwise.</returns>
-        internal bool AddWorker(Engine engine, WorkerPivot worker)
+        internal bool AddWorker(WorkerPivot worker)
         {
-            bool canWork = !engine.WorkerIsBusy(worker);
+            bool canWork = !Owner.WorkerIsBusy(worker);
             if (canWork)
             {
                 _workers.Add(worker);

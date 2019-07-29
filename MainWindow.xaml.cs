@@ -11,6 +11,7 @@ using System.Windows.Shapes;
 using ErsatzCiv.Properties;
 using ErsatzCivLib;
 using ErsatzCivLib.Model;
+using ErsatzCivLib.Model.Persistent;
 
 namespace ErsatzCiv
 {

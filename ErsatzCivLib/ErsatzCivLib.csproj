@@ -40,16 +40,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Model\BiomeSizePivot.cs" />
+    <Compile Include="Model\BasePivot.cs" />
+    <Compile Include="Model\Persistent\BiomeSizePivot.cs" />
     <Compile Include="Model\CityPivot.cs" />
     <Compile Include="Model\CurrentWorkerActionPivot.cs" />
-    <Compile Include="Model\DirectionPivot.cs" />
+    <Compile Include="Model\Persistent\DirectionPivot.cs" />
     <Compile Include="Engine.cs" />
     <Compile Include="Model\MapPivot.cs" />
-    <Compile Include="Model\WorkerActionPivot.cs" />
+    <Compile Include="Model\Persistent\WorkerActionPivot.cs" />
     <Compile Include="Model\MapSquarePivot.cs" />
-    <Compile Include="Model\BiomePivot.cs" />
-    <Compile Include="Model\RenderTypePivot.cs" />
+    <Compile Include="Model\Persistent\BiomePivot.cs" />
+    <Compile Include="Model\Persistent\RenderTypePivot.cs" />
     <Compile Include="Model\Units\SettlerPivot.cs" />
     <Compile Include="Model\UnitPivot.cs" />
     <Compile Include="Model\Units\WorkerPivot.cs" />

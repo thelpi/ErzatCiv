@@ -1,4 +1,5 @@
 ﻿using System;
+using ErsatzCivLib.Model.Persistent;
 
 namespace ErsatzCivLib.Model
 {
@@ -6,10 +7,8 @@ namespace ErsatzCivLib.Model
     /// Represents an unit.
     /// </summary>
     [Serializable]
-    public abstract class UnitPivot
+    public abstract class UnitPivot : BasePivot
     {
-        protected Engine _engine { get; private set; }
-
         /// <summary>
         /// Row on the map grid.
         /// </summary>
@@ -56,10 +55,9 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public RenderTypePivot RenderType { get; private set; }
 
-        protected UnitPivot(Engine engine, int row, int column, bool seaNavigate, bool groundNavigate, int defensePoints, int offensePoints,
-            string renderValue, RenderTypePivot renderType, int lifePoints, int speed)
+        protected UnitPivot(Engine owner, int row, int column, bool seaNavigate, bool groundNavigate, int defensePoints, int offensePoints,
+            string renderValue, RenderTypePivot renderType, int lifePoints, int speed) : base(owner)
         {
-            _engine = engine;
             Row = row;
             Column = column;
             SeaNavigate = seaNavigate;
@@ -83,15 +81,15 @@ namespace ErsatzCivLib.Model
             if (!direction.HasValue)
             {
                 RemainingMoves = 0;
-                _engine.ToNextUnit();
+                Owner.ToNextUnit();
                 return true;
             }
 
             var x = direction.Value.Row(Row);
             var y = direction.Value.Column(Column);
-            var square = _engine.Map[x, y];
-            var prevSq = _engine.Map[Row, Column];
-            bool isCity = _engine.IsCity(x, y);
+            var square = Owner.Map[x, y];
+            var prevSq = Owner.Map[Row, Column];
+            bool isCity = Owner.IsCity(x, y);
             if (square == null
                 || (square.Biome.IsSeaType && !SeaNavigate && !isCity)
                 || (!square.Biome.IsSeaType && !GroundNavigate && !isCity))
@@ -112,7 +110,7 @@ namespace ErsatzCivLib.Model
             if (RemainingMoves <= 0)
             {
                 RemainingMoves = 0;
-                _engine.ToNextUnit();
+                Owner.ToNextUnit();
             }
 
             return true;

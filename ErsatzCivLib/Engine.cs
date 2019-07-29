@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using ErsatzCivLib.Model;
+using ErsatzCivLib.Model.Persistent;
 using ErsatzCivLib.Model.Units;
 
 namespace ErsatzCivLib
@@ -33,7 +34,7 @@ namespace ErsatzCivLib
             MapPivot.LandCoveragePivot landCoverage,
             MapPivot.TemperaturePivot temperature)
         {
-            Map = new MapPivot(mapSize, mapShape, landCoverage, temperature);
+            Map = new MapPivot(this, mapSize, mapShape, landCoverage, temperature);
 
             int x = 0;
             int y = 0;
@@ -123,7 +124,7 @@ namespace ErsatzCivLib
             {
                 for (var j = 0; j < Map.Width; j++)
                 {
-                    Map[i, j].UpdateActionsProgress(this, i, j);
+                    Map[i, j].UpdateActionsProgress(i, j);
                 }
             }
             foreach (var u in _units)
@@ -159,7 +160,7 @@ namespace ErsatzCivLib
                 actionPivot = WorkerActionPivot.Road;
             }
 
-            var result = sq.ApplyAction(this, worker, actionPivot);
+            var result = sq.ApplyAction(worker, actionPivot);
             if (result)
             {
                 worker.Move(null);

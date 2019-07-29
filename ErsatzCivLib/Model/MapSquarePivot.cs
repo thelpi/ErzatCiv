@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ErsatzCivLib.Model.Persistent;
 using ErsatzCivLib.Model.Units;
 
 namespace ErsatzCivLib.Model
@@ -9,7 +10,7 @@ namespace ErsatzCivLib.Model
     /// Represents a map square.
     /// </summary>
     [Serializable]
-    public class MapSquarePivot
+    public class MapSquarePivot : BasePivot
     {
         #region Properties
 
@@ -59,7 +60,6 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public bool CrossedByRiver { get; private set; }
         public bool? RiverTopToBottom { get; private set; }
-        internal MapPivot Parent { get; private set; }
         public int Food
         {
             get
@@ -132,10 +132,9 @@ namespace ErsatzCivLib.Model
 
         #endregion
 
-        internal MapSquarePivot(BiomePivot biome, MapPivot parent, BiomePivot underlyingType = null)
+        internal MapSquarePivot(Engine owner, BiomePivot biome, BiomePivot underlyingType = null) : base(owner)
         {
             Biome = biome ?? throw new ArgumentNullException(nameof(biome));
-            Parent = parent;
             if (Biome.Actions.Contains(WorkerActionPivot.Clear))
             {
                 UnderlyingBiome = underlyingType ?? throw new ArgumentNullException(nameof(underlyingType));
@@ -162,7 +161,7 @@ namespace ErsatzCivLib.Model
 
         internal void ApplyCityActions(CityPivot city)
         {
-            if (Parent[city.Row, city.Column] != this)
+            if (Owner.Map[city.Row, city.Column] != this)
             {
                 return;
             }
@@ -180,7 +179,7 @@ namespace ErsatzCivLib.Model
         /// <returns>
         /// <c>True</c> if the worker actually starts the action; <c>False</c> otherwise.
         /// </returns>
-        internal bool ApplyAction(Engine engine, WorkerPivot worker, WorkerActionPivot action)
+        internal bool ApplyAction(WorkerPivot worker, WorkerActionPivot action)
         {
             if (worker == null)
             {
@@ -192,65 +191,65 @@ namespace ErsatzCivLib.Model
                 throw new ArgumentNullException(nameof(action));
             }
 
-            if ((!action.AlwaysAvailable && !Biome.Actions.Contains(action)) || engine.IsCity(worker.Row, worker.Column))
+            if ((!action.AlwaysAvailable && !Biome.Actions.Contains(action)) || Owner.IsCity(worker.Row, worker.Column))
             {
                 return false;
             }
 
             if (action == WorkerActionPivot.Irrigate)
             {
-                return ApplyActionInternal(engine, worker, action, Irrigate);
+                return ApplyActionInternal(worker, action, Irrigate);
             }
 
             if (action == WorkerActionPivot.Mine)
             {
-                return ApplyActionInternal(engine, worker, action, Mine);
+                return ApplyActionInternal(worker, action, Mine);
             }
 
             if (action == WorkerActionPivot.Road)
             {
-                return ApplyActionInternal(engine, worker, action, Road);
+                return ApplyActionInternal(worker, action, Road);
             }
 
             if (action == WorkerActionPivot.DestroyImprovement)
             {
-                return ApplyActionInternal(engine, worker, action, !Irrigate && !Mine && !Fortress);
+                return ApplyActionInternal(worker, action, !Irrigate && !Mine && !Fortress);
             }
 
             if (action == WorkerActionPivot.DestroyRoad)
             {
-                return ApplyActionInternal(engine, worker, action, !Road && !RailRoad);
+                return ApplyActionInternal(worker, action, !Road && !RailRoad);
             }
 
             if (action == WorkerActionPivot.BuildFortress)
             {
-                return ApplyActionInternal(engine, worker, action, Fortress);
+                return ApplyActionInternal(worker, action, Fortress);
             }
 
             if (action == WorkerActionPivot.Clear)
             {
-                return ApplyActionInternal(engine, worker, action, false);
+                return ApplyActionInternal(worker, action, false);
             }
 
             if (action == WorkerActionPivot.ClearPollution)
             {
-                return ApplyActionInternal(engine, worker, action, Pollution);
+                return ApplyActionInternal(worker, action, Pollution);
             }
 
             if (action == WorkerActionPivot.Plant)
             {
-                return ApplyActionInternal(engine, worker, action, false);
+                return ApplyActionInternal(worker, action, false);
             }
 
             if (action == WorkerActionPivot.RailRoad)
             {
-                return ApplyActionInternal(engine, worker, action, RailRoad);
+                return ApplyActionInternal(worker, action, RailRoad);
             }
 
             return false;
         }
 
-        private bool ApplyActionInternal(Engine engine, WorkerPivot worker, WorkerActionPivot action, bool currentApplianceValue)
+        private bool ApplyActionInternal(WorkerPivot worker, WorkerActionPivot action, bool currentApplianceValue)
         {
             if (currentApplianceValue)
             {
@@ -260,11 +259,11 @@ namespace ErsatzCivLib.Model
             var actionInProgress = CurrentActions.SingleOrDefault(a => a.Action == action);
             if (actionInProgress == null)
             {
-                actionInProgress = new InProgressWorkerActionPivot(engine, action);
+                actionInProgress = new InProgressWorkerActionPivot(Owner, action);
                 _currentActions.Add(actionInProgress);
             }
 
-            return actionInProgress.AddWorker(engine, worker);
+            return actionInProgress.AddWorker(worker);
         }
 
         /// <summary>
@@ -272,7 +271,7 @@ namespace ErsatzCivLib.Model
         /// This method need to be called at the end of each turn.
         /// If two opposed actions ends on the same turn, latest added is applied.
         /// </summary>
-        internal void UpdateActionsProgress(Engine engine, int row, int column)
+        internal void UpdateActionsProgress(int row, int column)
         {
             var removableActions = new List<InProgressWorkerActionPivot>();
             foreach (var action in _currentActions)
@@ -358,7 +357,7 @@ namespace ErsatzCivLib.Model
             foreach (var action in removableActions.Distinct())
             {
                 _currentActions.Remove(action);
-                engine.RemoveWorkerAction(action);
+                Owner.RemoveWorkerAction(action);
             }
         }
 

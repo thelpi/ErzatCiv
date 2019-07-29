@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ErsatzCivLib.Model.Persistent;
 
 namespace ErsatzCivLib.Model
 {
     [Serializable]
-    public class MapPivot
+    public class MapPivot : BasePivot
     {
         #region Constants (private)
 
@@ -92,7 +93,7 @@ namespace ErsatzCivLib.Model
         /// <param name="mapShape"><see cref="LandShapePivot"/></param>
         /// <param name="landCoverage"><see cref="LandCoveragePivot"/></param>
         /// <param name="temperature"><see cref="TemperaturePivot"/></param>
-        internal MapPivot(SizePivot mapSize, LandShapePivot mapShape, LandCoveragePivot landCoverage, TemperaturePivot temperature)
+        internal MapPivot(Engine owner, SizePivot mapSize, LandShapePivot mapShape, LandCoveragePivot landCoverage, TemperaturePivot temperature) : base(owner)
         {
             var continentCount = mapShape == LandShapePivot.Pangaea ? 1 : (
                 mapShape == LandShapePivot.Continent ? Tools.Randomizer.Next(CONTINENT_COUNT_MIN, CONTINENT_COUNT_MAX + 1) :
@@ -328,7 +329,7 @@ namespace ErsatzCivLib.Model
                     {
                         isCoast = true;
                     }
-                    var newSquare = new MapSquarePivot(biome, this, null);
+                    var newSquare = new MapSquarePivot(Owner, biome, null);
                     continentSquares.Add(new Tuple<MapSquarePivot, int, int>(newSquare, y, x));
                     if (isCoast)
                     {

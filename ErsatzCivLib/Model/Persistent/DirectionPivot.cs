@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ErsatzCivLib.Model
+namespace ErsatzCivLib.Model.Persistent
 {
     [Serializable]
     public enum DirectionPivot

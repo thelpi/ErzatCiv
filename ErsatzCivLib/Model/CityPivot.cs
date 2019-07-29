@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace ErsatzCivLib.Model
 {
     [Serializable]
-    public class CityPivot
+    public class CityPivot : BasePivot
     {
         public const double DISPLAY_RATIO = 0.8;
         internal const int CITY_SPEED_COST = 1;
@@ -14,7 +14,6 @@ namespace ErsatzCivLib.Model
         private static readonly double NEXT_CITIZEN_EULER = (FORTY_CITIZEN_EULER - FIRST_CITIZEN_EULER) / (40 - 1);
 
         private List<CitizenPivot> _citizens = new List<CitizenPivot>();
-        private Engine _engine;
 
         public int Row { get; private set; }
         public int Column { get; private set; }
@@ -28,9 +27,8 @@ namespace ErsatzCivLib.Model
             }
         }
 
-        internal CityPivot(Engine engine, int row, int column)
+        internal CityPivot(Engine owner, int row, int column) : base(owner)
         {
-            _engine = engine;
             Row = row;
             Column = column;
             RenderValue = CITY_RENDER_PATH;
@@ -48,14 +46,14 @@ namespace ErsatzCivLib.Model
             {
                 for (int y = Column - 2; y <= Column + 2; y++)
                 {
-                    var currentSquare = _engine.Map[x, y];
+                    var currentSquare = Owner.Map[x, y];
                     if (currentSquare != null
                         && !(x == Row && y == Column)
                         && !(x == Row - 2 && y == Column - 2)
                         && !(x == Row + 2 && y == Column - 2)
                         && !(x == Row - 2 && y == Column + 2)
                         && !(x == Row + 2 && y == Column + 2)
-                        && !_engine.OccupiedByAnotherCity(this, x, y))
+                        && !Owner.OccupiedByAnotherCity(this, x, y))
                     {
                         if (currentBestValue < currentSquare.TotalValue)
                         {

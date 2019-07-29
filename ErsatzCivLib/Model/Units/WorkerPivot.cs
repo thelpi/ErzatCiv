@@ -1,4 +1,5 @@
 ﻿using System;
+using ErsatzCivLib.Model.Persistent;
 
 namespace ErsatzCivLib.Model.Units
 {
@@ -7,7 +8,7 @@ namespace ErsatzCivLib.Model.Units
     {
         public const int LifePoints = 1;
 
-        internal WorkerPivot(Engine engine, int row, int column) : base(engine, row, column, false, true, 0, 0,
+        internal WorkerPivot(Engine owner, int row, int column) : base(owner, row, column, false, true, 0, 0,
             "unit_worker.png", RenderTypePivot.Image, LifePoints, 1)
         {
 
@@ -15,7 +16,7 @@ namespace ErsatzCivLib.Model.Units
 
         internal override void Release()
         {
-            RemainingMoves = _engine.WorkerIsBusy(this) ? 0 : Speed;
+            RemainingMoves = Owner.WorkerIsBusy(this) ? 0 : Speed;
         }
     }
 }
