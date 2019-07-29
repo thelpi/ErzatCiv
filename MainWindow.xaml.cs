@@ -28,10 +28,13 @@ namespace ErsatzCiv
         private double _minimapSquareSize;
         private Rectangle _rCapture;
 
-        public MainWindow()
+        public MainWindow(Engine engine)
         {
             InitializeComponent();
-            InitializeEngine();
+
+            _engine = engine;
+            InitializeEngineEvents();
+
             DrawFullMapAndMiniMap();
             RefreshDynamicView();
         }
@@ -550,9 +553,8 @@ namespace ErsatzCiv
 
         #region Other methods
 
-        private void InitializeEngine()
+        private void InitializeEngineEvents()
         {
-            _engine = new Engine(MapPivot.SizePivot.Large, MapPivot.LandShapePivot.Continent, MapPivot.LandCoveragePivot.High, MapPivot.TemperaturePivot.Temperate);
             _engine.NextUnitEvent += FocusOnUnit;
             _engine.SubscribeToMapSquareChangeEvent(UpdateSquareMap);
         }

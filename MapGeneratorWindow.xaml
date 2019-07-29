@@ -1,0 +1,43 @@
+﻿<Window x:Class="ErsatzCiv.MapGeneratorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ErsatzCiv"
+        mc:Ignorable="d" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize"
+        Title="Générateur de carte" Height="480" Width="600">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <ProgressBar HorizontalAlignment="Center" VerticalAlignment="Center" Name="ProgressBarLoading" Width="200" Height="25" IsIndeterminate="True" Visibility="Collapsed" />
+        <Grid Name="GridForm" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50" />
+                <RowDefinition Height="50" />
+                <RowDefinition Height="50" />
+                <RowDefinition Height="50" />
+                <RowDefinition Height="50" />
+                <RowDefinition Height="50" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="120" />
+                <ColumnDefinition Width="180" />
+            </Grid.ColumnDefinitions>
+            <Label VerticalAlignment="Center" HorizontalAlignment="Center" Content="Paramètres de génération" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" />
+            <Label VerticalAlignment="Center" HorizontalAlignment="Right" Content="Taille du monde :" Grid.Row="1" Grid.Column="0" />
+            <Label VerticalAlignment="Center" HorizontalAlignment="Right" Content="Forme du monde :" Grid.Row="2" Grid.Column="0" />
+            <Label VerticalAlignment="Center" HorizontalAlignment="Right" Content="Ratio terre / mer :" Grid.Row="3" Grid.Column="0" />
+            <Label VerticalAlignment="Center" HorizontalAlignment="Right" Content="Climat global :" Grid.Row="4" Grid.Column="0" />
+            <ComboBox VerticalAlignment="Center" HorizontalAlignment="Left" Height="25" Width="150" Grid.Column="1" Grid.Row="1" Name="ComboSize" VerticalContentAlignment="Center" />
+            <ComboBox VerticalAlignment="Center" HorizontalAlignment="Left" Height="25" Width="150" Grid.Column="1" Grid.Row="2" Name="ComboLandType" VerticalContentAlignment="Center" />
+            <ComboBox VerticalAlignment="Center" HorizontalAlignment="Left" Height="25" Width="150" Grid.Column="1" Grid.Row="3" Name="ComboLandRatio" VerticalContentAlignment="Center" />
+            <ComboBox VerticalAlignment="Center" HorizontalAlignment="Left" Height="25" Width="150" Grid.Column="1" Grid.Row="4" Name="ComboTemperature" VerticalContentAlignment="Center" />
+            <Button VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="5" Grid.Column="0" Content="Valider" Name="ConfirmButton" Click="ConfirmButton_Click" Width="75" Height="25" />
+            <Button VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="5" Grid.Column="1" Content="Annuler" Name="CancelButton" Click="CancelButton_Click" Width="75" Height="25" />
+        </Grid>
+    </Grid>
+</Window>

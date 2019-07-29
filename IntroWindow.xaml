@@ -1,0 +1,23 @@
+﻿<Window x:Class="ErsatzCiv.IntroWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ErsatzCiv"
+        mc:Ignorable="d" ResizeMode="CanMinimize"
+        WindowStartupLocation="CenterScreen"
+        Title="ErsatzCiv" Height="480" Width="640">
+    <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="200" />
+            <RowDefinition Height="50" />
+            <RowDefinition Height="50" />
+        </Grid.RowDefinitions>
+        <Label Grid.Column="0" Grid.Row="0" Content="ERSATZ CIV" VerticalAlignment="Center" HorizontalAlignment="Center" />
+        <Button Grid.Column="0" Grid.Row="1" Content="Nouvelle partie" Height="25" Width="150" Name="NewButton" Click="NewButton_Click" VerticalAlignment="Center" HorizontalAlignment="Center" />
+        <Button Grid.Column="0" Grid.Row="2" Content="Charger une partie" Height="25" Width="150" Name="LoadButton" Click="LoadButton_Click" VerticalAlignment="Center" HorizontalAlignment="Center" />
+    </Grid>
+</Window>
