@@ -9,7 +9,7 @@ namespace ErsatzCivLib.Model
     /// Represents a <see cref="WorkerActionPivot"/> in progress.
     /// </summary>
     [Serializable]
-    public class InProgressWorkerActionPivot : BasePivot
+    public class InProgressWorkerActionPivot
     {
         private List<WorkerPivot> _workers;
 
@@ -37,12 +37,11 @@ namespace ErsatzCivLib.Model
         /// <remarks>The task has no worker by default.</remarks>
         /// <param name="guid">Caller key.</param>
         /// <param name="action">The action to start.</param>
-        internal InProgressWorkerActionPivot(Engine owner, WorkerActionPivot action) : base(owner)
+        internal InProgressWorkerActionPivot(WorkerActionPivot action)
         {
             Action = action ?? throw new ArgumentNullException(nameof(action));
             _workers = new List<WorkerPivot>();
             TurnsCount = 0;
-            Owner.AddWorkerAction(this);
         }
 
         /// <summary>
@@ -52,12 +51,19 @@ namespace ErsatzCivLib.Model
         /// <returns><c>True</c> if success; <c>False</c> otherwise.</returns>
         internal bool AddWorker(WorkerPivot worker)
         {
-            bool canWork = !Owner.WorkerIsBusy(worker);
+            bool canWork = !worker.BusyOnAction;
             if (canWork)
             {
                 _workers.Add(worker);
+                worker.SetAction(this);
             }
             return canWork;
+        }
+
+        internal void RemoveWorkers()
+        {
+            _workers.ForEach(w => w.SetAction(null));
+            _workers.Clear();
         }
 
         /// <summary>
@@ -66,11 +72,6 @@ namespace ErsatzCivLib.Model
         internal void ForwardProgression()
         {
             TurnsCount += _workers.Count;
-        }
-
-        public bool ContainsWorker(WorkerPivot worker)
-        {
-            return _workers.Contains(worker);
         }
     }
 }

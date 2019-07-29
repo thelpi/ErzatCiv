@@ -259,7 +259,7 @@ namespace ErsatzCivLib.Model
             var actionInProgress = CurrentActions.SingleOrDefault(a => a.Action == action);
             if (actionInProgress == null)
             {
-                actionInProgress = new InProgressWorkerActionPivot(Owner, action);
+                actionInProgress = new InProgressWorkerActionPivot(action);
                 _currentActions.Add(actionInProgress);
             }
 
@@ -357,7 +357,7 @@ namespace ErsatzCivLib.Model
             foreach (var action in removableActions.Distinct())
             {
                 _currentActions.Remove(action);
-                Owner.RemoveWorkerAction(action);
+                action.RemoveWorkers();
             }
         }
 

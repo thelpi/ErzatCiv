@@ -8,6 +8,9 @@ namespace ErsatzCivLib.Model.Units
     {
         public const int LifePoints = 1;
 
+        private InProgressWorkerActionPivot _currentAction = null;
+        internal bool BusyOnAction { get { return _currentAction != null; } }
+
         internal WorkerPivot(Engine owner, int row, int column) : base(owner, row, column, false, true, 0, 0,
             "unit_worker.png", RenderTypePivot.Image, LifePoints, 1)
         {
@@ -16,7 +19,12 @@ namespace ErsatzCivLib.Model.Units
 
         internal override void Release()
         {
-            RemainingMoves = Owner.WorkerIsBusy(this) ? 0 : Speed;
+            RemainingMoves = BusyOnAction ? 0 : Speed;
+        }
+
+        internal void SetAction(InProgressWorkerActionPivot action)
+        {
+            _currentAction = action;
         }
     }
 }
