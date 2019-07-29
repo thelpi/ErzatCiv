@@ -8,6 +8,8 @@ namespace ErsatzCivLib.Model
     [Serializable]
     public abstract class UnitPivot
     {
+        protected Engine _engine { get; private set; }
+
         /// <summary>
         /// Row on the map grid.
         /// </summary>
@@ -40,13 +42,10 @@ namespace ErsatzCivLib.Model
         /// Square movement by turn.
         /// </summary>
         public int Speed { get; private set; }
+        /// <summary>
+        /// Remaining moves.
+        /// </summary>
         public double RemainingMoves { get; protected set; }
-
-        internal virtual void Release(Engine engine)
-        {
-            RemainingMoves = Speed;
-        }
-
         /// <summary>
         /// Render value.
         /// </summary>
@@ -57,9 +56,10 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public RenderTypePivot RenderType { get; private set; }
 
-        protected UnitPivot(int row, int column, bool seaNavigate, bool groundNavigate, int defensePoints, int offensePoints,
+        protected UnitPivot(Engine engine, int row, int column, bool seaNavigate, bool groundNavigate, int defensePoints, int offensePoints,
             string renderValue, RenderTypePivot renderType, int lifePoints, int speed)
         {
+            _engine = engine;
             Row = row;
             Column = column;
             SeaNavigate = seaNavigate;
@@ -73,7 +73,7 @@ namespace ErsatzCivLib.Model
             RemainingMoves = Speed;
         }
 
-        internal bool Move(Engine engine, DirectionPivot? direction)
+        internal bool Move(DirectionPivot? direction)
         {
             if (RemainingMoves == 0)
             {
@@ -83,15 +83,15 @@ namespace ErsatzCivLib.Model
             if (!direction.HasValue)
             {
                 RemainingMoves = 0;
-                engine.ToNextUnit();
+                _engine.ToNextUnit();
                 return true;
             }
 
             var x = direction.Value.Row(Row);
             var y = direction.Value.Column(Column);
-            var square = engine.Map[x, y];
-            var prevSq = engine.Map[Row, Column];
-            bool isCity = engine.IsCity(x, y);
+            var square = _engine.Map[x, y];
+            var prevSq = _engine.Map[Row, Column];
+            bool isCity = _engine.IsCity(x, y);
             if (square == null
                 || (square.Biome.IsSeaType && !SeaNavigate && !isCity)
                 || (!square.Biome.IsSeaType && !GroundNavigate && !isCity))
@@ -112,10 +112,15 @@ namespace ErsatzCivLib.Model
             if (RemainingMoves <= 0)
             {
                 RemainingMoves = 0;
-                engine.ToNextUnit();
+                _engine.ToNextUnit();
             }
 
             return true;
+        }
+
+        internal virtual void Release()
+        {
+            RemainingMoves = Speed;
         }
     }
 }

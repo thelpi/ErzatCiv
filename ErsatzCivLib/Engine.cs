@@ -44,8 +44,8 @@ namespace ErsatzCivLib
             }
             while (Map[x, y] == null || Map[x, y].Biome.IsSeaType);
 
-            _units.Add(new SettlerPivot(x, y));
-            _units.Add(new WorkerPivot(x, y));
+            _units.Add(new SettlerPivot(this, x, y));
+            _units.Add(new WorkerPivot(this, x, y));
 
             SetUnitIndex(false, true);
 
@@ -128,7 +128,7 @@ namespace ErsatzCivLib
             }
             foreach (var u in _units)
             {
-                u.Release(this);
+                u.Release();
             }
             CurrentTurn++;
             SetUnitIndex(false, true);
@@ -162,7 +162,7 @@ namespace ErsatzCivLib
             var result = sq.ApplyAction(this, worker, actionPivot);
             if (result)
             {
-                worker.Move(this, null);
+                worker.Move(null);
             }
 
             return result;
@@ -181,7 +181,7 @@ namespace ErsatzCivLib
 
         public bool MoveCurrentUnit(DirectionPivot direction)
         {
-            return CurrentUnit.Move(this, direction);
+            return CurrentUnit.Move(direction);
         }
 
         /// <summary>
