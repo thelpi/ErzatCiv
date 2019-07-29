@@ -11,23 +11,24 @@ namespace ErsatzCiv
     /// </summary>
     public partial class MapGeneratorWindow : Window
     {
-        private Engine _generatedEngine = null;
-
         /// <summary>
         /// Constructor.
         /// </summary>
         public MapGeneratorWindow()
         {
             InitializeComponent();
+
             ShowAgain();
-            ComboLandRatio.ItemsSource = Enum.GetValues(typeof(MapPivot.SizePivot));
-            ComboLandType.ItemsSource = Enum.GetValues(typeof(MapPivot.LandShapePivot));
-            ComboSize.ItemsSource = Enum.GetValues(typeof(MapPivot.LandCoveragePivot));
-            ComboTemperature.ItemsSource = Enum.GetValues(typeof(MapPivot.TemperaturePivot));
-            ComboLandRatio.SelectedValue = MapPivot.SizePivot.Medium;
-            ComboLandType.SelectedValue = MapPivot.LandShapePivot.Continent;
-            ComboSize.SelectedValue = MapPivot.LandCoveragePivot.Medium;
-            ComboTemperature.SelectedValue = MapPivot.TemperaturePivot.Temperate;
+
+            ComboBoxSize.ItemsSource = Enum.GetValues(typeof(MapPivot.SizePivot));
+            ComboBoxLandShape.ItemsSource = Enum.GetValues(typeof(MapPivot.LandShapePivot));
+            ComboBoxLandCoverage.ItemsSource = Enum.GetValues(typeof(MapPivot.LandCoveragePivot));
+            ComboBoxTemperature.ItemsSource = Enum.GetValues(typeof(MapPivot.TemperaturePivot));
+
+            ComboBoxSize.SelectedValue = MapPivot.SizePivot.Medium;
+            ComboBoxLandShape.SelectedValue = MapPivot.LandShapePivot.Continent;
+            ComboBoxLandCoverage.SelectedValue = MapPivot.LandCoveragePivot.Medium;
+            ComboBoxTemperature.SelectedValue = MapPivot.TemperaturePivot.Temperate;
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
@@ -37,8 +38,8 @@ namespace ErsatzCiv
 
         private void ConfirmButton_Click(object sender, RoutedEventArgs e)
         {
-            if (ComboSize.SelectedIndex < 0 || ComboLandType.SelectedIndex < 0
-                || ComboLandRatio.SelectedIndex < 0 || ComboTemperature.SelectedIndex < 0)
+            if (ComboBoxSize.SelectedIndex < 0 || ComboBoxLandShape.SelectedIndex < 0
+                || ComboBoxLandCoverage.SelectedIndex < 0 || ComboBoxTemperature.SelectedIndex < 0)
             {
                 MessageBox.Show("Please select a value for each parameter !");
                 return;
@@ -47,7 +48,7 @@ namespace ErsatzCiv
             GridForm.Visibility = Visibility.Collapsed;
             ProgressBarLoading.Visibility = Visibility.Visible;
 
-            BackgroundWorker bgw = new BackgroundWorker
+            var bgw = new BackgroundWorker
             {
                 WorkerSupportsCancellation = false,
                 WorkerReportsProgress = false
@@ -56,26 +57,19 @@ namespace ErsatzCiv
             bgw.RunWorkerCompleted += EndOfMapGeneration;
             bgw.RunWorkerAsync(new object[]
             {
-                ComboSize.SelectedItem,
-                ComboLandType.SelectedItem,
-                ComboLandRatio.SelectedItem,
-                ComboTemperature.SelectedItem
+                ComboBoxSize.SelectedItem,
+                ComboBoxLandShape.SelectedItem,
+                ComboBoxLandCoverage.SelectedItem,
+                ComboBoxTemperature.SelectedItem
             });
         }
 
         private void GenerateMapBackground(object sender, DoWorkEventArgs e)
         {
-            try
-            {
-                object[] parameters = e.Argument as object[];
+            object[] parameters = e.Argument as object[];
 
-                _generatedEngine = new Engine((MapPivot.SizePivot)parameters[0], (MapPivot.LandShapePivot)parameters[1],
-                    (MapPivot.LandCoveragePivot)parameters[2], (MapPivot.TemperaturePivot)parameters[3]);
-            }
-            catch (Exception ex)
-            {
-                e.Result = ex;
-            }
+            e.Result = new Engine((MapPivot.SizePivot)parameters[0], (MapPivot.LandShapePivot)parameters[1],
+                (MapPivot.LandCoveragePivot)parameters[2], (MapPivot.TemperaturePivot)parameters[3]);
         }
 
         private void EndOfMapGeneration(object sender, RunWorkerCompletedEventArgs e)
@@ -89,7 +83,7 @@ namespace ErsatzCiv
             {
                 ShowAgain();
                 Hide();
-                new MainWindow(_generatedEngine).ShowDialog();
+                new MainWindow(e.Result as Engine).ShowDialog();
                 ShowDialog();
             }
         }
