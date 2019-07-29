@@ -1,5 +1,8 @@
-﻿namespace ErsatzCivLib.Model
+﻿using System;
+
+namespace ErsatzCivLib.Model
 {
+    [Serializable]
     public enum DirectionPivot
     {
         Top,

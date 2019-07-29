@@ -8,10 +8,12 @@ namespace ErsatzCivLib.Model
     /// <summary>
     /// Represents a map square.
     /// </summary>
+    [Serializable]
     public class MapSquarePivot
     {
         #region Properties
 
+        [field: NonSerialized]
         public event EventHandler<SquareChangedEventArgs> SquareChangeEvent;
 
         private List<CurrentActionPivot> _currentActions = new List<CurrentActionPivot>();
@@ -294,6 +296,7 @@ namespace ErsatzCivLib.Model
         /// <summary>
         /// Represents a <see cref="WorkerActionPivot"/> in progress.
         /// </summary>
+        [Serializable]
         public class CurrentActionPivot : IDisposable
         {
             private static List<CurrentActionPivot> _globalActions = new List<CurrentActionPivot>();
@@ -369,6 +372,7 @@ namespace ErsatzCivLib.Model
             }
         }
 
+        [Serializable]
         public class SquareChangedEventArgs : EventArgs
         {
             public MapSquarePivot MapSquare { get; private set; }

@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using Microsoft.Win32;
 
 namespace ErsatzCiv
 {
@@ -17,7 +18,26 @@ namespace ErsatzCiv
 
         private void LoadButton_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Not implemented yet !");
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Multiselect = false,
+                InitialDirectory = Properties.Settings.Default.datasPath + Properties.Settings.Default.savesSubFolder
+            };
+            if (openFileDialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(openFileDialog.FileName))
+            {
+                var desRes = ErsatzCivLib.Engine.DeserializeSave(openFileDialog.FileName);
+                if (string.IsNullOrWhiteSpace(desRes.Item2))
+                {
+
+                    Hide();
+                    new MainWindow(desRes.Item1).ShowDialog();
+                    ShowDialog();
+                }
+                else
+                {
+                    MessageBox.Show($"Echec du chargement de la sauvegarde : {desRes.Item2}", "ErsatzCiv");
+                }
+            }
         }
 
         private void NewButton_Click(object sender, RoutedEventArgs e)

@@ -1,8 +1,11 @@
-﻿namespace ErsatzCivLib.Model
+﻿using System;
+
+namespace ErsatzCivLib.Model
 {
     /// <summary>
     /// Types of render.
     /// </summary>
+    [Serializable]
     public enum RenderTypePivot
     {
         /// <summary>

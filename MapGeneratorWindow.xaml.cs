@@ -41,7 +41,7 @@ namespace ErsatzCiv
             if (ComboBoxSize.SelectedIndex < 0 || ComboBoxLandShape.SelectedIndex < 0
                 || ComboBoxLandCoverage.SelectedIndex < 0 || ComboBoxTemperature.SelectedIndex < 0)
             {
-                MessageBox.Show("Please select a value for each parameter !");
+                MessageBox.Show("Please select a value for each parameter !", "ErsatzCiv");
                 return;
             }
 
@@ -77,7 +77,7 @@ namespace ErsatzCiv
             if (e.Error != null)
             {
                 ShowAgain();
-                MessageBox.Show($"The following error occurs : {e.Error.Message}");
+                MessageBox.Show($"The following error has occurred : {e.Error.Message}", "ErsatzCiv");
             }
             else
             {

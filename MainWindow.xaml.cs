@@ -206,6 +206,28 @@ namespace ErsatzCiv
             Settings.Default.Save();
         }
 
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            var res = MessageBox.Show("Sauvegarder avant de quitter la partie ?", "ErsatzCiv", MessageBoxButton.YesNoCancel);
+            if (res == MessageBoxResult.Yes)
+            {
+                var serRes = _engine.SerializeToFile(Settings.Default.datasPath + Settings.Default.savesSubFolder);
+                if (!string.IsNullOrWhiteSpace(serRes))
+                {
+                    MessageBox.Show($"Echec de la sauvegarde : {serRes}", "ErsatzCiv");
+                    e.Cancel = true;
+                }
+                else
+                {
+                    MessageBox.Show("Sauvegarde effectuée !", "ErsatzCiv");
+                }
+            }
+            else if (res == MessageBoxResult.Cancel)
+            {
+                e.Cancel = true;
+            }
+        }
+
         #endregion
 
         #region Draw methods
@@ -265,7 +287,7 @@ namespace ErsatzCiv
             }
 
             FrameworkElement squareRender;
-            string imgPath = Settings.Default.imagesPath + Settings.Default.squareImageSubFolder + $"{square.Biome.Name}.jpg";
+            string imgPath = Settings.Default.datasPath + Settings.Default.squareImageSubFolder + $"{square.Biome.Name}.jpg";
             if (System.IO.File.Exists(imgPath))
             {
                 squareRender = new Border
@@ -409,7 +431,7 @@ namespace ErsatzCiv
             {
                 Width = DEFAULT_SIZE * ratio,
                 Height = DEFAULT_SIZE * ratio,
-                Source = new BitmapImage(new Uri(Settings.Default.imagesPath + imgName)),
+                Source = new BitmapImage(new Uri(Settings.Default.datasPath + imgName)),
                 Stretch = Stretch.Uniform,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center
@@ -493,7 +515,7 @@ namespace ErsatzCiv
             {
                 Width = DEFAULT_SIZE * CityPivot.DISPLAY_RATIO,
                 Height = DEFAULT_SIZE * CityPivot.DISPLAY_RATIO,
-                Source = new BitmapImage(new Uri(Settings.Default.imagesPath + city.RenderValue)),
+                Source = new BitmapImage(new Uri(Settings.Default.datasPath + city.RenderValue)),
                 Stretch = Stretch.Uniform,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center
@@ -527,7 +549,7 @@ namespace ErsatzCiv
             {
                 Width = DEFAULT_SIZE,
                 Height = DEFAULT_SIZE,
-                Source = new BitmapImage(new Uri(Settings.Default.imagesPath + unit.RenderValue)),
+                Source = new BitmapImage(new Uri(Settings.Default.datasPath + unit.RenderValue)),
                 Stretch = Stretch.Uniform
             };
             img.SetValue(Grid.RowProperty, unit.Row);

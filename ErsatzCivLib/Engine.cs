@@ -1,16 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using ErsatzCivLib.Model;
 using ErsatzCivLib.Model.Units;
 
 namespace ErsatzCivLib
 {
+    [Serializable]
     public class Engine
     {
         private List<UnitPivot> _units = new List<UnitPivot>();
         private List<CityPivot> _cities = new List<CityPivot>();
 
+        [field: NonSerialized]
         public event EventHandler<NextUnitEventArgs> NextUnitEvent;
 
         private int _currentUnitIndex;
@@ -177,6 +181,71 @@ namespace ErsatzCivLib
         public bool MoveCurrentUnit(DirectionPivot direction)
         {
             return CurrentUnit.Move(this, direction);
+        }
+
+        /// <summary>
+        /// Deserializes a save file into an <see cref="Engine"/>.
+        /// </summary>
+        /// <param name="saveFullPath">Path to save do deserialize.</param>
+        /// <returns>Engine and error message.</returns>
+        public static Tuple<Engine, string> DeserializeSave(string saveFullPath)
+        {
+            try
+            {
+                string settings = null;
+                using (StreamReader sr = new StreamReader(saveFullPath))
+                {
+                    settings = sr.ReadToEnd();
+                }
+
+                byte[] b = Convert.FromBase64String(settings);
+                using (var stream = new MemoryStream(b))
+                {
+                    var formatter = new BinaryFormatter();
+                    stream.Seek(0, SeekOrigin.Begin);
+                    var engine = (Engine)formatter.Deserialize(stream);
+                    return new Tuple<Engine, string>(engine, engine == null ? "Failure to deserialize the save !" : null);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new Tuple<Engine, string>(null, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Serialize the instance into a file.
+        /// </summary>
+        /// <param name="folder">Folder.</param>
+        /// <returns>Error message.</returns>
+        public string SerializeToFile(string folder)
+        {
+            try
+            {
+                string fileContent = null;
+
+                using (var stream = new MemoryStream())
+                {
+                    var formatter = new BinaryFormatter();
+                    formatter.Serialize(stream, this);
+                    stream.Flush();
+                    stream.Position = 0;
+                    fileContent = Convert.ToBase64String(stream.ToArray());
+                }
+
+                string fileName = "SAVE_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".data";
+
+                using (StreamWriter sw = new StreamWriter(folder + fileName, false))
+                {
+                    sw.Write(fileContent);
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
         }
 
         public class NextUnitEventArgs : EventArgs

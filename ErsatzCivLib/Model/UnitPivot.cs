@@ -1,10 +1,11 @@
-﻿using System.Linq;
+﻿using System;
 
 namespace ErsatzCivLib.Model
 {
     /// <summary>
     /// Represents an unit.
     /// </summary>
+    [Serializable]
     public abstract class UnitPivot
     {
         /// <summary>

@@ -1,5 +1,8 @@
-﻿namespace ErsatzCivLib.Model.Units
+﻿using System;
+
+namespace ErsatzCivLib.Model.Units
 {
+    [Serializable]
     public class SettlerPivot : UnitPivot
     {
         public const int LifePoints = 1;

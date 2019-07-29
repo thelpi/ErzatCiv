@@ -26,9 +26,9 @@ namespace ErsatzCiv.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("D:\\Ma programmation\\csharp\\Projects\\ErsatzCiv\\datas\\")]
-        public string imagesPath {
+        public string datasPath {
             get {
-                return ((string)(this["imagesPath"]));
+                return ((string)(this["datasPath"]));
             }
         }
         
@@ -50,6 +50,18 @@ namespace ErsatzCiv.Properties {
             }
             set {
                 this["waitEndTurn"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("saves\\")]
+        public string savesSubFolder {
+            get {
+                return ((string)(this["savesSubFolder"]));
+            }
+            set {
+                this["savesSubFolder"] = value;
             }
         }
     }

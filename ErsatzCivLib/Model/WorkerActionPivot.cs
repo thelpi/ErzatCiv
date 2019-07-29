@@ -1,8 +1,11 @@
-﻿namespace ErsatzCivLib.Model
+﻿using System;
+
+namespace ErsatzCivLib.Model
 {
     /// <summary>
     /// Represents a worker action.
     /// </summary>
+    [Serializable]
     public class WorkerActionPivot
     {
         internal const double ROAD_RATIO = 0.3;

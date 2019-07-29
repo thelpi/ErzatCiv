@@ -4,6 +4,7 @@ using System.Linq;
 
 namespace ErsatzCivLib.Model
 {
+    [Serializable]
     public class MapPivot
     {
         #region Constants (private)
@@ -389,6 +390,7 @@ namespace ErsatzCivLib.Model
         /// <summary>
         /// Represents the map size.
         /// </summary>
+        [Serializable]
         public enum SizePivot
         {
             /// <summary>
@@ -416,6 +418,7 @@ namespace ErsatzCivLib.Model
         /// <summary>
         /// Represents the land coverage of the map.
         /// </summary>
+        [Serializable]
         public enum LandCoveragePivot
         {
             /// <summary>
@@ -443,6 +446,7 @@ namespace ErsatzCivLib.Model
         /// <summary>
         /// Represents the land organization inside the map.
         /// </summary>
+        [Serializable]
         public enum LandShapePivot
         {
             /// <summary>
@@ -462,6 +466,7 @@ namespace ErsatzCivLib.Model
         /// <summary>
         /// Levels of temperature.
         /// </summary>
+        [Serializable]
         public enum TemperaturePivot
         {
             /// <summary>
