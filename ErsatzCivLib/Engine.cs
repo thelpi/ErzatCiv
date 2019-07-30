@@ -69,20 +69,20 @@ namespace ErsatzCivLib
                 return null;
             }
 
-            var citySquares = new List<Tuple<MapSquarePivot, int, int>>();
+            var citySquares = new List<MapSquarePivot>();
             for (var i = settler.Row - 2; i <= settler.Row + 2; i++)
             {
                 for (var j = settler.Column - 2; j <= settler.Column + 2; j++)
                 {
                     var mapSquare = Map[i, j];
-                    if (mapSquare != null && (i != settler.Row || j != settler.Column) && !OccupiedByCity(i, j))
+                    if (mapSquare != null && (i != settler.Row || j != settler.Column) && !OccupiedByCity(mapSquare))
                     {
-                        citySquares.Add(new Tuple<MapSquarePivot, int, int>(mapSquare, i, j));
+                        citySquares.Add(mapSquare);
                     }
                 }
             }
 
-            var city = new CityPivot(settler.Row, settler.Column, citySquares);
+            var city = new CityPivot(settler, citySquares);
             sq.ApplyCityActions(city);
 
             _cities.Add(city);
@@ -274,9 +274,9 @@ namespace ErsatzCivLib
             }
         }
 
-        internal bool OccupiedByCity(int row, int column)
+        internal bool OccupiedByCity(MapSquarePivot mapSquare)
         {
-            return _cities.Any(c => c.Citizens.Any(cc => cc.Row == row && cc.Column == column));
+            return _cities.Any(c => c.Citizens.Any(cc => cc.MapSquare == mapSquare));
         }
 
         public class NextUnitEventArgs : EventArgs

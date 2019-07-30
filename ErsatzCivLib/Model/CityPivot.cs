@@ -16,7 +16,7 @@ namespace ErsatzCivLib.Model
         private static readonly double NEXT_CITIZEN_LN = (FORTY_CITIZEN_LN - FIRST_CITIZEN_LN) / (40 - 1);
 
         private List<CitizenPivot> _citizens;
-        private List<Tuple<MapSquarePivot, int, int>> _availableMapSquares;
+        private List<MapSquarePivot> _availableMapSquares;
 
         public int Row { get; private set; }
         public int Column { get; private set; }
@@ -30,40 +30,38 @@ namespace ErsatzCivLib.Model
             }
         }
 
-        internal CityPivot(int row, int column, IEnumerable<Tuple<MapSquarePivot, int,int>> availableMapSquares)
+        internal CityPivot(Units.SettlerPivot settler, IEnumerable<MapSquarePivot> availableMapSquares)
         {
-            Row = row;
-            Column = column;
+            Row = settler.Row;
+            Column = settler.Column;
             RenderValue = CITY_RENDER_PATH;
 
-            _availableMapSquares = new List<Tuple<MapSquarePivot, int, int>>(availableMapSquares);
-
-            var coordinates = BestVacantSpot();
+            _availableMapSquares = new List<MapSquarePivot>(availableMapSquares);
+            
             _citizens = new List<CitizenPivot>
             {
-                new CitizenPivot(coordinates.Item1, coordinates.Item2)
+                new CitizenPivot(BestVacantSpot())
             };
         }
 
-        internal void AddAvailableMapSquare(MapSquarePivot square, int row, int column)
+        internal void AddAvailableMapSquare(MapSquarePivot square)
         {
-            if (!_availableMapSquares.Any(x => x.Item1 == square) && _availableMapSquares.Count < AVAILABLE_SQUARES_MAX_COUNT)
+            if (!_availableMapSquares.Any(x => x == square) && _availableMapSquares.Count < AVAILABLE_SQUARES_MAX_COUNT)
             {
-                _availableMapSquares.Add(new Tuple<MapSquarePivot, int, int>(square, row, column));
+                _availableMapSquares.Add(square);
             }
         }
 
-        internal void RemoveAvailableMapSquare(int row, int column)
+        internal void RemoveAvailableMapSquare(MapSquarePivot square)
         {
-            _availableMapSquares.RemoveAll(x => x.Item2 == row && x.Item3 == column);
+            _availableMapSquares.RemoveAll(x => x == square);
         }
 
-        private Tuple<int, int> BestVacantSpot()
+        private MapSquarePivot BestVacantSpot()
         {
             return _availableMapSquares
-                .Where(x => _citizens?.Any(c => c.Row == x.Item2 && c.Column == x.Item3) != true)
-                .OrderByDescending(x => x.Item1.TotalValue)
-                .Select(x => new Tuple<int, int>(x.Item2, x.Item3))
+                .Where(x => _citizens?.Any(c => c.MapSquare == x) != true)
+                .OrderByDescending(x => x.TotalValue)
                 .FirstOrDefault();
         }
 
@@ -72,17 +70,15 @@ namespace ErsatzCivLib.Model
         {
             public const int FOOD_BY_TURN = 2;
 
-            public int Row { get; private set; }
-            public int Column { get; private set; }
+            public MapSquarePivot MapSquare { get; private set; }
             public MoodPivot Mood { get; private set; }
             public CitizenTypePivot Type { get; private set; }
 
-            public CitizenPivot(int row, int column)
+            public CitizenPivot(MapSquarePivot mapSquare)
             {
-                Row = row;
-                Column = column;
+                MapSquare = mapSquare;
                 Mood = MoodPivot.Content;
-                Type = CitizenTypePivot.Regular;
+                Type = mapSquare == null ? CitizenTypePivot.Entertaining : CitizenTypePivot.Regular;
             }
         }
 
