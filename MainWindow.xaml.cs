@@ -48,7 +48,7 @@ namespace ErsatzCiv
         {
             if (evt?.MapSquare != null)
             {
-                DrawSingleMapAndMiniMapSquare(evt.MapSquare, evt.Row, evt.Column, true);
+                DrawSingleMapAndMiniMapSquare(evt.MapSquare, true);
             }
         }
 
@@ -275,12 +275,12 @@ namespace ErsatzCiv
             {
                 for (var j = 0; j < _engine.Map.Width; j++)
                 {
-                    DrawSingleMapAndMiniMapSquare(_engine.Map[i, j], i, j, false);
+                    DrawSingleMapAndMiniMapSquare(_engine.Map[i, j], false);
                 }
             }
         }
 
-        private void DrawSingleMapAndMiniMapSquare(MapSquarePivot square, int row, int column, bool cleanPreviousSquare)
+        private void DrawSingleMapAndMiniMapSquare(MapSquarePivot square, bool cleanPreviousSquare)
         {
             if (cleanPreviousSquare)
             {
@@ -318,8 +318,8 @@ namespace ErsatzCiv
                 };
             }
 
-            squareRender.SetValue(Grid.RowProperty, row);
-            squareRender.SetValue(Grid.ColumnProperty, column);
+            squareRender.SetValue(Grid.RowProperty, square.Row);
+            squareRender.SetValue(Grid.ColumnProperty, square.Column);
             squareRender.Tag = square;
             MapGrid.Children.Add(squareRender);
 
@@ -329,17 +329,17 @@ namespace ErsatzCiv
                 Height = _minimapSquareSize,
                 Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(square.Biome.ColorValue))
             };
-            rctMinimap.SetValue(Canvas.TopProperty, row * _minimapSquareSize);
-            rctMinimap.SetValue(Canvas.LeftProperty, column * _minimapSquareSize);
+            rctMinimap.SetValue(Canvas.TopProperty, square.Row * _minimapSquareSize);
+            rctMinimap.SetValue(Canvas.LeftProperty, square.Column * _minimapSquareSize);
             rctMinimap.Tag = square;
             MiniMapCanvas.Children.Add(rctMinimap);
 
             if (square.CrossedByRiver)
             {
-                DrawSquareRivers(square, row, column);
+                DrawSquareRivers(square);
             }
 
-            DrawSquareImprovements(square, row, column);
+            DrawSquareImprovements(square);
         }
 
         private void CleanPreviousRenderOnMapAndMiniMap(MapSquarePivot square)
@@ -357,23 +357,23 @@ namespace ErsatzCiv
             }
         }
 
-        private void DrawSquareRivers(MapSquarePivot square, int row, int column)
+        private void DrawSquareRivers(MapSquarePivot square)
         {
             if (!square.RiverTopToBottom.HasValue)
             {
-                DrawRiver(square, row, column, false, false);
-                DrawRiver(square, row, column, true, false);
-                DrawRiver(square, row, column, false, true);
-                DrawRiver(square, row, column, true, true);
+                DrawRiver(square, false, false);
+                DrawRiver(square, true, false);
+                DrawRiver(square, false, true);
+                DrawRiver(square, true, true);
             }
             else
             {
-                DrawRiver(square, row, column, square.RiverTopToBottom.Value, false);
-                DrawRiver(square, row, column, square.RiverTopToBottom.Value, true);
+                DrawRiver(square, square.RiverTopToBottom.Value, false);
+                DrawRiver(square, square.RiverTopToBottom.Value, true);
             }
         }
 
-        private void DrawSquareImprovements(MapSquarePivot square, int row, int column)
+        private void DrawSquareImprovements(MapSquarePivot square)
         {
             var newElementsWithZIndex = new Dictionary<FrameworkElement, int>();
             if (square.RailRoad)
@@ -403,8 +403,8 @@ namespace ErsatzCiv
 
             foreach (var element in newElementsWithZIndex.Keys)
             {
-                element.SetValue(Grid.RowProperty, row);
-                element.SetValue(Grid.ColumnProperty, column);
+                element.SetValue(Grid.RowProperty, square.Row);
+                element.SetValue(Grid.ColumnProperty, square.Column);
                 element.SetValue(Panel.ZIndexProperty, newElementsWithZIndex[element]);
                 element.Tag = square;
                 MapGrid.Children.Add(element);
@@ -459,7 +459,7 @@ namespace ErsatzCiv
             }
         }
 
-        private void DrawRiver(MapSquarePivot square, int row, int column, bool topToBottom, bool miniMap)
+        private void DrawRiver(MapSquarePivot square, bool topToBottom, bool miniMap)
         {
             Rectangle riverRect = new Rectangle
             {
@@ -470,13 +470,13 @@ namespace ErsatzCiv
 
             if (miniMap)
             {
-                riverRect.SetValue(Canvas.TopProperty, row * _minimapSquareSize);
-                riverRect.SetValue(Canvas.LeftProperty, column * _minimapSquareSize);
+                riverRect.SetValue(Canvas.TopProperty, square.Row * _minimapSquareSize);
+                riverRect.SetValue(Canvas.LeftProperty, square.Column * _minimapSquareSize);
             }
             else
             {
-                riverRect.SetValue(Grid.RowProperty, row);
-                riverRect.SetValue(Grid.ColumnProperty, column);
+                riverRect.SetValue(Grid.RowProperty, square.Row);
+                riverRect.SetValue(Grid.ColumnProperty, square.Column);
             }
 
             riverRect.Tag = square;

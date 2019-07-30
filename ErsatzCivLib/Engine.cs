@@ -137,7 +137,7 @@ namespace ErsatzCivLib
             {
                 for (var j = 0; j < Map.Width; j++)
                 {
-                    Map[i, j].UpdateActionsProgress(i, j);
+                    Map[i, j].UpdateActionsProgress();
                 }
             }
             foreach (var u in _units)

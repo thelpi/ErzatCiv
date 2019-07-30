@@ -329,7 +329,7 @@ namespace ErsatzCivLib.Model
                     {
                         isCoast = true;
                     }
-                    var newSquare = new MapSquarePivot(biome, null);
+                    var newSquare = new MapSquarePivot(y, x, biome, null);
                     continentSquares.Add(new Tuple<MapSquarePivot, int, int>(newSquare, y, x));
                     if (isCoast)
                     {

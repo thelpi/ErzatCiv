@@ -19,6 +19,8 @@ namespace ErsatzCivLib.Model
 
         private List<InProgressWorkerActionPivot> _currentActions = new List<InProgressWorkerActionPivot>();
 
+        public int Row { get; private set; }
+        public int Column { get; private set; }
         /// <summary>
         /// Square type.
         /// </summary>
@@ -132,8 +134,10 @@ namespace ErsatzCivLib.Model
 
         #endregion
 
-        internal MapSquarePivot(BiomePivot biome, BiomePivot underlyingType = null)
+        internal MapSquarePivot(int row, int column, BiomePivot biome, BiomePivot underlyingType = null)
         {
+            Row = row;
+            Column = column;
             Biome = biome ?? throw new ArgumentNullException(nameof(biome));
             if (Biome.Actions.Contains(WorkerActionPivot.Clear))
             {
@@ -163,7 +167,7 @@ namespace ErsatzCivLib.Model
         {
             Road = true;
             RailRoad = true;
-            SquareChangeEvent?.Invoke(this, new SquareChangedEventArgs(this, city.Row, city.Column));
+            SquareChangeEvent?.Invoke(this, new SquareChangedEventArgs(this));
         }
 
         /// <summary>
@@ -266,7 +270,7 @@ namespace ErsatzCivLib.Model
         /// This method need to be called at the end of each turn.
         /// If two opposed actions ends on the same turn, latest added is applied.
         /// </summary>
-        internal void UpdateActionsProgress(int row, int column)
+        internal void UpdateActionsProgress()
         {
             var removableActions = new List<InProgressWorkerActionPivot>();
             foreach (var action in _currentActions)
@@ -345,7 +349,7 @@ namespace ErsatzCivLib.Model
                     {
                         Road = true;
                     }
-                    SquareChangeEvent?.Invoke(this, new SquareChangedEventArgs(this, row, column));
+                    SquareChangeEvent?.Invoke(this, new SquareChangedEventArgs(this));
                 }
             }
 
@@ -360,14 +364,10 @@ namespace ErsatzCivLib.Model
         public class SquareChangedEventArgs : EventArgs
         {
             public MapSquarePivot MapSquare { get; private set; }
-            public int Row { get; private set; }
-            public int Column { get; private set; }
 
-            public SquareChangedEventArgs(MapSquarePivot mapSquare, int row, int column)
+            public SquareChangedEventArgs(MapSquarePivot mapSquare)
             {
                 MapSquare = mapSquare;
-                Row = row;
-                Column = column;
             }
         }
     }
