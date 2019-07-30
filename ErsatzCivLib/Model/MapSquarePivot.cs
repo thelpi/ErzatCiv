@@ -10,7 +10,7 @@ namespace ErsatzCivLib.Model
     /// Represents a map square.
     /// </summary>
     [Serializable]
-    public class MapSquarePivot : BasePivot
+    public class MapSquarePivot
     {
         #region Properties
 
@@ -132,7 +132,7 @@ namespace ErsatzCivLib.Model
 
         #endregion
 
-        internal MapSquarePivot(Engine owner, BiomePivot biome, BiomePivot underlyingType = null) : base(owner)
+        internal MapSquarePivot(BiomePivot biome, BiomePivot underlyingType = null)
         {
             Biome = biome ?? throw new ArgumentNullException(nameof(biome));
             if (Biome.Actions.Contains(WorkerActionPivot.Clear))
@@ -161,11 +161,6 @@ namespace ErsatzCivLib.Model
 
         internal void ApplyCityActions(CityPivot city)
         {
-            if (Owner.Map[city.Row, city.Column] != this)
-            {
-                return;
-            }
-
             Road = true;
             RailRoad = true;
             SquareChangeEvent?.Invoke(this, new SquareChangedEventArgs(this, city.Row, city.Column));
@@ -191,7 +186,7 @@ namespace ErsatzCivLib.Model
                 throw new ArgumentNullException(nameof(action));
             }
 
-            if ((!action.AlwaysAvailable && !Biome.Actions.Contains(action)) || Owner.IsCity(worker.Row, worker.Column))
+            if (!action.AlwaysAvailable && !Biome.Actions.Contains(action))
             {
                 return false;
             }

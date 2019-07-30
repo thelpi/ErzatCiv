@@ -149,7 +149,7 @@ namespace ErsatzCivLib
 
             var worker = CurrentUnit as WorkerPivot;
             var sq = Map[worker.Row, worker.Column];
-            if (sq == null)
+            if (sq == null || IsCity(worker.Row, worker.Column))
             {
                 return false;
             }
