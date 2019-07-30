@@ -7,13 +7,13 @@
         Loaded="Window_Loaded"
         KeyDown="Window_KeyDown" Closing="Window_Closing"
         mc:Ignorable="d" WindowState="Maximized"
-        Title="MainWindow" Height="600" Width="800">
+        Title="ErsatzCiv">
     <DockPanel Margin="5">
         <DockPanel Name="MenuDock" DockPanel.Dock="Bottom">
             <Canvas Margin="2" Name="MiniMapCanvas" DockPanel.Dock="Right" MouseDown="MiniMapCanvas_MouseDown" />
             <StackPanel Orientation="Vertical" DockPanel.Dock="Left">
-                <CheckBox Margin="0, 5, 0, 0" Name="CheckBoxWaitTurn" Click="CheckBoxWaitTurn_Click" Content="Attendre à la fin du tout" HorizontalAlignment="Center" />
-                <Button Margin="0, 5, 0, 0" Name="BtnNextTurn" Content="Next" Width="75" Height="25" Click="BtnNextTurn_Click" />
+                <CheckBox Margin="0, 5, 0, 0" Name="CheckBoxWaitTurn" Click="CheckBoxWaitTurn_Click" Content="Wait at the end of turn" HorizontalAlignment="Center" />
+                <Button Margin="0, 5, 0, 0" Name="BtnNextTurn" Content="Next turn" Width="75" Height="25" Click="BtnNextTurn_Click" />
             </StackPanel>
         </DockPanel>
         <ScrollViewer ScrollChanged="MapScroller_ScrollChanged" DockPanel.Dock="Top" CanContentScroll="True"

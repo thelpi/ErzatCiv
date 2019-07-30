@@ -19,6 +19,7 @@ namespace ErsatzCivLib.Model
         private List<CitizenPivot> _citizens;
         private List<MapSquarePivot> _availableMapSquares;
 
+        public string Name { get; private set; }
         public int Row { get; private set; }
         public int Column { get; private set; }
         public string RenderValue { get; private set; }
@@ -31,8 +32,9 @@ namespace ErsatzCivLib.Model
             }
         }
 
-        internal CityPivot(Units.SettlerPivot settler, IEnumerable<MapSquarePivot> availableMapSquares)
+        internal CityPivot(string name, Units.SettlerPivot settler, IEnumerable<MapSquarePivot> availableMapSquares)
         {
+            Name = name;
             Row = settler.Row;
             Column = settler.Column;
             RenderValue = CITY_RENDER_PATH;

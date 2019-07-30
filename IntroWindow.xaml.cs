@@ -1,4 +1,6 @@
 ﻿using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 
 namespace ErsatzCiv
@@ -14,6 +16,8 @@ namespace ErsatzCiv
         public IntroWindow()
         {
             InitializeComponent();
+            (GridContent.Background as ImageBrush).ImageSource =
+                new BitmapImage(new System.Uri(Properties.Settings.Default.datasPath + "intro.jpg"));
         }
 
         private void LoadButton_Click(object sender, RoutedEventArgs e)
@@ -35,7 +39,7 @@ namespace ErsatzCiv
                 }
                 else
                 {
-                    MessageBox.Show($"Echec du chargement de la sauvegarde : {desRes.Item2}", "ErsatzCiv");
+                    MessageBox.Show($"The save can't be loaded because of the following error : {desRes.Item2}", "ErsatzCiv");
                 }
             }
         }

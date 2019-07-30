@@ -52,22 +52,23 @@ namespace ErsatzCivLib
             CurrentTurn = 1;
         }
 
-        public CityPivot BuildCity()
+        public CityPivot BuildCity(string name, out bool notUniqueNameError)
         {
-            if (CurrentUnit?.GetType() != typeof(SettlerPivot))
+            notUniqueNameError = false;
+
+            if (!CanBuildCity() || string.IsNullOrWhiteSpace(name))
             {
+                return null;
+            }
+
+            if (_cities.Any(c => c.Name.Equals(name.ToLower(), StringComparison.InvariantCultureIgnoreCase)))
+            {
+                notUniqueNameError = true;
                 return null;
             }
 
             var settler = CurrentUnit as SettlerPivot;
-
-            var sq = Map[settler.Row, settler.Column];
-            if (sq?.Biome?.IsCityBuildable != true
-                || _cities.Any(c => settler.Row == c.Row && settler.Column == c.Column)
-                || sq?.Pollution == true)
-            {
-                return null;
-            }
+            var sq = Map[CurrentUnit.Row, CurrentUnit.Column];
 
             var citySquares = new List<MapSquarePivot>();
             for (var i = settler.Row - 2; i <= settler.Row + 2; i++)
@@ -75,14 +76,17 @@ namespace ErsatzCivLib
                 for (var j = settler.Column - 2; j <= settler.Column + 2; j++)
                 {
                     var mapSquare = Map[i, j];
-                    if (mapSquare != null && (i != settler.Row || j != settler.Column) && !OccupiedByCity(mapSquare))
+                    if (mapSquare != null
+                        && (i != settler.Row || j != settler.Column)
+                        && !OccupiedByCity(mapSquare)
+                        && !(Math.Abs(i) == 2 && Math.Abs(j) == 2))
                     {
                         citySquares.Add(mapSquare);
                     }
                 }
             }
 
-            var city = new CityPivot(settler, citySquares);
+            var city = new CityPivot(name, settler, citySquares);
             sq.ApplyCityActions(city);
 
             _cities.Add(city);
@@ -90,6 +94,24 @@ namespace ErsatzCivLib
             SetUnitIndex(true, false);
 
             return city;
+        }
+
+        public bool CanBuildCity()
+        {
+            if (CurrentUnit?.GetType() != typeof(SettlerPivot))
+            {
+                return false;
+            }
+
+            var sq = Map[CurrentUnit.Row, CurrentUnit.Column];
+            if (sq?.Biome?.IsCityBuildable != true
+                || _cities.Any(c => CurrentUnit.Row == c.Row && CurrentUnit.Column == c.Column)
+                || sq?.Pollution == true)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         public void ToNextUnit()
@@ -193,15 +215,27 @@ namespace ErsatzCivLib
             }
         }
 
-        public bool MoveCurrentUnit(DirectionPivot direction)
+        public bool MoveCurrentUnit(DirectionPivot? direction)
         {
-            var x = direction.Row(CurrentUnit.Row);
-            var y = direction.Column(CurrentUnit.Column);
+            if (CurrentUnit == null)
+            {
+                return false;
+            }
+
+            if (direction == null)
+            {
+                CurrentUnit.ForceNoMove();
+                ToNextUnit();
+                return true;
+            }
+
+            var x = direction.Value.Row(CurrentUnit.Row);
+            var y = direction.Value.Column(CurrentUnit.Column);
             var square = Map[x, y];
             var prevSq = Map[CurrentUnit.Row, CurrentUnit.Column];
             bool isCity = IsCity(x, y);
 
-            var res = CurrentUnit.Move(direction, x, y, isCity, prevSq, square);
+            var res = CurrentUnit.Move(direction.Value, x, y, isCity, prevSq, square);
             if (res && CurrentUnit.RemainingMoves == 0)
             {
                 ToNextUnit();

@@ -60,7 +60,7 @@ namespace ErsatzCiv
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            // just in case th event in the constructor doesn't work.
+            // just in case the event in the constructor doesn't work.
             RecomputeFocus();
 
             var rWidth = (MapScroller.ActualWidth * (MENU_HEIGHT * _engine.Map.WidthHeighRatio)) / MapGrid.ActualWidth;
@@ -137,26 +137,36 @@ namespace ErsatzCiv
             // Buils city.
             else if (e.Key == Key.B)
             {
-                var unitToMove = _engine.CurrentUnit; // do not remove this line ! ("BuildCity()" changes the value of "CurrentUnit")
-                var city = _engine.BuildCity();
-                if (city != null)
+                if (_engine.CanBuildCity())
                 {
-                    var associatedSprites = GetGraphicRenders(unitToMove);
-                    if (associatedSprites.Count > 0)
+                    var windowCity = new CityNameWindow(_engine);
+                    windowCity.ShowDialog();
+                    if (windowCity.City != null)
                     {
-                        MapGrid.Children.Remove(associatedSprites.First());
+                        var associatedSprites = GetGraphicRenders(windowCity.UnitUsed);
+                        if (associatedSprites.Count > 0)
+                        {
+                            MapGrid.Children.Remove(associatedSprites.First());
 
-                        DrawMapCity(city, true);
+                            DrawMapCity(windowCity.City, true);
+                        }
+                        // Ensures a refresh of the blinking current unit.
+                        RecomputeFocus();
                     }
-                    // Ensures a refresh of the blinking current unit.
-                    RecomputeFocus();
                 }
             }
-            // Forces next turn.
+            // Forces turn for current unit.
             else if (e.Key == Key.Space)
             {
-                _engine.NewTurn();
-                RefreshDynamicView();
+                if (_engine.CurrentUnit != null)
+                {
+                    _engine.MoveCurrentUnit(null);
+                }
+                else
+                {
+                    _engine.NewTurn();
+                    RefreshDynamicView();
+                }
             }
             // Centers the screen on current unit.
             else if (e.Key == Key.C)
@@ -209,18 +219,18 @@ namespace ErsatzCiv
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            var res = MessageBox.Show("Sauvegarder avant de quitter la partie ?", "ErsatzCiv", MessageBoxButton.YesNoCancel);
+            var res = MessageBox.Show("Save the game ?", "ErsatzCiv", MessageBoxButton.YesNoCancel);
             if (res == MessageBoxResult.Yes)
             {
                 var serRes = _engine.SerializeToFile(Settings.Default.datasPath + Settings.Default.savesSubFolder);
                 if (!string.IsNullOrWhiteSpace(serRes))
                 {
-                    MessageBox.Show($"Echec de la sauvegarde : {serRes}", "ErsatzCiv");
+                    MessageBox.Show($"Save has failed with the following error : {serRes}", "ErsatzCiv");
                     e.Cancel = true;
                 }
                 else
                 {
-                    MessageBox.Show("Sauvegarde effectuée !", "ErsatzCiv");
+                    MessageBox.Show("Save done !", "ErsatzCiv");
                 }
             }
             else if (res == MessageBoxResult.Cancel)
@@ -512,6 +522,7 @@ namespace ErsatzCiv
                 }
             }
 
+
             Image img = new Image
             {
                 Width = DEFAULT_SIZE * CityPivot.DISPLAY_RATIO,
@@ -527,10 +538,29 @@ namespace ErsatzCiv
             img.Tag = city;
             MapGrid.Children.Add(img);
 
+            bool stuckOnLeft = city.Row == 0;
+            bool stuckOnRight = city.Row == _engine.Map.Width - 1;
+
+            var citynameBlock = new TextBlock
+            {
+                HorizontalAlignment = stuckOnLeft ? HorizontalAlignment.Left :
+                    (stuckOnRight ? HorizontalAlignment.Right : HorizontalAlignment.Center),
+                VerticalAlignment = VerticalAlignment.Bottom,
+                Text = $"{city.Name} - {city.Citizens.Count}",
+                TextAlignment = TextAlignment.Center,
+                Background = Brushes.White
+            };
+            citynameBlock.SetValue(Grid.RowProperty, city.Row);
+            citynameBlock.SetValue(Grid.ColumnProperty, city.Column - (stuckOnLeft ? 0 : 1));
+            citynameBlock.SetValue(Grid.ColumnSpanProperty, stuckOnLeft || stuckOnRight ? 2 : 3);
+            citynameBlock.SetValue(Panel.ZIndexProperty, CITY_ZINDEX + 1);
+            citynameBlock.Tag = city;
+            MapGrid.Children.Add(citynameBlock);
+
             Rectangle imgMini = new Rectangle
             {
-                Width = _minimapSquareSize * CityPivot.DISPLAY_RATIO,
-                Height = _minimapSquareSize * CityPivot.DISPLAY_RATIO,
+                Width = _minimapSquareSize,
+                Height = _minimapSquareSize,
                 Fill = Brushes.White
             };
             imgMini.SetValue(Canvas.TopProperty, city.Row * _minimapSquareSize);

@@ -1,0 +1,19 @@
+﻿<Window x:Class="ErsatzCiv.CityNameWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ErsatzCiv"
+        mc:Ignorable="d" ResizeMode="CanMinimize"
+        Title="Rename the city" SizeToContent="WidthAndHeight">
+    <StackPanel Margin="5" Orientation="Vertical">
+        <StackPanel Orientation="Horizontal">
+            <Label Content="Name :" Width="75" HorizontalContentAlignment="Right" />
+            <TextBox MaxLength="25" Name="TextBoxCityName" Text="Paizay-le-Tort" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Width="300" />
+        </StackPanel>
+        <StackPanel HorizontalAlignment="Right" Margin="0, 5, 0, 0" Orientation="Horizontal">
+            <Button Height="25" Width="75" Content="Validate" Name="ButtonValidate" Click="ButtonValidate_Click" />
+            <Button Height="25" Width="75" Margin="5, 0, 0, 0" Content="Cancel" Name="ButtonCancel" Click="ButtonCancel_Click" />
+        </StackPanel>
+    </StackPanel>
+</Window>
