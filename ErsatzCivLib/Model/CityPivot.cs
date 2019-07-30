@@ -9,9 +9,9 @@ namespace ErsatzCivLib.Model
         public const double DISPLAY_RATIO = 0.8;
         internal const int CITY_SPEED_COST = 1;
         private const string CITY_RENDER_PATH = "city.png";
-        private const double FIRST_CITIZEN_EULER = 9.21034;
-        private const double FORTY_CITIZEN_EULER = 16.81124;
-        private static readonly double NEXT_CITIZEN_EULER = (FORTY_CITIZEN_EULER - FIRST_CITIZEN_EULER) / (40 - 1);
+        private static readonly double FIRST_CITIZEN_LN = Math.Log(10000);
+        private static readonly double FORTY_CITIZEN_LN = Math.Log(20000000);
+        private static readonly double NEXT_CITIZEN_LN = (FORTY_CITIZEN_LN - FIRST_CITIZEN_LN) / (40 - 1);
 
         private List<CitizenPivot> _citizens = new List<CitizenPivot>();
 
@@ -23,7 +23,7 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                return (int)Math.Round(Math.Pow(Math.E, FIRST_CITIZEN_EULER + (NEXT_CITIZEN_EULER * _citizens.Count - 1)));
+                return (int)Math.Round(Math.Pow(Math.E, FIRST_CITIZEN_LN + (NEXT_CITIZEN_LN * (_citizens.Count - 1))));
             }
         }
 
