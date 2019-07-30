@@ -11,9 +11,10 @@ namespace ErsatzCivLib.Model
         public const double DISPLAY_RATIO = 0.8;
         internal const int CITY_SPEED_COST = 1;
         private const string CITY_RENDER_PATH = "city.png";
-        private static readonly double FIRST_CITIZEN_LN = Math.Log(10000);
-        private static readonly double FORTY_CITIZEN_LN = Math.Log(20000000);
-        private static readonly double NEXT_CITIZEN_LN = (FORTY_CITIZEN_LN - FIRST_CITIZEN_LN) / (40 - 1);
+        private const double MAX_CITIZEN_COUNT = 40;
+        private const double MIN_CC_POP = 1000;
+        private const double MAX_CC_POP = 20000000;
+        private static readonly double POP_GROWTH_RATIO = Math.Log(MIN_CC_POP / MAX_CC_POP) / (1 - MAX_CITIZEN_COUNT);
 
         private List<CitizenPivot> _citizens;
         private List<MapSquarePivot> _availableMapSquares;
@@ -26,7 +27,7 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                return (int)Math.Round(Math.Pow(Math.E, FIRST_CITIZEN_LN + (NEXT_CITIZEN_LN * (_citizens.Count - 1))));
+                return (int)Math.Round((MIN_CC_POP / Math.Exp(POP_GROWTH_RATIO)) * Math.Exp(POP_GROWTH_RATIO * _citizens.Count));
             }
         }
 
