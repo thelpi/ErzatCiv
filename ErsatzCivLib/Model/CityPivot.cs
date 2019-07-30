@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ErsatzCivLib.Model
 {
     [Serializable]
     public class CityPivot : BasePivot
     {
+        private static readonly int AVAILABLE_SQUARES_MAX_COUNT = (5 * 5) - 4 - 1;
         public const double DISPLAY_RATIO = 0.8;
         internal const int CITY_SPEED_COST = 1;
         private const string CITY_RENDER_PATH = "city.png";
@@ -13,7 +15,8 @@ namespace ErsatzCivLib.Model
         private static readonly double FORTY_CITIZEN_LN = Math.Log(20000000);
         private static readonly double NEXT_CITIZEN_LN = (FORTY_CITIZEN_LN - FIRST_CITIZEN_LN) / (40 - 1);
 
-        private List<CitizenPivot> _citizens = new List<CitizenPivot>();
+        private List<CitizenPivot> _citizens;
+        private List<Tuple<MapSquarePivot, int, int>> _availableMapSquares;
 
         public int Row { get; private set; }
         public int Column { get; private set; }
@@ -27,44 +30,41 @@ namespace ErsatzCivLib.Model
             }
         }
 
-        internal CityPivot(Engine owner, int row, int column) : base(owner)
+        internal CityPivot(Engine owner, int row, int column, IEnumerable<Tuple<MapSquarePivot, int,int>> availableMapSquares) : base(owner)
         {
             Row = row;
             Column = column;
             RenderValue = CITY_RENDER_PATH;
 
-            var coordinates = BestCoordinates();
-            _citizens.Add(new CitizenPivot(coordinates.Item1, coordinates.Item2));
+            _availableMapSquares = new List<Tuple<MapSquarePivot, int, int>>(availableMapSquares);
+
+            var coordinates = BestVacantSpot();
+            _citizens = new List<CitizenPivot>
+            {
+                new CitizenPivot(coordinates.Item1, coordinates.Item2)
+            };
         }
 
-        private Tuple<int, int> BestCoordinates()
+        internal void AddAvailableMapSquare(MapSquarePivot square, int row, int column)
         {
-            var bestCoord = new Tuple<int, int>(-1, -1);
-            var currentBestValue = -1;
-
-            for (int x = Row - 2; x <= Row + 2; x++)
+            if (!_availableMapSquares.Any(x => x.Item1 == square) && _availableMapSquares.Count < AVAILABLE_SQUARES_MAX_COUNT)
             {
-                for (int y = Column - 2; y <= Column + 2; y++)
-                {
-                    var currentSquare = Owner.Map[x, y];
-                    if (currentSquare != null
-                        && !(x == Row && y == Column)
-                        && !(x == Row - 2 && y == Column - 2)
-                        && !(x == Row + 2 && y == Column - 2)
-                        && !(x == Row - 2 && y == Column + 2)
-                        && !(x == Row + 2 && y == Column + 2)
-                        && !Owner.OccupiedByAnotherCity(this, x, y))
-                    {
-                        if (currentBestValue < currentSquare.TotalValue)
-                        {
-                            currentBestValue = currentSquare.TotalValue;
-                            bestCoord = new Tuple<int, int>(x, y);
-                        }
-                    }
-                }
+                _availableMapSquares.Add(new Tuple<MapSquarePivot, int, int>(square, row, column));
             }
+        }
 
-            return bestCoord;
+        internal void RemoveAvailableMapSquare(int row, int column)
+        {
+            _availableMapSquares.RemoveAll(x => x.Item2 == row && x.Item3 == column);
+        }
+
+        private Tuple<int, int> BestVacantSpot()
+        {
+            return _availableMapSquares
+                .Where(x => !_citizens.Any(c => c.Row == x.Item2 && c.Column == x.Item3))
+                .OrderByDescending(x => x.Item1.TotalValue)
+                .Select(x => new Tuple<int, int>(x.Item2, x.Item3))
+                .FirstOrDefault();
         }
 
         [Serializable]
