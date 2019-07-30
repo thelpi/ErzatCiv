@@ -33,7 +33,7 @@ namespace ErsatzCivLib
             MapPivot.LandCoveragePivot landCoverage,
             MapPivot.TemperaturePivot temperature)
         {
-            Map = new MapPivot(this, mapSize, mapShape, landCoverage, temperature);
+            Map = new MapPivot(mapSize, mapShape, landCoverage, temperature);
 
             int x = 0;
             int y = 0;
@@ -44,8 +44,8 @@ namespace ErsatzCivLib
             }
             while (Map[x, y] == null || Map[x, y].Biome.IsSeaType);
 
-            _units.Add(new SettlerPivot(this, x, y));
-            _units.Add(new WorkerPivot(this, x, y));
+            _units.Add(new SettlerPivot(x, y));
+            _units.Add(new WorkerPivot(x, y));
 
             SetUnitIndex(false, true);
 
@@ -82,7 +82,7 @@ namespace ErsatzCivLib
                 }
             }
 
-            var city = new CityPivot(this, settler.Row, settler.Column, citySquares);
+            var city = new CityPivot(settler.Row, settler.Column, citySquares);
             sq.ApplyCityActions(city);
 
             _cities.Add(city);
@@ -176,9 +176,9 @@ namespace ErsatzCivLib
             var result = sq.ApplyAction(worker, actionPivot);
             if (result)
             {
-                worker.Move(null);
+                worker.ForceNoMove();
+                ToNextUnit();
             }
-
             return result;
         }
 
@@ -195,7 +195,18 @@ namespace ErsatzCivLib
 
         public bool MoveCurrentUnit(DirectionPivot direction)
         {
-            return CurrentUnit.Move(direction);
+            var x = direction.Row(CurrentUnit.Row);
+            var y = direction.Column(CurrentUnit.Column);
+            var square = Map[x, y];
+            var prevSq = Map[CurrentUnit.Row, CurrentUnit.Column];
+            bool isCity = IsCity(x, y);
+
+            var res = CurrentUnit.Move(direction, x, y, isCity, prevSq, square);
+            if (res && CurrentUnit.RemainingMoves == 0)
+            {
+                ToNextUnit();
+            }
+            return res;
         }
 
         /// <summary>
@@ -265,7 +276,7 @@ namespace ErsatzCivLib
 
         internal bool OccupiedByCity(int row, int column)
         {
-            return !_cities.Any(c => c.Citizens.Any(cc => cc.Row == row && cc.Column == column));
+            return _cities.Any(c => c.Citizens.Any(cc => cc.Row == row && cc.Column == column));
         }
 
         public class NextUnitEventArgs : EventArgs

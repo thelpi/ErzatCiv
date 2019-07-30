@@ -6,7 +6,7 @@ using ErsatzCivLib.Model.Persistent;
 namespace ErsatzCivLib.Model
 {
     [Serializable]
-    public class MapPivot : BasePivot
+    public class MapPivot
     {
         #region Constants (private)
 
@@ -93,7 +93,7 @@ namespace ErsatzCivLib.Model
         /// <param name="mapShape"><see cref="LandShapePivot"/></param>
         /// <param name="landCoverage"><see cref="LandCoveragePivot"/></param>
         /// <param name="temperature"><see cref="TemperaturePivot"/></param>
-        internal MapPivot(Engine owner, SizePivot mapSize, LandShapePivot mapShape, LandCoveragePivot landCoverage, TemperaturePivot temperature) : base(owner)
+        internal MapPivot(SizePivot mapSize, LandShapePivot mapShape, LandCoveragePivot landCoverage, TemperaturePivot temperature)
         {
             var continentCount = mapShape == LandShapePivot.Pangaea ? 1 : (
                 mapShape == LandShapePivot.Continent ? Tools.Randomizer.Next(CONTINENT_COUNT_MIN, CONTINENT_COUNT_MAX + 1) :

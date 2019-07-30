@@ -7,7 +7,7 @@ namespace ErsatzCivLib.Model
     /// Represents an unit.
     /// </summary>
     [Serializable]
-    public abstract class UnitPivot : BasePivot
+    public abstract class UnitPivot
     {
         /// <summary>
         /// Row on the map grid.
@@ -55,8 +55,8 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public RenderTypePivot RenderType { get; private set; }
 
-        protected UnitPivot(Engine owner, int row, int column, bool seaNavigate, bool groundNavigate, int defensePoints, int offensePoints,
-            string renderValue, RenderTypePivot renderType, int lifePoints, int speed) : base(owner)
+        protected UnitPivot(int row, int column, bool seaNavigate, bool groundNavigate, int defensePoints, int offensePoints,
+            string renderValue, RenderTypePivot renderType, int lifePoints, int speed)
         {
             Row = row;
             Column = column;
@@ -71,46 +71,41 @@ namespace ErsatzCivLib.Model
             RemainingMoves = Speed;
         }
 
-        internal bool Move(DirectionPivot? direction)
+        internal void ForceNoMove()
+        {
+            if (RemainingMoves > 0)
+            {
+                RemainingMoves = 0;
+            }
+        }
+
+        internal bool Move(DirectionPivot direction, int newRow, int newColumn, bool comeIntoCity,
+            MapSquarePivot previousMapSquare, MapSquarePivot currentMapSquare)
         {
             if (RemainingMoves == 0)
             {
                 return false;
             }
 
-            if (!direction.HasValue)
-            {
-                RemainingMoves = 0;
-                Owner.ToNextUnit();
-                return true;
-            }
-
-            var x = direction.Value.Row(Row);
-            var y = direction.Value.Column(Column);
-            var square = Owner.Map[x, y];
-            var prevSq = Owner.Map[Row, Column];
-            bool isCity = Owner.IsCity(x, y);
-            if (square == null
-                || (square.Biome.IsSeaType && !SeaNavigate && !isCity)
-                || (!square.Biome.IsSeaType && !GroundNavigate && !isCity))
+            if ((currentMapSquare.Biome.IsSeaType && !SeaNavigate && !comeIntoCity)
+                || (!currentMapSquare.Biome.IsSeaType && !GroundNavigate && !comeIntoCity))
             {
                 return false;
             }
 
-            if (!prevSq.RailRoad || !square.RailRoad)
+            if (!previousMapSquare.RailRoad || !currentMapSquare.RailRoad)
             {
                 RemainingMoves -=
-                    (isCity ? CityPivot.CITY_SPEED_COST : square.Biome.SpeedCost)
-                    * (prevSq.Road && square.Road ? WorkerActionPivot.ROAD_SPEED_COST_RATIO : 1);
+                    (comeIntoCity ? CityPivot.CITY_SPEED_COST : currentMapSquare.Biome.SpeedCost)
+                    * (previousMapSquare.Road && currentMapSquare.Road ? WorkerActionPivot.ROAD_SPEED_COST_RATIO : 1);
             }
 
-            Row = x;
-            Column = y;
+            Row = newRow;
+            Column = newColumn;
 
             if (RemainingMoves <= 0)
             {
                 RemainingMoves = 0;
-                Owner.ToNextUnit();
             }
 
             return true;

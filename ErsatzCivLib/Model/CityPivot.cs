@@ -5,7 +5,7 @@ using System.Linq;
 namespace ErsatzCivLib.Model
 {
     [Serializable]
-    public class CityPivot : BasePivot
+    public class CityPivot
     {
         private static readonly int AVAILABLE_SQUARES_MAX_COUNT = (5 * 5) - 4 - 1;
         public const double DISPLAY_RATIO = 0.8;
@@ -30,7 +30,7 @@ namespace ErsatzCivLib.Model
             }
         }
 
-        internal CityPivot(Engine owner, int row, int column, IEnumerable<Tuple<MapSquarePivot, int,int>> availableMapSquares) : base(owner)
+        internal CityPivot(int row, int column, IEnumerable<Tuple<MapSquarePivot, int,int>> availableMapSquares)
         {
             Row = row;
             Column = column;
@@ -61,7 +61,7 @@ namespace ErsatzCivLib.Model
         private Tuple<int, int> BestVacantSpot()
         {
             return _availableMapSquares
-                .Where(x => !_citizens.Any(c => c.Row == x.Item2 && c.Column == x.Item3))
+                .Where(x => _citizens?.Any(c => c.Row == x.Item2 && c.Column == x.Item3) != true)
                 .OrderByDescending(x => x.Item1.TotalValue)
                 .Select(x => new Tuple<int, int>(x.Item2, x.Item3))
                 .FirstOrDefault();
