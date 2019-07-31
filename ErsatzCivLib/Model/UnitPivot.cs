@@ -7,7 +7,7 @@ namespace ErsatzCivLib.Model
     /// Represents an unit.
     /// </summary>
     [Serializable]
-    public abstract class UnitPivot
+    public abstract class UnitPivot : BuildablePivot
     {
         /// <summary>
         /// Location on map.
@@ -52,15 +52,15 @@ namespace ErsatzCivLib.Model
         public RenderTypePivot RenderType { get; private set; }
 
         protected UnitPivot(MapSquarePivot location, bool seaNavigate, bool groundNavigate, int defensePoints, int offensePoints,
-            string renderValue, RenderTypePivot renderType, int lifePoints, int speed)
+            string imagePath, int lifePoints, int speed, int productivityCost) : base(productivityCost)
         {
             MapSquareLocation = location;
             SeaNavigate = seaNavigate;
             GroundNavigate = groundNavigate;
             DefensePoints = defensePoints;
             OffensePoints = offensePoints;
-            RenderValue = renderValue;
-            RenderType = renderType;
+            RenderValue = imagePath;
+            RenderType = RenderTypePivot.Image;
             CurrentLifePoints = lifePoints;
             Speed = speed;
             RemainingMoves = Speed;

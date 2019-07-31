@@ -6,13 +6,16 @@ namespace ErsatzCivLib.Model.Units
     [Serializable]
     public class WorkerPivot : UnitPivot
     {
-        public const int LifePoints = 1;
+        private const string RENDER_IMAGE_FILENAME = "unit_worker.png";
+        private const int SPEED = 1;
+        private const int PRODUCTIVITY_COST = 10;
+        private const int LIFE_POINTS = 1;
 
         private InProgressWorkerActionPivot _currentAction = null;
         internal bool BusyOnAction { get { return _currentAction != null; } }
 
-        internal WorkerPivot(MapSquarePivot location) : base(location, false, true, 0, 0,
-            "unit_worker.png", RenderTypePivot.Image, LifePoints, 1)
+        internal WorkerPivot(MapSquarePivot location) :
+            base(location, false, true, 0, 0, RENDER_IMAGE_FILENAME, LIFE_POINTS, LIFE_POINTS, PRODUCTIVITY_COST)
         {
 
         }

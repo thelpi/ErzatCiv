@@ -28,6 +28,7 @@ namespace ErsatzCiv
         private Engine _engine;
         private double _minimapSquareSize;
         private Rectangle _rCapture;
+        private bool _freezeActions = false;
 
         public MainWindow(Engine engine)
         {
@@ -55,8 +56,14 @@ namespace ErsatzCiv
 
         private void BtnNextTurn_Click(object sender, RoutedEventArgs e)
         {
+            if (_freezeActions)
+            {
+                return;
+            }
+            _freezeActions = true;
             _engine.NewTurn();
             RefreshDynamicView();
+            _freezeActions = false;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -82,6 +89,12 @@ namespace ErsatzCiv
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
+            if (_freezeActions)
+            {
+                return;
+            }
+            _freezeActions = true;
+
             // Worker actions.
             if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
             {
@@ -179,6 +192,8 @@ namespace ErsatzCiv
             {
                 _engine.ToNextUnit();
             }
+
+            _freezeActions = false;
         }
 
         private void MiniMapCanvas_MouseDown(object sender, MouseButtonEventArgs e)

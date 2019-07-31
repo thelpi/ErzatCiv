@@ -40,6 +40,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\CityImprovementPivot.cs" />
+    <Compile Include="Model\BuildablePivot.cs" />
     <Compile Include="Model\Persistent\BiomeSizePivot.cs" />
     <Compile Include="Model\CityPivot.cs" />
     <Compile Include="Model\CurrentWorkerActionPivot.cs" />
@@ -53,8 +55,12 @@
     <Compile Include="Model\Units\SettlerPivot.cs" />
     <Compile Include="Model\UnitPivot.cs" />
     <Compile Include="Model\Units\WorkerPivot.cs" />
+    <Compile Include="Model\WonderPivot.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tools.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Model\CityImprovements\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

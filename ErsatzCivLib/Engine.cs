@@ -87,7 +87,7 @@ namespace ErsatzCivLib
                 }
             }
 
-            var city = new CityPivot(name, sq, citySquares);
+            var city = new CityPivot(CurrentTurn, name, sq, citySquares, null);
             sq.ApplyCityActions(city);
 
             _cities.Add(city);
@@ -152,6 +152,14 @@ namespace ErsatzCivLib
 
         public bool NewTurn()
         {
+            foreach (var city in _cities)
+            {
+                var produced = city.UpdateStatus();
+                if (produced != null)
+                {
+
+                }
+            }
             foreach (var ms in Map)
             {
                 ms.UpdateActionsProgress();

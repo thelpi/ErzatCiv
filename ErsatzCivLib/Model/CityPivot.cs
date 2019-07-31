@@ -15,10 +15,16 @@ namespace ErsatzCivLib.Model
         private const double MIN_CC_POP = 1000;
         private const double MAX_CC_POP = 20000000;
         private static readonly double POP_GROWTH_RATIO = Math.Log(MIN_CC_POP / MAX_CC_POP) / (1 - MAX_CITIZEN_COUNT);
+        private const int FOOD_RATIO_TO_NEXT_CITIZEN = 50;
+        private const int PRODUCTIVITY_TO_COMMERCE_RATIO = 10;
 
         private List<CitizenPivot> _citizens;
         private List<MapSquarePivot> _availableMapSquares;
 
+        public BuildablePivot Production { get; private set; }
+        public int CreationTurn { get; private set; }
+        public int FoodStorage { get; private set; }
+        public int ProductivityStorage { get; private set; }
         public string Name { get; private set; }
         public MapSquarePivot MapSquareLocation { get; private set; }
         public string RenderValue { get; private set; }
@@ -57,7 +63,9 @@ namespace ErsatzCivLib.Model
                 }
 
                 // TODO : include city improvements
-                return MapSquareLocation.CityCommerce + _citizens
+                return MapSquareLocation.CityCommerce
+                    + (Production == null ? Productivity / PRODUCTIVITY_TO_COMMERCE_RATIO : 0)
+                    + _citizens
                         .Where(c => c.Type == CitizenTypePivot.Regular)
                         .Sum(c => c.MapSquare.Commerce);
             }
@@ -111,11 +119,13 @@ namespace ErsatzCivLib.Model
             }
         }
 
-        internal CityPivot(string name, MapSquarePivot location, IEnumerable<MapSquarePivot> availableMapSquares)
+        internal CityPivot(int currentTurn, string name, MapSquarePivot location, IEnumerable<MapSquarePivot> availableMapSquares, BuildablePivot production)
         {
             Name = name;
             MapSquareLocation = location;
             RenderValue = CITY_RENDER_PATH;
+            CreationTurn = currentTurn;
+            Production = production;
 
             _availableMapSquares = new List<MapSquarePivot>(availableMapSquares);
             
@@ -144,6 +154,43 @@ namespace ErsatzCivLib.Model
                 .Where(x => _citizens?.Any(c => c.MapSquare == x) != true)
                 .OrderByDescending(x => x.TotalValue)
                 .FirstOrDefault();
+        }
+
+        internal BuildablePivot UpdateStatus()
+        {
+            BuildablePivot produced = null;
+
+            var foodToConsume = CitizenPivot.FOOD_BY_TURN * _citizens.Count;
+            FoodStorage -= foodToConsume;
+            FoodStorage += Food;
+
+            if (FoodStorage < 0)
+            {
+                _citizens.Remove(_citizens.OrderByDescending(c => (int)c.Type).ThenBy(c => c.MapSquare?.Food).First());
+                FoodStorage = 0;
+            }
+            else if (FoodStorage > FOOD_RATIO_TO_NEXT_CITIZEN * _citizens.Count)
+            {
+                FoodStorage = FoodStorage - (FOOD_RATIO_TO_NEXT_CITIZEN * _citizens.Count);
+                _citizens.Add(new CitizenPivot(BestVacantSpot()));
+            }
+
+            if (Production == null)
+            {
+                ProductivityStorage = 0;
+            }
+            else
+            {
+                ProductivityStorage += Productivity;
+                if (ProductivityStorage >= Production.ProductivityCost)
+                {
+                    ProductivityStorage -= Production.ProductivityCost;
+                    produced = Production;
+                    Production = null;
+                }
+            }
+
+            return produced;
         }
 
         [Serializable]
