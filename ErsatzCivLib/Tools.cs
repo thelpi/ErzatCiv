@@ -1,13 +1,24 @@
 ﻿using System;
-using ErsatzCivLib.Model;
 using ErsatzCivLib.Model.Persistent;
 
 namespace ErsatzCivLib
 {
     internal static class Tools
     {
-        internal static readonly Random Randomizer =
+        private static readonly object _locker = new object();
+        private static readonly Random _randomizer =
             new Random(DateTime.Now.Millisecond * DateTime.Now.Second * DateTime.Now.Minute * DateTime.Now.Hour);
+
+        public static Random Randomizer
+        {
+            get
+            {
+                lock (_locker)
+                {
+                    return _randomizer;
+                }
+            }
+        }
 
         internal static int Column(this DirectionPivot direction, int column)
         {

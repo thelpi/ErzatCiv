@@ -128,8 +128,8 @@ namespace ErsatzCiv
                         var associatedSprites = GetGraphicRenders(unitToMove);
                         if (associatedSprites.Count > 0)
                         {
-                            associatedSprites.First().SetValue(Grid.RowProperty, unitToMove.Row);
-                            associatedSprites.First().SetValue(Grid.ColumnProperty, unitToMove.Column);
+                            associatedSprites.First().SetValue(Grid.RowProperty, unitToMove.MapSquareLocation.Row);
+                            associatedSprites.First().SetValue(Grid.ColumnProperty, unitToMove.MapSquareLocation.Column);
                         }
                     }
                 }
@@ -532,14 +532,14 @@ namespace ErsatzCiv
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center
             };
-            img.SetValue(Grid.RowProperty, city.Row);
-            img.SetValue(Grid.ColumnProperty, city.Column);
+            img.SetValue(Grid.RowProperty, city.MapSquareLocation.Row);
+            img.SetValue(Grid.ColumnProperty, city.MapSquareLocation.Column);
             img.SetValue(Panel.ZIndexProperty, CITY_ZINDEX);
             img.Tag = city;
             MapGrid.Children.Add(img);
 
-            bool stuckOnLeft = city.Row == 0;
-            bool stuckOnRight = city.Row == _engine.Map.Width - 1;
+            bool stuckOnLeft = city.MapSquareLocation.Row == 0;
+            bool stuckOnRight = city.MapSquareLocation.Row == _engine.Map.Width - 1;
 
             var citynameBlock = new TextBlock
             {
@@ -550,8 +550,8 @@ namespace ErsatzCiv
                 TextAlignment = TextAlignment.Center,
                 Background = Brushes.White
             };
-            citynameBlock.SetValue(Grid.RowProperty, city.Row);
-            citynameBlock.SetValue(Grid.ColumnProperty, city.Column - (stuckOnLeft ? 0 : 1));
+            citynameBlock.SetValue(Grid.RowProperty, city.MapSquareLocation.Row);
+            citynameBlock.SetValue(Grid.ColumnProperty, city.MapSquareLocation.Column - (stuckOnLeft ? 0 : 1));
             citynameBlock.SetValue(Grid.ColumnSpanProperty, stuckOnLeft || stuckOnRight ? 2 : 3);
             citynameBlock.SetValue(Panel.ZIndexProperty, CITY_ZINDEX + 1);
             citynameBlock.Tag = city;
@@ -563,8 +563,8 @@ namespace ErsatzCiv
                 Height = _minimapSquareSize,
                 Fill = Brushes.White
             };
-            imgMini.SetValue(Canvas.TopProperty, city.Row * _minimapSquareSize);
-            imgMini.SetValue(Canvas.LeftProperty, city.Column * _minimapSquareSize);
+            imgMini.SetValue(Canvas.TopProperty, city.MapSquareLocation.Row * _minimapSquareSize);
+            imgMini.SetValue(Canvas.LeftProperty, city.MapSquareLocation.Column * _minimapSquareSize);
             imgMini.Tag = city;
             MiniMapCanvas.Children.Add(imgMini);
         }
@@ -583,8 +583,8 @@ namespace ErsatzCiv
                 Source = new BitmapImage(new Uri(Settings.Default.datasPath + unit.RenderValue)),
                 Stretch = Stretch.Uniform
             };
-            img.SetValue(Grid.RowProperty, unit.Row);
-            img.SetValue(Grid.ColumnProperty, unit.Column);
+            img.SetValue(Grid.RowProperty, unit.MapSquareLocation.Row);
+            img.SetValue(Grid.ColumnProperty, unit.MapSquareLocation.Column);
             img.SetValue(Panel.ZIndexProperty, UNIT_ZINDEX);
             img.Tag = unit;
             if (blinkAndZindex)
@@ -663,8 +663,8 @@ namespace ErsatzCiv
 
             if (_engine.CurrentUnit != null)
             {
-                var newX = ((MapGrid.ActualWidth * _engine.CurrentUnit.Column) / _engine.Map.Width) - (MapScroller.ActualWidth / 2);
-                var newY = ((MapGrid.ActualHeight * _engine.CurrentUnit.Row) / _engine.Map.Height) - (MapScroller.ActualHeight / 2);
+                var newX = ((MapGrid.ActualWidth * _engine.CurrentUnit.MapSquareLocation.Column) / _engine.Map.Width) - (MapScroller.ActualWidth / 2);
+                var newY = ((MapGrid.ActualHeight * _engine.CurrentUnit.MapSquareLocation.Row) / _engine.Map.Height) - (MapScroller.ActualHeight / 2);
                 FocusOn(newX, newY);
                 DrawUnit(_engine.CurrentUnit, true);
             }

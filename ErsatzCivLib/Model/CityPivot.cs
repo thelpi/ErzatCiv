@@ -20,10 +20,16 @@ namespace ErsatzCivLib.Model
         private List<MapSquarePivot> _availableMapSquares;
 
         public string Name { get; private set; }
-        public int Row { get; private set; }
-        public int Column { get; private set; }
+        public MapSquarePivot MapSquareLocation { get; private set; }
         public string RenderValue { get; private set; }
         public IReadOnlyCollection<CitizenPivot> Citizens { get { return _citizens; } }
+        public bool InCivilTrouble
+        {
+            get
+            {
+                return _citizens.Count(c => c.Mood == MoodPivot.Unhappy) > _citizens.Count(c => c.Mood == MoodPivot.Happy);
+            }
+        }
         public int Population
         {
             get
@@ -31,12 +37,84 @@ namespace ErsatzCivLib.Model
                 return (int)Math.Round((MIN_CC_POP / Math.Exp(POP_GROWTH_RATIO)) * Math.Exp(POP_GROWTH_RATIO * _citizens.Count));
             }
         }
+        public int Food
+        {
+            get
+            {
+                // TODO : include city improvements
+                return MapSquareLocation.CityFood + _citizens
+                        .Where(c => c.Type == CitizenTypePivot.Regular)
+                        .Sum(c => c.MapSquare.Food);
+            }
+        }
+        public int Commerce
+        {
+            get
+            {
+                if (InCivilTrouble)
+                {
+                    return 0;
+                }
 
-        internal CityPivot(string name, Units.SettlerPivot settler, IEnumerable<MapSquarePivot> availableMapSquares)
+                // TODO : include city improvements
+                return MapSquareLocation.CityCommerce + _citizens
+                        .Where(c => c.Type == CitizenTypePivot.Regular)
+                        .Sum(c => c.MapSquare.Commerce);
+            }
+        }
+        public int Tax
+        {
+            get
+            {
+                if (InCivilTrouble)
+                {
+                    return 0;
+                }
+
+                // TODO : include city improvements
+                return _citizens.Count(c => c.Type == CitizenTypePivot.TaxCollector || c.Type == CitizenTypePivot.Regular);
+            }
+        }
+        public int Productivity
+        {
+            get
+            {
+                if (InCivilTrouble)
+                {
+                    return 0;
+                }
+
+                // TODO : include city improvements
+                return MapSquareLocation.CityProductivity + _citizens
+                        .Where(c => c.Type == CitizenTypePivot.Regular)
+                        .Sum(c => c.MapSquare.Productivity);
+            }
+        }
+        public int Science
+        {
+            get
+            {
+                if (InCivilTrouble)
+                {
+                    return 0;
+                }
+
+                // TODO : include city improvements
+                return _citizens.Count(c => c.Type == CitizenTypePivot.Scientist || c.Type == CitizenTypePivot.Regular);
+            }
+        }
+        public int Pollution
+        {
+            get
+            {
+                throw new NotImplementedException("Do it, bitch !");
+            }
+        }
+
+        internal CityPivot(string name, MapSquarePivot location, IEnumerable<MapSquarePivot> availableMapSquares)
         {
             Name = name;
-            Row = settler.Row;
-            Column = settler.Column;
+            MapSquareLocation = location;
             RenderValue = CITY_RENDER_PATH;
 
             _availableMapSquares = new List<MapSquarePivot>(availableMapSquares);
@@ -82,6 +160,23 @@ namespace ErsatzCivLib.Model
                 MapSquare = mapSquare;
                 Mood = MoodPivot.Content;
                 Type = mapSquare == null ? CitizenTypePivot.Entertaining : CitizenTypePivot.Regular;
+            }
+
+            public void ToSpecialist(CitizenTypePivot citizenType)
+            {
+                if (citizenType != CitizenTypePivot.Regular)
+                {
+                    Mood = MoodPivot.Content;
+                    Type = citizenType;
+                    MapSquare = null;
+                }
+            }
+
+            public void ToCitizen(MapSquarePivot mapSquare)
+            {
+                MapSquare = mapSquare ?? throw new ArgumentNullException("Argument is null !", nameof(mapSquare));
+                Mood = MoodPivot.Content;
+                Type = CitizenTypePivot.Regular;
             }
         }
 

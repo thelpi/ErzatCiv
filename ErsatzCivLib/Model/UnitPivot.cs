@@ -10,13 +10,9 @@ namespace ErsatzCivLib.Model
     public abstract class UnitPivot
     {
         /// <summary>
-        /// Row on the map grid.
+        /// Location on map.
         /// </summary>
-        public int Row { get; private set; }
-        /// <summary>
-        /// Column on the map grid.
-        /// </summary>
-        public int Column { get; private set; }
+        public MapSquarePivot MapSquareLocation { get; private set; }
         /// <summary>
         /// Current life points.
         /// </summary>
@@ -55,11 +51,10 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public RenderTypePivot RenderType { get; private set; }
 
-        protected UnitPivot(int row, int column, bool seaNavigate, bool groundNavigate, int defensePoints, int offensePoints,
+        protected UnitPivot(MapSquarePivot location, bool seaNavigate, bool groundNavigate, int defensePoints, int offensePoints,
             string renderValue, RenderTypePivot renderType, int lifePoints, int speed)
         {
-            Row = row;
-            Column = column;
+            MapSquareLocation = location;
             SeaNavigate = seaNavigate;
             GroundNavigate = groundNavigate;
             DefensePoints = defensePoints;
@@ -79,8 +74,7 @@ namespace ErsatzCivLib.Model
             }
         }
 
-        internal bool Move(DirectionPivot direction, int newRow, int newColumn, bool comeIntoCity,
-            MapSquarePivot previousMapSquare, MapSquarePivot currentMapSquare)
+        internal bool Move(DirectionPivot direction, bool comeIntoCity, MapSquarePivot previousMapSquare, MapSquarePivot currentMapSquare)
         {
             if (RemainingMoves == 0)
             {
@@ -100,8 +94,7 @@ namespace ErsatzCivLib.Model
                     * (previousMapSquare.Road && currentMapSquare.Road ? WorkerActionPivot.ROAD_SPEED_COST_RATIO : 1);
             }
 
-            Row = newRow;
-            Column = newColumn;
+            MapSquareLocation = currentMapSquare;
 
             if (RemainingMoves <= 0)
             {

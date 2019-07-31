@@ -11,7 +11,7 @@ namespace ErsatzCivLib.Model.Units
         private InProgressWorkerActionPivot _currentAction = null;
         internal bool BusyOnAction { get { return _currentAction != null; } }
 
-        internal WorkerPivot(int row, int column) : base(row, column, false, true, 0, 0,
+        internal WorkerPivot(MapSquarePivot location) : base(location, false, true, 0, 0,
             "unit_worker.png", RenderTypePivot.Image, LifePoints, 1)
         {
 

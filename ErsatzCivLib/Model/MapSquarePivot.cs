@@ -62,6 +62,7 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public bool CrossedByRiver { get; private set; }
         public bool? RiverTopToBottom { get; private set; }
+
         public int Food
         {
             get
@@ -131,6 +132,38 @@ namespace ErsatzCivLib.Model
             }
         }
         public int TotalValue { get { return Food + Productivity + Commerce; } }
+
+        public int CityFood
+        {
+            get
+            {
+                var baseValue = Biome.Food;
+                if (CrossedByRiver)
+                {
+                    baseValue += BiomePivot.RIVER_BONUS;
+                }
+                return baseValue < 2 ? 2 : baseValue;
+            }
+        }
+        public int CityProductivity
+        {
+            get
+            {
+                return Biome.Productivity < 1 ? 1 : Biome.Productivity;
+            }
+        }
+        public int CityCommerce
+        {
+            get
+            {
+                var baseValue = Biome.Commerce;
+                if (CrossedByRiver)
+                {
+                    baseValue += BiomePivot.RIVER_BONUS;
+                }
+                return baseValue < 2 ? 2 : baseValue;
+            }
+        }
 
         #endregion
 

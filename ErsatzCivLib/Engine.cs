@@ -35,17 +35,17 @@ namespace ErsatzCivLib
         {
             Map = new MapPivot(mapSize, mapShape, landCoverage, temperature);
 
-            int x = 0;
-            int y = 0;
+            MapSquarePivot ms = null;
             do
             {
-                x = Tools.Randomizer.Next(0, Map.Width);
-                y = Tools.Randomizer.Next(0, Map.Height);
+                var row = Tools.Randomizer.Next(0, Map.Height);
+                var column = Tools.Randomizer.Next(0, Map.Width);
+                ms = Map[row, column];
             }
-            while (Map[x, y] == null || Map[x, y].Biome.IsSeaType);
+            while (ms == null || ms.Biome.IsSeaType);
 
-            _units.Add(new SettlerPivot(x, y));
-            _units.Add(new WorkerPivot(x, y));
+            _units.Add(new SettlerPivot(ms));
+            _units.Add(new WorkerPivot(ms));
 
             SetUnitIndex(false, true);
 
@@ -68,16 +68,17 @@ namespace ErsatzCivLib
             }
 
             var settler = CurrentUnit as SettlerPivot;
-            var sq = Map[CurrentUnit.Row, CurrentUnit.Column];
+            var sq = CurrentUnit.MapSquareLocation;
 
             var citySquares = new List<MapSquarePivot>();
-            for (var i = settler.Row - 2; i <= settler.Row + 2; i++)
+            for (var i = sq.Row - 2; i <= sq.Row + 2; i++)
             {
-                for (var j = settler.Column - 2; j <= settler.Column + 2; j++)
+                for (var j = sq.Column - 2; j <= sq.Column + 2; j++)
                 {
                     var mapSquare = Map[i, j];
                     if (mapSquare != null
-                        && (i != settler.Row || j != settler.Column)
+                        && mapSquare != sq
+                        && !IsCity(mapSquare)
                         && !OccupiedByCity(mapSquare)
                         && !(Math.Abs(i) == 2 && Math.Abs(j) == 2))
                     {
@@ -86,7 +87,7 @@ namespace ErsatzCivLib
                 }
             }
 
-            var city = new CityPivot(name, settler, citySquares);
+            var city = new CityPivot(name, sq, citySquares);
             sq.ApplyCityActions(city);
 
             _cities.Add(city);
@@ -103,15 +104,11 @@ namespace ErsatzCivLib
                 return false;
             }
 
-            var sq = Map[CurrentUnit.Row, CurrentUnit.Column];
-            if (sq?.Biome?.IsCityBuildable != true
-                || _cities.Any(c => CurrentUnit.Row == c.Row && CurrentUnit.Column == c.Column)
-                || sq?.Pollution == true)
-            {
-                return false;
-            }
+            var sq = CurrentUnit.MapSquareLocation;
 
-            return true;
+            return sq?.Biome?.IsCityBuildable == true
+                && !IsCity(sq)
+                && sq.Pollution != true;
         }
 
         public void ToNextUnit()
@@ -171,9 +168,9 @@ namespace ErsatzCivLib
             return true;
         }
 
-        internal bool IsCity(int row, int column)
+        internal bool IsCity(MapSquarePivot square)
         {
-            return _cities.Any(c => c.Row == row && c.Column == column);
+            return _cities.Any(c => c.MapSquareLocation == square);
         }
 
         public bool WorkerAction(WorkerActionPivot actionPivot)
@@ -184,8 +181,8 @@ namespace ErsatzCivLib
             }
 
             var worker = CurrentUnit as WorkerPivot;
-            var sq = Map[worker.Row, worker.Column];
-            if (sq == null || IsCity(worker.Row, worker.Column))
+            var sq = worker.MapSquareLocation;
+            if (sq == null || IsCity(sq))
             {
                 return false;
             }
@@ -229,13 +226,14 @@ namespace ErsatzCivLib
                 return true;
             }
 
-            var x = direction.Value.Row(CurrentUnit.Row);
-            var y = direction.Value.Column(CurrentUnit.Column);
-            var square = Map[x, y];
-            var prevSq = Map[CurrentUnit.Row, CurrentUnit.Column];
-            bool isCity = IsCity(x, y);
+            var prevSq = CurrentUnit.MapSquareLocation;
 
-            var res = CurrentUnit.Move(direction.Value, x, y, isCity, prevSq, square);
+            var x = direction.Value.Row(prevSq.Row);
+            var y = direction.Value.Column(prevSq.Column);
+            var square = Map[x, y];
+            bool isCity = IsCity(square);
+
+            var res = CurrentUnit.Move(direction.Value, isCity, prevSq, square);
             if (res && CurrentUnit.RemainingMoves == 0)
             {
                 ToNextUnit();
