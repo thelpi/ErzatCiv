@@ -32,6 +32,7 @@ namespace ErsatzCiv
         public MainWindow(Engine engine)
         {
             InitializeComponent();
+            MenuDock.Height = MENU_HEIGHT + MiniMapCanvas.Margin.Top + MiniMapCanvas.Margin.Bottom;
 
             _engine = engine;
             CheckBoxWaitTurn.IsChecked = Settings.Default.waitEndTurn;
@@ -281,12 +282,9 @@ namespace ErsatzCiv
 
             _minimapSquareSize = (double)MENU_HEIGHT / _engine.Map.Height;
 
-            for (int i = 0; i < _engine.Map.Height; i++)
+            foreach (MapSquarePivot ms in _engine.Map)
             {
-                for (var j = 0; j < _engine.Map.Width; j++)
-                {
-                    DrawSingleMapAndMiniMapSquare(_engine.Map[i, j], false);
-                }
+                DrawSingleMapAndMiniMapSquare(ms, false);
             }
         }
 

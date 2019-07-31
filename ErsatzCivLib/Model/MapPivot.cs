@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using ErsatzCivLib.Model.Persistent;
@@ -6,7 +7,7 @@ using ErsatzCivLib.Model.Persistent;
 namespace ErsatzCivLib.Model
 {
     [Serializable]
-    public class MapPivot
+    public class MapPivot : IEnumerable<MapSquarePivot>
     {
         #region Constants (private)
 
@@ -44,7 +45,7 @@ namespace ErsatzCivLib.Model
         /// <param name="row">The row, between <c>0</c> and <see cref="Height"/>.</param>
         /// <param name="column">The column, between <c>0</c> and <see cref="Width"/>.</param>
         /// <returns>The square; <c>Null</c> if <paramref name="column"/> or <paramref name="row"/> is invalid.</returns>
-        public MapSquarePivot this[int row, int column]
+        internal MapSquarePivot this[int row, int column]
         {
             get
             {
@@ -388,6 +389,18 @@ namespace ErsatzCivLib.Model
             return chunksList;
         }
 
+        /// <inheritdoc />
+        public IEnumerator<MapSquarePivot> GetEnumerator()
+        {
+            return new MapSquareEnumerator(_mapSquareList);
+        }
+
+        /// <inheritdoc />
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return new MapSquareEnumerator(_mapSquareList);
+        }
+
         /// <summary>
         /// Represents the map size.
         /// </summary>
@@ -482,6 +495,70 @@ namespace ErsatzCivLib.Model
             /// Hot.
             /// </summary>
             Hot
+        }
+
+        /// <summary>
+        /// Enumerator for the list of <see cref="MapSquarePivot"/> inside <see cref="MapPivot"/>.
+        /// </summary>
+        /// <seealso cref="IEnumerator"/>
+        private class MapSquareEnumerator : IEnumerator<MapSquarePivot>
+        {
+            private MapSquarePivot[,] _mapSquares;
+
+            private int _rowPosition = -1;
+            private int _columnPosition = 0;
+
+            /// <summary>
+            /// Constructor.
+            /// </summary>
+            /// <param name="mapSquares">Collection of <see cref="MapSquarePivot"/>.</param>
+            public MapSquareEnumerator(MapSquarePivot[,] mapSquares)
+            {
+                _mapSquares = mapSquares;
+            }
+
+            /// <inheritdoc />
+            public bool MoveNext()
+            {
+                if (_rowPosition < _mapSquares.GetLength(0) - 1)
+                {
+                    _rowPosition++;
+                }
+                else
+                {
+                    _columnPosition++;
+                    _rowPosition = 0;
+                }
+                return _columnPosition < _mapSquares.GetLength(1);
+            }
+
+            /// <inheritdoc />
+            public void Reset()
+            {
+                _rowPosition = -1;
+                _columnPosition = 0;
+            }
+
+            /// <inheritdoc />
+            public void Dispose() { }
+
+            /// <inheritdoc />
+            object IEnumerator.Current
+            {
+                get
+                {
+                    return Current;
+                }
+            }
+
+            /// <inheritdoc />
+            public MapSquarePivot Current
+            {
+                get
+                {
+                    return _mapSquares[_rowPosition, _columnPosition];
+                }
+            }
         }
 
         // Tool to represent a continent square.

@@ -11,6 +11,60 @@
     <DockPanel Margin="5">
         <DockPanel Name="MenuDock" DockPanel.Dock="Bottom">
             <Canvas Margin="2" Name="MiniMapCanvas" DockPanel.Dock="Right" MouseDown="MiniMapCanvas_MouseDown" />
+            <GroupBox Header="Keyboard controls" DockPanel.Dock="Left">
+                <ScrollViewer CanContentScroll="True">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="75" />
+                            <ColumnDefinition Width="225" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <Label Grid.Column="0" Grid.Row="00" Content="B" FontWeight="Bold" />
+                        <Label Grid.Column="1" Grid.Row="00" Content="Build a city (settler)" />
+                        <Label Grid.Column="0" Grid.Row="01" Content="Space" FontWeight="Bold" />
+                        <Label Grid.Column="1" Grid.Row="01" Content="Current unit wait next turn" />
+                        <Label Grid.Column="0" Grid.Row="02" Content="C" FontWeight="Bold" />
+                        <Label Grid.Column="1" Grid.Row="02" Content="Center to current unit" />
+                        <Label Grid.Column="0" Grid.Row="03" Content="W" FontWeight="Bold" />
+                        <Label Grid.Column="1" Grid.Row="03" Content="Change focus to next unit" />
+                        <Label Grid.Column="0" Grid.Row="04" Content="1-9 (n. pad)" FontWeight="Bold" />
+                        <Label Grid.Column="1" Grid.Row="04" Content="Move unit in 8 directions" />
+                        <Label Grid.Column="0" Grid.Row="05" Content="Shift + M" FontWeight="Bold" />
+                        <Label Grid.Column="1" Grid.Row="05" Content="Build a mine (worker)" />
+                        <Label Grid.Column="0" Grid.Row="06" Content="Shift + I" FontWeight="Bold" />
+                        <Label Grid.Column="1" Grid.Row="06" Content="Build irrigation (worker)" />
+                        <Label Grid.Column="0" Grid.Row="07" Content="Shift + R" FontWeight="Bold" />
+                        <Label Grid.Column="1" Grid.Row="07" Content="Build rail/road (worker)" />
+                        <Label Grid.Column="0" Grid.Row="08" Content="Shift + C" FontWeight="Bold" />
+                        <Label Grid.Column="1" Grid.Row="08" Content="Clear swamp/jungle/forest (worker)" />
+                        <Label Grid.Column="0" Grid.Row="09" Content="Shift + D" FontWeight="Bold" />
+                        <Label Grid.Column="1" Grid.Row="09" Content="Destroy improvements (worker)" />
+                        <Label Grid.Column="0" Grid.Row="10" Content="Shift + F" FontWeight="Bold" />
+                        <Label Grid.Column="1" Grid.Row="10" Content="Build fortress (worker)" />
+                        <Label Grid.Column="0" Grid.Row="11" Content="Shift + P" FontWeight="Bold" />
+                        <Label Grid.Column="1" Grid.Row="11" Content="Plant forest (worker)" />
+                        <Label Grid.Column="0" Grid.Row="12" Content="Shift + A" FontWeight="Bold" />
+                        <Label Grid.Column="1" Grid.Row="12" Content="Clear pollution (worker)" />
+                        <Label Grid.Column="0" Grid.Row="13" Content="Shift + X" FontWeight="Bold" />
+                        <Label Grid.Column="1" Grid.Row="13" Content="Destroy rail/road (worker)" />
+                    </Grid>
+                </ScrollViewer>
+            </GroupBox>
             <StackPanel Orientation="Vertical" DockPanel.Dock="Left">
                 <CheckBox Margin="0, 5, 0, 0" Name="CheckBoxWaitTurn" Click="CheckBoxWaitTurn_Click" Content="Wait at the end of turn" HorizontalAlignment="Center" />
                 <Button Margin="0, 5, 0, 0" Name="BtnNextTurn" Content="Next turn" Width="75" Height="25" Click="BtnNextTurn_Click" />

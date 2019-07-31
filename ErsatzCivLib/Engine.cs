@@ -152,12 +152,9 @@ namespace ErsatzCivLib
 
         public bool NewTurn()
         {
-            for (int i = 0; i < Map.Height; i++)
+            foreach (var ms in Map)
             {
-                for (var j = 0; j < Map.Width; j++)
-                {
-                    Map[i, j].UpdateActionsProgress();
-                }
+                ms.UpdateActionsProgress();
             }
             foreach (var u in _units)
             {
@@ -203,12 +200,9 @@ namespace ErsatzCivLib
 
         public void SubscribeToMapSquareChangeEvent(EventHandler<MapSquarePivot.SquareChangedEventArgs> handler)
         {
-            for (int i = 0; i < Map.Height; i++)
+            foreach (var ms in Map)
             {
-                for (var j = 0; j < Map.Width; j++)
-                {
-                    Map[i, j].SquareChangeEvent += handler;
-                }
+                ms.SquareChangeEvent += handler;
             }
         }
 

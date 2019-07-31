@@ -64,5 +64,14 @@ namespace ErsatzCiv.Properties {
                 this["savesSubFolder"] = value;
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Bordeaux")]
+        public string defaultCityName {
+            get {
+                return ((string)(this["defaultCityName"]));
+            }
+        }
     }
 }

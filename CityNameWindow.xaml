@@ -5,11 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ErsatzCiv"
         mc:Ignorable="d" ResizeMode="CanMinimize"
+        WindowStartupLocation="CenterScreen"
         Title="Rename the city" SizeToContent="WidthAndHeight">
     <StackPanel Margin="5" Orientation="Vertical">
         <StackPanel Orientation="Horizontal">
             <Label Content="Name :" Width="75" HorizontalContentAlignment="Right" />
-            <TextBox MaxLength="25" Name="TextBoxCityName" Text="Paizay-le-Tort" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Width="300" />
+            <TextBox MaxLength="25" Name="TextBoxCityName" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Width="300" />
         </StackPanel>
         <StackPanel HorizontalAlignment="Right" Margin="0, 5, 0, 0" Orientation="Horizontal">
             <Button Height="25" Width="75" Content="Validate" Name="ButtonValidate" Click="ButtonValidate_Click" />
