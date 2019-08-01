@@ -157,7 +157,11 @@ namespace ErsatzCivLib
                 var produced = city.UpdateStatus();
                 if (produced != null)
                 {
-
+                    if (produced.GetType().IsSubclassOf(typeof(UnitPivot)))
+                    {
+                        _units.Add(produced as UnitPivot);
+                        SetUnitIndex(false, false);
+                    }
                 }
             }
             foreach (var ms in Map)
@@ -317,6 +321,37 @@ namespace ErsatzCivLib
         {
             // TODO
             return new List<Type> { typeof(SettlerPivot), typeof(WorkerPivot), null  };
+        }
+
+        /// <summary>
+        /// Tries to change the production of a city.
+        /// </summary>
+        /// <param name="city">The <see cref="CityPivot"/>.</param>
+        /// <param name="buildableType">
+        /// The type of production.
+        /// Anything other than a subtype of <see cref="BuildablePivot"/> will fail.
+        /// </param>
+        /// <returns><c>True</c> if success; <c>False</c> otherwise.</returns>
+        public bool ChangeCityProduction(CityPivot city, Type buildableType)
+        {
+            if (buildableType == null || !buildableType.IsSubclassOf(typeof(BuildablePivot)))
+            {
+                return false;
+            }
+            
+            var constructorSearch = buildableType.GetConstructor(
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic,
+                null,
+                new[] { typeof(MapSquarePivot) },
+                null
+            );
+            if (constructorSearch == null)
+            {
+                return false;
+            }
+
+            city.ChangeProduction((BuildablePivot)constructorSearch.Invoke(new[] { city.MapSquareLocation }));
+            return true;
         }
 
         public class NextUnitEventArgs : EventArgs

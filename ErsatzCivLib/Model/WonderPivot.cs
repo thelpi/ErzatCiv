@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ErsatzCivLib.Model
 {
+    [Serializable]
     public class WonderPivot : BuildablePivot
     {
-        protected WonderPivot(int productivityCost) : base(productivityCost)
+        protected WonderPivot(string name, int productivityCost) : base(name, productivityCost)
         {
 
         }

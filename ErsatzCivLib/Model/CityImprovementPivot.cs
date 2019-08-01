@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ErsatzCivLib.Model
 {
+    [Serializable]
     public abstract class CityImprovementPivot : BuildablePivot
     {
-        protected CityImprovementPivot(int productivityCost) : base (productivityCost)
+        protected CityImprovementPivot(string name, int productivityCost) : base (name, productivityCost)
         {
 
         }

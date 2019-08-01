@@ -52,7 +52,7 @@ namespace ErsatzCivLib.Model
         public RenderTypePivot RenderType { get; private set; }
 
         protected UnitPivot(MapSquarePivot location, bool seaNavigate, bool groundNavigate, int defensePoints, int offensePoints,
-            string imagePath, int lifePoints, int speed, int productivityCost) : base(productivityCost)
+            string imagePath, int lifePoints, int speed, int productivityCost, string name) : base(name, productivityCost)
         {
             MapSquareLocation = location;
             SeaNavigate = seaNavigate;

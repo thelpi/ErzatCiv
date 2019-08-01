@@ -12,7 +12,7 @@ namespace ErsatzCivLib.Model.Units
         private const int LIFE_POINTS = 1;
 
         internal SettlerPivot(MapSquarePivot location) :
-            base(location, false, true, 0, 0, RENDER_IMAGE_FILENAME, LIFE_POINTS, SPEED, PRODUCTIVITY_COST)
+            base(location, false, true, 0, 0, RENDER_IMAGE_FILENAME, LIFE_POINTS, SPEED, PRODUCTIVITY_COST, "Settler")
         {
 
         }

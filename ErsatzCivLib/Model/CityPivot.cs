@@ -15,11 +15,13 @@ namespace ErsatzCivLib.Model
         private const double MIN_CC_POP = 1000;
         private const double MAX_CC_POP = 20000000;
         private static readonly double POP_GROWTH_RATIO = Math.Log(MIN_CC_POP / MAX_CC_POP) / (1 - MAX_CITIZEN_COUNT);
-        private const int FOOD_RATIO_TO_NEXT_CITIZEN = 50;
+        public const int FOOD_RATIO_TO_NEXT_CITIZEN = 50;
         private const int PRODUCTIVITY_TO_COMMERCE_RATIO = 10;
 
-        private List<CitizenPivot> _citizens;
-        private List<MapSquarePivot> _availableMapSquares;
+        private readonly List<CitizenPivot> _citizens;
+        private readonly List<MapSquarePivot> _availableMapSquares;
+        private readonly List<CityImprovementPivot> _improvements;
+        private readonly List<WonderPivot> _wonders;
 
         public BuildablePivot Production { get; private set; }
         public int CreationTurn { get; private set; }
@@ -119,6 +121,15 @@ namespace ErsatzCivLib.Model
                 return 0;
             }
         }
+        public IReadOnlyCollection<CityImprovementPivot> Improvements { get { return _improvements; } }
+        public IReadOnlyCollection<WonderPivot> Wonders { get { return _wonders; } }
+        public IReadOnlyCollection<BuildablePivot> ImprovementsAndWonders
+        {
+            get
+            {
+                return new List<BuildablePivot>(_improvements).Concat(_wonders).ToList();
+            }
+        }
 
         internal CityPivot(int currentTurn, string name, MapSquarePivot location, IEnumerable<MapSquarePivot> availableMapSquares, BuildablePivot production)
         {
@@ -129,7 +140,9 @@ namespace ErsatzCivLib.Model
             Production = production;
 
             _availableMapSquares = new List<MapSquarePivot>(availableMapSquares);
-            
+            _improvements = new List<CityImprovementPivot>();
+            _wonders = new List<WonderPivot>();
+
             _citizens = new List<CitizenPivot>
             {
                 new CitizenPivot(BestVacantSpot())
@@ -155,6 +168,11 @@ namespace ErsatzCivLib.Model
                 .Where(x => _citizens?.Any(c => c.MapSquare == x) != true)
                 .OrderByDescending(x => x.TotalValue)
                 .FirstOrDefault();
+        }
+
+        internal void ChangeProduction(BuildablePivot buildable)
+        {
+            Production = buildable;
         }
 
         internal BuildablePivot UpdateStatus()

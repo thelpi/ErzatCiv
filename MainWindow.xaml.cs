@@ -262,8 +262,7 @@ namespace ErsatzCiv
             {
                 if (e.Source != null && e.Source is FrameworkElement)
                 {
-                    var sourceCity = (e.Source as FrameworkElement).Tag as CityPivot;
-                    if (sourceCity != null)
+                    if ((e.Source as FrameworkElement).Tag is CityPivot sourceCity)
                     {
                         if (_freezeActions)
                         {

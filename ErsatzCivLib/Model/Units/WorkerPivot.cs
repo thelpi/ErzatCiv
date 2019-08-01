@@ -15,7 +15,7 @@ namespace ErsatzCivLib.Model.Units
         internal bool BusyOnAction { get { return _currentAction != null; } }
 
         internal WorkerPivot(MapSquarePivot location) :
-            base(location, false, true, 0, 0, RENDER_IMAGE_FILENAME, LIFE_POINTS, LIFE_POINTS, PRODUCTIVITY_COST)
+            base(location, false, true, 0, 0, RENDER_IMAGE_FILENAME, LIFE_POINTS, LIFE_POINTS, PRODUCTIVITY_COST, "Worker")
         {
 
         }

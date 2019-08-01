@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:ErsatzCiv"
+        xmlns:local="clr-namespace:ErsatzCiv" Loaded="Window_Loaded"
         mc:Ignorable="d" ResizeMode="CanMinimize" WindowState="Maximized"
         Title="Gestion de la ville">
     <Window.Background>
@@ -24,7 +24,7 @@
             <RowDefinition />
         </Grid.RowDefinitions>
         <Label Grid.Row="0" Grid.Column="0" Name="LabelCityInfos" Content="Nom de la ville" VerticalContentAlignment="Center" FontSize="15" />
-        <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal" Name="StackCitizens">
+        <StackPanel Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal" Name="StackCitizens">
             
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical">
@@ -61,7 +61,7 @@
             </ScrollViewer>
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="2" Orientation="Vertical">
-            <ComboBox DisplayMemberPath="Key" Height="25" Name="ComboBoxProduction" />
+            <ComboBox DisplayMemberPath="Key" Height="25" Name="ComboBoxProduction" SelectionChanged="ComboBoxProduction_SelectionChanged" />
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
@@ -70,8 +70,8 @@
                     <RowDefinition Height="2*" />
                     <RowDefinition Height="3*" />
                 </Grid.RowDefinitions>
-                <WrapPanel Grid.Row="0" Grid.Column="0" Name="WrapPanelNextProduction" />
-                <WrapPanel Grid.Row="1" Grid.Column="0" Name="WrapPanelNextCitizen" />
+                <StackPanel Grid.Row="0" Grid.Column="0" Name="PanelNextProduction" Orientation="Vertical" />
+                <StackPanel Grid.Row="1" Grid.Column="0" Name="PanelNextCitizen" Orientation="Vertical" />
             </Grid>
         </StackPanel>
         <Grid Name="GridCityMap" Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center">
