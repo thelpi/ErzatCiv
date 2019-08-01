@@ -157,6 +157,7 @@ namespace ErsatzCiv
                     windowCity.ShowDialog();
                     if (windowCity.City != null)
                     {
+                        new CityWindow(_engine, windowCity.City).ShowDialog();
                         var associatedSprites = GetGraphicRenders(windowCity.UnitUsed);
                         if (associatedSprites.Count > 0)
                         {
@@ -252,6 +253,29 @@ namespace ErsatzCiv
             else if (res == MessageBoxResult.Cancel)
             {
                 e.Cancel = true;
+            }
+        }
+
+        private void MapGrid_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ClickCount == 2)
+            {
+                if (e.Source != null && e.Source is FrameworkElement)
+                {
+                    var sourceCity = (e.Source as FrameworkElement).Tag as CityPivot;
+                    if (sourceCity != null)
+                    {
+                        if (_freezeActions)
+                        {
+                            return;
+                        }
+                        _freezeActions = true;
+
+                        new CityWindow(_engine, sourceCity).ShowDialog();
+
+                        _freezeActions = false;
+                    }
+                }
             }
         }
 

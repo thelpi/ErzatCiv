@@ -57,6 +57,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="CityWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="IntroWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -71,6 +75,9 @@
     </Compile>
     <Compile Include="CityNameWindow.xaml.cs">
       <DependentUpon>CityNameWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CityWindow.xaml.cs">
+      <DependentUpon>CityWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="IntroWindow.xaml.cs">
       <DependentUpon>IntroWindow.xaml</DependentUpon>

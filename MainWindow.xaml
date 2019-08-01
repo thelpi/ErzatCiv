@@ -74,7 +74,7 @@
                   Name="MapScroller"
                       HorizontalScrollBarVisibility="Visible"
                   VerticalScrollBarVisibility="Visible">
-            <Grid Name="MapGrid" />
+            <Grid Name="MapGrid" MouseLeftButtonDown="MapGrid_MouseLeftButtonDown" />
         </ScrollViewer>
     </DockPanel>
 </Window>

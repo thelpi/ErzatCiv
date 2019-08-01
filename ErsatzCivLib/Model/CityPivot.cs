@@ -115,7 +115,8 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                throw new NotImplementedException("Do it, bitch !");
+                // TODO
+                return 0;
             }
         }
 

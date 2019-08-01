@@ -313,6 +313,12 @@ namespace ErsatzCivLib
             return _cities.Any(c => c.Citizens.Any(cc => cc.MapSquare == mapSquare));
         }
 
+        public IReadOnlyCollection<Type> BuildableItems()
+        {
+            // TODO
+            return new List<Type> { typeof(SettlerPivot), typeof(WorkerPivot), null  };
+        }
+
         public class NextUnitEventArgs : EventArgs
         {
             public bool MoreUnit { get; private set; }
