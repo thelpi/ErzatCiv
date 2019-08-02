@@ -52,7 +52,7 @@ namespace ErsatzCivLib.Model
             {
                 // TODO : include city improvements
                 return MapSquareLocation.CityFood + _citizens
-                        .Where(c => c.Type == CitizenTypePivot.Regular)
+                        .Where(c => !c.Type.HasValue)
                         .Sum(c => c.MapSquare.Food);
             }
         }
@@ -69,7 +69,7 @@ namespace ErsatzCivLib.Model
                 return MapSquareLocation.CityCommerce
                     + (Production == null ? Productivity / PRODUCTIVITY_TO_COMMERCE_RATIO : 0)
                     + _citizens
-                        .Where(c => c.Type == CitizenTypePivot.Regular)
+                        .Where(c => !c.Type.HasValue)
                         .Sum(c => c.MapSquare.Commerce);
             }
         }
@@ -83,7 +83,7 @@ namespace ErsatzCivLib.Model
                 }
 
                 // TODO : include city improvements
-                return _citizens.Count(c => c.Type == CitizenTypePivot.TaxCollector || c.Type == CitizenTypePivot.Regular);
+                return _citizens.Count(c => c.Type == CitizenTypePivot.TaxCollector || !c.Type.HasValue);
             }
         }
         public int Productivity
@@ -97,7 +97,7 @@ namespace ErsatzCivLib.Model
 
                 // TODO : include city improvements
                 return MapSquareLocation.CityProductivity + _citizens
-                        .Where(c => c.Type == CitizenTypePivot.Regular)
+                        .Where(c => !c.Type.HasValue)
                         .Sum(c => c.MapSquare.Productivity);
             }
         }
@@ -111,7 +111,7 @@ namespace ErsatzCivLib.Model
                 }
 
                 // TODO : include city improvements
-                return _citizens.Count(c => c.Type == CitizenTypePivot.Scientist || c.Type == CitizenTypePivot.Regular);
+                return _citizens.Count(c => c.Type == CitizenTypePivot.Scientist || !c.Type.HasValue);
             }
         }
         public int Pollution
@@ -163,7 +163,7 @@ namespace ErsatzCivLib.Model
             _availableMapSquares.RemoveAll(x => x == square);
         }
 
-        private MapSquarePivot BestVacantSpot()
+        internal MapSquarePivot BestVacantSpot()
         {
             return _availableMapSquares
                 .Where(x => _citizens?.Any(c => c.MapSquare == x) != true)
@@ -186,7 +186,8 @@ namespace ErsatzCivLib.Model
 
             if (FoodStorage < 0)
             {
-                _citizens.Remove(_citizens.OrderByDescending(c => (int)c.Type).ThenBy(c => c.MapSquare?.Food).First());
+                _citizens.RemoveAt(0);
+                ResetCitizens();
                 FoodStorage = 0;
             }
             else if (FoodStorage > FOOD_RATIO_TO_NEXT_CITIZEN * _citizens.Count)
@@ -221,7 +222,7 @@ namespace ErsatzCivLib.Model
             {
                 if (i > _availableMapSquares.Count)
                 {
-                    if (_citizens[i].Type == CitizenTypePivot.Regular)
+                    if (!_citizens[i].Type.HasValue)
                     {
                         _citizens[i].ToSpecialist(CitizenTypePivot.Entertaining);
                     }
@@ -245,31 +246,28 @@ namespace ErsatzCivLib.Model
 
             public MapSquarePivot MapSquare { get; private set; }
             public MoodPivot Mood { get; private set; }
-            public CitizenTypePivot Type { get; private set; }
+            public CitizenTypePivot? Type { get; private set; }
 
-            public CitizenPivot(MapSquarePivot mapSquare)
+            internal CitizenPivot(MapSquarePivot mapSquare)
             {
                 MapSquare = mapSquare;
                 Mood = MoodPivot.Content;
-                Type = mapSquare == null ? CitizenTypePivot.Entertaining : CitizenTypePivot.Regular;
+                Type = mapSquare == null ? CitizenTypePivot.Entertaining : (CitizenTypePivot?)null;
             }
 
-            public void ToSpecialist(CitizenTypePivot citizenType)
+            internal void ToSpecialist(CitizenTypePivot citizenType)
             {
-                if (citizenType != CitizenTypePivot.Regular)
-                {
-                    Mood = MoodPivot.Content;
-                    Type = citizenType;
-                    MapSquare = null;
-                }
+                Mood = MoodPivot.Content;
+                Type = citizenType;
+                MapSquare = null;
             }
 
-            public void ToCitizen(MapSquarePivot mapSquare)
+            internal void ToCitizen(MapSquarePivot mapSquare)
             {
                 MapSquare = mapSquare ?? throw new ArgumentNullException("Argument is null !", nameof(mapSquare));
                 // TODO : can be something different than "Content"
                 Mood = MoodPivot.Content;
-                Type = CitizenTypePivot.Regular;
+                Type = null;
             }
 
             public int CompareTo(CitizenPivot other)
@@ -279,7 +277,9 @@ namespace ErsatzCivLib.Model
                     return -1;
                 }
 
-                var compareType = ((int)Type).CompareTo((int)other.Type);
+                var compareType = Type.HasValue ?
+                    (other.Type.HasValue ? ((int)Type.Value).CompareTo((int)other.Type.Value) : 1) :
+                    (other.Type.HasValue ? -1 : 0);
                 var compareMood = ((int)Mood).CompareTo((int)other.Mood);
                 var compareMapS = MapSquare.TotalValue.CompareTo(other.MapSquare.TotalValue);
 
@@ -298,7 +298,6 @@ namespace ErsatzCivLib.Model
         [Serializable]
         public enum CitizenTypePivot
         {
-            Regular,
             Scientist,
             TaxCollector,
             Entertaining

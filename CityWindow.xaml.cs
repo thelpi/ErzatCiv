@@ -15,7 +15,8 @@ namespace ErsatzCiv
     public partial class CityWindow : Window
     {
         private const int CITY_GRID_SIZE = 75;
-        private const int CITIZEN_SIZE = 25;
+        private const int CITIZEN_SIZE_TOPBAR = 25;
+        private const int CITIZEN_SIZE_CITYGRID = 35;
         private const int COUNT_SHOW_CITY_SQUARES = 7; // ODD NUMBER !
 
         private readonly Engine _engine;
@@ -104,7 +105,7 @@ namespace ErsatzCiv
             StackCitizens.Children.Clear();
             foreach (var citizen in _city.Citizens)
             {
-                StackCitizens.Children.Add(DrawCitizen(citizen, CITIZEN_SIZE));
+                StackCitizens.Children.Add(DrawCitizen(citizen, CITIZEN_SIZE_TOPBAR, 1, MouseClickOnTopBarCitizen));
             }
 
             ListBoxImprovements.ItemsSource = _city.ImprovementsAndWonders;
@@ -124,17 +125,45 @@ namespace ErsatzCiv
             }
         }
 
-        private static Image DrawCitizen(CityPivot.CitizenPivot citizen, int size)
+        private static Image DrawCitizen(CityPivot.CitizenPivot citizen, int size, double opacity,
+            Action<object, System.Windows.Input.MouseButtonEventArgs> MouseLeftButtonCallback)
         {
-            string resourceName = (citizen.Type == CityPivot.CitizenTypePivot.Regular ?
-                                citizen.Mood.ToString() : citizen.Type.ToString());
+            Style style = new Style
+            {
+                TargetType = typeof(Image)
+            };
+            style.Setters.Add(new Setter(OpacityProperty, opacity));
+
+            if (opacity < 1)
+            {
+                var trigger = new Trigger
+                {
+                    Property = IsMouseOverProperty,
+                    Value = true
+                };
+                trigger.Setters.Add(new Setter(OpacityProperty, Convert.ToDouble(1)));
+                style.Triggers.Add(trigger);
+            }
+
+            string resourceName = (!citizen.Type.HasValue ?
+                citizen.Mood.ToString() : citizen.Type.ToString());
+
             var imgCitizen = new Image
             {
                 Width = size,
                 Height = size,
                 Source = new System.Windows.Media.Imaging.BitmapImage(new Uri(Properties.Settings.Default.datasPath + "citizen_" + resourceName.ToLowerInvariant() + ".png")),
-                ToolTip = resourceName
+                ToolTip = resourceName,
+                Style = style,
+                Stretch = System.Windows.Media.Stretch.Uniform,
+                Tag = citizen
             };
+
+            if (MouseLeftButtonCallback != null)
+            {
+                imgCitizen.MouseLeftButtonDown += new System.Windows.Input.MouseButtonEventHandler(MouseLeftButtonCallback);
+            }
+
             return imgCitizen;
         }
 
@@ -157,14 +186,16 @@ namespace ErsatzCiv
                 {
                     GridCityMap.Children.Add(DrawDisableSquare(i, j, 5, 0.4));
                 }
-
-                if (squares[current].Item1 != null)
+                else
                 {
-                    var imgCitizen = DrawCitizen(squares[current].Item1, CITIZEN_SIZE);
-                    imgCitizen.SetValue(Panel.ZIndexProperty, 2);
-                    imgCitizen.SetValue(Grid.RowProperty, i);
-                    imgCitizen.SetValue(Grid.ColumnProperty, j);
-                    GridCityMap.Children.Add(imgCitizen);
+                    if (squares[current].Item1 != null)
+                    {
+                        var imgCitizen = DrawCitizen(squares[current].Item1, CITIZEN_SIZE_CITYGRID, 0.6, MouseClickOnCityGridCitizen);
+                        imgCitizen.SetValue(Panel.ZIndexProperty, 2);
+                        imgCitizen.SetValue(Grid.RowProperty, i);
+                        imgCitizen.SetValue(Grid.ColumnProperty, j);
+                        GridCityMap.Children.Add(imgCitizen);
+                    }
                 }
             }
         }
@@ -218,6 +249,39 @@ namespace ErsatzCiv
             if (e.ClickCount == 2)
             {
                 _engine.ResetCitizens(_city);
+                RefreshDisplay();
+            }
+        }
+
+        private void MouseClickOnCityGridCitizen(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if ((sender as Image)?.Tag is CityPivot.CitizenPivot citizenSource)
+            {
+                _engine.ChangeCitizenToSpecialist(citizenSource, CityPivot.CitizenTypePivot.Entertaining);
+                RefreshDisplay();
+            }
+        }
+
+        private void MouseClickOnTopBarCitizen(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if ((sender as Image)?.Tag is CityPivot.CitizenPivot citizenSource)
+            {
+                if (!citizenSource.Type.HasValue)
+                {
+                    _engine.ChangeCitizenToSpecialist(citizenSource, CityPivot.CitizenTypePivot.Entertaining);
+                }
+                else if (citizenSource.Type.Value == CityPivot.CitizenTypePivot.Entertaining)
+                {
+                    _engine.ChangeCitizenToSpecialist(citizenSource, CityPivot.CitizenTypePivot.Scientist);
+                }
+                else if (citizenSource.Type.Value == CityPivot.CitizenTypePivot.Scientist)
+                {
+                    _engine.ChangeCitizenToSpecialist(citizenSource, CityPivot.CitizenTypePivot.TaxCollector);
+                }
+                else if (citizenSource.Type.Value == CityPivot.CitizenTypePivot.TaxCollector)
+                {
+                    _engine.ChangeCitizenToDefault(citizenSource, null);
+                }
                 RefreshDisplay();
             }
         }

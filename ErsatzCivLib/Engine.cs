@@ -314,6 +314,31 @@ namespace ErsatzCivLib
             }
         }
 
+        public void ChangeCitizenToSpecialist(CityPivot.CitizenPivot citizenSource, CityPivot.CitizenTypePivot citizenType)
+        {
+            citizenSource?.ToSpecialist(citizenType);
+        }
+
+        public void ChangeCitizenToDefault(CityPivot.CitizenPivot citizenSource, MapSquarePivot mapSquare)
+        {
+            if (mapSquare != null)
+            {
+                citizenSource?.ToCitizen(mapSquare);
+            }
+            else
+            {
+                var theCity = _cities.SingleOrDefault(c => c.Citizens.Any(ci => ci == citizenSource));
+                if (theCity != null)
+                {
+                    mapSquare = theCity.BestVacantSpot();
+                    if (mapSquare != null)
+                    {
+                        citizenSource?.ToCitizen(mapSquare);
+                    }
+                }
+            }
+        }
+
         internal bool OccupiedByCity(MapSquarePivot mapSquare, CityPivot exceptCity = null)
         {
             return _cities.Any(c => (exceptCity == null || exceptCity != c) && c.Citizens.Any(cc =>  cc.MapSquare == mapSquare));
