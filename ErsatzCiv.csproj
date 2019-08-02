@@ -79,6 +79,7 @@
     <Compile Include="CityWindow.xaml.cs">
       <DependentUpon>CityWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="DrawTools.cs" />
     <Compile Include="IntroWindow.xaml.cs">
       <DependentUpon>IntroWindow.xaml</DependentUpon>
     </Compile>

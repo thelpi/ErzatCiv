@@ -139,7 +139,7 @@ namespace ErsatzCiv
                     var unitToMove = _engine.CurrentUnit; // do not remove this line ! ("MoveCurrentUnit()" changes the value of "CurrentUnit")
                     if (_engine.MoveCurrentUnit(Move(e.Key).Value))
                     {
-                        var associatedSprites = GetGraphicRenders(unitToMove);
+                        var associatedSprites = MapGrid.GetChildrenByTag(unitToMove);
                         if (associatedSprites.Count > 0)
                         {
                             associatedSprites.First().SetValue(Grid.RowProperty, unitToMove.MapSquareLocation.Row);
@@ -158,7 +158,7 @@ namespace ErsatzCiv
                     if (windowCity.City != null)
                     {
                         new CityWindow(_engine, windowCity.City).ShowDialog();
-                        var associatedSprites = GetGraphicRenders(windowCity.UnitUsed);
+                        var associatedSprites = MapGrid.GetChildrenByTag(windowCity.UnitUsed);
                         if (associatedSprites.Count > 0)
                         {
                             MapGrid.Children.Remove(associatedSprites.First());
@@ -390,13 +390,13 @@ namespace ErsatzCiv
 
         private void CleanPreviousRenderOnMapAndMiniMap(MapSquarePivot square)
         {
-            var elements = GetGraphicRenders(square);
+            var elements = MapGrid.GetChildrenByTag(square);
             foreach (var elem in elements)
             {
                 MapGrid.Children.Remove(elem);
             }
 
-            var elementsMiniMap = GetMiniGraphicRenders(square);
+            var elementsMiniMap = MiniMapCanvas.GetChildrenByTag(square);
             foreach (var elem in elementsMiniMap)
             {
                 MiniMapCanvas.Children.Remove(elem);
@@ -545,13 +545,13 @@ namespace ErsatzCiv
         {
             if (!skipPreviousCheck)
             {
-                var elements = GetGraphicRenders(city);
+                var elements = MapGrid.GetChildrenByTag(city);
                 foreach (var element in elements)
                 {
                     MapGrid.Children.Remove(element);
                 }
 
-                var elementsMiniMap = GetMiniGraphicRenders(city);
+                var elementsMiniMap = MiniMapCanvas.GetChildrenByTag(city);
                 foreach (var element in elementsMiniMap)
                 {
                     MiniMapCanvas.Children.Remove(element);
@@ -607,11 +607,12 @@ namespace ErsatzCiv
 
         private void DrawUnit(UnitPivot unit, bool blinkAndZindex = false)
         {
-            var currentElem = MapGrid.Children.OfType<Image>().FirstOrDefault(x => x.Tag == unit);
-            if (currentElem != null)
+            var elements = MapGrid.GetChildrenByTag(unit);
+            foreach (var elem in elements)
             {
-                MapGrid.Children.Remove(currentElem);
+                MapGrid.Children.Remove(elem);
             }
+
             Image img = new Image
             {
                 Width = DEFAULT_SIZE,
@@ -644,16 +645,6 @@ namespace ErsatzCiv
                 blinkingStoryboard.Begin();
             }
             MapGrid.Children.Add(img);
-        }
-
-        private List<FrameworkElement> GetGraphicRenders(object tagValue)
-        {
-            return MapGrid.Children.OfType<FrameworkElement>().Where(x => x.Tag == tagValue).ToList();
-        }
-
-        private List<FrameworkElement> GetMiniGraphicRenders(object tagValue)
-        {
-            return MiniMapCanvas.Children.OfType<FrameworkElement>().Where(x => x.Tag == tagValue).ToList();
         }
 
         #endregion
