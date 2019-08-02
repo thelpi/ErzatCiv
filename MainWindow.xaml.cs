@@ -605,48 +605,6 @@ namespace ErsatzCiv
             MiniMapCanvas.Children.Add(imgMini);
         }
 
-        private void DrawUnit(UnitPivot unit, bool blinkAndZindex = false)
-        {
-            var elements = MapGrid.GetChildrenByTag(unit);
-            foreach (var elem in elements)
-            {
-                MapGrid.Children.Remove(elem);
-            }
-
-            Image img = new Image
-            {
-                Width = DEFAULT_SIZE,
-                Height = DEFAULT_SIZE,
-                Source = new BitmapImage(new Uri(Settings.Default.datasPath + unit.RenderValue)),
-                Stretch = Stretch.Uniform
-            };
-            img.SetValue(Grid.RowProperty, unit.MapSquareLocation.Row);
-            img.SetValue(Grid.ColumnProperty, unit.MapSquareLocation.Column);
-            img.SetValue(Panel.ZIndexProperty, UNIT_ZINDEX);
-            img.Tag = unit;
-            if (blinkAndZindex)
-            {
-                img.SetValue(Panel.ZIndexProperty, UNIT_ZINDEX + 1);
-
-                var blinkingAnimation = new DoubleAnimation
-                {
-                    From = 1.0,
-                    To = 0.0,
-                    RepeatBehavior = RepeatBehavior.Forever,
-                    AutoReverse = true,
-                    Duration = new Duration(TimeSpan.FromMilliseconds(500))
-                };
-
-                var blinkingStoryboard = new Storyboard();
-                blinkingStoryboard.Children.Add(blinkingAnimation);
-                Storyboard.SetTargetProperty(blinkingAnimation, new PropertyPath("(Image.Opacity)"));
-
-                Storyboard.SetTarget(blinkingAnimation, img);
-                blinkingStoryboard.Begin();
-            }
-            MapGrid.Children.Add(img);
-        }
-
         #endregion
 
         #region Other methods
@@ -661,7 +619,7 @@ namespace ErsatzCiv
         {
             foreach (var unit in _engine.Units)
             {
-                DrawUnit(unit);
+                MapGrid.DrawUnit(unit, DEFAULT_SIZE, UNIT_ZINDEX, false, true);
             }
 
             foreach (var city in _engine.Cities)
@@ -685,7 +643,7 @@ namespace ErsatzCiv
         {
             if (_engine.PreviousUnit != null)
             {
-                DrawUnit(_engine.PreviousUnit);
+                MapGrid.DrawUnit(_engine.PreviousUnit, DEFAULT_SIZE, UNIT_ZINDEX, false, true);
             }
 
             if (_engine.CurrentUnit != null)
@@ -693,7 +651,7 @@ namespace ErsatzCiv
                 var newX = ((MapGrid.ActualWidth * _engine.CurrentUnit.MapSquareLocation.Column) / _engine.Map.Width) - (MapScroller.ActualWidth / 2);
                 var newY = ((MapGrid.ActualHeight * _engine.CurrentUnit.MapSquareLocation.Row) / _engine.Map.Height) - (MapScroller.ActualHeight / 2);
                 FocusOn(newX, newY);
-                DrawUnit(_engine.CurrentUnit, true);
+                MapGrid.DrawUnit(_engine.CurrentUnit, DEFAULT_SIZE, UNIT_ZINDEX, true, true);
             }
         }
 
