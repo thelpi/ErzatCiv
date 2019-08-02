@@ -265,11 +265,8 @@ namespace ErsatzCivLib.Model
 
                         reachOtherRiver = ExistRiver(riverPoint);
                         outOfContinentBounds = !continentLand.Any(msq => msq.Row == riverPoint.Item1 && msq.Column == riverPoint.Item2);
-                        
-                        if (!reachOtherRiver && !outOfContinentBounds)
-                        {
-                            currentRiver.Add(riverPoint);
-                        }
+
+                        currentRiver.Add(riverPoint);
                     }
 
                     riversPoints.Add(currentRiver);

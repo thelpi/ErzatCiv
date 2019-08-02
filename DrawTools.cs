@@ -194,6 +194,43 @@ namespace ErsatzCiv
                 panel.CleanPreviousChildrenByTag(square);
             }
 
+            var dockPanel = new DockPanel { LastChildFill = true };
+            var b1 = new Border { BorderThickness = new Thickness(0.5), BorderBrush = Brushes.DarkGray };
+            var b2 = new Border { BorderThickness = new Thickness(0.5), BorderBrush = Brushes.DarkGray };
+            var b3 = new Border { BorderThickness = new Thickness(0.5), BorderBrush = Brushes.DarkGray };
+            var b4 = new Border { BorderThickness = new Thickness(0.5), BorderBrush = Brushes.DarkGray };
+
+            if (square.Rivers.Contains(MapSquarePivot.CardinalPivot.Top))
+            {
+                b1.BorderBrush = Brushes.Blue;
+                b1.BorderThickness = new Thickness(1);
+            }
+            if (square.Rivers.Contains(MapSquarePivot.CardinalPivot.Right))
+            {
+                b2.BorderBrush = Brushes.Blue;
+                b2.BorderThickness = new Thickness(1);
+            }
+            if (square.Rivers.Contains(MapSquarePivot.CardinalPivot.Bottom))
+            {
+                b3.BorderBrush = Brushes.Blue;
+                b3.BorderThickness = new Thickness(1);
+            }
+            if (square.Rivers.Contains(MapSquarePivot.CardinalPivot.Left))
+            {
+                b4.BorderBrush = Brushes.Blue;
+                b4.BorderThickness = new Thickness(1);
+            }
+
+            b1.SetValue(DockPanel.DockProperty, Dock.Top);
+            b2.SetValue(DockPanel.DockProperty, Dock.Right);
+            b3.SetValue(DockPanel.DockProperty, Dock.Bottom);
+            b4.SetValue(DockPanel.DockProperty, Dock.Left);
+
+            dockPanel.Children.Add(b1);
+            dockPanel.Children.Add(b2);
+            dockPanel.Children.Add(b3);
+            dockPanel.Children.Add(b4);
+
             FrameworkElement squareRender;
             string imgPath = Settings.Default.datasPath + Settings.Default.squareImageSubFolder + $"{square.Biome.Name}.jpg";
             if (System.IO.File.Exists(imgPath))
@@ -208,27 +245,25 @@ namespace ErsatzCiv
                         Stretch = Stretch.Uniform,
                         HorizontalAlignment = HorizontalAlignment.Center,
                         VerticalAlignment = VerticalAlignment.Center
-                    },
-                    BorderBrush = Brushes.DarkGray,
-                    BorderThickness = new Thickness(1)
+                    }
                 };
             }
             else
             {
                 squareRender = new Rectangle
                 {
-                    Stroke = Brushes.DarkGray,
-                    StrokeThickness = 1,
                     Width = defaultDim,
                     Height = defaultDim,
                     Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(square.Biome.ColorValue))
                 };
             }
 
-            squareRender.SetValue(Grid.RowProperty, square.Row - (gridPositionOffset == null ? 0 : gridPositionOffset.Item1));
-            squareRender.SetValue(Grid.ColumnProperty, square.Column - (gridPositionOffset == null ? 0 : gridPositionOffset.Item2));
-            squareRender.Tag = square;
-            panel.Children.Add(squareRender);
+            dockPanel.Children.Add(squareRender);
+
+            dockPanel.SetValue(Grid.RowProperty, square.Row - (gridPositionOffset == null ? 0 : gridPositionOffset.Item1));
+            dockPanel.SetValue(Grid.ColumnProperty, square.Column - (gridPositionOffset == null ? 0 : gridPositionOffset.Item2));
+            dockPanel.Tag = square;
+            panel.Children.Add(dockPanel);
 
             panel.DrawSquareImprovements(square, defaultDim, gridPositionOffset);
         }

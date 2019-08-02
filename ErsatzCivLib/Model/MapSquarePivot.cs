@@ -367,7 +367,7 @@ namespace ErsatzCivLib.Model
 
         internal void SetRiver(CardinalPivot cardinal, bool isRiver)
         {
-            _rivers[cardinal] = isRiver;
+            _rivers[cardinal] = isRiver ? !Biome.IsSeaType : isRiver;
         }
 
         [Serializable]
