@@ -226,5 +226,56 @@ namespace ErsatzCiv
             newElementsWithZIndex.Add(l3, 1);
             newElementsWithZIndex.Add(l4, 1);
         }
+
+        internal static void DrawSingleMapSquare(this Panel panel, double defaultDim, MapSquarePivot square, bool cleanPreviousSquare, int gridOffset = 0)
+        {
+            if (cleanPreviousSquare)
+            {
+                panel.CleanPreviousChildrenByTag(square);
+            }
+
+            FrameworkElement squareRender;
+            string imgPath = Settings.Default.datasPath + Settings.Default.squareImageSubFolder + $"{square.Biome.Name}.jpg";
+            if (System.IO.File.Exists(imgPath))
+            {
+                squareRender = new Border
+                {
+                    Child = new Image
+                    {
+                        Width = defaultDim,
+                        Height = defaultDim,
+                        Source = new BitmapImage(new Uri(imgPath)),
+                        Stretch = Stretch.Uniform,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center
+                    },
+                    BorderBrush = Brushes.DarkGray,
+                    BorderThickness = new Thickness(1)
+                };
+            }
+            else
+            {
+                squareRender = new Rectangle
+                {
+                    Stroke = Brushes.DarkGray,
+                    StrokeThickness = 1,
+                    Width = defaultDim,
+                    Height = defaultDim,
+                    Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(square.Biome.ColorValue))
+                };
+            }
+
+            squareRender.SetValue(Grid.RowProperty, square.Row - gridOffset);
+            squareRender.SetValue(Grid.ColumnProperty, square.Column - gridOffset);
+            squareRender.Tag = square;
+            panel.Children.Add(squareRender);
+
+            if (square.CrossedByRiver)
+            {
+                panel.DrawSquareRivers(defaultDim, square, 1, gridOffset);
+            }
+
+            panel.DrawSquareImprovements(square, defaultDim, gridOffset);
+        }
     }
 }

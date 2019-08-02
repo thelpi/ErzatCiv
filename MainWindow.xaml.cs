@@ -50,7 +50,8 @@ namespace ErsatzCiv
         {
             if (evt?.MapSquare != null)
             {
-                DrawSingleMapAndMiniMapSquare(evt.MapSquare, true);
+                MapGrid.DrawSingleMapSquare(DEFAULT_SIZE, evt.MapSquare, true);
+                DrawSingleMiniMapSquare(evt.MapSquare, true);
             }
         }
 
@@ -319,53 +320,17 @@ namespace ErsatzCiv
 
             foreach (MapSquarePivot ms in _engine.Map)
             {
-                DrawSingleMapAndMiniMapSquare(ms, false);
+                MapGrid.DrawSingleMapSquare(DEFAULT_SIZE, ms, false);
+                DrawSingleMiniMapSquare(ms, false);
             }
         }
-
-        private void DrawSingleMapAndMiniMapSquare(MapSquarePivot square, bool cleanPreviousSquare)
+        
+        private void DrawSingleMiniMapSquare(MapSquarePivot square, bool cleanPreviousSquare)
         {
             if (cleanPreviousSquare)
             {
-                MapGrid.CleanPreviousChildrenByTag(square);
                 MiniMapCanvas.CleanPreviousChildrenByTag(square);
             }
-
-            FrameworkElement squareRender;
-            string imgPath = Settings.Default.datasPath + Settings.Default.squareImageSubFolder + $"{square.Biome.Name}.jpg";
-            if (System.IO.File.Exists(imgPath))
-            {
-                squareRender = new Border
-                {
-                    Child = new Image
-                    {
-                        Width = DEFAULT_SIZE,
-                        Height = DEFAULT_SIZE,
-                        Source = new BitmapImage(new Uri(imgPath)),
-                        Stretch = Stretch.Uniform,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center
-                    },
-                    BorderBrush = Brushes.DarkGray,
-                    BorderThickness = new Thickness(1)
-                };
-            }
-            else
-            {
-                squareRender = new Rectangle
-                {
-                    Stroke = Brushes.DarkGray,
-                    StrokeThickness = 1,
-                    Width = DEFAULT_SIZE,
-                    Height = DEFAULT_SIZE,
-                    Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(square.Biome.ColorValue))
-                };
-            }
-
-            squareRender.SetValue(Grid.RowProperty, square.Row);
-            squareRender.SetValue(Grid.ColumnProperty, square.Column);
-            squareRender.Tag = square;
-            MapGrid.Children.Add(squareRender);
 
             Rectangle rctMinimap = new Rectangle
             {
@@ -380,11 +345,8 @@ namespace ErsatzCiv
 
             if (square.CrossedByRiver)
             {
-                MapGrid.DrawSquareRivers(DEFAULT_SIZE, square);
                 MiniMapCanvas.DrawSquareRivers(_minimapSquareSize, square, _minimapSquareSize);
             }
-
-            MapGrid.DrawSquareImprovements(square, DEFAULT_SIZE);
         }
 
         private void DrawMapCity(CityPivot city, bool skipPreviousCheck)
