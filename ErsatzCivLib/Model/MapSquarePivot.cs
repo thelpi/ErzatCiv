@@ -18,6 +18,8 @@ namespace ErsatzCivLib.Model
         public event EventHandler<SquareChangedEventArgs> SquareChangeEvent;
 
         private List<InProgressWorkerActionPivot> _currentActions = new List<InProgressWorkerActionPivot>();
+        private readonly Dictionary<CardinalPivot, bool> _rivers =
+            Enum.GetValues(typeof(CardinalPivot)).Cast<CardinalPivot>().ToDictionary(x => x, x => false);
 
         public int Row { get; private set; }
         public int Column { get; private set; }
@@ -29,6 +31,7 @@ namespace ErsatzCivLib.Model
         /// Underlying type in case of clearage (forest, jungle...).
         /// </summary>
         public BiomePivot UnderlyingBiome { get; private set; }
+
         /// <summary>
         /// Mine built y/n.
         /// </summary>
@@ -57,6 +60,7 @@ namespace ErsatzCivLib.Model
         /// List of <see cref="InProgressWorkerActionPivot"/> in progress for this instance.
         /// </summary>
         public IReadOnlyCollection<InProgressWorkerActionPivot> CurrentActions { get { return _currentActions; } }
+        public IReadOnlyCollection<CardinalPivot> Rivers { get { return _rivers.Where(r => r.Value).Select(r => r.Key).ToList(); } }
 
         public int Food
         {
@@ -361,6 +365,11 @@ namespace ErsatzCivLib.Model
             }
         }
 
+        internal void SetRiver(CardinalPivot cardinal, bool isRiver)
+        {
+            _rivers[cardinal] = isRiver;
+        }
+
         [Serializable]
         public class SquareChangedEventArgs : EventArgs
         {
@@ -370,6 +379,15 @@ namespace ErsatzCivLib.Model
             {
                 MapSquare = mapSquare;
             }
+        }
+
+        [Serializable]
+        public enum CardinalPivot
+        {
+            Top,
+            Bottom,
+            Right,
+            Left
         }
     }
 }

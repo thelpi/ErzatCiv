@@ -29,6 +29,7 @@ namespace ErsatzCivLib.Model
         public int ProductivityStorage { get; private set; }
         public string Name { get; private set; }
         public MapSquarePivot MapSquareLocation { get; private set; }
+        public bool HasWaterSupply { get { return MapSquareLocation.Rivers.Count > 0; } }
         public string RenderValue { get; private set; }
         public IReadOnlyCollection<CitizenPivot> Citizens { get { return _citizens; } }
         public bool InCivilTrouble
