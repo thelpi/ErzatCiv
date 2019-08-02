@@ -192,7 +192,8 @@ namespace ErsatzCivLib.Model
             else if (FoodStorage > FOOD_RATIO_TO_NEXT_CITIZEN * _citizens.Count)
             {
                 FoodStorage = FoodStorage - (FOOD_RATIO_TO_NEXT_CITIZEN * _citizens.Count);
-                _citizens.Add(new CitizenPivot(BestVacantSpot()));
+                _citizens.Add(new CitizenPivot(null));
+                ResetCitizens();
             }
 
             if (Production == null)
@@ -213,8 +214,32 @@ namespace ErsatzCivLib.Model
             return produced;
         }
 
+        internal void ResetCitizens()
+        {
+            _citizens.Sort();
+            for (int i = 0; i < _citizens.Count; i++)
+            {
+                if (i > _availableMapSquares.Count)
+                {
+                    if (_citizens[i].Type == CitizenTypePivot.Regular)
+                    {
+                        _citizens[i].ToSpecialist(CitizenTypePivot.Entertaining);
+                    }
+                }
+                else
+                {
+                    var newBestSpot = BestVacantSpot();
+                    if (_citizens[i].MapSquare == null
+                        || _citizens[i].MapSquare.TotalValue < newBestSpot.TotalValue)
+                    {
+                        _citizens[i].ToCitizen(newBestSpot);
+                    }
+                }
+            }
+        }
+
         [Serializable]
-        public class CitizenPivot
+        public class CitizenPivot : IComparable<CitizenPivot>
         {
             public const int FOOD_BY_TURN = 2;
 
@@ -242,8 +267,23 @@ namespace ErsatzCivLib.Model
             public void ToCitizen(MapSquarePivot mapSquare)
             {
                 MapSquare = mapSquare ?? throw new ArgumentNullException("Argument is null !", nameof(mapSquare));
+                // TODO : can be something different than "Content"
                 Mood = MoodPivot.Content;
                 Type = CitizenTypePivot.Regular;
+            }
+
+            public int CompareTo(CitizenPivot other)
+            {
+                if (other == null)
+                {
+                    return -1;
+                }
+
+                var compareType = ((int)Type).CompareTo((int)other.Type);
+                var compareMood = ((int)Mood).CompareTo((int)other.Mood);
+                var compareMapS = MapSquare.TotalValue.CompareTo(other.MapSquare.TotalValue);
+
+                return compareType == 0 ? (compareMood == 0 ? compareMapS : compareMood) : compareType;
             }
         }
 

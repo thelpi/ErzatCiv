@@ -268,7 +268,8 @@ namespace ErsatzCiv
             panel.DrawSquareImprovements(square, defaultDim, gridPositionOffset);
         }
 
-        internal static void DrawMapCity(this Panel panel, CityPivot city, double defaultDim, int cityZindex, bool skipPreviousCheck, Tuple<int, int> gridPositionOffset = null)
+        internal static void DrawMapCity(this Panel panel, CityPivot city, double defaultDim, int cityZindex, bool skipPreviousCheck,
+            Tuple<int, int> gridPositionOffset = null, Action<object, System.Windows.Input.MouseButtonEventArgs> mouseLeftButtonDownCallback = null)
         {
             if (panel == null)
             {
@@ -293,6 +294,12 @@ namespace ErsatzCiv
             img.SetValue(Grid.ColumnProperty, city.MapSquareLocation.Column - (gridPositionOffset == null ? 0 : gridPositionOffset.Item2));
             img.SetValue(Panel.ZIndexProperty, cityZindex);
             img.Tag = city;
+
+            if (mouseLeftButtonDownCallback != null)
+            {
+                img.MouseLeftButtonDown += new System.Windows.Input.MouseButtonEventHandler(mouseLeftButtonDownCallback);
+            }
+
             panel.Children.Add(img);
         }
     }

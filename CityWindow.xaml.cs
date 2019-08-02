@@ -15,6 +15,7 @@ namespace ErsatzCiv
     public partial class CityWindow : Window
     {
         private const int CITY_GRID_SIZE = 75;
+        private const int CITIZEN_SIZE = 25;
         private const int COUNT_SHOW_CITY_SQUARES = 7; // ODD NUMBER !
 
         private readonly Engine _engine;
@@ -103,15 +104,7 @@ namespace ErsatzCiv
             StackCitizens.Children.Clear();
             foreach (var citizen in _city.Citizens)
             {
-                string resourceName = (citizen.Type == CityPivot.CitizenTypePivot.Regular ?
-                    citizen.Mood.ToString() : citizen.Type.ToString());
-                StackCitizens.Children.Add(new Image
-                {
-                    Width = 25,
-                    Height = 25,
-                    Source = new System.Windows.Media.Imaging.BitmapImage(new Uri(Properties.Settings.Default.datasPath + "citizen_" + resourceName.ToLowerInvariant() + ".png")),
-                    ToolTip = resourceName
-                });
+                StackCitizens.Children.Add(DrawCitizen(citizen, CITIZEN_SIZE));
             }
 
             ListBoxImprovements.ItemsSource = _city.ImprovementsAndWonders;
@@ -126,33 +119,66 @@ namespace ErsatzCiv
             {
                 for (var j = 0; j < COUNT_SHOW_CITY_SQUARES; j++)
                 {
-                    var current = squares.Keys.SingleOrDefault(msq => msq.Row == (i + gridOffset.Item1) && msq.Column == (j + gridOffset.Item2));
-                    if (current == null)
-                    {
-                        GridCityMap.Children.Add(DrawDisableSquare(i, j, 1, 1));
-                    }
-                    else
-                    {
-                        GridCityMap.DrawSingleMapSquare(CITY_GRID_SIZE, current, false, gridOffset);
-                        if (i + gridOffset.Item1 == _city.MapSquareLocation.Row
-                            && j + gridOffset.Item2 == _city.MapSquareLocation.Column)
-                        {
-                            GridCityMap.DrawMapCity(_city, CITY_GRID_SIZE, 5, true, gridOffset);
-                        }
-                        else if ((i + gridOffset.Item1 < _city.MapSquareLocation.Row - 2)
-                            || (i + gridOffset.Item1 > _city.MapSquareLocation.Row + 2)
-                            || (j + gridOffset.Item2 < _city.MapSquareLocation.Column - 2)
-                            || (j + gridOffset.Item2 > _city.MapSquareLocation.Column + 2)
-                            || (i + gridOffset.Item1 == _city.MapSquareLocation.Row - 2 && j + gridOffset.Item2 == _city.MapSquareLocation.Column - 2)
-                            || (i + gridOffset.Item1 == _city.MapSquareLocation.Row - 2 && j + gridOffset.Item2 == _city.MapSquareLocation.Column + 2)
-                            || (i + gridOffset.Item1 == _city.MapSquareLocation.Row + 2 && j + gridOffset.Item2 == _city.MapSquareLocation.Column - 2)
-                            || (i + gridOffset.Item1 == _city.MapSquareLocation.Row + 2 && j + gridOffset.Item2 == _city.MapSquareLocation.Column + 2))
-                        {
-                            GridCityMap.Children.Add(DrawDisableSquare(i, j, 5, 0.4));
-                        }
-                    }
+                    DrawCitySquare(gridOffset, squares, i, j);
                 }
             }
+        }
+
+        private static Image DrawCitizen(CityPivot.CitizenPivot citizen, int size)
+        {
+            string resourceName = (citizen.Type == CityPivot.CitizenTypePivot.Regular ?
+                                citizen.Mood.ToString() : citizen.Type.ToString());
+            var imgCitizen = new Image
+            {
+                Width = size,
+                Height = size,
+                Source = new System.Windows.Media.Imaging.BitmapImage(new Uri(Properties.Settings.Default.datasPath + "citizen_" + resourceName.ToLowerInvariant() + ".png")),
+                ToolTip = resourceName
+            };
+            return imgCitizen;
+        }
+
+        private void DrawCitySquare(Tuple<int, int> gridOffset, Dictionary<MapSquarePivot, Tuple<CityPivot.CitizenPivot, bool>> squares, int i, int j)
+        {
+            var current = squares.Keys.SingleOrDefault(msq => msq.Row == (i + gridOffset.Item1) && msq.Column == (j + gridOffset.Item2));
+            if (current == null)
+            {
+                GridCityMap.Children.Add(DrawDisableSquare(i, j, 1, 1));
+            }
+            else
+            {
+                GridCityMap.DrawSingleMapSquare(CITY_GRID_SIZE, current, false, gridOffset);
+                if (i + gridOffset.Item1 == _city.MapSquareLocation.Row
+                    && j + gridOffset.Item2 == _city.MapSquareLocation.Column)
+                {
+                    GridCityMap.DrawMapCity(_city, CITY_GRID_SIZE, 5, true, gridOffset, MouseClickOnCity);
+                }
+                else if (IsOutOfCityBounds(gridOffset, i, j) || squares[current].Item2)
+                {
+                    GridCityMap.Children.Add(DrawDisableSquare(i, j, 5, 0.4));
+                }
+
+                if (squares[current].Item1 != null)
+                {
+                    var imgCitizen = DrawCitizen(squares[current].Item1, CITIZEN_SIZE);
+                    imgCitizen.SetValue(Panel.ZIndexProperty, 2);
+                    imgCitizen.SetValue(Grid.RowProperty, i);
+                    imgCitizen.SetValue(Grid.ColumnProperty, j);
+                    GridCityMap.Children.Add(imgCitizen);
+                }
+            }
+        }
+
+        private bool IsOutOfCityBounds(Tuple<int, int> gridOffset, int i, int j)
+        {
+            return (i + gridOffset.Item1 < _city.MapSquareLocation.Row - 2)
+                                        || (i + gridOffset.Item1 > _city.MapSquareLocation.Row + 2)
+                                        || (j + gridOffset.Item2 < _city.MapSquareLocation.Column - 2)
+                                        || (j + gridOffset.Item2 > _city.MapSquareLocation.Column + 2)
+                                        || (i + gridOffset.Item1 == _city.MapSquareLocation.Row - 2 && j + gridOffset.Item2 == _city.MapSquareLocation.Column - 2)
+                                        || (i + gridOffset.Item1 == _city.MapSquareLocation.Row - 2 && j + gridOffset.Item2 == _city.MapSquareLocation.Column + 2)
+                                        || (i + gridOffset.Item1 == _city.MapSquareLocation.Row + 2 && j + gridOffset.Item2 == _city.MapSquareLocation.Column - 2)
+                                        || (i + gridOffset.Item1 == _city.MapSquareLocation.Row + 2 && j + gridOffset.Item2 == _city.MapSquareLocation.Column + 2);
         }
 
         private static Rectangle DrawDisableSquare(int i, int j, int zindex, double opacity)
@@ -163,7 +189,7 @@ namespace ErsatzCiv
                 Height = CITY_GRID_SIZE,
                 Stroke = System.Windows.Media.Brushes.Black,
                 StrokeThickness = 2,
-                Fill = System.Windows.Media.Brushes.DarkGray,
+                Fill = System.Windows.Media.Brushes.Black,
                 Opacity = opacity
             };
             children.SetValue(Grid.RowProperty, i);
@@ -185,6 +211,15 @@ namespace ErsatzCiv
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             _checkComboSelection = true;
+        }
+
+        private void MouseClickOnCity(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (e.ClickCount == 2)
+            {
+                _engine.ResetCitizens(_city);
+                RefreshDisplay();
+            }
         }
     }
 }

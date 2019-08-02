@@ -81,7 +81,8 @@ namespace ErsatzCivLib
                         && mapSquare != sq
                         && !IsCity(mapSquare)
                         && !OccupiedByCity(mapSquare)
-                        && !(Math.Abs(i) == 2 && Math.Abs(j) == 2))
+                        && !(i == sq.Row - 2 && (j == sq.Column - 2 || j == sq.Column + 2))
+                        && !(i == sq.Row + 2 && (j == sq.Column - 2 || j == sq.Column + 2)))
                     {
                         citySquares.Add(mapSquare);
                     }
@@ -139,7 +140,7 @@ namespace ErsatzCivLib
                 }
                 for (int i = 0; i < _currentUnitIndex + (currentJustBeenRemoved ? 1 : 0); i++)
                 {
-                    if (_units[i].RemainingMoves > 0)
+                    if (_units.Count > i && _units[i].RemainingMoves > 0)
                     {
                         _currentUnitIndex = i;
                         NextUnitEvent?.Invoke(this, new NextUnitEventArgs(true));
@@ -385,6 +386,20 @@ namespace ErsatzCivLib
 
             city.ChangeProduction((BuildablePivot)constructorSearch.Invoke(new[] { city.MapSquareLocation }));
             return true;
+        }
+
+        /// <summary>
+        /// Resets the position on the working area of each citizen of a <see cref="CityPivot"/>.
+        /// </summary>
+        /// <param name="city">The city to reset.</param>
+        public void ResetCitizens(CityPivot city)
+        {
+            if (city == null)
+            {
+                throw new ArgumentNullException(nameof(city));
+            }
+
+            city.ResetCitizens();
         }
 
         public class NextUnitEventArgs : EventArgs
