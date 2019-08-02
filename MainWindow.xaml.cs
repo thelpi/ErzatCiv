@@ -344,11 +344,6 @@ namespace ErsatzCiv
             rctMinimap.SetValue(Canvas.LeftProperty, square.Column * _minimapSquareSize);
             rctMinimap.Tag = square;
             MiniMapCanvas.Children.Add(rctMinimap);
-
-            if (square.CrossedByRiver)
-            {
-                MiniMapCanvas.DrawSquareRivers(_minimapSquareSize, square, _minimapSquareSize);
-            }
         }
 
         private void DrawMiniMapCity(CityPivot city, bool skipPreviousCheck)

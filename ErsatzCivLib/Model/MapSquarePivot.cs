@@ -57,11 +57,6 @@ namespace ErsatzCivLib.Model
         /// List of <see cref="InProgressWorkerActionPivot"/> in progress for this instance.
         /// </summary>
         public IReadOnlyCollection<InProgressWorkerActionPivot> CurrentActions { get { return _currentActions; } }
-        /// <summary>
-        /// Indicates if the square is crossed by a river.
-        /// </summary>
-        public bool CrossedByRiver { get; private set; }
-        public bool? RiverTopToBottom { get; private set; }
 
         public int Food
         {
@@ -71,10 +66,6 @@ namespace ErsatzCivLib.Model
                 if (!Pollution)
                 {
                     baseValue = Biome.Food;
-                    if (CrossedByRiver)
-                    {
-                        baseValue += BiomePivot.RIVER_BONUS;
-                    }
                     if (Irrigate)
                     {
                         baseValue = baseValue == 0 ?
@@ -115,10 +106,6 @@ namespace ErsatzCivLib.Model
                 if (!Pollution)
                 {
                     baseValue = Biome.Commerce;
-                    if (CrossedByRiver)
-                    {
-                        baseValue += BiomePivot.RIVER_BONUS;
-                    }
                     if (Road)
                     {
                         baseValue += WorkerActionPivot.ROAD_COMMERCE_BONUS;
@@ -137,12 +124,7 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                var baseValue = Biome.Food;
-                if (CrossedByRiver)
-                {
-                    baseValue += BiomePivot.RIVER_BONUS;
-                }
-                return baseValue < 2 ? 2 : baseValue;
+                return Biome.Food < 2 ? 2 : Biome.Food;
             }
         }
         public int CityProductivity
@@ -156,12 +138,7 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                var baseValue = Biome.Commerce;
-                if (CrossedByRiver)
-                {
-                    baseValue += BiomePivot.RIVER_BONUS;
-                }
-                return baseValue < 2 ? 2 : baseValue;
+                return Biome.Commerce < 2 ? 2 : Biome.Commerce;
             }
         }
 
@@ -184,15 +161,6 @@ namespace ErsatzCivLib.Model
             if (Biome.Actions.Contains(WorkerActionPivot.Clear))
             {
                 UnderlyingBiome = underlyingType ?? throw new ArgumentNullException(nameof(underlyingType));
-            }
-        }
-
-        internal void SetRiver(bool riverTopToBottom)
-        {
-            if (Biome.RiverCrossable)
-            {
-                RiverTopToBottom = CrossedByRiver && (RiverTopToBottom != riverTopToBottom || !RiverTopToBottom.HasValue) ? (bool?)null : riverTopToBottom;
-                CrossedByRiver = true;
             }
         }
 

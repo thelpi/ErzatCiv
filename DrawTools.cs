@@ -79,48 +79,6 @@ namespace ErsatzCiv
             panel.Children.Add(img);
         }
 
-        internal static void DrawSquareRivers(this Panel panel, double size, MapSquarePivot square, double canvasOffsetRatio = 1, Tuple<int, int> gridPositionOffset = null)
-        {
-            if (panel == null)
-            {
-                return;
-            }
-
-            if (!square.RiverTopToBottom.HasValue)
-            {
-                panel.DrawRiver(size, square, false, canvasOffsetRatio);
-                panel.DrawRiver(size, square, true, canvasOffsetRatio);
-            }
-            else
-            {
-                panel.DrawRiver(size, square, square.RiverTopToBottom.Value, canvasOffsetRatio);
-            }
-        }
-
-        private static void DrawRiver(this Panel panel, double defaultDim, MapSquarePivot square, bool topToBottom, double canvasOffsetRatio = 1, Tuple<int, int> gridPositionOffset = null)
-        {
-            Rectangle riverRect = new Rectangle
-            {
-                Width = defaultDim / (topToBottom ? 10 : 1),
-                Height = defaultDim / (topToBottom ? 1 : 10),
-                Fill = Brushes.Blue
-            };
-
-            if (panel.GetType() == typeof(Grid))
-            {
-                riverRect.SetValue(Grid.RowProperty, square.Row - (gridPositionOffset == null ? 0 : gridPositionOffset.Item1));
-                riverRect.SetValue(Grid.ColumnProperty, square.Column - (gridPositionOffset == null ? 0 : gridPositionOffset.Item2));
-            }
-            else
-            {
-                riverRect.SetValue(Canvas.TopProperty, (square.Row - (gridPositionOffset == null ? 0 : gridPositionOffset.Item1)) * canvasOffsetRatio);
-                riverRect.SetValue(Canvas.LeftProperty, (square.Column - (gridPositionOffset == null ? 0 : gridPositionOffset.Item2)) * canvasOffsetRatio);
-            }
-
-            riverRect.Tag = square;
-            panel.Children.Add(riverRect);
-        }
-
         internal static void DrawSquareImprovements(this Panel panel, MapSquarePivot square, double defaultDim, Tuple<int, int> gridPositionOffset = null)
         {
             if (panel == null)
@@ -271,11 +229,6 @@ namespace ErsatzCiv
             squareRender.SetValue(Grid.ColumnProperty, square.Column - (gridPositionOffset == null ? 0 : gridPositionOffset.Item2));
             squareRender.Tag = square;
             panel.Children.Add(squareRender);
-
-            if (square.CrossedByRiver)
-            {
-                panel.DrawSquareRivers(defaultDim, square, 1, gridPositionOffset);
-            }
 
             panel.DrawSquareImprovements(square, defaultDim, gridPositionOffset);
         }

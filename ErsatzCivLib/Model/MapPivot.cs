@@ -168,14 +168,8 @@ namespace ErsatzCivLib.Model
                 coastSquares.AddRange(tmpCoastSquares);
             }
 
-            // sets chunks and rivers
+            // sets chunks
             var chunksByType = BiomePivot.NonSeaAndNonDefaultBiomes.ToDictionary(b => b, b => new List<List<Tuple<int, int>>>());
-            var riverChunks = new Dictionary<List<Tuple<int, int>>, bool>();
-
-            var Exist = new Func<int, int, bool>(delegate(int y, int x)
-            {
-                return riverChunks.Any(rc => rc.Key.Any(rck => rck.Item1 == y && rck.Item2 == x));
-            });
 
             foreach (var fullLand in continentInfos)
             {
@@ -199,83 +193,6 @@ namespace ErsatzCivLib.Model
                         chunksCountByType[chunkType],
                         (int)chunkType.Size * CHUNK_SIZE_RATIO,
                         topY, leftX, bottomY, rightX, ratioHeightWidth, chunkType.Temperatures));
-                }
-
-                for (int i = 0; i < riversChunksCount; i++)
-                {
-                    var riverChunk = new List<Tuple<int, int>>();
-                    var x = Tools.Randomizer.Next(leftX, rightX + 1);
-                    var y = Tools.Randomizer.Next(topY, bottomY + 1);
-                    if (Exist(y, x))
-                    {
-                        continue;
-                    }
-                    // 0 : left to right / top to bottom, 1 : opposite
-                    var reverseDir = Tools.Randomizer.Next(0, 2) == 0;
-                    var vertical = Tools.Randomizer.Next(0, (1 * (ratioHeightWidth)) + 1) >= ratioHeightWidth;
-                    if (vertical)
-                    {
-                        if (reverseDir)
-                        {
-                            // to the top
-                            for (int curY = y; curY >= topY; curY--)
-                            {
-                                if (Exist(curY, x))
-                                {
-                                    break;
-                                }
-                                riverChunk.Add(new Tuple<int, int>(curY, x));
-                            }
-                        }
-                        else
-                        {
-                            // to the bottom
-                            for (int curY = y; curY <= bottomY; curY++)
-                            {
-                                if (Exist(curY, x))
-                                {
-                                    break;
-                                }
-                                riverChunk.Add(new Tuple<int, int>(curY, x));
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (reverseDir)
-                        {
-                            // to the left
-                            for (int curX = x; curX >= leftX; curX--)
-                            {
-                                if (Exist(y, curX))
-                                {
-                                    break;
-                                }
-                                riverChunk.Add(new Tuple<int, int>(y, curX));
-                            }
-                        }
-                        else
-                        {
-                            // to the right
-                            for (int curX = x; curX <= rightX; curX++)
-                            {
-                                if (Exist(y, curX))
-                                {
-                                    break;
-                                }
-                                riverChunk.Add(new Tuple<int, int>(y, curX));
-                            }
-                        }
-                    }
-                    riverChunks.Add(riverChunk, vertical);
-                }
-            }
-
-            foreach (var riverChunk in riverChunks.Keys)
-            {
-                foreach (var river in riverChunk)
-                {
-                    _mapSquareList[river.Item1, river.Item2].SetRiver(riverChunks[riverChunk]);
                 }
             }
 

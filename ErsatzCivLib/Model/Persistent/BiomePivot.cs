@@ -10,11 +10,6 @@ namespace ErsatzCivLib.Model.Persistent
     [Serializable]
     public class BiomePivot
     {
-        /// <summary>
-        /// Food and commerce bonus when the square is through by a river.
-        /// </summary>
-        public const int RIVER_BONUS = 1;
-
         private List<WorkerActionPivot> _actions;
         private List<MapPivot.TemperaturePivot> _temperatures;
         private Dictionary<MapPivot.TemperaturePivot, BiomePivot> _underlyingBiomes;
@@ -45,10 +40,6 @@ namespace ErsatzCivLib.Model.Persistent
         /// Hexadecimal code of the color.
         /// </summary>
         public string ColorValue { get; private set; }
-        /// <summary>
-        /// Indicates if the square map can be crossed by a river.
-        /// </summary>
-        public bool RiverCrossable { get; private set; }
         /// <summary>
         /// Indicates of the type is sea navigable (otherwise, it's ground navigable).
         /// </summary>
@@ -111,7 +102,6 @@ namespace ErsatzCivLib.Model.Persistent
             Productivity = 1,
             Defense = 0,
             ColorValue = "#32CD32",
-            RiverCrossable = true,
             _actions = new List<WorkerActionPivot>
                 {
                     WorkerActionPivot.Irrigate,
@@ -141,7 +131,6 @@ namespace ErsatzCivLib.Model.Persistent
             Productivity = 0,
             Defense = 0,
             ColorValue = "#1E90FF",
-            RiverCrossable = false,
             _actions = new List<WorkerActionPivot>(),
             _temperatures = new List<MapPivot.TemperaturePivot>(),
             _underlyingBiomes = new Dictionary<MapPivot.TemperaturePivot, BiomePivot>(),
@@ -159,7 +148,6 @@ namespace ErsatzCivLib.Model.Persistent
             Productivity = 0,
             Defense = 1,
             ColorValue = "#FFFAF0",
-            RiverCrossable = true,
             _actions = new List<WorkerActionPivot>
                 {
                     WorkerActionPivot.Mine,
@@ -186,7 +174,6 @@ namespace ErsatzCivLib.Model.Persistent
             Productivity = 1,
             Defense = 0,
             ColorValue = "#2F4F4F",
-            RiverCrossable = true,
             _actions = new List<WorkerActionPivot>
                 {
                     WorkerActionPivot.Irrigate,
@@ -215,7 +202,6 @@ namespace ErsatzCivLib.Model.Persistent
             Productivity = 1,
             Defense = 1,
             ColorValue = "#FF7F50",
-            RiverCrossable = true,
             _actions = new List<WorkerActionPivot>
                 {
                     WorkerActionPivot.Irrigate,
@@ -243,7 +229,6 @@ namespace ErsatzCivLib.Model.Persistent
             Productivity = 0,
             Defense = 2,
             ColorValue = "#9ACD32",
-            RiverCrossable = true,
             _actions = new List<WorkerActionPivot>
                 {
                     WorkerActionPivot.Clear,
@@ -273,7 +258,6 @@ namespace ErsatzCivLib.Model.Persistent
             Productivity = 2,
             Defense = 2,
             ColorValue = "#A52A2A",
-            RiverCrossable = true,
             _actions = new List<WorkerActionPivot>
                 {
                     WorkerActionPivot.Mine,
@@ -302,7 +286,6 @@ namespace ErsatzCivLib.Model.Persistent
             Productivity = 1,
             Defense = 1,
             ColorValue = "#556B2F",
-            RiverCrossable = true,
             _actions = new List<WorkerActionPivot>
                 {
                     WorkerActionPivot.Mine,
@@ -331,7 +314,6 @@ namespace ErsatzCivLib.Model.Persistent
             Productivity = 0,
             Defense = 1,
             ColorValue = "#3CB371",
-            RiverCrossable = true,
             _actions = new List<WorkerActionPivot>
                 {
                     WorkerActionPivot.RailRoad,
@@ -365,7 +347,6 @@ namespace ErsatzCivLib.Model.Persistent
             Productivity = 2,
             Defense = 1,
             ColorValue = "#006400",
-            RiverCrossable = true,
             _actions = new List<WorkerActionPivot>
                 {
                     WorkerActionPivot.Clear,
@@ -397,7 +378,6 @@ namespace ErsatzCivLib.Model.Persistent
             Productivity = 1,
             Defense = 0,
             ColorValue = "#EEE8AA",
-            RiverCrossable = true,
             _actions = new List<WorkerActionPivot>
                 {
                     WorkerActionPivot.Irrigate,
@@ -428,7 +408,6 @@ namespace ErsatzCivLib.Model.Persistent
             Productivity = 0,
             Defense = 0,
             ColorValue = "#00BFFF",
-            RiverCrossable = false,
             _actions = new List<WorkerActionPivot>(),
             _temperatures = new List<MapPivot.TemperaturePivot>(),
             _underlyingBiomes = new Dictionary<MapPivot.TemperaturePivot, BiomePivot>(),
