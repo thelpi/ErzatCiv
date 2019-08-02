@@ -139,11 +139,11 @@ namespace ErsatzCiv
                     var unitToMove = _engine.CurrentUnit; // do not remove this line ! ("MoveCurrentUnit()" changes the value of "CurrentUnit")
                     if (_engine.MoveCurrentUnit(Move(e.Key).Value))
                     {
-                        var associatedSprites = MapGrid.GetChildrenByTag(unitToMove);
-                        if (associatedSprites.Count > 0)
+                        var spritesToMove = MapGrid.GetChildrenByTag(unitToMove);
+                        foreach (var sprite in spritesToMove)
                         {
-                            associatedSprites.First().SetValue(Grid.RowProperty, unitToMove.MapSquareLocation.Row);
-                            associatedSprites.First().SetValue(Grid.ColumnProperty, unitToMove.MapSquareLocation.Column);
+                            sprite.SetValue(Grid.RowProperty, unitToMove.MapSquareLocation.Row);
+                            sprite.SetValue(Grid.ColumnProperty, unitToMove.MapSquareLocation.Column);
                         }
                     }
                 }
@@ -158,13 +158,10 @@ namespace ErsatzCiv
                     if (windowCity.City != null)
                     {
                         new CityWindow(_engine, windowCity.City).ShowDialog();
-                        var associatedSprites = MapGrid.GetChildrenByTag(windowCity.UnitUsed);
-                        if (associatedSprites.Count > 0)
-                        {
-                            MapGrid.Children.Remove(associatedSprites.First());
 
-                            DrawMapCity(windowCity.City, true);
-                        }
+                        MapGrid.CleanPreviousChildrenByTag(windowCity.UnitUsed);
+                        DrawMapCity(windowCity.City, true);
+
                         // Ensures a refresh of the blinking current unit.
                         RecomputeFocus();
                     }
@@ -330,7 +327,8 @@ namespace ErsatzCiv
         {
             if (cleanPreviousSquare)
             {
-                CleanPreviousRenderOnMapAndMiniMap(square);
+                MapGrid.CleanPreviousChildrenByTag(square);
+                MiniMapCanvas.CleanPreviousChildrenByTag(square);
             }
 
             FrameworkElement squareRender;
@@ -382,182 +380,19 @@ namespace ErsatzCiv
 
             if (square.CrossedByRiver)
             {
-                DrawSquareRivers(square);
+                MapGrid.DrawSquareRivers(DEFAULT_SIZE, square);
+                MiniMapCanvas.DrawSquareRivers(_minimapSquareSize, square, _minimapSquareSize);
             }
 
-            DrawSquareImprovements(square);
-        }
-
-        private void CleanPreviousRenderOnMapAndMiniMap(MapSquarePivot square)
-        {
-            var elements = MapGrid.GetChildrenByTag(square);
-            foreach (var elem in elements)
-            {
-                MapGrid.Children.Remove(elem);
-            }
-
-            var elementsMiniMap = MiniMapCanvas.GetChildrenByTag(square);
-            foreach (var elem in elementsMiniMap)
-            {
-                MiniMapCanvas.Children.Remove(elem);
-            }
-        }
-
-        private void DrawSquareRivers(MapSquarePivot square)
-        {
-            if (!square.RiverTopToBottom.HasValue)
-            {
-                DrawRiver(square, false, false);
-                DrawRiver(square, true, false);
-                DrawRiver(square, false, true);
-                DrawRiver(square, true, true);
-            }
-            else
-            {
-                DrawRiver(square, square.RiverTopToBottom.Value, false);
-                DrawRiver(square, square.RiverTopToBottom.Value, true);
-            }
-        }
-
-        private void DrawSquareImprovements(MapSquarePivot square)
-        {
-            var newElementsWithZIndex = new Dictionary<FrameworkElement, int>();
-            if (square.RailRoad)
-            {
-                DrawRoad(newElementsWithZIndex, true);
-            }
-            else if (square.Road)
-            {
-                DrawRoad(newElementsWithZIndex, false);
-            }
-            if (square.Irrigate)
-            {
-                DrawIrrigationSystem(newElementsWithZIndex);
-            }
-            if (square.Mine)
-            {
-                DrawImageOnSquare(newElementsWithZIndex, 0.5, "mine.png", 2);
-            }
-            if (square.Pollution)
-            {
-                DrawImageOnSquare(newElementsWithZIndex, 0.8, "pollution.png", 3);
-            }
-            if (square.Fortress)
-            {
-                DrawFortress(newElementsWithZIndex);
-            }
-
-            foreach (var element in newElementsWithZIndex.Keys)
-            {
-                element.SetValue(Grid.RowProperty, square.Row);
-                element.SetValue(Grid.ColumnProperty, square.Column);
-                element.SetValue(Panel.ZIndexProperty, newElementsWithZIndex[element]);
-                element.Tag = square;
-                MapGrid.Children.Add(element);
-            }
-        }
-
-        private static void DrawFortress(Dictionary<FrameworkElement, int> newElementsWithZIndex)
-        {
-            var rect = new Rectangle
-            {
-                Width = DEFAULT_SIZE * 0.7,
-                Height = DEFAULT_SIZE * 0.7,
-                Fill = Brushes.Transparent,
-                Stroke = Brushes.Maroon,
-                StrokeThickness = 2,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center
-            };
-            newElementsWithZIndex.Add(rect, 4);
-        }
-
-        private static void DrawImageOnSquare(Dictionary<FrameworkElement, int> newElementsWithZIndex, double ratio, string imgName, int zIndex)
-        {
-            Image img = new Image
-            {
-                Width = DEFAULT_SIZE * ratio,
-                Height = DEFAULT_SIZE * ratio,
-                Source = new BitmapImage(new Uri(Settings.Default.datasPath + imgName)),
-                Stretch = Stretch.Uniform,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center
-            };
-            newElementsWithZIndex.Add(img, zIndex);
-        }
-
-        private static void DrawIrrigationSystem(Dictionary<FrameworkElement, int> newElementsWithZIndex)
-        {
-            var firstThird = (DEFAULT_SIZE / (double)3) - 1;
-            var secondThird = ((DEFAULT_SIZE / (double)3) * 2) - 1;
-            for (int i = 0; i < 4; i++)
-            {
-                var line = new Line
-                {
-                    X1 = (i == 3 ? secondThird : (i == 2 ? firstThird : 1)),
-                    Y1 = (i == 0 ? firstThird : (i == 1 ? secondThird : 1)),
-                    X2 = (i == 3 ? secondThird : (i == 2 ? firstThird : DEFAULT_SIZE - 1)),
-                    Y2 = (i == 0 ? firstThird : (i == 1 ? secondThird : DEFAULT_SIZE - 1)),
-                    StrokeThickness = 2,
-                    Stroke = Brushes.Aquamarine
-                };
-                newElementsWithZIndex.Add(line, 2);
-            }
-        }
-
-        private void DrawRiver(MapSquarePivot square, bool topToBottom, bool miniMap)
-        {
-            Rectangle riverRect = new Rectangle
-            {
-                Width = (miniMap ? _minimapSquareSize : DEFAULT_SIZE) / (topToBottom ? 10 : 1),
-                Height = (miniMap ? _minimapSquareSize : DEFAULT_SIZE) / (topToBottom ? 1 : 10),
-                Fill = Brushes.Blue
-            };
-
-            if (miniMap)
-            {
-                riverRect.SetValue(Canvas.TopProperty, square.Row * _minimapSquareSize);
-                riverRect.SetValue(Canvas.LeftProperty, square.Column * _minimapSquareSize);
-            }
-            else
-            {
-                riverRect.SetValue(Grid.RowProperty, square.Row);
-                riverRect.SetValue(Grid.ColumnProperty, square.Column);
-            }
-
-            riverRect.Tag = square;
-            (miniMap ? (Panel)MiniMapCanvas : MapGrid).Children.Add(riverRect);
-        }
-
-        private static void DrawRoad(Dictionary<FrameworkElement, int> newElementsWithZIndex, bool railRoad)
-        {
-            Line l1 = new Line { X1 = 0, Y1 = 0, X2 = DEFAULT_SIZE, Y2 = DEFAULT_SIZE, StrokeThickness = 1, Stroke = railRoad ? Brushes.Black : Brushes.Tan };
-            Line l2 = new Line { X1 = 0, Y1 = DEFAULT_SIZE / 2, X2 = DEFAULT_SIZE, Y2 = DEFAULT_SIZE / 2, StrokeThickness = 1, Stroke = railRoad ? Brushes.Black : Brushes.Tan };
-            Line l3 = new Line { X1 = 0, Y1 = DEFAULT_SIZE, X2 = DEFAULT_SIZE, Y2 = 0, StrokeThickness = 1, Stroke = railRoad ? Brushes.Black : Brushes.Tan };
-            Line l4 = new Line { X1 = DEFAULT_SIZE / 2, Y1 = 0, X2 = DEFAULT_SIZE / 2, Y2 = DEFAULT_SIZE, StrokeThickness = 1, Stroke = railRoad ? Brushes.Black : Brushes.Tan };
-            newElementsWithZIndex.Add(l1, 1);
-            newElementsWithZIndex.Add(l2, 1);
-            newElementsWithZIndex.Add(l3, 1);
-            newElementsWithZIndex.Add(l4, 1);
+            MapGrid.DrawSquareImprovements(square, DEFAULT_SIZE);
         }
 
         private void DrawMapCity(CityPivot city, bool skipPreviousCheck)
         {
             if (!skipPreviousCheck)
             {
-                var elements = MapGrid.GetChildrenByTag(city);
-                foreach (var element in elements)
-                {
-                    MapGrid.Children.Remove(element);
-                }
-
-                var elementsMiniMap = MiniMapCanvas.GetChildrenByTag(city);
-                foreach (var element in elementsMiniMap)
-                {
-                    MiniMapCanvas.Children.Remove(element);
-                }
+                MapGrid.CleanPreviousChildrenByTag(city);
             }
-
 
             Image img = new Image
             {
@@ -592,6 +427,16 @@ namespace ErsatzCiv
             citynameBlock.SetValue(Panel.ZIndexProperty, CITY_ZINDEX + 1);
             citynameBlock.Tag = city;
             MapGrid.Children.Add(citynameBlock);
+
+            DrawMiniMapCity(city, skipPreviousCheck);
+        }
+
+        private void DrawMiniMapCity(CityPivot city, bool skipPreviousCheck)
+        {
+            if (!skipPreviousCheck)
+            {
+                MiniMapCanvas.CleanPreviousChildrenByTag(city);
+            }
 
             Rectangle imgMini = new Rectangle
             {
