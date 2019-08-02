@@ -161,7 +161,9 @@ namespace ErsatzCiv
                         new CityWindow(_engine, windowCity.City).ShowDialog();
 
                         MapGrid.CleanPreviousChildrenByTag(windowCity.UnitUsed);
-                        DrawMapCity(windowCity.City, true);
+                        MapGrid.DrawMapCity(windowCity.City, DEFAULT_SIZE, CITY_ZINDEX, true);
+                        DisplayCityName(windowCity.City);
+                        DrawMiniMapCity(windowCity.City, true);
 
                         // Ensures a refresh of the blinking current unit.
                         RecomputeFocus();
@@ -349,28 +351,27 @@ namespace ErsatzCiv
             }
         }
 
-        private void DrawMapCity(CityPivot city, bool skipPreviousCheck)
+        private void DrawMiniMapCity(CityPivot city, bool skipPreviousCheck)
         {
             if (!skipPreviousCheck)
             {
-                MapGrid.CleanPreviousChildrenByTag(city);
+                MiniMapCanvas.CleanPreviousChildrenByTag(city);
             }
 
-            Image img = new Image
+            Rectangle imgMini = new Rectangle
             {
-                Width = DEFAULT_SIZE * CityPivot.DISPLAY_RATIO,
-                Height = DEFAULT_SIZE * CityPivot.DISPLAY_RATIO,
-                Source = new BitmapImage(new Uri(Settings.Default.datasPath + city.RenderValue)),
-                Stretch = Stretch.Uniform,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center
+                Width = _minimapSquareSize,
+                Height = _minimapSquareSize,
+                Fill = Brushes.White
             };
-            img.SetValue(Grid.RowProperty, city.MapSquareLocation.Row);
-            img.SetValue(Grid.ColumnProperty, city.MapSquareLocation.Column);
-            img.SetValue(Panel.ZIndexProperty, CITY_ZINDEX);
-            img.Tag = city;
-            MapGrid.Children.Add(img);
+            imgMini.SetValue(Canvas.TopProperty, city.MapSquareLocation.Row * _minimapSquareSize);
+            imgMini.SetValue(Canvas.LeftProperty, city.MapSquareLocation.Column * _minimapSquareSize);
+            imgMini.Tag = city;
+            MiniMapCanvas.Children.Add(imgMini);
+        }
 
+        private void DisplayCityName(CityPivot city)
+        {
             bool stuckOnLeft = city.MapSquareLocation.Row == 0;
             bool stuckOnRight = city.MapSquareLocation.Row == _engine.Map.Width - 1;
 
@@ -389,27 +390,6 @@ namespace ErsatzCiv
             citynameBlock.SetValue(Panel.ZIndexProperty, CITY_ZINDEX + 1);
             citynameBlock.Tag = city;
             MapGrid.Children.Add(citynameBlock);
-
-            DrawMiniMapCity(city, skipPreviousCheck);
-        }
-
-        private void DrawMiniMapCity(CityPivot city, bool skipPreviousCheck)
-        {
-            if (!skipPreviousCheck)
-            {
-                MiniMapCanvas.CleanPreviousChildrenByTag(city);
-            }
-
-            Rectangle imgMini = new Rectangle
-            {
-                Width = _minimapSquareSize,
-                Height = _minimapSquareSize,
-                Fill = Brushes.White
-            };
-            imgMini.SetValue(Canvas.TopProperty, city.MapSquareLocation.Row * _minimapSquareSize);
-            imgMini.SetValue(Canvas.LeftProperty, city.MapSquareLocation.Column * _minimapSquareSize);
-            imgMini.Tag = city;
-            MiniMapCanvas.Children.Add(imgMini);
         }
 
         #endregion
@@ -431,7 +411,9 @@ namespace ErsatzCiv
 
             foreach (var city in _engine.Cities)
             {
-                DrawMapCity(city, false);
+                MapGrid.DrawMapCity(city, DEFAULT_SIZE, CITY_ZINDEX, false);
+                DisplayCityName(city);
+                DrawMiniMapCity(city, false);
             }
 
             // Ensures a refresh of the blinking current unit.

@@ -79,7 +79,7 @@ namespace ErsatzCiv
             panel.Children.Add(img);
         }
 
-        internal static void DrawSquareRivers(this Panel panel, double size, MapSquarePivot square, double canvasOffsetRatio = 1, int grdPositionOffset = 0)
+        internal static void DrawSquareRivers(this Panel panel, double size, MapSquarePivot square, double canvasOffsetRatio = 1, Tuple<int, int> gridPositionOffset = null)
         {
             if (panel == null)
             {
@@ -88,19 +88,16 @@ namespace ErsatzCiv
 
             if (!square.RiverTopToBottom.HasValue)
             {
-                panel.DrawRiver(size, square, false);
-                panel.DrawRiver(size, square, true);
                 panel.DrawRiver(size, square, false, canvasOffsetRatio);
                 panel.DrawRiver(size, square, true, canvasOffsetRatio);
             }
             else
             {
-                panel.DrawRiver(size, square, square.RiverTopToBottom.Value);
                 panel.DrawRiver(size, square, square.RiverTopToBottom.Value, canvasOffsetRatio);
             }
         }
 
-        private static void DrawRiver(this Panel panel, double defaultDim, MapSquarePivot square, bool topToBottom, double canvasOffsetRatio = 1, int grdPositionOffset = 0)
+        private static void DrawRiver(this Panel panel, double defaultDim, MapSquarePivot square, bool topToBottom, double canvasOffsetRatio = 1, Tuple<int, int> gridPositionOffset = null)
         {
             Rectangle riverRect = new Rectangle
             {
@@ -111,20 +108,20 @@ namespace ErsatzCiv
 
             if (panel.GetType() == typeof(Grid))
             {
-                riverRect.SetValue(Grid.RowProperty, square.Row - grdPositionOffset);
-                riverRect.SetValue(Grid.ColumnProperty, square.Column - grdPositionOffset);
+                riverRect.SetValue(Grid.RowProperty, square.Row - (gridPositionOffset == null ? 0 : gridPositionOffset.Item1));
+                riverRect.SetValue(Grid.ColumnProperty, square.Column - (gridPositionOffset == null ? 0 : gridPositionOffset.Item2));
             }
             else
             {
-                riverRect.SetValue(Canvas.TopProperty, (square.Row - grdPositionOffset) * canvasOffsetRatio);
-                riverRect.SetValue(Canvas.LeftProperty, (square.Column - grdPositionOffset) * canvasOffsetRatio);
+                riverRect.SetValue(Canvas.TopProperty, (square.Row - (gridPositionOffset == null ? 0 : gridPositionOffset.Item1)) * canvasOffsetRatio);
+                riverRect.SetValue(Canvas.LeftProperty, (square.Column - (gridPositionOffset == null ? 0 : gridPositionOffset.Item2)) * canvasOffsetRatio);
             }
 
             riverRect.Tag = square;
             panel.Children.Add(riverRect);
         }
 
-        internal static void DrawSquareImprovements(this Panel panel, MapSquarePivot square, double defaultDim, int gridOffset = 0)
+        internal static void DrawSquareImprovements(this Panel panel, MapSquarePivot square, double defaultDim, Tuple<int, int> gridPositionOffset = null)
         {
             if (panel == null)
             {
@@ -159,8 +156,8 @@ namespace ErsatzCiv
 
             foreach (var element in newElementsWithZIndex.Keys)
             {
-                element.SetValue(Grid.RowProperty, square.Row - gridOffset);
-                element.SetValue(Grid.ColumnProperty, square.Column - gridOffset);
+                element.SetValue(Grid.RowProperty, square.Row - (gridPositionOffset == null ? 0 : gridPositionOffset.Item1));
+                element.SetValue(Grid.ColumnProperty, square.Column - (gridPositionOffset == null ? 0 : gridPositionOffset.Item2));
                 element.SetValue(Panel.ZIndexProperty, newElementsWithZIndex[element]);
                 element.Tag = square;
                 panel.Children.Add(element);
@@ -227,8 +224,13 @@ namespace ErsatzCiv
             newElementsWithZIndex.Add(l4, 1);
         }
 
-        internal static void DrawSingleMapSquare(this Panel panel, double defaultDim, MapSquarePivot square, bool cleanPreviousSquare, int gridOffset = 0)
+        internal static void DrawSingleMapSquare(this Panel panel, double defaultDim, MapSquarePivot square, bool cleanPreviousSquare, Tuple<int, int> gridPositionOffset = null)
         {
+            if (panel == null)
+            {
+                return;
+            }
+
             if (cleanPreviousSquare)
             {
                 panel.CleanPreviousChildrenByTag(square);
@@ -265,17 +267,45 @@ namespace ErsatzCiv
                 };
             }
 
-            squareRender.SetValue(Grid.RowProperty, square.Row - gridOffset);
-            squareRender.SetValue(Grid.ColumnProperty, square.Column - gridOffset);
+            squareRender.SetValue(Grid.RowProperty, square.Row - (gridPositionOffset == null ? 0 : gridPositionOffset.Item1));
+            squareRender.SetValue(Grid.ColumnProperty, square.Column - (gridPositionOffset == null ? 0 : gridPositionOffset.Item2));
             squareRender.Tag = square;
             panel.Children.Add(squareRender);
 
             if (square.CrossedByRiver)
             {
-                panel.DrawSquareRivers(defaultDim, square, 1, gridOffset);
+                panel.DrawSquareRivers(defaultDim, square, 1, gridPositionOffset);
             }
 
-            panel.DrawSquareImprovements(square, defaultDim, gridOffset);
+            panel.DrawSquareImprovements(square, defaultDim, gridPositionOffset);
+        }
+
+        internal static void DrawMapCity(this Panel panel, CityPivot city, double defaultDim, int cityZindex, bool skipPreviousCheck, Tuple<int, int> gridPositionOffset = null)
+        {
+            if (panel == null)
+            {
+                return;
+            }
+
+            if (!skipPreviousCheck)
+            {
+                panel.CleanPreviousChildrenByTag(city);
+            }
+
+            Image img = new Image
+            {
+                Width = defaultDim * CityPivot.DISPLAY_RATIO,
+                Height = defaultDim * CityPivot.DISPLAY_RATIO,
+                Source = new BitmapImage(new Uri(Settings.Default.datasPath + city.RenderValue)),
+                Stretch = Stretch.Uniform,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            img.SetValue(Grid.RowProperty, city.MapSquareLocation.Row - (gridPositionOffset == null ? 0 : gridPositionOffset.Item1));
+            img.SetValue(Grid.ColumnProperty, city.MapSquareLocation.Column - (gridPositionOffset == null ? 0 : gridPositionOffset.Item2));
+            img.SetValue(Panel.ZIndexProperty, cityZindex);
+            img.Tag = city;
+            panel.Children.Add(img);
         }
     }
 }

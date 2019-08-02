@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Shapes;
 using ErsatzCivLib;
 using ErsatzCivLib.Model;
 
@@ -13,6 +14,9 @@ namespace ErsatzCiv
     /// </summary>
     public partial class CityWindow : Window
     {
+        private const int CITY_GRID_SIZE = 75;
+        private const int COUNT_SHOW_CITY_SQUARES = 7; // ODD NUMBER !
+
         private readonly Engine _engine;
         private readonly CityPivot _city;
         private bool _checkComboSelection = false;
@@ -25,6 +29,12 @@ namespace ErsatzCiv
         public CityWindow(Engine engine, CityPivot city)
         {
             InitializeComponent();
+
+            for (int i = 0; i < COUNT_SHOW_CITY_SQUARES; i++)
+            {
+                GridCityMap.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(CITY_GRID_SIZE) });
+                GridCityMap.RowDefinitions.Add(new RowDefinition { Height = new GridLength(CITY_GRID_SIZE) });
+            }
 
             _engine = engine;
             _city = city;
@@ -106,7 +116,60 @@ namespace ErsatzCiv
 
             ListBoxImprovements.ItemsSource = _city.ImprovementsAndWonders;
 
-            // GridCityMap
+            GridCityMap.Children.Clear();
+            var gridOffset = new Tuple<int, int>(
+                _city.MapSquareLocation.Row - ((COUNT_SHOW_CITY_SQUARES - 1) / 2),
+                _city.MapSquareLocation.Column - ((COUNT_SHOW_CITY_SQUARES - 1) / 2)
+            );
+            var squares = _engine.GetMapSquaresAroundCity(_city);
+            for (int i = 0; i < COUNT_SHOW_CITY_SQUARES; i++)
+            {
+                for (var j = 0; j < COUNT_SHOW_CITY_SQUARES; j++)
+                {
+                    var current = squares.Keys.SingleOrDefault(msq => msq.Row == (i + gridOffset.Item1) && msq.Column == (j + gridOffset.Item2));
+                    if (current == null)
+                    {
+                        GridCityMap.Children.Add(DrawDisableSquare(i, j, 1, 1));
+                    }
+                    else
+                    {
+                        GridCityMap.DrawSingleMapSquare(CITY_GRID_SIZE, current, false, gridOffset);
+                        if (i + gridOffset.Item1 == _city.MapSquareLocation.Row
+                            && j + gridOffset.Item2 == _city.MapSquareLocation.Column)
+                        {
+                            GridCityMap.DrawMapCity(_city, CITY_GRID_SIZE, 5, true, gridOffset);
+                        }
+                        else if ((i + gridOffset.Item1 < _city.MapSquareLocation.Row - 2)
+                            || (i + gridOffset.Item1 > _city.MapSquareLocation.Row + 2)
+                            || (j + gridOffset.Item2 < _city.MapSquareLocation.Column - 2)
+                            || (j + gridOffset.Item2 > _city.MapSquareLocation.Column + 2)
+                            || (i + gridOffset.Item1 == _city.MapSquareLocation.Row - 2 && j + gridOffset.Item2 == _city.MapSquareLocation.Column - 2)
+                            || (i + gridOffset.Item1 == _city.MapSquareLocation.Row - 2 && j + gridOffset.Item2 == _city.MapSquareLocation.Column + 2)
+                            || (i + gridOffset.Item1 == _city.MapSquareLocation.Row + 2 && j + gridOffset.Item2 == _city.MapSquareLocation.Column - 2)
+                            || (i + gridOffset.Item1 == _city.MapSquareLocation.Row + 2 && j + gridOffset.Item2 == _city.MapSquareLocation.Column + 2))
+                        {
+                            GridCityMap.Children.Add(DrawDisableSquare(i, j, 5, 0.4));
+                        }
+                    }
+                }
+            }
+        }
+
+        private static Rectangle DrawDisableSquare(int i, int j, int zindex, double opacity)
+        {
+            var children = new Rectangle
+            {
+                Width = CITY_GRID_SIZE,
+                Height = CITY_GRID_SIZE,
+                Stroke = System.Windows.Media.Brushes.Black,
+                StrokeThickness = 2,
+                Fill = System.Windows.Media.Brushes.DarkGray,
+                Opacity = opacity
+            };
+            children.SetValue(Grid.RowProperty, i);
+            children.SetValue(Grid.ColumnProperty, j);
+            children.SetValue(Panel.ZIndexProperty, zindex);
+            return children;
         }
 
         private void ComboBoxProduction_SelectionChanged(object sender, SelectionChangedEventArgs e)

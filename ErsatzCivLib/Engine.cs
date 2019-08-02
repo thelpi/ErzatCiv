@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using ErsatzCivLib.Model;
 using ErsatzCivLib.Model.Persistent;
@@ -312,15 +313,50 @@ namespace ErsatzCivLib
             }
         }
 
-        internal bool OccupiedByCity(MapSquarePivot mapSquare)
+        internal bool OccupiedByCity(MapSquarePivot mapSquare, CityPivot exceptCity = null)
         {
-            return _cities.Any(c => c.Citizens.Any(cc => cc.MapSquare == mapSquare));
+            return _cities.Any(c => (exceptCity == null || exceptCity != c) && c.Citizens.Any(cc =>  cc.MapSquare == mapSquare));
+        }
+
+        /// <summary>
+        /// Gets, for a specified city, the list of <see cref="MapSquarePivot"/> around it.
+        /// </summary>
+        /// <param name="city">The <see cref="CityPivot"/>.</param>
+        /// <returns>A dictionary where the key is the <see cref="MapSquarePivot"/>,
+        /// and the value is a tuple [<see cref="CityPivot.CitizenPivot"/> status, occupied by another city y/n].</returns>
+        /// <exception cref="ArgumentNullException">The parameter <paramref name="city"/> is <c>Null</c>.</exception>
+        public Dictionary<MapSquarePivot, Tuple<CityPivot.CitizenPivot, bool>> GetMapSquaresAroundCity(CityPivot city)
+        {
+            if (city == null)
+            {
+                throw new ArgumentNullException(nameof(city));
+            }
+
+            var result = new Dictionary<MapSquarePivot, Tuple<CityPivot.CitizenPivot, bool>>();
+            for (var i = city.MapSquareLocation.Row - 3; i <= city.MapSquareLocation.Row + 3; i++)
+            {
+                for (var j = city.MapSquareLocation.Column - 3; j <= city.MapSquareLocation.Column + 3; j++)
+                {
+                    var msq = Map[i, j];
+                    if (msq != null)
+                    {
+                        result.Add(msq, new Tuple<CityPivot.CitizenPivot, bool>(
+                            city.Citizens.SingleOrDefault(c => c.MapSquare == msq), OccupiedByCity(msq, city)));
+                    }
+                }
+            }
+
+            return result;
         }
 
         public IReadOnlyCollection<Type> BuildableItems()
         {
-            // TODO
-            return new List<Type> { typeof(SettlerPivot), typeof(WorkerPivot), null  };
+            var buildableTypes =
+                Assembly.GetExecutingAssembly().GetTypes().Where(myType =>
+                    myType.IsClass && !myType.IsAbstract && myType.IsSubclassOf(typeof(BuildablePivot)));
+            
+            // TODO : some processing
+            return buildableTypes.ToList();
         }
 
         /// <summary>
@@ -339,11 +375,8 @@ namespace ErsatzCivLib
                 return false;
             }
             
-            var constructorSearch = buildableType.GetConstructor(
-                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic,
-                null,
-                new[] { typeof(MapSquarePivot) },
-                null
+            var constructorSearch = buildableType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic,
+                null, new[] { typeof(MapSquarePivot) }, null
             );
             if (constructorSearch == null)
             {
