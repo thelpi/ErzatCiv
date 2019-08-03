@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Shapes;
 using ErsatzCivLib;
 using ErsatzCivLib.Model;
@@ -126,7 +127,7 @@ namespace ErsatzCiv
         }
 
         private static Image DrawCitizen(CityPivot.CitizenPivot citizen, int size, double opacity,
-            Action<object, System.Windows.Input.MouseButtonEventArgs> MouseLeftButtonCallback)
+            Action<object, MouseButtonEventArgs> MouseLeftButtonCallback)
         {
             Style style = new Style
             {
@@ -161,7 +162,7 @@ namespace ErsatzCiv
 
             if (MouseLeftButtonCallback != null)
             {
-                imgCitizen.MouseLeftButtonDown += new System.Windows.Input.MouseButtonEventHandler(MouseLeftButtonCallback);
+                imgCitizen.MouseLeftButtonDown += new MouseButtonEventHandler(MouseLeftButtonCallback);
             }
 
             return imgCitizen;
@@ -176,26 +177,33 @@ namespace ErsatzCiv
             }
             else
             {
-                GridCityMap.DrawSingleMapSquare(CITY_GRID_SIZE, current, false, gridOffset);
-                if (i + gridOffset.Item1 == _city.MapSquareLocation.Row
-                    && j + gridOffset.Item2 == _city.MapSquareLocation.Column)
+                bool disable = IsOutOfCityBounds(gridOffset, i, j) || squares[current].Item2;
+                bool isCity = i + gridOffset.Item1 == _city.MapSquareLocation.Row
+                    && j + gridOffset.Item2 == _city.MapSquareLocation.Column;
+                bool isCitizen = squares[current].Item1 != null;
+
+                Action<object, MouseButtonEventArgs> callback = MouseClickOnCityGridEmpty;
+                if (disable || isCity || isCitizen)
+                {
+                    callback = null;
+                }
+
+                GridCityMap.DrawSingleMapSquare(CITY_GRID_SIZE, current, false, gridOffset, callback);
+                if (isCity)
                 {
                     GridCityMap.DrawMapCity(_city, CITY_GRID_SIZE, 5, true, gridOffset, MouseClickOnCity);
                 }
-                else if (IsOutOfCityBounds(gridOffset, i, j) || squares[current].Item2)
+                else if (disable)
                 {
                     GridCityMap.Children.Add(DrawDisableSquare(i, j, 5, 0.4));
                 }
-                else
+                else if (isCitizen)
                 {
-                    if (squares[current].Item1 != null)
-                    {
-                        var imgCitizen = DrawCitizen(squares[current].Item1, CITIZEN_SIZE_CITYGRID, 0.6, MouseClickOnCityGridCitizen);
-                        imgCitizen.SetValue(Panel.ZIndexProperty, 2);
-                        imgCitizen.SetValue(Grid.RowProperty, i);
-                        imgCitizen.SetValue(Grid.ColumnProperty, j);
-                        GridCityMap.Children.Add(imgCitizen);
-                    }
+                    var imgCitizen = DrawCitizen(squares[current].Item1, CITIZEN_SIZE_CITYGRID, 0.6, MouseClickOnCityGridCitizen);
+                    imgCitizen.SetValue(Panel.ZIndexProperty, 2);
+                    imgCitizen.SetValue(Grid.RowProperty, i);
+                    imgCitizen.SetValue(Grid.ColumnProperty, j);
+                    GridCityMap.Children.Add(imgCitizen);
                 }
             }
         }
@@ -244,7 +252,7 @@ namespace ErsatzCiv
             _checkComboSelection = true;
         }
 
-        private void MouseClickOnCity(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void MouseClickOnCity(object sender, MouseButtonEventArgs e)
         {
             if (e.ClickCount == 2)
             {
@@ -253,7 +261,7 @@ namespace ErsatzCiv
             }
         }
 
-        private void MouseClickOnCityGridCitizen(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void MouseClickOnCityGridCitizen(object sender, MouseButtonEventArgs e)
         {
             if ((sender as Image)?.Tag is CityPivot.CitizenPivot citizenSource)
             {
@@ -262,7 +270,7 @@ namespace ErsatzCiv
             }
         }
 
-        private void MouseClickOnTopBarCitizen(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void MouseClickOnTopBarCitizen(object sender, MouseButtonEventArgs e)
         {
             if ((sender as Image)?.Tag is CityPivot.CitizenPivot citizenSource)
             {
@@ -282,6 +290,15 @@ namespace ErsatzCiv
                 {
                     _engine.ChangeCitizenToDefault(citizenSource, null);
                 }
+                RefreshDisplay();
+            }
+        }
+
+        public void MouseClickOnCityGridEmpty(object sender, MouseButtonEventArgs e)
+        {
+            if ((sender as Rectangle)?.Tag is MapSquarePivot squareSource)
+            {
+                _engine.ChangeCitizenToDefault(_city.Citizens.FirstOrDefault(c => c.Type.HasValue), squareSource);
                 RefreshDisplay();
             }
         }

@@ -240,7 +240,13 @@ namespace ErsatzCivLib
 
             var x = direction.Value.Row(prevSq.Row);
             var y = direction.Value.Column(prevSq.Column);
+
             var square = Map[x, y];
+            if (square == null)
+            {
+                return false;
+            }
+
             bool isCity = IsCity(square);
 
             var res = CurrentUnit.Move(direction.Value, isCity, prevSq, square);
@@ -323,9 +329,14 @@ namespace ErsatzCivLib
 
         public void ChangeCitizenToDefault(CityPivot.CitizenPivot citizenSource, MapSquarePivot mapSquare)
         {
+            if (citizenSource == null)
+            {
+                return;
+            }
+
             if (mapSquare != null)
             {
-                citizenSource?.ToCitizen(mapSquare);
+                citizenSource.ToCitizen(mapSquare);
             }
             else
             {
@@ -335,7 +346,7 @@ namespace ErsatzCivLib
                     mapSquare = theCity.BestVacantSpot();
                     if (mapSquare != null)
                     {
-                        citizenSource?.ToCitizen(mapSquare);
+                        citizenSource.ToCitizen(mapSquare);
                     }
                 }
             }

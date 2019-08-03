@@ -182,7 +182,8 @@ namespace ErsatzCiv
             newElementsWithZIndex.Add(l4, 1);
         }
 
-        internal static void DrawSingleMapSquare(this Panel panel, double defaultDim, MapSquarePivot square, bool cleanPreviousSquare, Tuple<int, int> gridPositionOffset = null)
+        internal static void DrawSingleMapSquare(this Panel panel, double defaultDim, MapSquarePivot square, bool cleanPreviousSquare,
+            Tuple<int, int> gridPositionOffset = null, Action<object, System.Windows.Input.MouseButtonEventArgs> mouseLeftButtonDownCallback = null)
         {
             if (panel == null)
             {
@@ -266,6 +267,22 @@ namespace ErsatzCiv
             panel.Children.Add(dockPanel);
 
             panel.DrawSquareImprovements(square, defaultDim, gridPositionOffset);
+
+            if (mouseLeftButtonDownCallback != null)
+            {
+                var transparentLayer = new Rectangle
+                {
+                    Width = defaultDim,
+                    Height = defaultDim,
+                    Fill = Brushes.Transparent,
+                    Tag = square
+                };
+                transparentLayer.MouseLeftButtonDown += new System.Windows.Input.MouseButtonEventHandler(mouseLeftButtonDownCallback);
+                transparentLayer.SetValue(Grid.RowProperty, square.Row - (gridPositionOffset == null ? 0 : gridPositionOffset.Item1));
+                transparentLayer.SetValue(Grid.ColumnProperty, square.Column - (gridPositionOffset == null ? 0 : gridPositionOffset.Item2));
+                transparentLayer.SetValue(Panel.ZIndexProperty, 10);
+                panel.Children.Add(transparentLayer);
+            }
         }
 
         internal static void DrawMapCity(this Panel panel, CityPivot city, double defaultDim, int cityZindex, bool skipPreviousCheck,
