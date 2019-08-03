@@ -100,7 +100,7 @@ namespace ErsatzCiv
             });
             PanelNextProduction.Children.Add(new Label
             {
-                Content = $"Remaining : {prodFinish - _city.ProductivityStorage} (" + (prodFinish - _city.ProductivityStorage) / _city.Productivity + " turns)"
+                Content = $"Remaining : {prodFinish - _city.ProductivityStorage} (" + (_city.Productivity == 0 ? 9999 : (prodFinish - _city.ProductivityStorage) / _city.Productivity) + " turns)"
             });
 
             StackCitizens.Children.Clear();
@@ -265,7 +265,7 @@ namespace ErsatzCiv
         {
             if ((sender as Image)?.Tag is CityPivot.CitizenPivot citizenSource)
             {
-                _engine.ChangeCitizenToSpecialist(citizenSource, CityPivot.CitizenTypePivot.Entertaining);
+                _engine.ChangeCitizenToSpecialist(citizenSource, CityPivot.CitizenTypePivot.Entertainer);
                 RefreshDisplay();
             }
         }
@@ -276,9 +276,9 @@ namespace ErsatzCiv
             {
                 if (!citizenSource.Type.HasValue)
                 {
-                    _engine.ChangeCitizenToSpecialist(citizenSource, CityPivot.CitizenTypePivot.Entertaining);
+                    _engine.ChangeCitizenToSpecialist(citizenSource, CityPivot.CitizenTypePivot.Entertainer);
                 }
-                else if (citizenSource.Type.Value == CityPivot.CitizenTypePivot.Entertaining)
+                else if (citizenSource.Type.Value == CityPivot.CitizenTypePivot.Entertainer)
                 {
                     _engine.ChangeCitizenToSpecialist(citizenSource, CityPivot.CitizenTypePivot.Scientist);
                 }

@@ -7,6 +7,7 @@ namespace ErsatzCivLib.Model
     [Serializable]
     public class CityPivot
     {
+        private const int DEFAULT_RATIO_CITIZEN_UNHAPPY = 5;
         public const double DISPLAY_RATIO = 0.8;
         internal const int CITY_SPEED_COST = 1;
         private const string CITY_RENDER_PATH = "city.png";
@@ -50,9 +51,16 @@ namespace ErsatzCivLib.Model
             get
             {
                 // TODO : include city improvements
-                return MapSquareLocation.CityFood + _citizens
+                var foodValue = MapSquareLocation.CityFood + _citizens
                         .Where(c => !c.Type.HasValue)
                         .Sum(c => c.MapSquare.Food);
+
+                if (InCivilTrouble && foodValue > _citizens.Count * CitizenPivot.FOOD_BY_TURN)
+                {
+                    foodValue = _citizens.Count * CitizenPivot.FOOD_BY_TURN;
+                }
+
+                return foodValue;
             }
         }
         public int Commerce
@@ -199,7 +207,51 @@ namespace ErsatzCivLib.Model
                 }
             }
 
+            CheckCitizensMood();
+
             return produced;
+        }
+
+        private void CheckCitizensMood()
+        {
+            // Default behavior.
+            var specialistFaces = _citizens.Where(c => c.Type.HasValue).Count();
+            var nonSpecialistFaces = _citizens.Count - specialistFaces;
+            var unhappyFaces = nonSpecialistFaces / DEFAULT_RATIO_CITIZEN_UNHAPPY;
+            var happyFaces = 0;
+
+            // Entertaining effects.
+            var entertainers = _citizens.Where(c => c.Type == CitizenTypePivot.Entertainer).Count();
+            for (int i = 0; i < entertainers; i++)
+            {
+                if (unhappyFaces > 0)
+                {
+                    unhappyFaces--;
+                }
+                else if (happyFaces < nonSpecialistFaces)
+                {
+                    happyFaces++;
+                }
+            }
+
+            foreach (var citizen in _citizens.Where(ci => !ci.Type.HasValue))
+            {
+                if (happyFaces > 0)
+                {
+                    citizen.Mood = MoodPivot.Happy;
+                    happyFaces--;
+                }
+                else if (unhappyFaces > 0)
+                {
+                    citizen.Mood = MoodPivot.Unhappy;
+                    unhappyFaces--;
+                }
+                else
+                {
+                    citizen.Mood = MoodPivot.Content;
+                }
+            }
+            _citizens.Sort();
         }
 
         internal void ResetCitizens()
@@ -213,7 +265,7 @@ namespace ErsatzCivLib.Model
                 {
                     if (!_citizens[i].Type.HasValue)
                     {
-                        _citizens[i].ToSpecialist(CitizenTypePivot.Entertaining);
+                        _citizens[i].ToSpecialist(CitizenTypePivot.Entertainer);
                     }
                 }
                 else
@@ -234,14 +286,14 @@ namespace ErsatzCivLib.Model
             public const int FOOD_BY_TURN = 2;
 
             public MapSquarePivot MapSquare { get; private set; }
-            public MoodPivot Mood { get; private set; }
+            public MoodPivot Mood { get; internal set; }
             public CitizenTypePivot? Type { get; private set; }
 
             internal CitizenPivot(MapSquarePivot mapSquare)
             {
                 MapSquare = mapSquare;
                 Mood = MoodPivot.Content;
-                Type = mapSquare == null ? CitizenTypePivot.Entertaining : (CitizenTypePivot?)null;
+                Type = mapSquare == null ? CitizenTypePivot.Entertainer : (CitizenTypePivot?)null;
             }
 
             internal void ToSpecialist(CitizenTypePivot citizenType)
@@ -254,7 +306,6 @@ namespace ErsatzCivLib.Model
             internal void ToCitizen(MapSquarePivot mapSquare)
             {
                 MapSquare = mapSquare ?? throw new ArgumentNullException("Argument is null !", nameof(mapSquare));
-                // TODO : can be something different than "Content"
                 Mood = MoodPivot.Content;
                 Type = null;
             }
@@ -270,7 +321,7 @@ namespace ErsatzCivLib.Model
                     (other.Type.HasValue ? ((int)Type.Value).CompareTo((int)other.Type.Value) : 1) :
                     (other.Type.HasValue ? -1 : 0);
                 var compareMood = ((int)Mood).CompareTo((int)other.Mood);
-                var compareMapS = MapSquare.TotalValue.CompareTo(other.MapSquare.TotalValue);
+                var compareMapS = (MapSquare?.TotalValue).GetValueOrDefault(0).CompareTo((other.MapSquare?.TotalValue).GetValueOrDefault(0));
 
                 return compareType == 0 ? (compareMood == 0 ? compareMapS : compareMood) : compareType;
             }
@@ -289,7 +340,7 @@ namespace ErsatzCivLib.Model
         {
             Scientist,
             TaxCollector,
-            Entertaining
+            Entertainer
         }
     }
 }
