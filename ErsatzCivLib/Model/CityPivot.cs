@@ -207,12 +207,10 @@ namespace ErsatzCivLib.Model
                 }
             }
 
-            CheckCitizensMood();
-
             return produced;
         }
 
-        private void CheckCitizensMood()
+        internal void CheckCitizensMood()
         {
             // Default behavior.
             var specialistFaces = _citizens.Where(c => c.Type.HasValue).Count();
@@ -278,6 +276,8 @@ namespace ErsatzCivLib.Model
                     }
                 }
             }
+
+            CheckCitizensMood();
         }
 
         [Serializable]

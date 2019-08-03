@@ -331,7 +331,19 @@ namespace ErsatzCivLib
 
         public void ChangeCitizenToSpecialist(CityPivot.CitizenPivot citizenSource, CityPivot.CitizenTypePivot citizenType)
         {
-            citizenSource?.ToSpecialist(citizenType);
+            if (citizenSource == null)
+            {
+                return;
+            }
+
+            var theCity = GetCityFromCitizen(citizenSource);
+            if (theCity == null)
+            {
+                return;
+            }
+
+            citizenSource.ToSpecialist(citizenType);
+            theCity.CheckCitizensMood();
         }
 
         public void ChangeCitizenToDefault(CityPivot.CitizenPivot citizenSource, MapSquarePivot mapSquare)
@@ -341,22 +353,31 @@ namespace ErsatzCivLib
                 return;
             }
 
+            var theCity = GetCityFromCitizen(citizenSource);
+            if (theCity == null)
+            {
+                return;
+            }
+
+            if (mapSquare == null)
+            {
+                mapSquare = theCity.BestVacantSpot();
+            }
+            else if (!ComputeCityAvailableMapSquares(theCity).Contains(mapSquare))
+            {
+                return;
+            }
+
             if (mapSquare != null)
             {
                 citizenSource.ToCitizen(mapSquare);
+                theCity.CheckCitizensMood();
             }
-            else
-            {
-                var theCity = _cities.SingleOrDefault(c => c.Citizens.Any(ci => ci == citizenSource));
-                if (theCity != null)
-                {
-                    mapSquare = theCity.BestVacantSpot();
-                    if (mapSquare != null)
-                    {
-                        citizenSource.ToCitizen(mapSquare);
-                    }
-                }
-            }
+        }
+
+        private CityPivot GetCityFromCitizen(CityPivot.CitizenPivot citizenSource)
+        {
+            return _cities.SingleOrDefault(c => c.Citizens.Any(ci => ci == citizenSource));
         }
 
         internal bool OccupiedByCity(MapSquarePivot mapSquare, CityPivot exceptCity = null)
