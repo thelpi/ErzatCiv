@@ -363,21 +363,25 @@ namespace ErsatzCivLib.Model
         private List<MapSquarePivot> ConvertContinentBlueprintToMapSquares(double landRatio, ContinentBlueprint contBound, out List<MapSquarePivot> costSquares)
         {
             costSquares = new List<MapSquarePivot>();
-            var startChunkX = 0;
-            var startChunkY = 0;
-            var continentWidth = 0;
-            var continentHeight = 0;
+
+            var continentWidth = (int)Math.Floor(contBound.Width * landRatio);
+            var continentHeight = (int)Math.Floor(contBound.Height * landRatio);
+            var maxStartChunkX = (int)Math.Floor((1 - landRatio) * contBound.Width);
+            var maxStartChunkY = (int)Math.Floor((1 - landRatio) * contBound.Height);
+
+            var startChunkX = 1;
             do
             {
-                var maxStartChunkX = (int)Math.Floor((1 - landRatio) * contBound.Width);
-                var maxStartChunkY = (int)Math.Floor((1 - landRatio) * contBound.Height);
-                startChunkX = Tools.Randomizer.Next(0, maxStartChunkX);
-                startChunkY = Tools.Randomizer.Next(0, maxStartChunkY);
-                
-                continentWidth = (int)Math.Floor(contBound.Width * landRatio);
-                continentHeight = (int)Math.Floor(contBound.Height * landRatio);
+                startChunkX = Tools.Randomizer.Next(1, maxStartChunkX);
             }
-            while (startChunkX + continentWidth > contBound.Width || startChunkY + continentHeight > contBound.Height);
+            while (startChunkX + continentWidth > (contBound.Width - 1));
+
+            var startChunkY = 1;
+            do
+            {
+                startChunkY = Tools.Randomizer.Next(1, maxStartChunkY);
+            }
+            while (startChunkY + continentHeight > (contBound.Height - 1));
 
             Func<int, bool> IsGroundXFunc = delegate(int x) { return x >= startChunkX + (contBound.StartX - 1) && x <= (startChunkX + (contBound.StartX - 1) + continentWidth); };
             Func<int, bool> IsGroundYFunc = delegate(int y) { return y >= startChunkY + (contBound.StartY - 1) && y <= (startChunkY + (contBound.StartY - 1) + continentHeight); };
