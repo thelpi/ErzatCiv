@@ -421,9 +421,12 @@ namespace ErsatzCivLib
             var buildableTypes =
                 Assembly.GetExecutingAssembly().GetTypes().Where(myType =>
                     myType.IsClass && !myType.IsAbstract && myType.IsSubclassOf(typeof(BuildablePivot)));
-            
+
+            var list = buildableTypes.ToList();
+            list.Add(null);
+
             // TODO : some processing
-            return buildableTypes.ToList();
+            return list;
         }
 
         /// <summary>

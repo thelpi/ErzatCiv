@@ -15,7 +15,7 @@ namespace ErsatzCivLib.Model
         private const double MIN_CC_POP = 1000;
         private const double MAX_CC_POP = 20000000;
         private static readonly double POP_GROWTH_RATIO = Math.Log(MIN_CC_POP / MAX_CC_POP) / (1 - MAX_CITIZEN_COUNT);
-        public const int FOOD_RATIO_TO_NEXT_CITIZEN = 50;
+        public const int FOOD_RATIO_TO_NEXT_CITIZEN = 40;
         private const int PRODUCTIVITY_TO_COMMERCE_RATIO = 10;
 
         private readonly Func<CityPivot, List<MapSquarePivot>> _availableMapSquaresFunc;
@@ -185,7 +185,7 @@ namespace ErsatzCivLib.Model
                 ResetCitizens();
                 FoodStorage = 0;
             }
-            else if (FoodStorage > FOOD_RATIO_TO_NEXT_CITIZEN * _citizens.Count)
+            else if (FoodStorage >= FOOD_RATIO_TO_NEXT_CITIZEN * _citizens.Count)
             {
                 FoodStorage = FoodStorage - (FOOD_RATIO_TO_NEXT_CITIZEN * _citizens.Count);
                 _citizens.Add(new CitizenPivot(null));

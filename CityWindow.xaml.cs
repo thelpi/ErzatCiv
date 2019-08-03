@@ -61,7 +61,10 @@ namespace ErsatzCiv
 
             var foodCost = CityPivot.CitizenPivot.FOOD_BY_TURN * _city.Citizens.Count;
             var nextFood = CityPivot.FOOD_RATIO_TO_NEXT_CITIZEN * _city.Citizens.Count;
-            var ratioGrowth = (nextFood - _city.FoodStorage) / _city.Food;
+            var remainingFoodToProduce = (nextFood) - _city.FoodStorage;
+            var extraFoodByTurn = _city.Food - foodCost;
+            var realRatioGrowth = remainingFoodToProduce / (double)extraFoodByTurn;
+            var ratioGrowth = extraFoodByTurn == 0 ? 0 : Math.Ceiling(realRatioGrowth);
             PanelNextCitizen.Children.Clear();
             PanelNextCitizen.Children.Add(new Label
             {
@@ -79,7 +82,7 @@ namespace ErsatzCiv
             });
             PanelNextCitizen.Children.Add(new Label
             {
-                Content = "Status : " + (foodCost < _city.Food ? "Growth (" + ratioGrowth + " turns)" : (foodCost == _city.Food ? "Balanced" : "Famine (" + ratioGrowth + " turns)"))
+                Content = "Status : " + (extraFoodByTurn > 0 ? "Growth (" + ratioGrowth + " turns)" : (extraFoodByTurn == 0 ? "Balanced" : "Famine"))
             });
 
             var prodFinish = _city.Production == null ? 0 : _city.Production.ProductivityCost;
