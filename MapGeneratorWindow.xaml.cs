@@ -24,11 +24,15 @@ namespace ErsatzCiv
             ComboBoxLandShape.ItemsSource = Enum.GetValues(typeof(MapPivot.LandShapePivot));
             ComboBoxLandCoverage.ItemsSource = Enum.GetValues(typeof(MapPivot.LandCoveragePivot));
             ComboBoxTemperature.ItemsSource = Enum.GetValues(typeof(MapPivot.TemperaturePivot));
+            ComboBoxAge.ItemsSource = Enum.GetValues(typeof(MapPivot.AgePivot));
+            ComboBoxHumidity.ItemsSource = Enum.GetValues(typeof(MapPivot.HumidityPivot));
 
             ComboBoxSize.SelectedValue = MapPivot.SizePivot.Medium;
             ComboBoxLandShape.SelectedValue = MapPivot.LandShapePivot.Continent;
             ComboBoxLandCoverage.SelectedValue = MapPivot.LandCoveragePivot.Medium;
             ComboBoxTemperature.SelectedValue = MapPivot.TemperaturePivot.Temperate;
+            ComboBoxAge.SelectedValue = MapPivot.AgePivot.Average;
+            ComboBoxHumidity.SelectedValue = MapPivot.HumidityPivot.Average;
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
@@ -39,7 +43,8 @@ namespace ErsatzCiv
         private void ConfirmButton_Click(object sender, RoutedEventArgs e)
         {
             if (ComboBoxSize.SelectedIndex < 0 || ComboBoxLandShape.SelectedIndex < 0
-                || ComboBoxLandCoverage.SelectedIndex < 0 || ComboBoxTemperature.SelectedIndex < 0)
+                || ComboBoxLandCoverage.SelectedIndex < 0 || ComboBoxTemperature.SelectedIndex < 0
+                || ComboBoxAge.SelectedIndex < 0 || ComboBoxHumidity.SelectedIndex < 0)
             {
                 MessageBox.Show("Please select a value for each parameter !", "ErsatzCiv");
                 return;
@@ -60,7 +65,9 @@ namespace ErsatzCiv
                 ComboBoxSize.SelectedItem,
                 ComboBoxLandShape.SelectedItem,
                 ComboBoxLandCoverage.SelectedItem,
-                ComboBoxTemperature.SelectedItem
+                ComboBoxTemperature.SelectedItem,
+                ComboBoxAge.SelectedItem,
+                ComboBoxHumidity.SelectedItem
             });
         }
 
@@ -69,7 +76,8 @@ namespace ErsatzCiv
             object[] parameters = e.Argument as object[];
 
             e.Result = new Engine((MapPivot.SizePivot)parameters[0], (MapPivot.LandShapePivot)parameters[1],
-                (MapPivot.LandCoveragePivot)parameters[2], (MapPivot.TemperaturePivot)parameters[3]);
+                (MapPivot.LandCoveragePivot)parameters[2], (MapPivot.TemperaturePivot)parameters[3],
+                (MapPivot.AgePivot)parameters[4], (MapPivot.HumidityPivot)parameters[5]);
         }
 
         private void EndOfMapGeneration(object sender, RunWorkerCompletedEventArgs e)

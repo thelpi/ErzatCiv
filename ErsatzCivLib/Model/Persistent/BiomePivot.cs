@@ -79,6 +79,14 @@ namespace ErsatzCivLib.Model.Persistent
         /// Is ignored for <see cref="IsSeaType"/> biomes and <see cref="Default"/>.
         /// </summary>
         internal BiomeSizePivot Size { get; private set; }
+        /// <summary>
+        /// Biome's humidity level.
+        /// </summary>
+        internal MapPivot.HumidityPivot Humidity { get; private set; }
+        /// <summary>
+        /// Biome's flatness level.
+        /// </summary>
+        internal MapPivot.AgePivot Age { get; private set; }
 
         /// <summary>
         /// Underlying biome by temperature (if <see cref="WorkerActionPivot.Clear"/> available).
@@ -121,7 +129,9 @@ namespace ErsatzCivLib.Model.Persistent
             IsCityBuildable = true,
             SpeedCost = 1,
             AppearanceRatio = 0.1,
-            Size = BiomeSizePivot.Medium
+            Size = BiomeSizePivot.Medium,
+            Humidity = MapPivot.HumidityPivot.Average,
+            Age = MapPivot.AgePivot.Old
         };
         public static BiomePivot Sea { get; } = new BiomePivot
         {
@@ -138,7 +148,9 @@ namespace ErsatzCivLib.Model.Persistent
             IsCityBuildable = false,
             SpeedCost = 1,
             AppearanceRatio = 0.1,
-            Size = BiomeSizePivot.Large
+            Size = BiomeSizePivot.Large,
+            Humidity = MapPivot.HumidityPivot.Average,
+            Age = MapPivot.AgePivot.Average
         };
         public static BiomePivot Ice { get; } = new BiomePivot
         {
@@ -164,7 +176,9 @@ namespace ErsatzCivLib.Model.Persistent
             IsCityBuildable = false,
             SpeedCost = 2,
             AppearanceRatio = 0.1,
-            Size = BiomeSizePivot.Large
+            Size = BiomeSizePivot.Large,
+            Humidity = MapPivot.HumidityPivot.Dry,
+            Age = MapPivot.AgePivot.Average
         };
         public static BiomePivot Toundra { get; } = new BiomePivot
         {
@@ -192,7 +206,9 @@ namespace ErsatzCivLib.Model.Persistent
             IsCityBuildable = true,
             SpeedCost = 1,
             AppearanceRatio = 0.1,
-            Size = BiomeSizePivot.Medium
+            Size = BiomeSizePivot.Medium,
+            Humidity = MapPivot.HumidityPivot.Average,
+            Age = MapPivot.AgePivot.Old
         };
         public static BiomePivot Desert { get; } = new BiomePivot
         {
@@ -219,7 +235,9 @@ namespace ErsatzCivLib.Model.Persistent
             IsCityBuildable = true,
             SpeedCost = 2,
             AppearanceRatio = 0.1,
-            Size = BiomeSizePivot.Large
+            Size = BiomeSizePivot.Large,
+            Humidity = MapPivot.HumidityPivot.Dry,
+            Age = MapPivot.AgePivot.Average
         };
         public static BiomePivot Jungle { get; } = new BiomePivot
         {
@@ -248,7 +266,9 @@ namespace ErsatzCivLib.Model.Persistent
             IsCityBuildable = false,
             SpeedCost = 3,
             AppearanceRatio = 0.1,
-            Size = BiomeSizePivot.Medium
+            Size = BiomeSizePivot.Medium,
+            Humidity = MapPivot.HumidityPivot.Wet,
+            Age = MapPivot.AgePivot.Average
         };
         public static BiomePivot Mountain { get; } = new BiomePivot
         {
@@ -276,7 +296,9 @@ namespace ErsatzCivLib.Model.Persistent
             IsCityBuildable = false,
             SpeedCost = 3,
             AppearanceRatio = 0.1,
-            Size = BiomeSizePivot.Medium
+            Size = BiomeSizePivot.Medium,
+            Humidity = MapPivot.HumidityPivot.Average,
+            Age = MapPivot.AgePivot.New
         };
         public static BiomePivot Hill { get; } = new BiomePivot
         {
@@ -304,7 +326,9 @@ namespace ErsatzCivLib.Model.Persistent
             IsCityBuildable = true,
             SpeedCost = 2,
             AppearanceRatio = 0.1,
-            Size = BiomeSizePivot.Small
+            Size = BiomeSizePivot.Small,
+            Humidity = MapPivot.HumidityPivot.Average,
+            Age = MapPivot.AgePivot.New
         };
         public static BiomePivot Swamp { get; } = new BiomePivot
         {
@@ -337,7 +361,9 @@ namespace ErsatzCivLib.Model.Persistent
             IsCityBuildable = false,
             SpeedCost = 2,
             AppearanceRatio = 0.02,
-            Size = BiomeSizePivot.Small
+            Size = BiomeSizePivot.Small,
+            Humidity = MapPivot.HumidityPivot.Wet,
+            Age = MapPivot.AgePivot.Old
         };
         public static BiomePivot Forest { get; } = new BiomePivot
         {
@@ -368,7 +394,9 @@ namespace ErsatzCivLib.Model.Persistent
             IsCityBuildable = true,
             SpeedCost = 2,
             AppearanceRatio = 0.1,
-            Size = BiomeSizePivot.Medium
+            Size = BiomeSizePivot.Medium,
+            Humidity = MapPivot.HumidityPivot.Wet,
+            Age = MapPivot.AgePivot.Average
         };
         public static BiomePivot Plain { get; } = new BiomePivot
         {
@@ -398,7 +426,9 @@ namespace ErsatzCivLib.Model.Persistent
             IsCityBuildable = true,
             SpeedCost = 1,
             AppearanceRatio = 0.1,
-            Size = BiomeSizePivot.Large
+            Size = BiomeSizePivot.Large,
+            Humidity = MapPivot.HumidityPivot.Dry,
+            Age = MapPivot.AgePivot.Old
         };
         public static BiomePivot Coast { get; } = new BiomePivot
         {
@@ -415,7 +445,9 @@ namespace ErsatzCivLib.Model.Persistent
             IsCityBuildable = false,
             SpeedCost = 1,
             AppearanceRatio = 0.1,
-            Size = BiomeSizePivot.Small
+            Size = BiomeSizePivot.Small,
+            Humidity = MapPivot.HumidityPivot.Average,
+            Age = MapPivot.AgePivot.Average
         };
 
         /// <summary>
@@ -471,9 +503,56 @@ namespace ErsatzCivLib.Model.Persistent
         /// <param name="totalSquaresCount">Total count of squares in the continent.</param>
         /// <param name="chunkCoeff">Number real of squares in a <see cref="BiomeSizePivot.Small"/> chunk.</param>
         /// <returns>Number of squares </returns>
-        internal int ChunkSquaresCount(int totalSquaresCount, int chunkCoeff)
+        internal int ChunkSquaresCount(int totalSquaresCount, double chunkCoeff, MapPivot.HumidityPivot humidity, MapPivot.AgePivot age)
         {
-            return (int)Math.Round((totalSquaresCount * (AppearanceRatio * 3)) / ((int)Size * chunkCoeff));
+            if (age == MapPivot.AgePivot.New)
+            {
+                if (Age == MapPivot.AgePivot.Old)
+                {
+                    chunkCoeff += 1.5;
+                }
+                else if (Age == MapPivot.AgePivot.New)
+                {
+                    chunkCoeff -= 1.5;
+                }
+            }
+            else if (age == MapPivot.AgePivot.Old)
+            {
+                if (Age == MapPivot.AgePivot.Old)
+                {
+                    chunkCoeff -= 1.5;
+                }
+                else if (Age == MapPivot.AgePivot.New)
+                {
+                    chunkCoeff += 1.5;
+                }
+            }
+
+            var realRatio = AppearanceRatio;
+            if (humidity == MapPivot.HumidityPivot.Dry)
+            {
+                if (Humidity == MapPivot.HumidityPivot.Dry)
+                {
+                    realRatio *= 2;
+                }
+                else if (Humidity == MapPivot.HumidityPivot.Wet)
+                {
+                    realRatio /= 2;
+                }
+            }
+            else if (humidity == MapPivot.HumidityPivot.Wet)
+            {
+                if (Humidity == MapPivot.HumidityPivot.Dry)
+                {
+                    realRatio /= 2;
+                }
+                else if (Humidity == MapPivot.HumidityPivot.Wet)
+                {
+                    realRatio *= 2;
+                }
+            }
+
+            return (int)Math.Round((totalSquaresCount * (realRatio * 3)) / ((int)Size * chunkCoeff));
         }
     }
 }

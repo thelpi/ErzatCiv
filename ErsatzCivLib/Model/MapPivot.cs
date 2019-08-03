@@ -94,7 +94,10 @@ namespace ErsatzCivLib.Model
         /// <param name="mapShape"><see cref="LandShapePivot"/></param>
         /// <param name="landCoverage"><see cref="LandCoveragePivot"/></param>
         /// <param name="temperature"><see cref="TemperaturePivot"/></param>
-        internal MapPivot(SizePivot mapSize, LandShapePivot mapShape, LandCoveragePivot landCoverage, TemperaturePivot temperature)
+        /// <param name="age"><see cref="AgePivot"/></param>
+        /// <param name="humidity"><see cref="HumidityPivot"/></param>
+        internal MapPivot(SizePivot mapSize, LandShapePivot mapShape, LandCoveragePivot landCoverage,
+            TemperaturePivot temperature, AgePivot age, HumidityPivot humidity)
         {
             var continentCount = mapShape == LandShapePivot.Pangaea ? 1 : (
                 mapShape == LandShapePivot.Continent ? Tools.Randomizer.Next(CONTINENT_COUNT_MIN, CONTINENT_COUNT_MAX + 1) :
@@ -187,8 +190,9 @@ namespace ErsatzCivLib.Model
                 fullLand.ForEach(msloc => _mapSquareList[msloc.Row, msloc.Column] = msloc);
                 var continentLand = fullLand.Where(ms => !ms.Biome.IsSeaType).ToList();
 
-                var chunksCountByType = BiomePivot.NonSeaAndNonDefaultBiomes
-                                            .ToDictionary(b => b, b => b.ChunkSquaresCount(continentLand.Count, CHUNK_SIZE_RATIO));
+                var chunksCountByType =
+                    BiomePivot.NonSeaAndNonDefaultBiomes
+                        .ToDictionary(b => b, b => b.ChunkSquaresCount(continentLand.Count, CHUNK_SIZE_RATIO, humidity, age));
                 var riversChunksCount = (int)Math.Round(continentLand.Count * RIVER_STARTER_RATIO);
 
                 var topY = continentLand.Min(x => x.Row);
@@ -560,6 +564,47 @@ namespace ErsatzCivLib.Model
             /// Hot.
             /// </summary>
             Hot
+        }
+
+        /// <summary>
+        /// Levels of humidity.
+        /// </summary>
+        [Serializable]
+        public enum HumidityPivot
+        {
+            /// <summary>
+            /// Dry.
+            /// </summary>
+            Dry,
+            /// <summary>
+            /// Average.
+            /// </summary>
+            Average,
+            /// <summary>
+            /// Wet.
+            /// </summary>
+            Wet
+        }
+
+        /// <summary>
+        /// Age of the map.
+        /// </summary>
+        /// <remarks>The agest the flatness.</remarks>
+        [Serializable]
+        public enum AgePivot
+        {
+            /// <summary>
+            /// Old.
+            /// </summary>
+            Old,
+            /// <summary>
+            /// Average.
+            /// </summary>
+            Average,
+            /// <summary>
+            /// New.
+            /// </summary>
+            New
         }
 
         /// <summary>

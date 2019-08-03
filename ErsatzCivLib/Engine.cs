@@ -32,9 +32,11 @@ namespace ErsatzCivLib
         public Engine(MapPivot.SizePivot mapSize,
             MapPivot.LandShapePivot mapShape,
             MapPivot.LandCoveragePivot landCoverage,
-            MapPivot.TemperaturePivot temperature)
+            MapPivot.TemperaturePivot temperature,
+            MapPivot.AgePivot age,
+            MapPivot.HumidityPivot humidity)
         {
-            Map = new MapPivot(mapSize, mapShape, landCoverage, temperature);
+            Map = new MapPivot(mapSize, mapShape, landCoverage, temperature, age, humidity);
 
             MapSquarePivot ms = null;
             do
