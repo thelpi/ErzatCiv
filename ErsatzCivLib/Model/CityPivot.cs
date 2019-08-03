@@ -7,7 +7,6 @@ namespace ErsatzCivLib.Model
     [Serializable]
     public class CityPivot
     {
-        private static readonly int AVAILABLE_SQUARES_MAX_COUNT = (5 * 5) - 4 - 1;
         public const double DISPLAY_RATIO = 0.8;
         internal const int CITY_SPEED_COST = 1;
         private const string CITY_RENDER_PATH = "city.png";
@@ -18,8 +17,8 @@ namespace ErsatzCivLib.Model
         public const int FOOD_RATIO_TO_NEXT_CITIZEN = 50;
         private const int PRODUCTIVITY_TO_COMMERCE_RATIO = 10;
 
+        private readonly Func<CityPivot, List<MapSquarePivot>> _availableMapSquaresFunc;
         private readonly List<CitizenPivot> _citizens;
-        private readonly List<MapSquarePivot> _availableMapSquares;
         private readonly List<CityImprovementPivot> _improvements;
         private readonly List<WonderPivot> _wonders;
 
@@ -132,7 +131,8 @@ namespace ErsatzCivLib.Model
             }
         }
 
-        internal CityPivot(int currentTurn, string name, MapSquarePivot location, IEnumerable<MapSquarePivot> availableMapSquares, BuildablePivot production)
+        internal CityPivot(int currentTurn, string name, MapSquarePivot location,
+            Func<CityPivot, List<MapSquarePivot>> availableMapSquaresFunc, BuildablePivot production)
         {
             Name = name;
             MapSquareLocation = location;
@@ -140,7 +140,7 @@ namespace ErsatzCivLib.Model
             CreationTurn = currentTurn;
             Production = production;
 
-            _availableMapSquares = new List<MapSquarePivot>(availableMapSquares);
+            _availableMapSquaresFunc = availableMapSquaresFunc;
             _improvements = new List<CityImprovementPivot>();
             _wonders = new List<WonderPivot>();
 
@@ -150,22 +150,9 @@ namespace ErsatzCivLib.Model
             };
         }
 
-        internal void AddAvailableMapSquare(MapSquarePivot square)
-        {
-            if (!_availableMapSquares.Any(x => x == square) && _availableMapSquares.Count < AVAILABLE_SQUARES_MAX_COUNT)
-            {
-                _availableMapSquares.Add(square);
-            }
-        }
-
-        internal void RemoveAvailableMapSquare(MapSquarePivot square)
-        {
-            _availableMapSquares.RemoveAll(x => x == square);
-        }
-
         internal MapSquarePivot BestVacantSpot()
         {
-            return _availableMapSquares
+            return _availableMapSquaresFunc(this)
                 .Where(x => _citizens?.Any(c => c.MapSquare == x) != true)
                 .OrderByDescending(x => x.TotalValue)
                 .FirstOrDefault();
@@ -217,10 +204,12 @@ namespace ErsatzCivLib.Model
 
         internal void ResetCitizens()
         {
+            var availableMapSquaresCount = _availableMapSquaresFunc(this).Count;
+
             _citizens.Sort();
             for (int i = 0; i < _citizens.Count; i++)
             {
-                if (i > _availableMapSquares.Count)
+                if (i > availableMapSquaresCount)
                 {
                     if (!_citizens[i].Type.HasValue)
                     {

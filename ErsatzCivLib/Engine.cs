@@ -73,6 +73,20 @@ namespace ErsatzCivLib
             var settler = CurrentUnit as SettlerPivot;
             var sq = CurrentUnit.MapSquareLocation;
 
+            var city = new CityPivot(CurrentTurn, name, sq, ComputeCityAvailableMapSquares, null);
+            sq.ApplyCityActions(city);
+
+            _cities.Add(city);
+            _units.Remove(settler);
+            SetUnitIndex(true, false);
+
+            return city;
+        }
+
+        private List<MapSquarePivot> ComputeCityAvailableMapSquares(CityPivot city)
+        {
+            var sq = city.MapSquareLocation;
+
             var citySquares = new List<MapSquarePivot>();
             for (var i = sq.Row - 2; i <= sq.Row + 2; i++)
             {
@@ -91,14 +105,7 @@ namespace ErsatzCivLib
                 }
             }
 
-            var city = new CityPivot(CurrentTurn, name, sq, citySquares, null);
-            sq.ApplyCityActions(city);
-
-            _cities.Add(city);
-            _units.Remove(settler);
-            SetUnitIndex(true, false);
-
-            return city;
+            return citySquares;
         }
 
         public bool CanBuildCity()
