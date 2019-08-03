@@ -41,26 +41,15 @@ namespace ErsatzCivLib.Model
         /// Remaining moves.
         /// </summary>
         public double RemainingMoves { get; protected set; }
-        /// <summary>
-        /// Render value.
-        /// </summary>
-        /// <remarks>Path to image; hexadecimal color code.</remarks>
-        public string RenderValue { get; private set; }
-        /// <summary>
-        /// Type of render.
-        /// </summary>
-        public RenderTypePivot RenderType { get; private set; }
 
         protected UnitPivot(MapSquarePivot location, bool seaNavigate, bool groundNavigate, int defensePoints, int offensePoints,
-            string imagePath, int lifePoints, int speed, int productivityCost, string name) : base(name, productivityCost)
+            int lifePoints, int speed, int productivityCost, string name) : base(name, productivityCost)
         {
             MapSquareLocation = location;
             SeaNavigate = seaNavigate;
             GroundNavigate = groundNavigate;
             DefensePoints = defensePoints;
             OffensePoints = offensePoints;
-            RenderValue = imagePath;
-            RenderType = RenderTypePivot.Image;
             CurrentLifePoints = lifePoints;
             Speed = speed;
             RemainingMoves = Speed;

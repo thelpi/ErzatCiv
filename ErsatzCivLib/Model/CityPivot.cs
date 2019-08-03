@@ -8,9 +8,7 @@ namespace ErsatzCivLib.Model
     public class CityPivot
     {
         private const int DEFAULT_RATIO_CITIZEN_UNHAPPY = 5;
-        public const double DISPLAY_RATIO = 0.8;
         internal const int CITY_SPEED_COST = 1;
-        private const string CITY_RENDER_PATH = "city.png";
         private const double MAX_CITIZEN_COUNT = 40;
         private const double MIN_CC_POP = 1000;
         private const double MAX_CC_POP = 20000000;
@@ -30,7 +28,6 @@ namespace ErsatzCivLib.Model
         public string Name { get; private set; }
         public MapSquarePivot MapSquareLocation { get; private set; }
         public bool HasWaterSupply { get { return MapSquareLocation.Rivers.Count > 0; } }
-        public string RenderValue { get; private set; }
         public IReadOnlyCollection<CitizenPivot> Citizens { get { return _citizens; } }
         public bool InCivilTrouble
         {
@@ -144,7 +141,6 @@ namespace ErsatzCivLib.Model
         {
             Name = name;
             MapSquareLocation = location;
-            RenderValue = CITY_RENDER_PATH;
             CreationTurn = currentTurn;
             Production = production;
 

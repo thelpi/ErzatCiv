@@ -37,10 +37,6 @@ namespace ErsatzCivLib.Model.Persistent
         /// </summary>
         public int Defense { get; private set; }
         /// <summary>
-        /// Hexadecimal code of the color.
-        /// </summary>
-        public string ColorValue { get; private set; }
-        /// <summary>
         /// Indicates of the type is sea navigable (otherwise, it's ground navigable).
         /// </summary>
         public bool IsSeaType { get; private set; }
@@ -109,7 +105,6 @@ namespace ErsatzCivLib.Model.Persistent
             Food = 2,
             Productivity = 1,
             Defense = 0,
-            ColorValue = "#32CD32",
             _actions = new List<WorkerActionPivot>
                 {
                     WorkerActionPivot.Irrigate,
@@ -140,7 +135,6 @@ namespace ErsatzCivLib.Model.Persistent
             Food = 1,
             Productivity = 0,
             Defense = 0,
-            ColorValue = "#1E90FF",
             _actions = new List<WorkerActionPivot>(),
             _temperatures = new List<MapPivot.TemperaturePivot>(),
             _underlyingBiomes = new Dictionary<MapPivot.TemperaturePivot, BiomePivot>(),
@@ -159,7 +153,6 @@ namespace ErsatzCivLib.Model.Persistent
             Food = 0,
             Productivity = 0,
             Defense = 1,
-            ColorValue = "#FFFAF0",
             _actions = new List<WorkerActionPivot>
                 {
                     WorkerActionPivot.Mine,
@@ -187,7 +180,6 @@ namespace ErsatzCivLib.Model.Persistent
             Food = 1,
             Productivity = 1,
             Defense = 0,
-            ColorValue = "#2F4F4F",
             _actions = new List<WorkerActionPivot>
                 {
                     WorkerActionPivot.Irrigate,
@@ -217,7 +209,6 @@ namespace ErsatzCivLib.Model.Persistent
             Food = 0,
             Productivity = 1,
             Defense = 1,
-            ColorValue = "#FF7F50",
             _actions = new List<WorkerActionPivot>
                 {
                     WorkerActionPivot.Irrigate,
@@ -246,7 +237,6 @@ namespace ErsatzCivLib.Model.Persistent
             Food = 1,
             Productivity = 0,
             Defense = 2,
-            ColorValue = "#9ACD32",
             _actions = new List<WorkerActionPivot>
                 {
                     WorkerActionPivot.Clear,
@@ -277,7 +267,6 @@ namespace ErsatzCivLib.Model.Persistent
             Food = 0,
             Productivity = 2,
             Defense = 2,
-            ColorValue = "#A52A2A",
             _actions = new List<WorkerActionPivot>
                 {
                     WorkerActionPivot.Mine,
@@ -307,7 +296,6 @@ namespace ErsatzCivLib.Model.Persistent
             Food = 1,
             Productivity = 1,
             Defense = 1,
-            ColorValue = "#556B2F",
             _actions = new List<WorkerActionPivot>
                 {
                     WorkerActionPivot.Mine,
@@ -337,7 +325,6 @@ namespace ErsatzCivLib.Model.Persistent
             Food = 1,
             Productivity = 0,
             Defense = 1,
-            ColorValue = "#3CB371",
             _actions = new List<WorkerActionPivot>
                 {
                     WorkerActionPivot.RailRoad,
@@ -372,7 +359,6 @@ namespace ErsatzCivLib.Model.Persistent
             Food = 1,
             Productivity = 2,
             Defense = 1,
-            ColorValue = "#006400",
             _actions = new List<WorkerActionPivot>
                 {
                     WorkerActionPivot.Clear,
@@ -405,7 +391,6 @@ namespace ErsatzCivLib.Model.Persistent
             Food = 1,
             Productivity = 1,
             Defense = 0,
-            ColorValue = "#EEE8AA",
             _actions = new List<WorkerActionPivot>
                 {
                     WorkerActionPivot.Irrigate,
@@ -437,7 +422,6 @@ namespace ErsatzCivLib.Model.Persistent
             Food = 1,
             Productivity = 0,
             Defense = 0,
-            ColorValue = "#00BFFF",
             _actions = new List<WorkerActionPivot>(),
             _temperatures = new List<MapPivot.TemperaturePivot>(),
             _underlyingBiomes = new Dictionary<MapPivot.TemperaturePivot, BiomePivot>(),

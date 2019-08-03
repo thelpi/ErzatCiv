@@ -9,11 +9,31 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using ErsatzCiv.Properties;
 using ErsatzCivLib.Model;
+using Biome = ErsatzCivLib.Model.Persistent.BiomePivot;
 
 namespace ErsatzCiv
 {
     internal static class DrawTools
     {
+        internal const double CITY_DISPLAY_RATIO = 0.8;
+        internal const string CITY_RENDER_PATH = "city.png";
+        internal const string UNIT_RENDER_PATH = "unit_{0}.png";
+        internal static readonly Dictionary<string, string> MAP_SQUARE_COLORS = new Dictionary<string, string>
+        {
+            { Biome.Grassland.Name, "#32CD32" },
+            { Biome.Sea.Name, "#1E90FF" },
+            { Biome.Ice.Name, "#FFFAF0" },
+            { Biome.Toundra.Name, "#2F4F4F" },
+            { Biome.Desert.Name, "#FF7F50" },
+            { Biome.Jungle.Name, "#9ACD32" },
+            { Biome.Mountain.Name, "#A52A2A" },
+            { Biome.Hill.Name, "#556B2F" },
+            { Biome.Swamp.Name, "#3CB371" },
+            { Biome.Forest.Name, "#006400" },
+            { Biome.Plain.Name, "#EEE8AA" },
+            { Biome.Coast.Name, "#00BFFF" }
+        };
+
         internal static void CleanPreviousChildrenByTag(this Panel panel, object tagValue)
         {
             var elements = panel.GetChildrenByTag(tagValue);
@@ -49,7 +69,7 @@ namespace ErsatzCiv
             {
                 Width = defaultDim,
                 Height = defaultDim,
-                Source = new BitmapImage(new Uri(Settings.Default.datasPath + unit.RenderValue)),
+                Source = new BitmapImage(new Uri(Settings.Default.datasPath + UnitRenderFileName(unit))),
                 Stretch = Stretch.Uniform
             };
             img.SetValue(Grid.RowProperty, unit.MapSquareLocation.Row);
@@ -77,6 +97,11 @@ namespace ErsatzCiv
                 blinkingStoryboard.Begin();
             }
             panel.Children.Add(img);
+        }
+
+        private static string UnitRenderFileName(UnitPivot unit)
+        {
+            return string.Format(UNIT_RENDER_PATH, unit.GetType().Name.Replace("Pivot", string.Empty).ToLowerInvariant());
         }
 
         internal static void DrawSquareImprovements(this Panel panel, MapSquarePivot square, double defaultDim, Tuple<int, int> gridPositionOffset = null)
@@ -255,7 +280,7 @@ namespace ErsatzCiv
                 {
                     Width = defaultDim,
                     Height = defaultDim,
-                    Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(square.Biome.ColorValue))
+                    Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(MAP_SQUARE_COLORS[square.Biome.Name]))
                 };
             }
 
@@ -300,9 +325,9 @@ namespace ErsatzCiv
 
             Image img = new Image
             {
-                Width = defaultDim * CityPivot.DISPLAY_RATIO,
-                Height = defaultDim * CityPivot.DISPLAY_RATIO,
-                Source = new BitmapImage(new Uri(Settings.Default.datasPath + city.RenderValue)),
+                Width = defaultDim * CITY_DISPLAY_RATIO,
+                Height = defaultDim * CITY_DISPLAY_RATIO,
+                Source = new BitmapImage(new Uri(Settings.Default.datasPath + CITY_RENDER_PATH)),
                 Stretch = Stretch.Uniform,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center

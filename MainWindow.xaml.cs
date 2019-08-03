@@ -333,7 +333,7 @@ namespace ErsatzCiv
             {
                 Width = _minimapSquareSize,
                 Height = _minimapSquareSize,
-                Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(square.Biome.ColorValue))
+                Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(DrawTools.MAP_SQUARE_COLORS[square.Biome.Name]))
             };
             rctMinimap.SetValue(Canvas.TopProperty, square.Row * _minimapSquareSize);
             rctMinimap.SetValue(Canvas.LeftProperty, square.Column * _minimapSquareSize);
