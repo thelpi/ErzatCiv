@@ -73,7 +73,7 @@ namespace ErsatzCivLib
             var settler = CurrentUnit as SettlerPivot;
             var sq = CurrentUnit.MapSquareLocation;
 
-            var city = new CityPivot(CurrentTurn, name, sq, ComputeCityAvailableMapSquares, null);
+            var city = new CityPivot(CurrentTurn, name, sq, ComputeCityAvailableMapSquares, new CapitalizationPivot(sq));
             sq.ApplyCityActions(city);
 
             _cities.Add(city);
@@ -422,11 +422,8 @@ namespace ErsatzCivLib
                 Assembly.GetExecutingAssembly().GetTypes().Where(myType =>
                     myType.IsClass && !myType.IsAbstract && myType.IsSubclassOf(typeof(BuildablePivot)));
 
-            var list = buildableTypes.ToList();
-            list.Add(null);
-
             // TODO : some processing
-            return list;
+            return buildableTypes.ToList();
         }
 
         /// <summary>

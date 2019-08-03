@@ -16,7 +16,7 @@ namespace ErsatzCivLib.Model
         private const double MAX_CC_POP = 20000000;
         private static readonly double POP_GROWTH_RATIO = Math.Log(MIN_CC_POP / MAX_CC_POP) / (1 - MAX_CITIZEN_COUNT);
         public const int FOOD_RATIO_TO_NEXT_CITIZEN = 40;
-        private const int PRODUCTIVITY_TO_COMMERCE_RATIO = 10;
+        private const double PRODUCTIVITY_TO_COMMERCE_RATIO = 0.1;
 
         private readonly Func<CityPivot, List<MapSquarePivot>> _availableMapSquaresFunc;
         private readonly List<CitizenPivot> _citizens;
@@ -74,7 +74,7 @@ namespace ErsatzCivLib.Model
 
                 // TODO : include city improvements
                 return MapSquareLocation.CityCommerce
-                    + (Production == null ? Productivity / PRODUCTIVITY_TO_COMMERCE_RATIO : 0)
+                    + (Production.GetType() == typeof(CapitalizationPivot) ? (int)Math.Ceiling(Productivity * PRODUCTIVITY_TO_COMMERCE_RATIO) : 0)
                     + _citizens
                         .Where(c => !c.Type.HasValue)
                         .Sum(c => c.MapSquare.Commerce);
@@ -192,19 +192,12 @@ namespace ErsatzCivLib.Model
                 ResetCitizens();
             }
 
-            if (Production == null)
+            ProductivityStorage += Productivity;
+            if (ProductivityStorage >= Production.ProductivityCost)
             {
-                ProductivityStorage = 0;
-            }
-            else
-            {
-                ProductivityStorage += Productivity;
-                if (ProductivityStorage >= Production.ProductivityCost)
-                {
-                    ProductivityStorage -= Production.ProductivityCost;
-                    produced = Production;
-                    Production = null;
-                }
+                ProductivityStorage -= Production.ProductivityCost;
+                produced = Production;
+                Production = new CapitalizationPivot(MapSquareLocation);
             }
 
             return produced;

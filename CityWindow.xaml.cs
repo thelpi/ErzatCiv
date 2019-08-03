@@ -56,8 +56,8 @@ namespace ErsatzCiv
             LabelTaxStat.Content = _city.Tax;
 
             var buildableItems = _engine.BuildableItems().ToList();
-            ComboBoxProduction.ItemsSource = buildableItems.Select(x => new KeyValuePair<string, Type>(x == null ? "Capitalization" : x.Name.Replace("Pivot", string.Empty), x));
-            ComboBoxProduction.SelectedIndex = buildableItems.IndexOf(_city.Production?.GetType());
+            ComboBoxProduction.ItemsSource = buildableItems;
+            ComboBoxProduction.SelectedIndex = buildableItems.IndexOf(_city.Production.GetType());
 
             var foodCost = CityPivot.CitizenPivot.FOOD_BY_TURN * _city.Citizens.Count;
             var nextFood = CityPivot.FOOD_RATIO_TO_NEXT_CITIZEN * _city.Citizens.Count;
@@ -85,7 +85,7 @@ namespace ErsatzCiv
                 Content = "Status : " + (extraFoodByTurn > 0 ? "Growth (" + ratioGrowth + " turns)" : (extraFoodByTurn == 0 ? "Balanced" : "Famine"))
             });
 
-            var prodFinish = _city.Production == null ? 0 : _city.Production.ProductivityCost;
+            var prodFinish = _city.Production.ProductivityCost;
             PanelNextProduction.Children.Clear();
             PanelNextProduction.Children.Add(new Label
             {
@@ -242,11 +242,11 @@ namespace ErsatzCiv
 
         private void ComboBoxProduction_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (!_checkComboSelection)
+            if (!_checkComboSelection || ComboBoxProduction.SelectedIndex < 0)
             {
                 return;
             }
-            _engine.ChangeCityProduction(_city, ((KeyValuePair<string, Type>)ComboBoxProduction.SelectedItem).Value);
+            _engine.ChangeCityProduction(_city, (Type)ComboBoxProduction.SelectedItem);
             RefreshDisplay();
         }
 
