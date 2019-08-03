@@ -109,7 +109,7 @@ namespace ErsatzCiv
             StackCitizens.Children.Clear();
             foreach (var citizen in _city.Citizens)
             {
-                StackCitizens.Children.Add(DrawCitizen(citizen, CITIZEN_SIZE_TOPBAR, 1, MouseClickOnTopBarCitizen));
+                StackCitizens.Children.Add(DrawCitizen(citizen, CITIZEN_SIZE_TOPBAR, 1, MouseClickOnCitizen));
             }
 
             ListBoxImprovements.ItemsSource = _city.ImprovementsAndWonders;
@@ -124,7 +124,8 @@ namespace ErsatzCiv
             {
                 for (var j = 0; j < COUNT_SHOW_CITY_SQUARES; j++)
                 {
-                    DrawCitySquare(gridOffset, squares, i, j);
+                    var current = squares.Keys.SingleOrDefault(msq => msq.Row == (i + gridOffset.Item1) && msq.Column == (j + gridOffset.Item2));
+                    DrawCitySquare(gridOffset, current, squares[current].Item1, squares[current].Item2, i, j);
                 }
             }
         }
@@ -149,15 +150,12 @@ namespace ErsatzCiv
                 style.Triggers.Add(trigger);
             }
 
-            string resourceName = (!citizen.Type.HasValue ?
-                citizen.Mood.ToString() : citizen.Type.ToString());
-
             var imgCitizen = new Image
             {
                 Width = size,
                 Height = size,
-                Source = new System.Windows.Media.Imaging.BitmapImage(new Uri(Properties.Settings.Default.datasPath + "citizen_" + resourceName.ToLowerInvariant() + ".png")),
-                ToolTip = resourceName,
+                Source = new System.Windows.Media.Imaging.BitmapImage(new Uri(Properties.Settings.Default.datasPath + "citizen_" + citizen.ToString().ToLowerInvariant() + ".png")),
+                ToolTip = citizen.ToString(),
                 Style = style,
                 Stretch = System.Windows.Media.Stretch.Uniform,
                 Tag = citizen
@@ -171,22 +169,20 @@ namespace ErsatzCiv
             return imgCitizen;
         }
 
-        private void DrawCitySquare(Tuple<int, int> gridOffset, Dictionary<MapSquarePivot, Tuple<CityPivot.CitizenPivot, bool>> squares, int i, int j)
+        private void DrawCitySquare(Tuple<int, int> gridOffset, MapSquarePivot current,
+            CityPivot.CitizenPivot citizen, bool occupiedByOtherCity, int row, int column)
         {
-            var current = squares.Keys.SingleOrDefault(msq => msq.Row == (i + gridOffset.Item1) && msq.Column == (j + gridOffset.Item2));
             if (current == null)
             {
-                GridCityMap.Children.Add(DrawDisableSquare(i, j, 1, 1));
+                GridCityMap.Children.Add(DrawDisableSquare(row, column, 1, 1));
             }
             else
             {
-                bool disable = IsOutOfCityBounds(gridOffset, i, j) || squares[current].Item2;
-                bool isCity = i + gridOffset.Item1 == _city.MapSquareLocation.Row
-                    && j + gridOffset.Item2 == _city.MapSquareLocation.Column;
-                bool isCitizen = squares[current].Item1 != null;
+                bool isCityRadius = _city.CoordinatesAreCityRadius(row + gridOffset.Item1, column + gridOffset.Item2);
+                bool isCity = _city.CoordinatesAreCityCenter(row + gridOffset.Item1, column + gridOffset.Item2);
 
                 Action<object, MouseButtonEventArgs> callback = MouseClickOnCityGridEmpty;
-                if (disable || isCity || isCitizen)
+                if (!isCityRadius || occupiedByOtherCity || isCity || citizen != null)
                 {
                     callback = null;
                 }
@@ -196,31 +192,19 @@ namespace ErsatzCiv
                 {
                     GridCityMap.DrawMapCity(_city, CITY_GRID_SIZE, 5, true, gridOffset, MouseClickOnCity);
                 }
-                else if (disable)
+                else if (!isCityRadius || occupiedByOtherCity)
                 {
-                    GridCityMap.Children.Add(DrawDisableSquare(i, j, 5, 0.4));
+                    GridCityMap.Children.Add(DrawDisableSquare(row, column, 5, 0.4));
                 }
-                else if (isCitizen)
+                else if (citizen != null)
                 {
-                    var imgCitizen = DrawCitizen(squares[current].Item1, CITIZEN_SIZE_CITYGRID, 0.6, MouseClickOnCityGridCitizen);
+                    var imgCitizen = DrawCitizen(citizen, CITIZEN_SIZE_CITYGRID, 0.6, MouseClickOnCitizen);
                     imgCitizen.SetValue(Panel.ZIndexProperty, 2);
-                    imgCitizen.SetValue(Grid.RowProperty, i);
-                    imgCitizen.SetValue(Grid.ColumnProperty, j);
+                    imgCitizen.SetValue(Grid.RowProperty, row);
+                    imgCitizen.SetValue(Grid.ColumnProperty, column);
                     GridCityMap.Children.Add(imgCitizen);
                 }
             }
-        }
-
-        private bool IsOutOfCityBounds(Tuple<int, int> gridOffset, int i, int j)
-        {
-            return (i + gridOffset.Item1 < _city.MapSquareLocation.Row - 2)
-                                        || (i + gridOffset.Item1 > _city.MapSquareLocation.Row + 2)
-                                        || (j + gridOffset.Item2 < _city.MapSquareLocation.Column - 2)
-                                        || (j + gridOffset.Item2 > _city.MapSquareLocation.Column + 2)
-                                        || (i + gridOffset.Item1 == _city.MapSquareLocation.Row - 2 && j + gridOffset.Item2 == _city.MapSquareLocation.Column - 2)
-                                        || (i + gridOffset.Item1 == _city.MapSquareLocation.Row - 2 && j + gridOffset.Item2 == _city.MapSquareLocation.Column + 2)
-                                        || (i + gridOffset.Item1 == _city.MapSquareLocation.Row + 2 && j + gridOffset.Item2 == _city.MapSquareLocation.Column - 2)
-                                        || (i + gridOffset.Item1 == _city.MapSquareLocation.Row + 2 && j + gridOffset.Item2 == _city.MapSquareLocation.Column + 2);
         }
 
         private static Rectangle DrawDisableSquare(int i, int j, int zindex, double opacity)
@@ -264,35 +248,11 @@ namespace ErsatzCiv
             }
         }
 
-        private void MouseClickOnCityGridCitizen(object sender, MouseButtonEventArgs e)
+        private void MouseClickOnCitizen(object sender, MouseButtonEventArgs e)
         {
             if ((sender as Image)?.Tag is CityPivot.CitizenPivot citizenSource)
             {
-                _engine.ChangeCitizenToSpecialist(citizenSource, CityPivot.CitizenTypePivot.Entertainer);
-                RefreshDisplay();
-            }
-        }
-
-        private void MouseClickOnTopBarCitizen(object sender, MouseButtonEventArgs e)
-        {
-            if ((sender as Image)?.Tag is CityPivot.CitizenPivot citizenSource)
-            {
-                if (!citizenSource.Type.HasValue)
-                {
-                    _engine.ChangeCitizenToSpecialist(citizenSource, CityPivot.CitizenTypePivot.Entertainer);
-                }
-                else if (citizenSource.Type.Value == CityPivot.CitizenTypePivot.Entertainer)
-                {
-                    _engine.ChangeCitizenToSpecialist(citizenSource, CityPivot.CitizenTypePivot.Scientist);
-                }
-                else if (citizenSource.Type.Value == CityPivot.CitizenTypePivot.Scientist)
-                {
-                    _engine.ChangeCitizenToSpecialist(citizenSource, CityPivot.CitizenTypePivot.TaxCollector);
-                }
-                else if (citizenSource.Type.Value == CityPivot.CitizenTypePivot.TaxCollector)
-                {
-                    _engine.ChangeCitizenToDefault(citizenSource, null);
-                }
+                _engine.SwitchCitizenType(citizenSource);
                 RefreshDisplay();
             }
         }
@@ -301,7 +261,7 @@ namespace ErsatzCiv
         {
             if ((sender as Rectangle)?.Tag is MapSquarePivot squareSource)
             {
-                _engine.ChangeCitizenToDefault(_city.Citizens.FirstOrDefault(c => c.Type.HasValue), squareSource);
+                _engine.ChangeCitizenToDefault(_city.GetAnySpecialistCitizen(), squareSource);
                 RefreshDisplay();
             }
         }

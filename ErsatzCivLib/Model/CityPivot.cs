@@ -269,6 +269,28 @@ namespace ErsatzCivLib.Model
             CheckCitizensMood();
         }
 
+        public CitizenPivot GetAnySpecialistCitizen()
+        {
+            return _citizens.FirstOrDefault(c => c.Type.HasValue);
+        }
+
+        public bool CoordinatesAreCityRadius(int row, int column)
+        {
+            return (row >= MapSquareLocation.Row - 2)
+                && (row <= MapSquareLocation.Row + 2)
+                && (column >= MapSquareLocation.Column - 2)
+                && (column <= MapSquareLocation.Column + 2)
+                && (row != MapSquareLocation.Row - 2 || column != MapSquareLocation.Column - 2)
+                && (row != MapSquareLocation.Row - 2 || column != MapSquareLocation.Column + 2)
+                && (row != MapSquareLocation.Row + 2 || column != MapSquareLocation.Column - 2)
+                && (row != MapSquareLocation.Row + 2 || column != MapSquareLocation.Column + 2);
+        }
+
+        public bool CoordinatesAreCityCenter(int row, int column)
+        {
+            return row == MapSquareLocation.Row && column == MapSquareLocation.Column;
+        }
+
         [Serializable]
         public class CitizenPivot : IComparable<CitizenPivot>
         {
@@ -313,6 +335,12 @@ namespace ErsatzCivLib.Model
                 var compareMapS = (MapSquare?.TotalValue).GetValueOrDefault(0).CompareTo((other.MapSquare?.TotalValue).GetValueOrDefault(0));
 
                 return compareType == 0 ? (compareMood == 0 ? compareMapS : compareMood) : compareType;
+            }
+
+            /// <inheritdoc />
+            public override string ToString()
+            {
+                return (!Type.HasValue ? Mood.ToString() : Type.ToString());
             }
         }
 

@@ -434,7 +434,7 @@ namespace ErsatzCiv
             }
         }
 
-        public static DirectionPivot? Move(Key key)
+        private static DirectionPivot? Move(Key key)
         {
             switch (key)
             {

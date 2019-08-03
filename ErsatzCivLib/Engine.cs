@@ -329,13 +329,8 @@ namespace ErsatzCivLib
             }
         }
 
-        public void ChangeCitizenToSpecialist(CityPivot.CitizenPivot citizenSource, CityPivot.CitizenTypePivot citizenType)
+        private void ChangeCitizenToSpecialist(CityPivot.CitizenPivot citizenSource, CityPivot.CitizenTypePivot citizenType)
         {
-            if (citizenSource == null)
-            {
-                return;
-            }
-
             var theCity = GetCityFromCitizen(citizenSource);
             if (theCity == null)
             {
@@ -466,6 +461,34 @@ namespace ErsatzCivLib
             }
 
             city.ResetCitizens();
+        }
+
+        public void SwitchCitizenType(CityPivot.CitizenPivot citizenSource)
+        {
+            if (citizenSource == null)
+            {
+                return;
+            }
+
+            if (!citizenSource.Type.HasValue)
+            {
+                ChangeCitizenToSpecialist(citizenSource, CityPivot.CitizenTypePivot.Entertainer);
+            }
+            else
+            {
+                switch (citizenSource.Type.Value)
+                {
+                    case CityPivot.CitizenTypePivot.Entertainer:
+                        ChangeCitizenToSpecialist(citizenSource, CityPivot.CitizenTypePivot.Scientist);
+                        break;
+                    case CityPivot.CitizenTypePivot.Scientist:
+                        ChangeCitizenToSpecialist(citizenSource, CityPivot.CitizenTypePivot.TaxCollector);
+                        break;
+                    case CityPivot.CitizenTypePivot.TaxCollector:
+                        ChangeCitizenToDefault(citizenSource, null);
+                        break;
+                }
+            }
         }
 
         public class NextUnitEventArgs : EventArgs
