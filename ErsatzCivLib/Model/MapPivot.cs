@@ -14,8 +14,8 @@ namespace ErsatzCivLib.Model
         private const int RATIO_WIDTH_HEIGHT = 2;
         private const int MINIMAL_HEIGHT = 20;
         private const int CHUNK_SIZE_RATIO = 5;
-        private const double MAX_RATIO_TEMPERATURE = 0.4;
-        private const double MIN_RATIO_TEMPERATURE = 0.1;
+        private const double MAX_RATIO_TEMPERATURE = 0.45;
+        private const double MIN_RATIO_TEMPERATURE = 0.05;
         private const double AVG_RATIO_TEMPERATURE = 0.25;
         private const double RIVER_STARTER_RATIO = 0.005;
         private const int CONTINENT_COUNT_MIN = 3;
