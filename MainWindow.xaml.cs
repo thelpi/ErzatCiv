@@ -467,9 +467,13 @@ namespace ErsatzCiv
             var citiesWithDoneProduction = _engine.NewTurn();
             if (Settings.Default.openCityWindowAtProductionEnd)
             {
-                foreach (var city in citiesWithDoneProduction)
+                foreach (var city in citiesWithDoneProduction.Keys)
                 {
-                    new CityWindow(_engine, city).ShowDialog();
+                    var result = MessageBox.Show($"{city.Name} has built {citiesWithDoneProduction[city].Name} ! Zoom on city ?", "ErsatzCiv", MessageBoxButton.YesNo);
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        new CityWindow(_engine, city).ShowDialog();
+                    }
                 }
             }
             RefreshDynamicView();

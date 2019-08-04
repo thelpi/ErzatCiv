@@ -195,9 +195,9 @@ namespace ErsatzCivLib
             NextUnitEvent?.Invoke(this, new NextUnitEventArgs(_currentUnitIndex >= 0));
         }
 
-        public IReadOnlyCollection<CityPivot> NewTurn()
+        public IDictionary<CityPivot, BuildablePivot> NewTurn()
         {
-            var citiesWithDoneProduction = new List<CityPivot>();
+            var citiesWithDoneProduction = new Dictionary<CityPivot, BuildablePivot>();
             foreach (var city in _cities)
             {
                 var produced = city.UpdateStatus();
@@ -210,7 +210,7 @@ namespace ErsatzCivLib
                     }
                     else if (!produced.Is<CapitalizationPivot>())
                     {
-                        citiesWithDoneProduction.Add(city);
+                        citiesWithDoneProduction.Add(city, produced);
                     }
                 }
             }
