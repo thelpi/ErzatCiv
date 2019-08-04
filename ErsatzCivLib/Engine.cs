@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using ErsatzCivLib.Model;
 using ErsatzCivLib.Model.CityImprovements;
@@ -145,7 +144,7 @@ namespace ErsatzCivLib
 
         public bool CanBuildCity()
         {
-            if (CurrentUnit?.GetType() != typeof(SettlerPivot))
+            if (CurrentUnit?.Is<SettlerPivot>() == true)
             {
                 return false;
             }
@@ -204,12 +203,12 @@ namespace ErsatzCivLib
                 var produced = city.UpdateStatus();
                 if (produced != null)
                 {
-                    if (produced.IsUnit())
+                    if (produced.Is<UnitPivot>())
                     {
                         _units.Add(produced as UnitPivot);
                         SetUnitIndex(false, false);
                     }
-                    else if (!produced.IsCapitalization())
+                    else if (!produced.Is<CapitalizationPivot>())
                     {
                         citiesWithDoneProduction.Add(city);
                     }
@@ -236,7 +235,7 @@ namespace ErsatzCivLib
 
         public bool WorkerAction(WorkerActionPivot actionPivot)
         {
-            if (CurrentUnit?.GetType() != typeof(WorkerPivot) || actionPivot == null)
+            if (CurrentUnit == null || !CurrentUnit.Is<WorkerPivot>() || actionPivot == null)
             {
                 return false;
             }
@@ -460,19 +459,18 @@ namespace ErsatzCivLib
         /// <returns>List of <see cref="BuildablePivot"/> (<c>Default</c> instance for each) the city can build.</returns>
         public IReadOnlyCollection<BuildablePivot> GetBuildableItemsForCity(CityPivot city, out int indexOfDefault)
         {
+            indexOfDefault = -1;
+
             if (city == null)
             {
-                indexOfDefault = -1;
                 return null;
             }
 
-            var buildableDefaultInstances = Assembly
-                .GetExecutingAssembly()
-                .GetTypes()
-                .Where(t => t.IsSubclassOf(typeof(BuildablePivot)) && !t.IsAbstract)
-                // "SettlerPivot" is used to get the property's name, but it could be any other type.
-                .Select(t => (BuildablePivot)t.GetField(nameof(SettlerPivot.Default), BindingFlags.Static | BindingFlags.NonPublic).GetValue(null))
-                .ToList();
+            var buildableDefaultInstances = BuildablePivot.GetEveryDefaultInstances().ToList();
+            if (buildableDefaultInstances == null)
+            {
+                return null;
+            }
 
             // Already built for the current city.
             buildableDefaultInstances.RemoveAll(b => city.Improvements.Contains(b));
@@ -497,26 +495,12 @@ namespace ErsatzCivLib
         /// <returns><c>True</c> if success; <c>False</c> otherwise.</returns>
         public bool ChangeCityProduction(CityPivot city, BuildablePivot buildableDefaultInstance)
         {
-            if (buildableDefaultInstance == null)
+            if (city == null || buildableDefaultInstance == null)
             {
                 return false;
             }
 
-            var instanceCreatorCallback =
-                buildableDefaultInstance.GetType().GetMethod(
-                    // "SettlerPivot" is used to get the method's name, but it could be any other type.
-                    nameof(SettlerPivot.CreateAtLocation),
-                    BindingFlags.Static | BindingFlags.NonPublic,
-                    null,
-                    new[] { typeof(MapSquarePivot) },
-                    null);
-
-            if (instanceCreatorCallback == null)
-            {
-                return false;
-            }
-
-            var invokedInstance = (BuildablePivot)instanceCreatorCallback.Invoke(null, new[] { city.MapSquareLocation });
+            var invokedInstance = buildableDefaultInstance.CreateInstance(city.MapSquareLocation);
             if (invokedInstance == null)
             {
                 return false;

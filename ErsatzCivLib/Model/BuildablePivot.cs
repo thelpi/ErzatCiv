@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace ErsatzCivLib.Model
 {
@@ -42,39 +45,43 @@ namespace ErsatzCivLib.Model
         }
 
         /// <summary>
-        /// Indicates the instance is <see cref="CapitalizationPivot"/> typed.
+        /// Indicates if the instance is from the specified type (or a child of it).
         /// </summary>
-        /// <returns><c>True</c> if <see cref="CapitalizationPivot"/>; <c>False</c> otherwise.</returns>
-        public bool IsCapitalization()
+        /// <typeparam name="T">The <see cref="Type"/> to check.</typeparam>
+        /// <returns><c>True</c> if it is; <c>False</c> otherwise.</returns>
+        public bool Is<T>() where T : BuildablePivot
         {
-            return GetType() == typeof(CapitalizationPivot);
+            return GetType() == typeof(T) || GetType().IsSubclassOf(typeof(T));
         }
 
         /// <summary>
-        /// Indicates the instance is <see cref="UnitPivot"/> typed.
+        /// Creates a new instance from the current one.
         /// </summary>
-        /// <returns><c>True</c> if <see cref="UnitPivot"/>; <c>False</c> otherwise.</returns>
-        public bool IsUnit()
+        /// <returns>The instance location; might be <c>Null</c> if non-pertinent.</returns>
+        internal BuildablePivot CreateInstance(MapSquarePivot location)
         {
-            return GetType().IsSubclassOf(typeof(UnitPivot));
+            var method = GetType().GetMethod(
+                "CreateAtLocation",
+                BindingFlags.Static | BindingFlags.NonPublic,
+                null,
+                new[] { typeof(MapSquarePivot) },
+                null);
+
+            return (BuildablePivot)method?.Invoke(null, new[] { location });
         }
 
         /// <summary>
-        /// Indicates the instance is <see cref="CityImprovementPivot"/> typed.
+        /// Gets every <c>Default</c> instances for each concrete type which inherits from <see cref="BuildablePivot"/>.
         /// </summary>
-        /// <returns><c>True</c> if <see cref="CityImprovementPivot"/>; <c>False</c> otherwise.</returns>
-        public bool IsCityImprovement()
+        /// <returns>A collection of <see cref="BuildablePivot"/>, one for each concrete type.</returns>
+        internal static IReadOnlyCollection<BuildablePivot> GetEveryDefaultInstances()
         {
-            return GetType().IsSubclassOf(typeof(CityImprovementPivot));
-        }
-
-        /// <summary>
-        /// Indicates the instance is <see cref="WonderPivot"/> typed.
-        /// </summary>
-        /// <returns><c>True</c> if <see cref="WonderPivot"/>; <c>False</c> otherwise.</returns>
-        public bool IsWonder()
-        {
-            return GetType().IsSubclassOf(typeof(WonderPivot));
+            return Assembly
+                .GetExecutingAssembly()
+                .GetTypes()
+                .Where(t => t.IsSubclassOf(typeof(BuildablePivot)) && !t.IsAbstract)
+                .Select(t => (BuildablePivot)t.GetField("Default", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null))
+                .ToList();
         }
     }
 }

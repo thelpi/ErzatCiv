@@ -75,7 +75,7 @@ namespace ErsatzCivLib.Model
 
                 // TODO : include city improvements
                 return MapSquareLocation.CityCommerce
-                    + (Production.IsCapitalization() ? (int)Math.Ceiling(Productivity * PRODUCTIVITY_TO_COMMERCE_RATIO) : 0)
+                    + (Production.Is<CapitalizationPivot>() ? (int)Math.Ceiling(Productivity * PRODUCTIVITY_TO_COMMERCE_RATIO) : 0)
                     + _citizens
                         .Where(c => !c.Type.HasValue)
                         .Sum(c => c.MapSquare.Commerce);
@@ -276,7 +276,7 @@ namespace ErsatzCivLib.Model
             {
                 bool produce = true;
                 ProductivityStorage = Production.ProductivityCost;
-                if (Production.IsUnit())
+                if (Production.Is<UnitPivot>())
                 {
                     produce = false;
                     var citizensCost = ((UnitPivot)Production).CitizenCostToProduce;
@@ -291,7 +291,7 @@ namespace ErsatzCivLib.Model
                     ProductivityStorage = 0;
                     produced = Production;
                     Production = CapitalizationPivot.CreateAtLocation(MapSquareLocation);
-                    if (produced.IsCityImprovement())
+                    if (produced.Is<CityImprovementPivot>())
                     {
                         _improvements.Add((CityImprovementPivot)produced);
                         if (produced == GranaryPivot.Default)
@@ -309,7 +309,7 @@ namespace ErsatzCivLib.Model
                             }
                         }
                     }
-                    else if (produced.IsWonder())
+                    else if (produced.Is<WonderPivot>())
                     {
                         _wonders.Add((WonderPivot)produced);
                     }
