@@ -25,6 +25,10 @@ namespace ErsatzCivLib.Model
         /// Productivity amount required to build the item.
         /// </summary>
         public int ProductivityCost { get; private set; }
+        /// <summary>
+        /// Indicates if the item, when built, has impact on citizens mood.
+        /// </summary>
+        public bool HasCitizenMoodEffect { get; private set; }
 
         /// <summary>
         /// Constructor.
@@ -32,10 +36,12 @@ namespace ErsatzCivLib.Model
         /// <param name="productivityCost">The <see cref="ProductivityCost"/> value.</param>
         /// <param name="name">Optionnal; the <see cref="Name"/> value.
         /// IF <c>Null</c>, the class name is used without the "Pivot" suffix.</param>
-        protected BuildablePivot(int productivityCost, string name = null)
+        /// <param name="hasCitizenMoodEffect">Optionnal; the <see cref="HasCitizenMoodEffect"/> value.</param>
+        protected BuildablePivot(int productivityCost, string name = null, bool hasCitizenMoodEffect = false)
         {
             Name = name ?? GetType().Name.Replace("Pivot", string.Empty);
             ProductivityCost = productivityCost;
+            HasCitizenMoodEffect = hasCitizenMoodEffect;
         }
 
         /// <inheritdoc />

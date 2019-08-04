@@ -9,6 +9,8 @@ namespace ErsatzCivLib.Model.CityImprovements
     [Serializable]
     public class MarketplacePivot : CityImprovementPivot
     {
+        public const double COMMERCE_INCREASE_RATIO = 1.5;
+
         private const int PRODUCTIVITY_COST = 80;
         private const int MAINTENANCE_COST = 1;
         private const int PURCHASE_PRICE = 320;

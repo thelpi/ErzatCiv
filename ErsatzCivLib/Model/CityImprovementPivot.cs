@@ -30,8 +30,11 @@ namespace ErsatzCivLib.Model
         /// <param name="purchasePrice">The <see cref="PurchasePrice"/> value.</param>
         /// <param name="sellValue">The <see cref="SellValue"/> value.</param>
         /// <param name="name">Optionnal; the <see cref="BuildablePivot.Name"/> value.</param>
-        protected CityImprovementPivot(int productivityCost, int maintenanceCost, int purchasePrice, int sellValue, string name = null) :
-            base (productivityCost, name)
+        /// <param name="hasCitizenMoodEffect">Optionnal; the <see cref="BuildablePivot.HasCitizenMoodEffect"/> value.</param>
+        protected CityImprovementPivot(int productivityCost, int maintenanceCost,
+            int purchasePrice, int sellValue,
+            string name = null, bool hasCitizenMoodEffect = false) :
+            base (productivityCost, name, hasCitizenMoodEffect)
         {
             MaintenanceCost = maintenanceCost;
             PurchasePrice = purchasePrice;

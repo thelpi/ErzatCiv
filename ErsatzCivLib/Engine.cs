@@ -144,7 +144,7 @@ namespace ErsatzCivLib
 
         public bool CanBuildCity()
         {
-            if (CurrentUnit?.Is<SettlerPivot>() == true)
+            if (CurrentUnit?.Is<SettlerPivot>() != true)
             {
                 return false;
             }

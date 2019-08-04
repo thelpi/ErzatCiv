@@ -72,13 +72,19 @@ namespace ErsatzCivLib.Model
                 {
                     return 0;
                 }
-
-                // TODO : include city improvements
-                return MapSquareLocation.CityCommerce
+                
+                var commerceValue = MapSquareLocation.CityCommerce
                     + (Production.Is<CapitalizationPivot>() ? (int)Math.Ceiling(Productivity * PRODUCTIVITY_TO_COMMERCE_RATIO) : 0)
                     + _citizens
                         .Where(c => !c.Type.HasValue)
                         .Sum(c => c.MapSquare.Commerce);
+
+                if (_improvements.Contains(MarketplacePivot.Default))
+                {
+                    commerceValue = (int)Math.Floor(MarketplacePivot.COMMERCE_INCREASE_RATIO * commerceValue);
+                }
+
+                return commerceValue;
             }
         }
         public int Tax
@@ -117,9 +123,15 @@ namespace ErsatzCivLib.Model
                 {
                     return 0;
                 }
+                
+                var scienceValue = _citizens.Count(c => c.Type == CitizenTypePivot.Scientist || !c.Type.HasValue);
 
-                // TODO : include city improvements
-                return _citizens.Count(c => c.Type == CitizenTypePivot.Scientist || !c.Type.HasValue);
+                if (_improvements.Contains(LibraryPivot.Default))
+                {
+                    scienceValue = (int)Math.Floor(scienceValue * LibraryPivot.SCIENCE_INCREASE_RATIO);
+                }
+
+                return scienceValue;
             }
         }
         public int Pollution
@@ -219,6 +231,7 @@ namespace ErsatzCivLib.Model
         {
             BuildablePivot produced = null;
             bool resetCitizensRequired = false;
+            bool checkCitizensMood = false;
 
             if (ExtraFoodByTurn > 0)
             {
@@ -313,12 +326,20 @@ namespace ErsatzCivLib.Model
                     {
                         _wonders.Add((WonderPivot)produced);
                     }
+                    if (produced.HasCitizenMoodEffect)
+                    {
+                        checkCitizensMood = true;
+                    }
                 }
             }
 
             if (resetCitizensRequired)
             {
                 ResetCitizens();
+            }
+            else if (checkCitizensMood)
+            {
+                CheckCitizensMood();
             }
 
             return produced;
@@ -334,7 +355,9 @@ namespace ErsatzCivLib.Model
 
             // Entertaining effects.
             var entertainers = _citizens.Where(c => c.Type == CitizenTypePivot.Entertainer).Count();
-            for (int i = 0; i < entertainers; i++)
+            var templeEffect = _improvements.Contains(TemplePivot.Default) ? 1 : 0;
+            var colosseumEffect = _improvements.Contains(ColosseumPivot.Default) ? 3 : 0;
+            for (int i = 0; i < (entertainers + templeEffect + colosseumEffect); i++)
             {
                 if (unhappyFaces > 0)
                 {

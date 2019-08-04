@@ -15,7 +15,7 @@ namespace ErsatzCivLib.Model.CityImprovements
         private const int SELL_VALUE = 40;
 
         private TemplePivot() :
-            base(PRODUCTIVITY_COST, MAINTENANCE_COST, PURCHASE_PRICE, SELL_VALUE)
+            base(PRODUCTIVITY_COST, MAINTENANCE_COST, PURCHASE_PRICE, SELL_VALUE, null, true)
         { }
 
         /// <summary>

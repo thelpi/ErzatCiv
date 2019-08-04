@@ -15,7 +15,7 @@ namespace ErsatzCivLib.Model.CityImprovements
         private const int SELL_VALUE = 120;
 
         private CityWallsPivot() :
-            base(PRODUCTIVITY_COST, MAINTENANCE_COST, PURCHASE_PRICE, SELL_VALUE)
+            base(PRODUCTIVITY_COST, MAINTENANCE_COST, PURCHASE_PRICE, SELL_VALUE, "City walls")
         { }
 
         /// <summary>
