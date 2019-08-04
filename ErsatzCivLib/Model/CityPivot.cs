@@ -7,13 +7,14 @@ namespace ErsatzCivLib.Model
     [Serializable]
     public class CityPivot
     {
+        private const int PRODUCTION_INFINITE = 9999;
         private const int DEFAULT_RATIO_CITIZEN_UNHAPPY = 5;
         internal const int CITY_SPEED_COST = 1;
         private const double MAX_CITIZEN_COUNT = 40;
         private const double MIN_CC_POP = 1000;
         private const double MAX_CC_POP = 20000000;
         private static readonly double POP_GROWTH_RATIO = Math.Log(MIN_CC_POP / MAX_CC_POP) / (1 - MAX_CITIZEN_COUNT);
-        public const int FOOD_RATIO_TO_NEXT_CITIZEN = 40;
+        private const int FOOD_RATIO_TO_NEXT_CITIZEN = 40;
         private const double PRODUCTIVITY_TO_COMMERCE_RATIO = 0.1;
 
         private readonly Func<CityPivot, List<MapSquarePivot>> _availableMapSquaresFunc;
@@ -135,6 +136,50 @@ namespace ErsatzCivLib.Model
                 return new List<BuildablePivot>(_improvements).Concat(_wonders).ToList();
             }
         }
+        public int RemainingProductionCost
+        {
+            get
+            {
+                return Production.ProductivityCost - ProductivityStorage;
+            }
+        }
+        public int RemainingProductionTurns
+        {
+            get
+            {
+                return (Productivity == 0 ? PRODUCTION_INFINITE :
+                    (int)Math.Ceiling(RemainingProductionCost / (double)Productivity));
+            }
+        }
+        public int NextCitizenFoodRequirement
+        {
+            get
+            {
+                return FOOD_RATIO_TO_NEXT_CITIZEN * _citizens.Count;
+            }
+        }
+        public int ExtraFoodByTurn
+        {
+            get
+            {
+                return Food - (CitizenPivot.FOOD_BY_TURN * _citizens.Count);
+            }
+        }
+        public int NextCitizenTurns
+        {
+            get
+            {
+                return ExtraFoodByTurn == 0 ? 0 : (int)Math.Ceiling((NextCitizenFoodRequirement - FoodStorage) / (double)ExtraFoodByTurn);
+            }
+        }
+        public string FoodStatus
+        {
+            get
+            {
+                return ExtraFoodByTurn > 0 ? $"Growth ({NextCitizenTurns} turns)" :
+                    (ExtraFoodByTurn == 0 ? "Balanced" : "Famine");
+            }
+        }
 
         internal CityPivot(int currentTurn, string name, MapSquarePivot location,
             Func<CityPivot, List<MapSquarePivot>> availableMapSquaresFunc, BuildablePivot production)
@@ -171,9 +216,7 @@ namespace ErsatzCivLib.Model
         {
             BuildablePivot produced = null;
 
-            var foodToConsume = CitizenPivot.FOOD_BY_TURN * _citizens.Count;
-            FoodStorage -= foodToConsume;
-            FoodStorage += Food;
+            FoodStorage += ExtraFoodByTurn;
 
             if (FoodStorage < 0)
             {
@@ -181,9 +224,9 @@ namespace ErsatzCivLib.Model
                 ResetCitizens();
                 FoodStorage = 0;
             }
-            else if (FoodStorage >= FOOD_RATIO_TO_NEXT_CITIZEN * _citizens.Count)
+            else if (FoodStorage >= NextCitizenFoodRequirement)
             {
-                FoodStorage = FoodStorage - (FOOD_RATIO_TO_NEXT_CITIZEN * _citizens.Count);
+                FoodStorage -= NextCitizenFoodRequirement;
                 _citizens.Add(new CitizenPivot(null));
                 ResetCitizens();
             }

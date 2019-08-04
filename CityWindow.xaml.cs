@@ -56,13 +56,7 @@ namespace ErsatzCiv
             
             ComboBoxProduction.ItemsSource = _engine.GetBuildableItemsForCity(_city, out int indexOfDefault);
             ComboBoxProduction.SelectedIndex = indexOfDefault;
-
-            var foodCost = CityPivot.CitizenPivot.FOOD_BY_TURN * _city.Citizens.Count;
-            var nextFood = CityPivot.FOOD_RATIO_TO_NEXT_CITIZEN * _city.Citizens.Count;
-            var remainingFoodToProduce = (nextFood) - _city.FoodStorage;
-            var extraFoodByTurn = _city.Food - foodCost;
-            var realRatioGrowth = remainingFoodToProduce / (double)extraFoodByTurn;
-            var ratioGrowth = extraFoodByTurn == 0 ? 0 : Math.Ceiling(realRatioGrowth);
+            
             PanelNextCitizen.Children.Clear();
             PanelNextCitizen.Children.Add(new Label
             {
@@ -76,14 +70,13 @@ namespace ErsatzCiv
             });
             PanelNextCitizen.Children.Add(new Label
             {
-                Content = $"Next : {nextFood}"
+                Content = $"Next : {_city.NextCitizenFoodRequirement}"
             });
             PanelNextCitizen.Children.Add(new Label
             {
-                Content = "Status : " + (extraFoodByTurn > 0 ? "Growth (" + ratioGrowth + " turns)" : (extraFoodByTurn == 0 ? "Balanced" : "Famine"))
+                Content = $"Status : {_city.FoodStatus}"
             });
-
-            var prodFinish = _city.Production.ProductivityCost;
+            
             PanelNextProduction.Children.Clear();
             PanelNextProduction.Children.Add(new Label
             {
@@ -97,11 +90,11 @@ namespace ErsatzCiv
             });
             PanelNextProduction.Children.Add(new Label
             {
-                Content = $"Finish : {prodFinish}"
+                Content = $"Finish : {_city.Production.ProductivityCost}"
             });
             PanelNextProduction.Children.Add(new Label
             {
-                Content = $"Remaining : {prodFinish - _city.ProductivityStorage} (" + (_city.Productivity == 0 ? 9999 : (prodFinish - _city.ProductivityStorage) / _city.Productivity) + " turns)"
+                Content = $"Remaining : {_city.RemainingProductionCost} (" + _city.RemainingProductionTurns + " turns)"
             });
 
             StackCitizens.Children.Clear();
@@ -117,14 +110,11 @@ namespace ErsatzCiv
                 _city.MapSquareLocation.Row - ((COUNT_SHOW_CITY_SQUARES - 1) / 2),
                 _city.MapSquareLocation.Column - ((COUNT_SHOW_CITY_SQUARES - 1) / 2)
             );
-            var squares = _engine.GetMapSquaresAroundCity(_city);
-            for (int i = 0; i < COUNT_SHOW_CITY_SQUARES; i++)
+
+            foreach (var sq in _engine.GetMapSquaresAroundCity(_city))
             {
-                for (var j = 0; j < COUNT_SHOW_CITY_SQUARES; j++)
-                {
-                    var current = squares.Keys.SingleOrDefault(msq => msq.Row == (i + gridOffset.Item1) && msq.Column == (j + gridOffset.Item2));
-                    DrawCitySquare(gridOffset, current, squares[current].Item1, squares[current].Item2, i, j);
-                }
+                DrawCitySquare(gridOffset, sq.Key, sq.Value.Item1, sq.Value.Item2,
+                    sq.Key.Row - gridOffset.Item1, sq.Key.Column - gridOffset.Item2);
             }
         }
 

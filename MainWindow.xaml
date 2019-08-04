@@ -66,8 +66,9 @@
                 </ScrollViewer>
             </GroupBox>
             <StackPanel Orientation="Vertical" DockPanel.Dock="Left">
-                <CheckBox Margin="0, 5, 0, 0" Name="CheckBoxWaitTurn" Click="CheckBoxWaitTurn_Click" Content="Wait at the end of turn" HorizontalAlignment="Center" />
+                <CheckBox Margin="0, 5, 0, 0" Name="CheckBoxWaitTurn" Click="CheckBoxWaitTurn_Click" Content="Wait at the end of turn." HorizontalAlignment="Center" />
                 <Button Margin="0, 5, 0, 0" Name="BtnNextTurn" Content="Next turn" Width="75" Height="25" Click="BtnNextTurn_Click" />
+                <CheckBox Margin="0, 5, 0, 0" Name="CheckBoxOpenCityWindowAtProductionEnd" Click="CheckBoxOpenCityWindowAtProductionEnd_Click" Content="Open city window when current production is done." HorizontalAlignment="Center" />
             </StackPanel>
         </DockPanel>
         <ScrollViewer ScrollChanged="MapScroller_ScrollChanged" DockPanel.Dock="Top" CanContentScroll="True"

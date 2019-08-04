@@ -73,5 +73,17 @@ namespace ErsatzCiv.Properties {
                 return ((string)(this["defaultCityName"]));
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool openCityWindowAtProductionEnd {
+            get {
+                return ((bool)(this["openCityWindowAtProductionEnd"]));
+            }
+            set {
+                this["openCityWindowAtProductionEnd"] = value;
+            }
+        }
     }
 }

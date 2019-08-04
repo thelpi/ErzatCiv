@@ -161,8 +161,9 @@ namespace ErsatzCivLib
             NextUnitEvent?.Invoke(this, new NextUnitEventArgs(_currentUnitIndex >= 0));
         }
 
-        public bool NewTurn()
+        public IReadOnlyCollection<CityPivot> NewTurn()
         {
+            var citiesWithDoneProduction = new List<CityPivot>();
             foreach (var city in _cities)
             {
                 var produced = city.UpdateStatus();
@@ -172,6 +173,10 @@ namespace ErsatzCivLib
                     {
                         _units.Add(produced as UnitPivot);
                         SetUnitIndex(false, false);
+                    }
+                    else if (produced.GetType() != typeof(CapitalizationPivot))
+                    {
+                        citiesWithDoneProduction.Add(city);
                     }
                 }
             }
@@ -185,7 +190,8 @@ namespace ErsatzCivLib
             }
             CurrentTurn++;
             SetUnitIndex(false, true);
-            return true;
+
+            return citiesWithDoneProduction;
         }
 
         internal bool IsCity(MapSquarePivot square)

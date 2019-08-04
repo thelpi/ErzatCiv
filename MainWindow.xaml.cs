@@ -57,8 +57,7 @@ namespace ErsatzCiv
                 return;
             }
             _freezeActions = true;
-            _engine.NewTurn();
-            RefreshDynamicView();
+            MoveToNextTurnAndActAccordingly();
             _freezeActions = false;
         }
 
@@ -174,8 +173,7 @@ namespace ErsatzCiv
                 }
                 else
                 {
-                    _engine.NewTurn();
-                    RefreshDynamicView();
+                    MoveToNextTurnAndActAccordingly();
                 }
             }
             // Centers the screen on current unit.
@@ -214,8 +212,7 @@ namespace ErsatzCiv
         {
             if (!eventArgs.MoreUnit && !Settings.Default.waitEndTurn)
             {
-                _engine.NewTurn();
-                RefreshDynamicView();
+                MoveToNextTurnAndActAccordingly();
             }
             else
             {
@@ -226,6 +223,12 @@ namespace ErsatzCiv
         private void CheckBoxWaitTurn_Click(object sender, RoutedEventArgs e)
         {
             Settings.Default.waitEndTurn = !Settings.Default.waitEndTurn;
+            Settings.Default.Save();
+        }
+
+        private void CheckBoxOpenCityWindowAtProductionEnd_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.Default.openCityWindowAtProductionEnd = !Settings.Default.openCityWindowAtProductionEnd;
             Settings.Default.Save();
         }
 
@@ -457,6 +460,19 @@ namespace ErsatzCiv
                 default:
                     return null;
             }
+        }
+
+        private void MoveToNextTurnAndActAccordingly()
+        {
+            var citiesWithDoneProduction = _engine.NewTurn();
+            if (Settings.Default.openCityWindowAtProductionEnd)
+            {
+                foreach (var city in citiesWithDoneProduction)
+                {
+                    new CityWindow(_engine, city).ShowDialog();
+                }
+            }
+            RefreshDynamicView();
         }
 
         #endregion

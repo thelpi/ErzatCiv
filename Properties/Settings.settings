@@ -17,5 +17,8 @@
     <Setting Name="defaultCityName" Type="System.String" Scope="Application">
       <Value Profile="(Default)">Bordeaux</Value>
     </Setting>
+    <Setting Name="openCityWindowAtProductionEnd" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
