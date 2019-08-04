@@ -26,8 +26,42 @@ namespace ErsatzCivLib
         public MapPivot Map { get; private set; }
         public IReadOnlyCollection<UnitPivot> Units { get { return _units; } }
         public IReadOnlyCollection<CityPivot> Cities { get { return _cities; } }
-        public UnitPivot CurrentUnit { get { return _currentUnitIndex >= 0 ? _units[_currentUnitIndex] : null; } }
-        public UnitPivot PreviousUnit { get { return _previousUnitIndex >= 0 && _previousUnitIndex != _currentUnitIndex ? _units[_previousUnitIndex] : null; } }
+        public UnitPivot CurrentUnit
+        {
+            get
+            {
+                if (_currentUnitIndex == -1)
+                {
+                    return null;
+                }
+
+                if (_currentUnitIndex < -1 || _currentUnitIndex >= _units.Count)
+                {
+                    // Anormal behavior.
+                    return null;
+                }
+
+                return _units[_currentUnitIndex];
+            }
+        }
+        public UnitPivot PreviousUnit
+        {
+            get
+            {
+                if (_previousUnitIndex == -1 || _previousUnitIndex == _currentUnitIndex)
+                {
+                    return null;
+                }
+
+                if (_previousUnitIndex < -1 || _previousUnitIndex >= _units.Count)
+                {
+                    // Anormal behavior.
+                    return null;
+                }
+
+                return _units[_previousUnitIndex];
+            }
+        }
 
         public Engine(MapPivot.SizePivot mapSize,
             MapPivot.LandShapePivot mapShape,
