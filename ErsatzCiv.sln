@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ErsatzCiv", "ErsatzCiv.cspr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ErsatzCivLib", "ErsatzCivLib\ErsatzCivLib.csproj", "{C8D51508-6972-469C-860F-3B6EA3FDB86B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ErsatzCivLibUnitTests", "ErsatzCivLibUnitTests\ErsatzCivLibUnitTests.csproj", "{1EB3601D-9789-43FA-84F0-3BDA6C8481C9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{C8D51508-6972-469C-860F-3B6EA3FDB86B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C8D51508-6972-469C-860F-3B6EA3FDB86B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C8D51508-6972-469C-860F-3B6EA3FDB86B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1EB3601D-9789-43FA-84F0-3BDA6C8481C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1EB3601D-9789-43FA-84F0-3BDA6C8481C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1EB3601D-9789-43FA-84F0-3BDA6C8481C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1EB3601D-9789-43FA-84F0-3BDA6C8481C9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
