@@ -7,7 +7,7 @@ namespace ErsatzCivLib.Model
     /// </summary>
     /// <seealso cref="BuildablePivot"/>
     [Serializable]
-    public abstract class CityImprovementPivot : BuildablePivot
+    public abstract class CityImprovementPivot : BuildablePivot, IEquatable<CityImprovementPivot>
     {
         /// <summary>
         /// The maintenance cost, in gold by turn.
@@ -39,6 +39,51 @@ namespace ErsatzCivLib.Model
             MaintenanceCost = maintenanceCost;
             PurchasePrice = purchasePrice;
             SellValue = sellValue;
+        }
+
+        public bool Equals(CityImprovementPivot other)
+        {
+            return Name == other?.Name;
+        }
+
+        public static bool operator ==(CityImprovementPivot ms1, CityImprovementPivot ms2)
+        {
+            if (ms1 is null)
+            {
+                return ms2 is null;
+            }
+
+            return ms1.Equals(ms2) == true;
+        }
+
+        public static bool operator ==(CityImprovementPivot ms1, BuildablePivot ms2)
+        {
+            if (ms1 is null)
+            {
+                return ms2 is null;
+            }
+
+            return ms1.Equals(ms2) == true;
+        }
+
+        public static bool operator !=(CityImprovementPivot ms1, CityImprovementPivot ms2)
+        {
+            return !(ms1 == ms2);
+        }
+
+        public static bool operator !=(CityImprovementPivot ms1, BuildablePivot ms2)
+        {
+            return !(ms1 == ms2);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is CityImprovementPivot && Equals(obj as CityImprovementPivot);
+        }
+
+        public override int GetHashCode()
+        {
+            return Name.GetHashCode();
         }
     }
 }

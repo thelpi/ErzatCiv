@@ -412,7 +412,7 @@ namespace ErsatzCivLib
 
         private CityPivot GetCityFromCitizen(CityPivot.CitizenPivot citizenSource)
         {
-            return _cities.SingleOrDefault(c => c.Citizens.Any(ci => ci == citizenSource));
+            return _cities.SingleOrDefault(c => c.Citizens.Contains(citizenSource));
         }
 
         internal bool OccupiedByCity(MapSquarePivot mapSquare, CityPivot exceptCity = null)
@@ -478,7 +478,7 @@ namespace ErsatzCivLib
             // No aqueduc required if a river is close to the city.
             if (city.MapSquareLocation.HasRiver)
             {
-                buildableDefaultInstances.RemoveAll(b => b == AqueducPivot.Default);
+                buildableDefaultInstances.RemoveAll(b => AqueducPivot.Default == b);
             }
 
             // TODO : remove wonders already built globally.
@@ -550,6 +550,16 @@ namespace ErsatzCivLib
                         break;
                 }
             }
+        }
+
+        public bool CityOnLeftBorder(CityPivot city)
+        {
+            return city?.MapSquareLocation.Row == 0;
+        }
+
+        public bool CityOnRightBorder(CityPivot city)
+        {
+            return city?.MapSquareLocation.Row == Map.Width - 1;
         }
 
         public class NextUnitEventArgs : EventArgs

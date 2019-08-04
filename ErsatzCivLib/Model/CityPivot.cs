@@ -6,7 +6,7 @@ using ErsatzCivLib.Model.CityImprovements;
 namespace ErsatzCivLib.Model
 {
     [Serializable]
-    public class CityPivot
+    public class CityPivot : IEquatable<CityPivot>
     {
         private const int PRODUCTION_INFINITE = 9999;
         private const int DEFAULT_RATIO_CITIZEN_UNHAPPY = 5;
@@ -307,7 +307,7 @@ namespace ErsatzCivLib.Model
                     if (produced.Is<CityImprovementPivot>())
                     {
                         _improvements.Add((CityImprovementPivot)produced);
-                        if (produced == GranaryPivot.Default)
+                        if (GranaryPivot.Default == produced)
                         {
                             // Note : at this point, "NextCitizenFoodRequirement" takes the granary in consideration.
                             if (FoodStorage > NextCitizenFoodRequirement)
@@ -439,10 +439,42 @@ namespace ErsatzCivLib.Model
             return row == MapSquareLocation.Row && column == MapSquareLocation.Column;
         }
 
+        public bool Equals(CityPivot other)
+        {
+            return Name == other?.Name;
+        }
+
+        public static bool operator ==(CityPivot ms1, CityPivot ms2)
+        {
+            if (ms1 is null)
+            {
+                return ms2 is null;
+            }
+
+            return ms1.Equals(ms2) == true;
+        }
+
+        public static bool operator !=(CityPivot ms1, CityPivot ms2)
+        {
+            return !(ms1 == ms2);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is CityPivot && Equals(obj as CityPivot);
+        }
+
+        public override int GetHashCode()
+        {
+            return Name.GetHashCode();
+        }
+
         [Serializable]
-        public class CitizenPivot : IComparable<CitizenPivot>
+        public class CitizenPivot : IComparable<CitizenPivot>, IEquatable<CitizenPivot>
         {
             public const int FOOD_BY_TURN = 2;
+
+            private Guid _uniqueId;
 
             public MapSquarePivot MapSquare { get; private set; }
             public MoodPivot Mood { get; internal set; }
@@ -450,6 +482,7 @@ namespace ErsatzCivLib.Model
 
             internal CitizenPivot(MapSquarePivot mapSquare)
             {
+                _uniqueId = Guid.NewGuid();
                 MapSquare = mapSquare;
                 Mood = MoodPivot.Content;
                 Type = mapSquare == null ? CitizenTypePivot.Entertainer : (CitizenTypePivot?)null;
@@ -489,6 +522,36 @@ namespace ErsatzCivLib.Model
             public override string ToString()
             {
                 return (!Type.HasValue ? Mood.ToString() : Type.ToString());
+            }
+
+            public bool Equals(CitizenPivot other)
+            {
+                return _uniqueId == other?._uniqueId;
+            }
+
+            public static bool operator ==(CitizenPivot ms1, CitizenPivot ms2)
+            {
+                if (ms1 is null)
+                {
+                    return ms2 is null;
+                }
+
+                return ms1.Equals(ms2) == true;
+            }
+
+            public static bool operator !=(CitizenPivot ms1, CitizenPivot ms2)
+            {
+                return !(ms1 == ms2);
+            }
+
+            public override bool Equals(object obj)
+            {
+                return obj is CitizenPivot && Equals(obj as CitizenPivot);
+            }
+
+            public override int GetHashCode()
+            {
+                return _uniqueId.GetHashCode();
             }
         }
 

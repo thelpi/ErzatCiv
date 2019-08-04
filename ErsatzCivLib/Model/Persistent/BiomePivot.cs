@@ -8,7 +8,7 @@ namespace ErsatzCivLib.Model.Persistent
     /// Represents a type of square on the map.
     /// </summary>
     [Serializable]
-    public class BiomePivot
+    public class BiomePivot : IEquatable<BiomePivot>
     {
         private List<WorkerActionPivot> _actions;
         private List<MapPivot.TemperaturePivot> _temperatures;
@@ -537,6 +537,36 @@ namespace ErsatzCivLib.Model.Persistent
             }
 
             return (int)Math.Round((totalSquaresCount * (realRatio * 3)) / ((int)Size * chunkCoeff));
+        }
+
+        public bool Equals(BiomePivot other)
+        {
+            return Name == other?.Name;
+        }
+
+        public static bool operator ==(BiomePivot ms1, BiomePivot ms2)
+        {
+            if (ms1 is null)
+            {
+                return ms2 is null;
+            }
+
+            return ms1.Equals(ms2) == true;
+        }
+
+        public static bool operator !=(BiomePivot ms1, BiomePivot ms2)
+        {
+            return !(ms1 == ms2);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is BiomePivot && Equals(obj as BiomePivot);
+        }
+
+        public override int GetHashCode()
+        {
+            return Name.GetHashCode();
         }
     }
 }

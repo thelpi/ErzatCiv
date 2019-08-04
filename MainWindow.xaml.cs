@@ -365,8 +365,8 @@ namespace ErsatzCiv
 
         private void DisplayCityName(CityPivot city)
         {
-            bool stuckOnLeft = city.MapSquareLocation.Row == 0;
-            bool stuckOnRight = city.MapSquareLocation.Row == _engine.Map.Width - 1;
+            bool stuckOnLeft = _engine.CityOnLeftBorder(city);
+            bool stuckOnRight = _engine.CityOnRightBorder(city);
 
             var citynameBlock = new TextBlock
             {

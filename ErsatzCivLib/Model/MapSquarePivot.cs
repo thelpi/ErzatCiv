@@ -10,7 +10,7 @@ namespace ErsatzCivLib.Model
     /// Represents a map square.
     /// </summary>
     [Serializable]
-    public class MapSquarePivot
+    public class MapSquarePivot : IEquatable<MapSquarePivot>
     {
         #region Properties
 
@@ -369,6 +369,36 @@ namespace ErsatzCivLib.Model
         internal void SetRiver(CardinalPivot cardinal, bool isRiver)
         {
             _rivers[cardinal] = isRiver ? !Biome.IsSeaType : isRiver;
+        }
+
+        public bool Equals(MapSquarePivot other)
+        {
+            return Row == other?.Row && Column == other?.Column;
+        }
+
+        public static bool operator ==(MapSquarePivot ms1, MapSquarePivot ms2)
+        {
+            if (ms1 is null)
+            {
+                return ms2 is null;
+            }
+
+            return ms1.Equals(ms2) == true;
+        }
+
+        public static bool operator !=(MapSquarePivot ms1, MapSquarePivot ms2)
+        {
+            return !(ms1 == ms2);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is MapSquarePivot && Equals(obj as MapSquarePivot);
+        }
+
+        public override int GetHashCode()
+        {
+            return Row ^ Column;
         }
 
         [Serializable]

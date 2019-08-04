@@ -6,7 +6,7 @@ namespace ErsatzCivLib.Model.Persistent
     /// Represents a worker action.
     /// </summary>
     [Serializable]
-    public class WorkerActionPivot
+    public class WorkerActionPivot : IEquatable<WorkerActionPivot>
     {
         internal const double ROAD_SPEED_COST_RATIO = 0.3;
 
@@ -262,6 +262,36 @@ namespace ErsatzCivLib.Model.Persistent
                 }
                 return _destroyImprovement;
             }
+        }
+
+        public bool Equals(WorkerActionPivot other)
+        {
+            return Name == other?.Name;
+        }
+
+        public static bool operator ==(WorkerActionPivot ms1, WorkerActionPivot ms2)
+        {
+            if (ms1 is null)
+            {
+                return ms2 is null;
+            }
+
+            return ms1.Equals(ms2) == true;
+        }
+
+        public static bool operator !=(WorkerActionPivot ms1, WorkerActionPivot ms2)
+        {
+            return !(ms1 == ms2);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is WorkerActionPivot && Equals(obj as WorkerActionPivot);
+        }
+
+        public override int GetHashCode()
+        {
+            return Name.GetHashCode();
         }
     }
 }
