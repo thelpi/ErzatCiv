@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 using ErsatzCivLib.Model;
+using ErsatzCivLib.Model.CityImprovements;
 using ErsatzCivLib.Model.Persistent;
 using ErsatzCivLib.Model.Units;
 
@@ -459,6 +460,12 @@ namespace ErsatzCivLib
         /// <returns>List of <see cref="BuildablePivot"/> (<c>Default</c> instance for each) the city can build.</returns>
         public IReadOnlyCollection<BuildablePivot> GetBuildableItemsForCity(CityPivot city, out int indexOfDefault)
         {
+            if (city == null)
+            {
+                indexOfDefault = -1;
+                return null;
+            }
+
             var buildableDefaultInstances = Assembly
                 .GetExecutingAssembly()
                 .GetTypes()
@@ -467,7 +474,17 @@ namespace ErsatzCivLib
                 .Select(t => (BuildablePivot)t.GetField(nameof(SettlerPivot.Default), BindingFlags.Static | BindingFlags.NonPublic).GetValue(null))
                 .ToList();
 
-            // TODO : some processing
+            // Already built for the current city.
+            buildableDefaultInstances.RemoveAll(b => city.Improvements.Contains(b));
+
+            // No aqueduc required if a river is close to the city.
+            if (city.MapSquareLocation.HasRiver)
+            {
+                buildableDefaultInstances.RemoveAll(b => b == AqueducPivot.Default);
+            }
+
+            // TODO : remove wonders already built globally.
+
             indexOfDefault = buildableDefaultInstances.FindIndex(b => b.GetType() == city.Production.GetType());
             return buildableDefaultInstances;
         }

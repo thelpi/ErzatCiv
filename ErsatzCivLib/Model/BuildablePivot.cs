@@ -58,5 +58,23 @@ namespace ErsatzCivLib.Model
         {
             return GetType().IsSubclassOf(typeof(UnitPivot));
         }
+
+        /// <summary>
+        /// Indicates the instance is <see cref="CityImprovementPivot"/> typed.
+        /// </summary>
+        /// <returns><c>True</c> if <see cref="CityImprovementPivot"/>; <c>False</c> otherwise.</returns>
+        public bool IsCityImprovement()
+        {
+            return GetType().IsSubclassOf(typeof(CityImprovementPivot));
+        }
+
+        /// <summary>
+        /// Indicates the instance is <see cref="WonderPivot"/> typed.
+        /// </summary>
+        /// <returns><c>True</c> if <see cref="WonderPivot"/>; <c>False</c> otherwise.</returns>
+        public bool IsWonder()
+        {
+            return GetType().IsSubclassOf(typeof(WonderPivot));
+        }
     }
 }

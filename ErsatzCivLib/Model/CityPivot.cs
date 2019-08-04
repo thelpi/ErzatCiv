@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ErsatzCivLib.Model.CityImprovements;
 
 namespace ErsatzCivLib.Model
 {
@@ -16,6 +17,7 @@ namespace ErsatzCivLib.Model
         private static readonly double POP_GROWTH_RATIO = Math.Log(MIN_CC_POP / MAX_CC_POP) / (1 - MAX_CITIZEN_COUNT);
         private const int FOOD_RATIO_TO_NEXT_CITIZEN = 40;
         private const double PRODUCTIVITY_TO_COMMERCE_RATIO = 0.1;
+        private const int MAX_POPULATION_WITHOUT_WATER_SUPPLY = 10;
 
         private readonly Func<CityPivot, List<MapSquarePivot>> _availableMapSquaresFunc;
         private readonly List<CitizenPivot> _citizens;
@@ -25,6 +27,7 @@ namespace ErsatzCivLib.Model
         public BuildablePivot Production { get; private set; }
         public int CreationTurn { get; private set; }
         public int FoodStorage { get; private set; }
+        public int FoodGranaryStorage { get; private set; }
         public int ProductivityStorage { get; private set; }
         public string Name { get; private set; }
         public MapSquarePivot MapSquareLocation { get; private set; }
@@ -155,7 +158,7 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                return FOOD_RATIO_TO_NEXT_CITIZEN * _citizens.Count;
+                return (FOOD_RATIO_TO_NEXT_CITIZEN * _citizens.Count) / (_improvements.Contains(GranaryPivot.Default) ? 2 : 1);
             }
         }
         public int ExtraFoodByTurn
@@ -217,43 +220,99 @@ namespace ErsatzCivLib.Model
             BuildablePivot produced = null;
             bool resetCitizensRequired = false;
 
-            FoodStorage += ExtraFoodByTurn;
-            if (FoodStorage < 0)
+            if (ExtraFoodByTurn > 0)
+            {
+                // Fills the FoodGranaryStorage, then the FoodStorage.
+                var tmpExtraFoodByTurn = ExtraFoodByTurn;
+                if (_improvements.Contains(GranaryPivot.Default)
+                    && FoodGranaryStorage < NextCitizenFoodRequirement)
+                {
+                    FoodGranaryStorage += tmpExtraFoodByTurn;
+                    tmpExtraFoodByTurn = 0;
+                    if (FoodGranaryStorage > NextCitizenFoodRequirement)
+                    {
+                        tmpExtraFoodByTurn = FoodGranaryStorage - NextCitizenFoodRequirement;
+                        FoodGranaryStorage = NextCitizenFoodRequirement;
+                    }
+                }
+                FoodStorage += tmpExtraFoodByTurn;
+            }
+            else if (ExtraFoodByTurn < 0)
+            {
+                // Empty the FoodStorage, then the FoodGranaryStorage.
+                FoodStorage += ExtraFoodByTurn;
+                if (FoodStorage < 0 && _improvements.Contains(GranaryPivot.Default))
+                {
+                    FoodGranaryStorage += FoodStorage;
+                    FoodStorage = 0;
+                }
+            }
+
+            if (FoodStorage < 0 && FoodGranaryStorage < 0)
             {
                 _citizens.RemoveAt(0);
                 resetCitizensRequired = true;
                 FoodStorage = 0;
+                FoodGranaryStorage = 0;
             }
             else if (FoodStorage >= NextCitizenFoodRequirement)
             {
-                FoodStorage -= NextCitizenFoodRequirement;
-                _citizens.Add(new CitizenPivot(null));
-                resetCitizensRequired = true;
+                if (_citizens.Count < MAX_POPULATION_WITHOUT_WATER_SUPPLY
+                    || MapSquareLocation.HasRiver
+                    || _improvements.Contains(AqueducPivot.Default))
+                {
+                    FoodStorage = 0; // Note : excess is not keeped.
+                    _citizens.Add(new CitizenPivot(null));
+                    resetCitizensRequired = true;
+                }
+                else
+                {
+                    FoodStorage = NextCitizenFoodRequirement;
+                }
             }
-
-            Action ResetProduction = new Action(delegate()
-            {
-                ProductivityStorage = 0;
-                produced = Production;
-                Production = CapitalizationPivot.CreateAtLocation(MapSquareLocation);
-            });
 
             ProductivityStorage += Productivity;
             if (ProductivityStorage >= Production.ProductivityCost)
             {
+                bool produce = true;
                 ProductivityStorage = Production.ProductivityCost;
                 if (Production.IsUnit())
                 {
+                    produce = false;
                     var citizensCost = ((UnitPivot)Production).CitizenCostToProduce;
                     if (citizensCost < _citizens.Count)
                     {
                         _citizens.RemoveRange(0, citizensCost);
-                        ResetProduction();
+                        produce = true;
                     }
                 }
-                else
+                if (produce)
                 {
-                    ResetProduction();
+                    ProductivityStorage = 0;
+                    produced = Production;
+                    Production = CapitalizationPivot.CreateAtLocation(MapSquareLocation);
+                    if (produced.IsCityImprovement())
+                    {
+                        _improvements.Add((CityImprovementPivot)produced);
+                        if (produced == GranaryPivot.Default)
+                        {
+                            // Note : at this point, "NextCitizenFoodRequirement" takes the granary in consideration.
+                            if (FoodStorage > NextCitizenFoodRequirement)
+                            {
+                                FoodGranaryStorage = NextCitizenFoodRequirement;
+                                FoodStorage -= NextCitizenFoodRequirement;
+                            }
+                            else
+                            {
+                                FoodGranaryStorage = FoodStorage;
+                                FoodStorage = 0;
+                            }
+                        }
+                    }
+                    else if (produced.IsWonder())
+                    {
+                        _wonders.Add((WonderPivot)produced);
+                    }
                 }
             }
 

@@ -43,6 +43,15 @@
     <Compile Include="Model\CapitalizationPivot.cs" />
     <Compile Include="Model\CityImprovementPivot.cs" />
     <Compile Include="Model\BuildablePivot.cs" />
+    <Compile Include="Model\CityImprovements\AqueducPivot.cs" />
+    <Compile Include="Model\CityImprovements\BarracksPivot.cs" />
+    <Compile Include="Model\CityImprovements\CityWallsPivot.cs" />
+    <Compile Include="Model\CityImprovements\ColosseumPivot.cs" />
+    <Compile Include="Model\CityImprovements\CourthousePivot.cs" />
+    <Compile Include="Model\CityImprovements\GranaryPivot.cs" />
+    <Compile Include="Model\CityImprovements\LibraryPivot.cs" />
+    <Compile Include="Model\CityImprovements\MarketplacePivot.cs" />
+    <Compile Include="Model\CityImprovements\TemplePivot.cs" />
     <Compile Include="Model\Persistent\BiomeSizePivot.cs" />
     <Compile Include="Model\CityPivot.cs" />
     <Compile Include="Model\CurrentWorkerActionPivot.cs" />
@@ -60,7 +69,6 @@
     <Compile Include="Tools.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Model\CityImprovements\" />
     <Folder Include="Model\Wonders\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

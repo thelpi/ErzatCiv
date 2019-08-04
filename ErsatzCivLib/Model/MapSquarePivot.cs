@@ -61,6 +61,7 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public IReadOnlyCollection<InProgressWorkerActionPivot> CurrentActions { get { return _currentActions; } }
         public IReadOnlyCollection<CardinalPivot> Rivers { get { return _rivers.Where(r => r.Value).Select(r => r.Key).ToList(); } }
+        public bool HasRiver { get { return _rivers.Any(r => r.Value); } }
 
         public int Food
         {
