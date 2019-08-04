@@ -41,9 +41,13 @@ namespace ErsatzCivLib.Model
         /// Remaining moves.
         /// </summary>
         public double RemainingMoves { get; protected set; }
+        /// <summary>
+        /// Citizens cost to produce the unit.
+        /// </summary>
+        public int CitizenCostToProduce { get; private set; }
 
         protected UnitPivot(MapSquarePivot location, bool seaNavigate, bool groundNavigate, int defensePoints, int offensePoints,
-            int lifePoints, int speed, int productivityCost, string name = null) : base(productivityCost, name)
+            int lifePoints, int speed, int productivityCost, string name = null, int citizenCostToProduce = 0) : base(productivityCost, name)
         {
             MapSquareLocation = location;
             SeaNavigate = seaNavigate;
@@ -53,6 +57,7 @@ namespace ErsatzCivLib.Model
             CurrentLifePoints = lifePoints;
             Speed = speed;
             RemainingMoves = Speed;
+            CitizenCostToProduce = citizenCostToProduce;
         }
 
         internal void ForceNoMove()

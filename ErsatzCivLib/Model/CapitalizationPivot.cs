@@ -1,9 +1,12 @@
-﻿namespace ErsatzCivLib.Model
+﻿using System;
+
+namespace ErsatzCivLib.Model
 {
     /// <summary>
     /// Capitalization (city production).
     /// </summary>
     /// <seealso cref="BuildablePivot"/>
+    [Serializable]
     public class CapitalizationPivot : BuildablePivot
     {
         private const int PRODUCTIVITY_COST = 0;

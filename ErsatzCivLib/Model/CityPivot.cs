@@ -72,7 +72,7 @@ namespace ErsatzCivLib.Model
 
                 // TODO : include city improvements
                 return MapSquareLocation.CityCommerce
-                    + (Production.GetType() == typeof(CapitalizationPivot) ? (int)Math.Ceiling(Productivity * PRODUCTIVITY_TO_COMMERCE_RATIO) : 0)
+                    + (Production.IsCapitalization() ? (int)Math.Ceiling(Productivity * PRODUCTIVITY_TO_COMMERCE_RATIO) : 0)
                     + _citizens
                         .Where(c => !c.Type.HasValue)
                         .Sum(c => c.MapSquare.Commerce);
@@ -215,28 +215,51 @@ namespace ErsatzCivLib.Model
         internal BuildablePivot UpdateStatus()
         {
             BuildablePivot produced = null;
+            bool resetCitizensRequired = false;
 
             FoodStorage += ExtraFoodByTurn;
-
             if (FoodStorage < 0)
             {
                 _citizens.RemoveAt(0);
-                ResetCitizens();
+                resetCitizensRequired = true;
                 FoodStorage = 0;
             }
             else if (FoodStorage >= NextCitizenFoodRequirement)
             {
                 FoodStorage -= NextCitizenFoodRequirement;
                 _citizens.Add(new CitizenPivot(null));
-                ResetCitizens();
+                resetCitizensRequired = true;
             }
+
+            Action ResetProduction = new Action(delegate()
+            {
+                ProductivityStorage = 0;
+                produced = Production;
+                Production = CapitalizationPivot.CreateAtLocation(MapSquareLocation);
+            });
 
             ProductivityStorage += Productivity;
             if (ProductivityStorage >= Production.ProductivityCost)
             {
-                ProductivityStorage -= Production.ProductivityCost;
-                produced = Production;
-                Production = CapitalizationPivot.CreateAtLocation(MapSquareLocation);
+                ProductivityStorage = Production.ProductivityCost;
+                if (Production.IsUnit())
+                {
+                    var citizensCost = ((UnitPivot)Production).CitizenCostToProduce;
+                    if (citizensCost < _citizens.Count)
+                    {
+                        _citizens.RemoveRange(0, citizensCost);
+                        ResetProduction();
+                    }
+                }
+                else
+                {
+                    ResetProduction();
+                }
+            }
+
+            if (resetCitizensRequired)
+            {
+                ResetCitizens();
             }
 
             return produced;

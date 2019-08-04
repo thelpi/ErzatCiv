@@ -12,9 +12,10 @@ namespace ErsatzCivLib.Model.Units
         private const int SPEED = 1;
         private const int PRODUCTIVITY_COST = 20;
         private const int LIFE_POINTS = 1;
+        private const int CITIZENS_COST = 2;
 
         private SettlerPivot(MapSquarePivot location) :
-            base(location, false, true, 0, 0, LIFE_POINTS, SPEED, PRODUCTIVITY_COST)
+            base(location, false, true, 0, 0, LIFE_POINTS, SPEED, PRODUCTIVITY_COST, null, CITIZENS_COST)
         { }
 
         /// <summary>

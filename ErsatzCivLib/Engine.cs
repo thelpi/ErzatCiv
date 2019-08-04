@@ -203,12 +203,12 @@ namespace ErsatzCivLib
                 var produced = city.UpdateStatus();
                 if (produced != null)
                 {
-                    if (produced.GetType().IsSubclassOf(typeof(UnitPivot)))
+                    if (produced.IsUnit())
                     {
                         _units.Add(produced as UnitPivot);
                         SetUnitIndex(false, false);
                     }
-                    else if (produced.GetType() != typeof(CapitalizationPivot))
+                    else if (!produced.IsCapitalization())
                     {
                         citiesWithDoneProduction.Add(city);
                     }

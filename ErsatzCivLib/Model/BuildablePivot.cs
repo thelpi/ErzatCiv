@@ -40,5 +40,23 @@ namespace ErsatzCivLib.Model
         {
             return $"{Name} ({ProductivityCost})";
         }
+
+        /// <summary>
+        /// Indicates the instance is <see cref="CapitalizationPivot"/> typed.
+        /// </summary>
+        /// <returns><c>True</c> if <see cref="CapitalizationPivot"/>; <c>False</c> otherwise.</returns>
+        public bool IsCapitalization()
+        {
+            return GetType() == typeof(CapitalizationPivot);
+        }
+
+        /// <summary>
+        /// Indicates the instance is <see cref="UnitPivot"/> typed.
+        /// </summary>
+        /// <returns><c>True</c> if <see cref="UnitPivot"/>; <c>False</c> otherwise.</returns>
+        public bool IsUnit()
+        {
+            return GetType().IsSubclassOf(typeof(UnitPivot));
+        }
     }
 }
