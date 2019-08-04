@@ -61,7 +61,7 @@
             </ScrollViewer>
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="2" Orientation="Vertical">
-            <ComboBox DisplayMemberPath="Name" Height="25" Name="ComboBoxProduction" SelectionChanged="ComboBoxProduction_SelectionChanged" />
+            <ComboBox Height="25" Name="ComboBoxProduction" SelectionChanged="ComboBoxProduction_SelectionChanged" />
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />

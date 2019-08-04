@@ -3,9 +3,9 @@
 namespace ErsatzCivLib.Model
 {
     [Serializable]
-    public class WonderPivot : BuildablePivot
+    public abstract class WonderPivot : BuildablePivot
     {
-        protected WonderPivot(string name, int productivityCost) : base(name, productivityCost)
+        protected WonderPivot(int productivityCost, string name = null) : base(productivityCost, name)
         {
 
         }

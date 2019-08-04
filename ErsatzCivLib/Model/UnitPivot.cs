@@ -43,7 +43,7 @@ namespace ErsatzCivLib.Model
         public double RemainingMoves { get; protected set; }
 
         protected UnitPivot(MapSquarePivot location, bool seaNavigate, bool groundNavigate, int defensePoints, int offensePoints,
-            int lifePoints, int speed, int productivityCost, string name) : base(name, productivityCost)
+            int lifePoints, int speed, int productivityCost, string name = null) : base(productivityCost, name)
         {
             MapSquareLocation = location;
             SeaNavigate = seaNavigate;

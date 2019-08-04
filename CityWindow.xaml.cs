@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -54,10 +53,9 @@ namespace ErsatzCiv
             LabelProductionStat.Content = _city.Productivity;
             LabelScienceStat.Content = _city.Science;
             LabelTaxStat.Content = _city.Tax;
-
-            var buildableItems = _engine.BuildableItems().ToList();
-            ComboBoxProduction.ItemsSource = buildableItems;
-            ComboBoxProduction.SelectedIndex = buildableItems.IndexOf(_city.Production.GetType());
+            
+            ComboBoxProduction.ItemsSource = _engine.GetBuildableItemsForCity(_city, out int indexOfDefault);
+            ComboBoxProduction.SelectedIndex = indexOfDefault;
 
             var foodCost = CityPivot.CitizenPivot.FOOD_BY_TURN * _city.Citizens.Count;
             var nextFood = CityPivot.FOOD_RATIO_TO_NEXT_CITIZEN * _city.Citizens.Count;
@@ -230,7 +228,7 @@ namespace ErsatzCiv
             {
                 return;
             }
-            _engine.ChangeCityProduction(_city, (Type)ComboBoxProduction.SelectedItem);
+            _engine.ChangeCityProduction(_city, (BuildablePivot)ComboBoxProduction.SelectedItem);
             RefreshDisplay();
         }
 

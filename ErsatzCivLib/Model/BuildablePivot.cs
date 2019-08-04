@@ -5,6 +5,12 @@ namespace ErsatzCivLib.Model
     /// <summary>
     /// Represents an item a city can build.
     /// </summary>
+    /// <remarks>
+    /// Each concrete implementation must implement :
+    /// - A <c>static internal readonly</c> field "Default" used as a template.
+    /// - A <c>static internal</c> method "CreateAtLocation" used to create instances, based on the default template. The method must have a single parameter, of type <see cref="MapSquarePivot"/>.
+    /// - Every constructors must be <c>private</c>.
+    /// </remarks>
     [Serializable]
     public abstract class BuildablePivot
     {
@@ -20,18 +26,19 @@ namespace ErsatzCivLib.Model
         /// <summary>
         /// Constructor.
         /// </summary>
-        /// <param name="name">The <see cref="Name"/> value.</param>
         /// <param name="productivityCost">The <see cref="ProductivityCost"/> value.</param>
-        protected BuildablePivot(string name, int productivityCost)
+        /// <param name="name">Optionnal; the <see cref="Name"/> value.
+        /// IF <c>Null</c>, the class name is used without the "Pivot" suffix.</param>
+        protected BuildablePivot(int productivityCost, string name = null)
         {
-            Name = name;
+            Name = name ?? GetType().Name.Replace("Pivot", string.Empty);
             ProductivityCost = productivityCost;
         }
 
         /// <inheritdoc />
         public override string ToString()
         {
-            return Name;
+            return $"{Name} ({ProductivityCost})";
         }
     }
 }

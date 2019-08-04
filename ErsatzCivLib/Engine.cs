@@ -47,8 +47,8 @@ namespace ErsatzCivLib
             }
             while (ms == null || ms.Biome.IsSeaType);
 
-            _units.Add(new SettlerPivot(ms));
-            _units.Add(new WorkerPivot(ms));
+            _units.Add(SettlerPivot.CreateAtLocation(ms));
+            _units.Add(WorkerPivot.CreateAtLocation(ms));
 
             SetUnitIndex(false, true);
 
@@ -73,7 +73,7 @@ namespace ErsatzCivLib
             var settler = CurrentUnit as SettlerPivot;
             var sq = CurrentUnit.MapSquareLocation;
 
-            var city = new CityPivot(CurrentTurn, name, sq, ComputeCityAvailableMapSquares, new CapitalizationPivot(sq));
+            var city = new CityPivot(CurrentTurn, name, sq, ComputeCityAvailableMapSquares, CapitalizationPivot.CreateAtLocation(sq));
             sq.ApplyCityActions(city);
 
             _cities.Add(city);
@@ -411,41 +411,61 @@ namespace ErsatzCivLib
             return result;
         }
 
-        public IReadOnlyCollection<Type> BuildableItems()
+        /// <summary>
+        /// Gets, for a specified <see cref="CityPivot"/>, the list of <see cref="BuildablePivot"/> which can be built.
+        /// </summary>
+        /// <param name="city">The <see cref="CityPivot"/>.</param>
+        /// <param name="indexOfDefault">Out; the index, in the result list, of the city current production.</param>
+        /// <returns>List of <see cref="BuildablePivot"/> (<c>Default</c> instance for each) the city can build.</returns>
+        public IReadOnlyCollection<BuildablePivot> GetBuildableItemsForCity(CityPivot city, out int indexOfDefault)
         {
-            var buildableTypes =
-                Assembly.GetExecutingAssembly().GetTypes().Where(myType =>
-                    myType.IsClass && !myType.IsAbstract && myType.IsSubclassOf(typeof(BuildablePivot)));
+            var buildableDefaultInstances = Assembly
+                .GetExecutingAssembly()
+                .GetTypes()
+                .Where(t => t.IsSubclassOf(typeof(BuildablePivot)) && !t.IsAbstract)
+                // "SettlerPivot" is used to get the property's name, but it could be any other type.
+                .Select(t => (BuildablePivot)t.GetField(nameof(SettlerPivot.Default), BindingFlags.Static | BindingFlags.NonPublic).GetValue(null))
+                .ToList();
 
             // TODO : some processing
-            return buildableTypes.ToList();
+            indexOfDefault = buildableDefaultInstances.FindIndex(b => b.GetType() == city.Production.GetType());
+            return buildableDefaultInstances;
         }
 
         /// <summary>
-        /// Tries to change the production of a city.
+        /// Tries to change the production of a <see cref="CityPivot"/>.
         /// </summary>
         /// <param name="city">The <see cref="CityPivot"/>.</param>
-        /// <param name="buildableType">
-        /// The type of production.
-        /// Anything other than a subtype of <see cref="BuildablePivot"/> will fail.
-        /// </param>
+        /// <param name="buildableDefaultInstance">The <see cref="BuildablePivot"/> (<c>Default</c> instance).</param>
         /// <returns><c>True</c> if success; <c>False</c> otherwise.</returns>
-        public bool ChangeCityProduction(CityPivot city, Type buildableType)
+        public bool ChangeCityProduction(CityPivot city, BuildablePivot buildableDefaultInstance)
         {
-            if (buildableType == null || !buildableType.IsSubclassOf(typeof(BuildablePivot)))
-            {
-                return false;
-            }
-            
-            var constructorSearch = buildableType.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic,
-                null, new[] { typeof(MapSquarePivot) }, null
-            );
-            if (constructorSearch == null)
+            if (buildableDefaultInstance == null)
             {
                 return false;
             }
 
-            city.ChangeProduction((BuildablePivot)constructorSearch.Invoke(new[] { city.MapSquareLocation }));
+            var instanceCreatorCallback =
+                buildableDefaultInstance.GetType().GetMethod(
+                    // "SettlerPivot" is used to get the method's name, but it could be any other type.
+                    nameof(SettlerPivot.CreateAtLocation),
+                    BindingFlags.Static | BindingFlags.NonPublic,
+                    null,
+                    new[] { typeof(MapSquarePivot) },
+                    null);
+
+            if (instanceCreatorCallback == null)
+            {
+                return false;
+            }
+
+            var invokedInstance = (BuildablePivot)instanceCreatorCallback.Invoke(null, new[] { city.MapSquareLocation });
+            if (invokedInstance == null)
+            {
+                return false;
+            }
+
+            city.ChangeProduction(invokedInstance);
             return true;
         }
 

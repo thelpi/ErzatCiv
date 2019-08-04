@@ -193,7 +193,7 @@ namespace ErsatzCivLib.Model
             {
                 ProductivityStorage -= Production.ProductivityCost;
                 produced = Production;
-                Production = new CapitalizationPivot(MapSquareLocation);
+                Production = CapitalizationPivot.CreateAtLocation(MapSquareLocation);
             }
 
             return produced;
