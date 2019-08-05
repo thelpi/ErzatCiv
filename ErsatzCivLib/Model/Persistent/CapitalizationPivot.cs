@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ErsatzCivLib.Model
+namespace ErsatzCivLib.Model.Persistent
 {
     /// <summary>
     /// Capitalization (city production).

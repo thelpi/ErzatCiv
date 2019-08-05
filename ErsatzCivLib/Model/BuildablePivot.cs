@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using ErsatzCivLib.Model.Persistent;
 
 namespace ErsatzCivLib.Model
 {

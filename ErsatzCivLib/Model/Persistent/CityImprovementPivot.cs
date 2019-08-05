@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ErsatzCivLib.Model
+namespace ErsatzCivLib.Model.Persistent
 {
     /// <summary>
     /// Represents a city improvement.
