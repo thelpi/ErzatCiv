@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ErsatzCivLib.Model.CityImprovements;
 
 namespace ErsatzCivLib.Model
 {
     [Serializable]
     public class CityPivot : IEquatable<CityPivot>
     {
+        private const double MARKETPLACE_COMMERCE_INCREASE_RATIO = 1.5;
+        private const double LIBRARY_SCIENCE_INCREASE_RATIO = 1.5;
         private const int PRODUCTION_INFINITE = 9999;
         private const int DEFAULT_RATIO_CITIZEN_UNHAPPY = 5;
         internal const int CITY_SPEED_COST = 1;
@@ -79,9 +80,9 @@ namespace ErsatzCivLib.Model
                         .Where(c => !c.Type.HasValue)
                         .Sum(c => c.MapSquare.Commerce);
 
-                if (_improvements.Contains(MarketplacePivot.Default))
+                if (_improvements.Contains(CityImprovementPivot.Marketplace))
                 {
-                    commerceValue = (int)Math.Floor(MarketplacePivot.COMMERCE_INCREASE_RATIO * commerceValue);
+                    commerceValue = (int)Math.Floor(MARKETPLACE_COMMERCE_INCREASE_RATIO * commerceValue);
                 }
 
                 return commerceValue;
@@ -126,9 +127,9 @@ namespace ErsatzCivLib.Model
                 
                 var scienceValue = _citizens.Count(c => c.Type == CitizenTypePivot.Scientist || !c.Type.HasValue);
 
-                if (_improvements.Contains(LibraryPivot.Default))
+                if (_improvements.Contains(CityImprovementPivot.Library))
                 {
-                    scienceValue = (int)Math.Floor(scienceValue * LibraryPivot.SCIENCE_INCREASE_RATIO);
+                    scienceValue = (int)Math.Floor(scienceValue * LIBRARY_SCIENCE_INCREASE_RATIO);
                 }
 
                 return scienceValue;
@@ -170,7 +171,7 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                return (FOOD_RATIO_TO_NEXT_CITIZEN * _citizens.Count) / (_improvements.Contains(GranaryPivot.Default) ? 2 : 1);
+                return (FOOD_RATIO_TO_NEXT_CITIZEN * _citizens.Count) / (_improvements.Contains(CityImprovementPivot.Granary) ? 2 : 1);
             }
         }
         public int ExtraFoodByTurn
@@ -237,7 +238,7 @@ namespace ErsatzCivLib.Model
             {
                 // Fills the FoodGranaryStorage, then the FoodStorage.
                 var tmpExtraFoodByTurn = ExtraFoodByTurn;
-                if (_improvements.Contains(GranaryPivot.Default)
+                if (_improvements.Contains(CityImprovementPivot.Granary)
                     && FoodGranaryStorage < NextCitizenFoodRequirement)
                 {
                     FoodGranaryStorage += tmpExtraFoodByTurn;
@@ -254,7 +255,7 @@ namespace ErsatzCivLib.Model
             {
                 // Empty the FoodStorage, then the FoodGranaryStorage.
                 FoodStorage += ExtraFoodByTurn;
-                if (FoodStorage < 0 && _improvements.Contains(GranaryPivot.Default))
+                if (FoodStorage < 0 && _improvements.Contains(CityImprovementPivot.Granary))
                 {
                     FoodGranaryStorage += FoodStorage;
                     FoodStorage = 0;
@@ -272,7 +273,7 @@ namespace ErsatzCivLib.Model
             {
                 if (_citizens.Count < MAX_POPULATION_WITHOUT_WATER_SUPPLY
                     || MapSquareLocation.HasRiver
-                    || _improvements.Contains(AqueducPivot.Default))
+                    || _improvements.Contains(CityImprovementPivot.Aqueduc))
                 {
                     FoodStorage = 0; // Note : excess is not keeped.
                     _citizens.Add(new CitizenPivot(null));
@@ -303,11 +304,11 @@ namespace ErsatzCivLib.Model
                 {
                     ProductivityStorage = 0;
                     produced = Production;
-                    Production = CapitalizationPivot.CreateAtLocation(MapSquareLocation);
+                    Production = CapitalizationPivot.Default;
                     if (produced.Is<CityImprovementPivot>())
                     {
                         _improvements.Add((CityImprovementPivot)produced);
-                        if (GranaryPivot.Default == produced)
+                        if (CityImprovementPivot.Granary == produced)
                         {
                             // Note : at this point, "NextCitizenFoodRequirement" takes the granary in consideration.
                             if (FoodStorage > NextCitizenFoodRequirement)
@@ -355,8 +356,8 @@ namespace ErsatzCivLib.Model
 
             // Entertaining effects.
             var entertainers = _citizens.Where(c => c.Type == CitizenTypePivot.Entertainer).Count();
-            var templeEffect = _improvements.Contains(TemplePivot.Default) ? 1 : 0;
-            var colosseumEffect = _improvements.Contains(ColosseumPivot.Default) ? 3 : 0;
+            var templeEffect = _improvements.Contains(CityImprovementPivot.Temple) ? 1 : 0;
+            var colosseumEffect = _improvements.Contains(CityImprovementPivot.Colosseum) ? 3 : 0;
             for (int i = 0; i < (entertainers + templeEffect + colosseumEffect); i++)
             {
                 if (unhappyFaces > 0)

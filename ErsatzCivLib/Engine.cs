@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using ErsatzCivLib.Model;
-using ErsatzCivLib.Model.CityImprovements;
 using ErsatzCivLib.Model.Persistent;
 using ErsatzCivLib.Model.Units;
 
@@ -107,7 +106,7 @@ namespace ErsatzCivLib
             var settler = CurrentUnit as SettlerPivot;
             var sq = CurrentUnit.MapSquareLocation;
 
-            var city = new CityPivot(CurrentTurn, name, sq, ComputeCityAvailableMapSquares, CapitalizationPivot.CreateAtLocation(sq));
+            var city = new CityPivot(CurrentTurn, name, sq, ComputeCityAvailableMapSquares, CapitalizationPivot.Default);
             sq.ApplyCityActions(city);
 
             _cities.Add(city);
@@ -478,12 +477,13 @@ namespace ErsatzCivLib
             // No aqueduc required if a river is close to the city.
             if (city.MapSquareLocation.HasRiver)
             {
-                buildableDefaultInstances.RemoveAll(b => AqueducPivot.Default == b);
+                buildableDefaultInstances.RemoveAll(b => CityImprovementPivot.Aqueduc == b);
             }
 
             // TODO : remove wonders already built globally.
 
-            indexOfDefault = buildableDefaultInstances.FindIndex(b => b.GetType() == city.Production.GetType());
+            indexOfDefault = buildableDefaultInstances.FindIndex(b =>
+                b.GetType() == city.Production.GetType() && b.Name == city.Production.Name);
             return buildableDefaultInstances;
         }
 
@@ -500,7 +500,7 @@ namespace ErsatzCivLib
                 return false;
             }
 
-            var invokedInstance = buildableDefaultInstance.CreateInstance(city.MapSquareLocation);
+            var invokedInstance = buildableDefaultInstance.CreateOrGetInstance(city.MapSquareLocation);
             if (invokedInstance == null)
             {
                 return false;

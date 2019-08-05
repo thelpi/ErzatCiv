@@ -64,8 +64,13 @@ namespace ErsatzCivLib.Model
         /// Creates a new instance from the current one.
         /// </summary>
         /// <returns>The instance location; might be <c>Null</c> if non-pertinent.</returns>
-        internal BuildablePivot CreateInstance(MapSquarePivot location)
+        internal BuildablePivot CreateOrGetInstance(MapSquarePivot location)
         {
+            if (!Is<UnitPivot>())
+            {
+                return this;
+            }
+
             var method = GetType().GetMethod(
                 "CreateAtLocation",
                 BindingFlags.Static | BindingFlags.NonPublic,
@@ -73,7 +78,7 @@ namespace ErsatzCivLib.Model
                 new[] { typeof(MapSquarePivot) },
                 null);
 
-            return (BuildablePivot)method?.Invoke(null, new[] { location });
+            return (UnitPivot)method?.Invoke(null, new[] { location });
         }
 
         /// <summary>
@@ -82,12 +87,18 @@ namespace ErsatzCivLib.Model
         /// <returns>A collection of <see cref="BuildablePivot"/>, one for each concrete type.</returns>
         internal static IReadOnlyCollection<BuildablePivot> GetEveryDefaultInstances()
         {
-            return Assembly
+            var unitList = Assembly
                 .GetExecutingAssembly()
                 .GetTypes()
-                .Where(t => t.IsSubclassOf(typeof(BuildablePivot)) && !t.IsAbstract)
+                .Where(t => t.IsSubclassOf(typeof(UnitPivot)) && !t.IsAbstract)
                 .Select(t => (BuildablePivot)t.GetField("Default", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null))
                 .ToList();
+
+            unitList.Add(CapitalizationPivot.Default);
+            unitList.AddRange(CityImprovementPivot.Instances);
+            unitList.AddRange(WonderPivot.Instances);
+
+            return unitList;
         }
     }
 }

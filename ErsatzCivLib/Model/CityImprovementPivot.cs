@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace ErsatzCivLib.Model
 {
@@ -7,7 +8,7 @@ namespace ErsatzCivLib.Model
     /// </summary>
     /// <seealso cref="BuildablePivot"/>
     [Serializable]
-    public abstract class CityImprovementPivot : BuildablePivot, IEquatable<CityImprovementPivot>
+    public class CityImprovementPivot : BuildablePivot, IEquatable<CityImprovementPivot>
     {
         /// <summary>
         /// The maintenance cost, in gold by turn.
@@ -22,18 +23,8 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public int SellValue { get; private set; }
 
-        /// <summary>
-        /// Constructor.
-        /// </summary>
-        /// <param name="productivityCost">The <see cref="BuildablePivot.ProductivityCost"/> value.</param>
-        /// <param name="maintenanceCost">The <see cref="MaintenanceCost"/> value.</param>
-        /// <param name="purchasePrice">The <see cref="PurchasePrice"/> value.</param>
-        /// <param name="sellValue">The <see cref="SellValue"/> value.</param>
-        /// <param name="name">Optionnal; the <see cref="BuildablePivot.Name"/> value.</param>
-        /// <param name="hasCitizenMoodEffect">Optionnal; the <see cref="BuildablePivot.HasCitizenMoodEffect"/> value.</param>
-        protected CityImprovementPivot(int productivityCost, int maintenanceCost,
-            int purchasePrice, int sellValue,
-            string name = null, bool hasCitizenMoodEffect = false) :
+        private CityImprovementPivot(int productivityCost, int maintenanceCost, int purchasePrice,
+            int sellValue, string name, bool hasCitizenMoodEffect) :
             base (productivityCost, name, hasCitizenMoodEffect)
         {
             MaintenanceCost = maintenanceCost;
@@ -85,5 +76,33 @@ namespace ErsatzCivLib.Model
         {
             return Name.GetHashCode();
         }
+
+        #region Static instances
+
+        public static readonly CityImprovementPivot Aqueduc = new CityImprovementPivot(120, 2, 480, 120, "Aqueduc", false);
+        public static readonly CityImprovementPivot Barracks = new CityImprovementPivot(40, 2, 160, 40, "Barracks", false);
+        public static readonly CityImprovementPivot CityWalls = new CityImprovementPivot(120, 2, 480, 120, "CityWalls", false);
+        public static readonly CityImprovementPivot Colosseum = new CityImprovementPivot(100, 4, 400, 100, "Colosseum", true);
+        public static readonly CityImprovementPivot Courthouse = new CityImprovementPivot(80, 1, 320, 80, "Courthouse", false);
+        public static readonly CityImprovementPivot Granary = new CityImprovementPivot(60, 1, 240, 60, "Granary", false);
+        public static readonly CityImprovementPivot Library = new CityImprovementPivot(80, 1, 320, 80, "Library", false);
+        public static readonly CityImprovementPivot Marketplace = new CityImprovementPivot(80, 1, 320, 80, "Marketplace", false);
+        public static readonly CityImprovementPivot Temple = new CityImprovementPivot(40, 1, 160, 40, "Temple", true);
+        // TODO : add new instances to "Instances".
+
+        public static readonly IReadOnlyCollection<CityImprovementPivot> Instances = new List<CityImprovementPivot>
+        {
+            Aqueduc,
+            Barracks,
+            CityWalls,
+            Colosseum,
+            Courthouse,
+            Granary,
+            Library,
+            Marketplace,
+            Temple
+        };
+
+        #endregion
     }
 }

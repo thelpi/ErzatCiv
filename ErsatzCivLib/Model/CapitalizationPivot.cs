@@ -20,16 +20,6 @@ namespace ErsatzCivLib.Model
         /// <summary>
         /// Default instance.
         /// </summary>
-        internal static readonly CapitalizationPivot Default = new CapitalizationPivot();
-
-        /// <summary>
-        /// Static constructior.
-        /// </summary>
-        /// <param name="location">Builder location.</param>
-        /// <returns>An instance of <see cref="CapitalizationPivot"/>.</returns>
-        internal static CapitalizationPivot CreateAtLocation(MapSquarePivot location)
-        {
-            return new CapitalizationPivot();
-        }
+        public static readonly CapitalizationPivot Default = new CapitalizationPivot();
     }
 }

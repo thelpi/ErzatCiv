@@ -43,9 +43,9 @@ namespace ErsatzCivLibTests
         private List<Type> GetBuildableConcreteTypes()
         {
             return Assembly
-                .GetAssembly(typeof(BuildablePivot))
+                .GetAssembly(typeof(UnitPivot))
                 .GetTypes()
-                .Where(t => t.IsSubclassOf(typeof(BuildablePivot)) && !t.IsAbstract)
+                .Where(t => t.IsSubclassOf(typeof(UnitPivot)) && !t.IsAbstract)
                 .ToList();
         }
     }
