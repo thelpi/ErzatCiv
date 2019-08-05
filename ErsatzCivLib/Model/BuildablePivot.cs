@@ -81,24 +81,31 @@ namespace ErsatzCivLib.Model
             return (UnitPivot)method?.Invoke(null, new[] { location });
         }
 
+        private static List<BuildablePivot> _defaultUnitInstances = null;
+
         /// <summary>
         /// Gets every <c>Default</c> instances for each concrete type which inherits from <see cref="BuildablePivot"/>.
         /// </summary>
-        /// <returns>A collection of <see cref="BuildablePivot"/>, one for each concrete type.</returns>
-        internal static IReadOnlyCollection<BuildablePivot> GetEveryDefaultInstances()
+        internal static IReadOnlyCollection<BuildablePivot> GetEveryDefaultInstances
         {
-            var unitList = Assembly
-                .GetExecutingAssembly()
-                .GetTypes()
-                .Where(t => t.IsSubclassOf(typeof(UnitPivot)) && !t.IsAbstract)
-                .Select(t => (BuildablePivot)t.GetField("Default", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null))
-                .ToList();
+            get
+            {
+                if (_defaultUnitInstances == null)
+                {
+                    _defaultUnitInstances = Assembly
+                        .GetExecutingAssembly()
+                        .GetTypes()
+                        .Where(t => t.IsSubclassOf(typeof(UnitPivot)) && !t.IsAbstract)
+                        .Select(t => (BuildablePivot)t.GetField("Default", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null))
+                        .ToList();
 
-            unitList.Add(CapitalizationPivot.Default);
-            unitList.AddRange(CityImprovementPivot.Instances);
-            unitList.AddRange(WonderPivot.Instances);
+                    _defaultUnitInstances.Add(CapitalizationPivot.Default);
+                    _defaultUnitInstances.AddRange(CityImprovementPivot.Instances);
+                    _defaultUnitInstances.AddRange(WonderPivot.Instances);
+                }
 
-            return unitList;
+                return _defaultUnitInstances;
+            }
         }
     }
 }

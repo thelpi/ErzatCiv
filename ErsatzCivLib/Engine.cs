@@ -520,7 +520,7 @@ namespace ErsatzCivLib
                 return null;
             }
 
-            var buildableDefaultInstances = BuildablePivot.GetEveryDefaultInstances().ToList();
+            var buildableDefaultInstances = BuildablePivot.GetEveryDefaultInstances.ToList();
             if (buildableDefaultInstances == null)
             {
                 return null;

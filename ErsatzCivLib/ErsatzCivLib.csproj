@@ -44,6 +44,7 @@
     <Compile Include="Model\CityImprovementPivot.cs" />
     <Compile Include="Model\BuildablePivot.cs" />
     <Compile Include="Model\Persistent\AdvancePivot.cs" />
+    <Compile Include="Model\Persistent\CivilizationPivot.cs" />
     <Compile Include="Model\Persistent\EraPivot.cs" />
     <Compile Include="Model\Persistent\BiomeSizePivot.cs" />
     <Compile Include="Model\CityPivot.cs" />
