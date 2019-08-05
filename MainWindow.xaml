@@ -3,92 +3,95 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:ErsatzCiv"
         Loaded="Window_Loaded"
         KeyDown="Window_KeyDown" Closing="Window_Closing"
         mc:Ignorable="d" WindowState="Maximized"
         Title="ErsatzCiv">
     <DockPanel Margin="5">
-        <DockPanel Name="MenuDock" DockPanel.Dock="Bottom">
-            <Canvas Margin="2" Name="MiniMapCanvas" DockPanel.Dock="Right" MouseDown="MiniMapCanvas_MouseDown" />
-            <GroupBox Header="Keyboard controls" DockPanel.Dock="Left">
-                <ScrollViewer CanContentScroll="True">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="75" />
-                            <ColumnDefinition Width="225" />
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                            <RowDefinition />
-                        </Grid.RowDefinitions>
-                        <Label Grid.Column="0" Grid.Row="00" Content="B" FontWeight="Bold" />
-                        <Label Grid.Column="1" Grid.Row="00" Content="Build a city (settler)" />
-                        <Label Grid.Column="0" Grid.Row="01" Content="Space" FontWeight="Bold" />
-                        <Label Grid.Column="1" Grid.Row="01" Content="Current unit wait next turn" />
-                        <Label Grid.Column="0" Grid.Row="02" Content="C" FontWeight="Bold" />
-                        <Label Grid.Column="1" Grid.Row="02" Content="Center to current unit" />
-                        <Label Grid.Column="0" Grid.Row="03" Content="W" FontWeight="Bold" />
-                        <Label Grid.Column="1" Grid.Row="03" Content="Change focus to next unit" />
-                        <Label Grid.Column="0" Grid.Row="04" Content="1-9 (n. pad)" FontWeight="Bold" />
-                        <Label Grid.Column="1" Grid.Row="04" Content="Move unit in 8 directions" />
-                        <Label Grid.Column="0" Grid.Row="05" Content="Shift + M" FontWeight="Bold" />
-                        <Label Grid.Column="1" Grid.Row="05" Content="Build a mine (worker)" />
-                        <Label Grid.Column="0" Grid.Row="06" Content="Shift + I" FontWeight="Bold" />
-                        <Label Grid.Column="1" Grid.Row="06" Content="Build irrigation (worker)" />
-                        <Label Grid.Column="0" Grid.Row="07" Content="Shift + R" FontWeight="Bold" />
-                        <Label Grid.Column="1" Grid.Row="07" Content="Build rail/road (worker)" />
-                        <Label Grid.Column="0" Grid.Row="08" Content="Shift + C" FontWeight="Bold" />
-                        <Label Grid.Column="1" Grid.Row="08" Content="Clear swamp/jungle/forest (worker)" />
-                        <Label Grid.Column="0" Grid.Row="09" Content="Shift + D" FontWeight="Bold" />
-                        <Label Grid.Column="1" Grid.Row="09" Content="Destroy improvements (worker)" />
-                        <Label Grid.Column="0" Grid.Row="10" Content="Shift + F" FontWeight="Bold" />
-                        <Label Grid.Column="1" Grid.Row="10" Content="Build fortress (worker)" />
-                        <Label Grid.Column="0" Grid.Row="11" Content="Shift + P" FontWeight="Bold" />
-                        <Label Grid.Column="1" Grid.Row="11" Content="Plant forest (worker)" />
-                        <Label Grid.Column="0" Grid.Row="12" Content="Shift + A" FontWeight="Bold" />
-                        <Label Grid.Column="1" Grid.Row="12" Content="Clear pollution (worker)" />
-                        <Label Grid.Column="0" Grid.Row="13" Content="Shift + X" FontWeight="Bold" />
-                        <Label Grid.Column="1" Grid.Row="13" Content="Destroy rail/road (worker)" />
-                    </Grid>
+        <Expander IsExpanded="True" Name="ExpanderMenu" DockPanel.Dock="Bottom">
+            <DockPanel>
+                <Canvas Margin="2" Name="MiniMapCanvas" DockPanel.Dock="Right" MouseDown="MiniMapCanvas_MouseDown" />
+                <GroupBox Header="Keyboard controls" DockPanel.Dock="Left">
+                    <ScrollViewer CanContentScroll="True">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="75" />
+                                <ColumnDefinition Width="225" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                            <Label Grid.Column="0" Grid.Row="00" Content="B" FontWeight="Bold" />
+                            <Label Grid.Column="1" Grid.Row="00" Content="Build a city (settler)" />
+                            <Label Grid.Column="0" Grid.Row="01" Content="Space" FontWeight="Bold" />
+                            <Label Grid.Column="1" Grid.Row="01" Content="Current unit wait next turn" />
+                            <Label Grid.Column="0" Grid.Row="02" Content="C" FontWeight="Bold" />
+                            <Label Grid.Column="1" Grid.Row="02" Content="Center to current unit" />
+                            <Label Grid.Column="0" Grid.Row="03" Content="W" FontWeight="Bold" />
+                            <Label Grid.Column="1" Grid.Row="03" Content="Change focus to next unit" />
+                            <Label Grid.Column="0" Grid.Row="04" Content="1-9 (n. pad)" FontWeight="Bold" />
+                            <Label Grid.Column="1" Grid.Row="04" Content="Move unit in 8 directions" />
+                            <Label Grid.Column="0" Grid.Row="05" Content="Shift + M" FontWeight="Bold" />
+                            <Label Grid.Column="1" Grid.Row="05" Content="Build a mine (worker)" />
+                            <Label Grid.Column="0" Grid.Row="06" Content="Shift + I" FontWeight="Bold" />
+                            <Label Grid.Column="1" Grid.Row="06" Content="Build irrigation (worker)" />
+                            <Label Grid.Column="0" Grid.Row="07" Content="Shift + R" FontWeight="Bold" />
+                            <Label Grid.Column="1" Grid.Row="07" Content="Build rail/road (worker)" />
+                            <Label Grid.Column="0" Grid.Row="08" Content="Shift + C" FontWeight="Bold" />
+                            <Label Grid.Column="1" Grid.Row="08" Content="Clear swamp/jungle/forest (worker)" />
+                            <Label Grid.Column="0" Grid.Row="09" Content="Shift + D" FontWeight="Bold" />
+                            <Label Grid.Column="1" Grid.Row="09" Content="Destroy improvements (worker)" />
+                            <Label Grid.Column="0" Grid.Row="10" Content="Shift + F" FontWeight="Bold" />
+                            <Label Grid.Column="1" Grid.Row="10" Content="Build fortress (worker)" />
+                            <Label Grid.Column="0" Grid.Row="11" Content="Shift + P" FontWeight="Bold" />
+                            <Label Grid.Column="1" Grid.Row="11" Content="Plant forest (worker)" />
+                            <Label Grid.Column="0" Grid.Row="12" Content="Shift + A" FontWeight="Bold" />
+                            <Label Grid.Column="1" Grid.Row="12" Content="Clear pollution (worker)" />
+                            <Label Grid.Column="0" Grid.Row="13" Content="Shift + X" FontWeight="Bold" />
+                            <Label Grid.Column="1" Grid.Row="13" Content="Destroy rail/road (worker)" />
+                        </Grid>
+                    </ScrollViewer>
+                </GroupBox>
+                <ScrollViewer CanContentScroll="True" DockPanel.Dock="Left">
+                    <StackPanel Orientation="Vertical">
+                        <Button Margin="0, 5, 0, 0" Name="BtnNextTurn" ToolTip="Next turn" Content="NEXT" HorizontalAlignment="Stretch" Height="25" Click="BtnNextTurn_Click" />
+                        <GroupBox Padding="5" Margin="0, 5, 0, 0" Header="Informations">
+                            <StackPanel Orientation="Vertical">
+                                <Label Height="25" Name="LabelYearInfo" />
+                                <Label Margin="0, 2, 0, 0" Height="25" Name="LabelTreasureInfo" />
+                                <StackPanel Margin="0, 2, 0, 0" Height="25" Orientation="Horizontal">
+                                    <Button Height="25" Width="25" ToolTip="Change regime" Name="ButtonChangeRegime" Click="ButtonChangeRegime_Click" />
+                                    <Label Margin="5, 0, 0, 0" Height="25"  Name="LabelCurrentRegime" />
+                                </StackPanel>
+                                <StackPanel Margin="0, 2, 0, 0" Height="25" Orientation="Horizontal">
+                                    <Button Height="25" Width="25" ToolTip="Change scientific advance" Name="ButtonChangeAdvance" Click="ButtonChangeAdvance_Click" />
+                                    <Label Margin="5, 0, 0, 0" Height="25"  Name="LabelCurrentAdvance" />
+                                </StackPanel>
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox Padding="5" Margin="0, 5, 0, 0" Header="Configuration">
+                            <StackPanel Orientation="Vertical">
+                                <CheckBox Name="CheckBoxWaitTurn" Click="CheckBoxWaitTurn_Click" Content="Wait at the end of turn." />
+                                <CheckBox Margin="0, 5, 0, 0" Name="CheckBoxOpenCityWindowAtProductionEnd" Click="CheckBoxOpenCityWindowAtProductionEnd_Click" Content="Open city window when current production is done." />
+                            </StackPanel>
+                        </GroupBox>
+                    </StackPanel>
                 </ScrollViewer>
-            </GroupBox>
-            <StackPanel Orientation="Vertical" DockPanel.Dock="Left">
-                <Button Margin="0, 5, 0, 0" Name="BtnNextTurn" ToolTip="Next turn" Content="NEXT" HorizontalAlignment="Stretch" Height="25" Click="BtnNextTurn_Click" />
-                <GroupBox Padding="5" Margin="0, 5, 0, 0" Header="Informations">
-                    <StackPanel Orientation="Vertical">
-                        <Label Height="25" Name="LabelYearInfo" />
-                        <Label Height="25" Name="LabelTreasureInfo" />
-                        <StackPanel Orientation="Horizontal">
-                            <Button Height="25" Width="25" ToolTip="Change regime" Name="ButtonChangeRegime" Click="ButtonChangeRegime_Click" />
-                            <Label Margin="5, 0, 0, 0" Height="25"  Name="LabelCurrentRegime" />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <Button Height="25" Width="25" ToolTip="Change scientific advance" Name="ButtonChangeAdvance" Click="ButtonChangeAdvance_Click" />
-                            <Label Margin="5, 0, 0, 0" Height="25"  Name="LabelCurrentAdvance" />
-                        </StackPanel>
-                    </StackPanel>
-                </GroupBox>
-                <GroupBox Padding="5" Margin="0, 5, 0, 0" Header="Configuration">
-                    <StackPanel Orientation="Vertical">
-                        <CheckBox Name="CheckBoxWaitTurn" Click="CheckBoxWaitTurn_Click" Content="Wait at the end of turn." />
-                        <CheckBox Margin="0, 5, 0, 0" Name="CheckBoxOpenCityWindowAtProductionEnd" Click="CheckBoxOpenCityWindowAtProductionEnd_Click" Content="Open city window when current production is done." />
-                    </StackPanel>
-                </GroupBox>
-            </StackPanel>
-        </DockPanel>
+            </DockPanel>
+        </Expander>
         <ScrollViewer ScrollChanged="MapScroller_ScrollChanged" DockPanel.Dock="Top" CanContentScroll="True"
                   Name="MapScroller"
                       HorizontalScrollBarVisibility="Visible"

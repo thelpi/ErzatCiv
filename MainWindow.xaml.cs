@@ -28,7 +28,7 @@ namespace ErsatzCiv
         public MainWindow(Engine engine)
         {
             InitializeComponent();
-            MenuDock.Height = MENU_HEIGHT + MiniMapCanvas.Margin.Top + MiniMapCanvas.Margin.Bottom;
+            ExpanderMenu.ExpandDirection = ExpandDirection.Up;
 
             _engine = engine;
             CheckBoxWaitTurn.IsChecked = Settings.Default.waitEndTurn;
