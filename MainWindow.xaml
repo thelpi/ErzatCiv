@@ -66,9 +66,27 @@
                 </ScrollViewer>
             </GroupBox>
             <StackPanel Orientation="Vertical" DockPanel.Dock="Left">
-                <CheckBox Margin="0, 5, 0, 0" Name="CheckBoxWaitTurn" Click="CheckBoxWaitTurn_Click" Content="Wait at the end of turn." HorizontalAlignment="Center" />
-                <Button Margin="0, 5, 0, 0" Name="BtnNextTurn" Content="Next turn" Width="75" Height="25" Click="BtnNextTurn_Click" />
-                <CheckBox Margin="0, 5, 0, 0" Name="CheckBoxOpenCityWindowAtProductionEnd" Click="CheckBoxOpenCityWindowAtProductionEnd_Click" Content="Open city window when current production is done." HorizontalAlignment="Center" />
+                <Button Margin="0, 5, 0, 0" Name="BtnNextTurn" ToolTip="Next turn" Content="NEXT" HorizontalAlignment="Stretch" Height="25" Click="BtnNextTurn_Click" />
+                <GroupBox Padding="5" Margin="0, 5, 0, 0" Header="Informations">
+                    <StackPanel Orientation="Vertical">
+                        <Label Height="25" Name="LabelYearInfo" />
+                        <Label Height="25" Name="LabelTreasureInfo" />
+                        <StackPanel Orientation="Horizontal">
+                            <Button Height="25" Width="25" ToolTip="Change regime" Name="ButtonChangeRegime" Click="ButtonChangeRegime_Click" />
+                            <Label Margin="5, 0, 0, 0" Height="25"  Name="LabelCurrentRegime" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Button Height="25" Width="25" ToolTip="Change scientific advance" Name="ButtonChangeAdvance" Click="ButtonChangeAdvance_Click" />
+                            <Label Margin="5, 0, 0, 0" Height="25"  Name="LabelCurrentAdvance" />
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Padding="5" Margin="0, 5, 0, 0" Header="Configuration">
+                    <StackPanel Orientation="Vertical">
+                        <CheckBox Name="CheckBoxWaitTurn" Click="CheckBoxWaitTurn_Click" Content="Wait at the end of turn." />
+                        <CheckBox Margin="0, 5, 0, 0" Name="CheckBoxOpenCityWindowAtProductionEnd" Click="CheckBoxOpenCityWindowAtProductionEnd_Click" Content="Open city window when current production is done." />
+                    </StackPanel>
+                </GroupBox>
             </StackPanel>
         </DockPanel>
         <ScrollViewer ScrollChanged="MapScroller_ScrollChanged" DockPanel.Dock="Top" CanContentScroll="True"

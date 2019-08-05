@@ -6,6 +6,8 @@ namespace ErsatzCivLib.Model.Persistent
     [Serializable]
     public class AdvancePivot : IEquatable<AdvancePivot>
     {
+        public const int SCIENCE_COST = 100;
+
         private List<AdvancePivot> _prerequisite;
 
         public string Name { get; private set; }
@@ -451,12 +453,13 @@ namespace ErsatzCivLib.Model.Persistent
             _prerequisite = new List<AdvancePivot> { Medicine, Corporation }
         };
 
-        public static readonly AdvancePivot FutureTech = new AdvancePivot
+        // TODO : manage future techs.
+        /*public static readonly AdvancePivot FutureTech = new AdvancePivot
         {
             Era = EraPivot.ModernAge,
             Name = "Future Tech",
             _prerequisite = new List<AdvancePivot> { FusionPower }
-        };
+        };*/
 
         #endregion
     }

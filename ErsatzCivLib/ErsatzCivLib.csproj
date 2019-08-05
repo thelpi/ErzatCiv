@@ -51,6 +51,7 @@
     <Compile Include="Model\Persistent\DirectionPivot.cs" />
     <Compile Include="Engine.cs" />
     <Compile Include="Model\MapPivot.cs" />
+    <Compile Include="Model\Persistent\RegimePivot.cs" />
     <Compile Include="Model\Persistent\WorkerActionPivot.cs" />
     <Compile Include="Model\MapSquarePivot.cs" />
     <Compile Include="Model\Persistent\BiomePivot.cs" />

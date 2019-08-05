@@ -276,6 +276,32 @@ namespace ErsatzCiv
             }
         }
 
+        private void ButtonChangeRegime_Click(object sender, RoutedEventArgs e)
+        {
+            if (_freezeActions)
+            {
+                return;
+            }
+            _freezeActions = true;
+
+            MessageBox.Show("Not implemented yet !");
+
+            _freezeActions = false;
+        }
+
+        private void ButtonChangeAdvance_Click(object sender, RoutedEventArgs e)
+        {
+            if (_freezeActions)
+            {
+                return;
+            }
+            _freezeActions = true;
+
+            new WindowAdvancePick(_engine).ShowDialog();
+
+            _freezeActions = false;
+        }
+
         #endregion
 
         #region Draw methods
@@ -397,6 +423,11 @@ namespace ErsatzCiv
 
         private void RefreshDynamicView()
         {
+            LabelYearInfo.Content = $"Current year : {_engine.CurrentYear} (turn {_engine.CurrentTurn})";
+            LabelCurrentRegime.Content = $"Current regime : {_engine.CurrentRegime.Name}";
+            LabelTreasureInfo.Content = $"Treasure : {_engine.Treasure} gold ({_engine.TreasureByTurn} by turn)";
+            LabelCurrentAdvance.Content = $"Advance in proress : {_engine.CurrentAdvance?.Name ?? "{none}"} (in {_engine.RemainingScience} turn(s))";
+
             foreach (var unit in _engine.Units)
             {
                 MapGrid.DrawUnit(unit, DEFAULT_SIZE, UNIT_ZINDEX, false, true);
@@ -475,6 +506,10 @@ namespace ErsatzCiv
                         new CityWindow(_engine, city).ShowDialog();
                     }
                 }
+            }
+            if (_engine.CurrentAdvance == null)
+            {
+                new WindowAdvancePick(_engine).ShowDialog();
             }
             RefreshDynamicView();
         }

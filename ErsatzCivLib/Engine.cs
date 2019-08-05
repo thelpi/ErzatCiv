@@ -12,19 +12,21 @@ namespace ErsatzCivLib
     [Serializable]
     public class Engine
     {
-        private List<UnitPivot> _units = new List<UnitPivot>();
-        private List<CityPivot> _cities = new List<CityPivot>();
-
-        [field: NonSerialized]
-        public event EventHandler<NextUnitEventArgs> NextUnitEvent;
+        private const int TREASURE_START = 100;
 
         private int _currentUnitIndex;
         private int _previousUnitIndex;
+        private List<UnitPivot> _units = new List<UnitPivot>();
+        private List<CityPivot> _cities = new List<CityPivot>();
+        private List<AdvancePivot> _advances = new List<AdvancePivot>();
 
         public int CurrentTurn { get; private set; }
+        // TODO : wrong version.
+        public int CurrentYear { get { return (CurrentTurn * 10) - 4000; } }
         public MapPivot Map { get; private set; }
         public IReadOnlyCollection<UnitPivot> Units { get { return _units; } }
         public IReadOnlyCollection<CityPivot> Cities { get { return _cities; } }
+        public IReadOnlyCollection<AdvancePivot> Advances { get { return _advances; } }
         public UnitPivot CurrentUnit
         {
             get
@@ -61,6 +63,37 @@ namespace ErsatzCivLib
                 return _units[_previousUnitIndex];
             }
         }
+        public int ScienceByTurn
+        {
+            get
+            {
+                return _cities.Sum(c => c.Science);
+            }
+        }
+        public int ScienceStack { get; private set; }
+        public int RemainingScience
+        {
+            get
+            {
+                return CurrentAdvance == null ? 0 : (
+                    (int)Math.Ceiling((AdvancePivot.SCIENCE_COST - ScienceStack) / (double)ScienceByTurn)
+                );
+            }
+        }
+        public AdvancePivot CurrentAdvance { get; private set; }
+        public RegimePivot CurrentRegime { get; private set; }
+        public int Treasure { get; private set; }
+        public int TreasureByTurn
+        {
+            get
+            {
+                // TODO
+                return _cities.Sum(c => c.Commerce + c.Tax);
+            }
+        }
+
+        [field: NonSerialized]
+        public event EventHandler<NextUnitEventArgs> NextUnitEvent;
 
         public Engine(MapPivot.SizePivot mapSize,
             MapPivot.LandShapePivot mapShape,
@@ -69,6 +102,9 @@ namespace ErsatzCivLib
             MapPivot.AgePivot age,
             MapPivot.HumidityPivot humidity)
         {
+            CurrentRegime = RegimePivot.Despotism;
+            Treasure = TREASURE_START;
+
             Map = new MapPivot(mapSize, mapShape, landCoverage, temperature, age, humidity);
 
             MapSquarePivot ms = null;
@@ -221,6 +257,24 @@ namespace ErsatzCivLib
             {
                 u.Release();
             }
+
+            if (CurrentAdvance != null)
+            {
+                ScienceStack += ScienceByTurn;
+                if (ScienceStack >= AdvancePivot.SCIENCE_COST)
+                {
+                    _advances.Add(CurrentAdvance);
+                    ScienceStack = 0;
+                    CurrentAdvance = null;
+                }
+            }
+            Treasure += TreasureByTurn;
+            if (Treasure < 0)
+            {
+                // TODO
+                throw new NotImplementedException();
+            }
+
             CurrentTurn++;
             SetUnitIndex(false, true);
 
@@ -560,6 +614,23 @@ namespace ErsatzCivLib
         public bool CityOnRightBorder(CityPivot city)
         {
             return city?.MapSquareLocation.Row == Map.Width - 1;
+        }
+
+        public bool ChangeCurrentAdvance(AdvancePivot advance)
+        {
+            if (advance == null
+                || _advances.Contains(advance)
+                || (advance.Prerequisite.Any() && !advance.Prerequisite.All(_advances.Contains)))
+            {
+                return false;
+            }
+
+            if (CurrentAdvance != null)
+            {
+                ScienceStack /= 2;
+            }
+            CurrentAdvance = advance;
+            return true;
         }
 
         public class NextUnitEventArgs : EventArgs
