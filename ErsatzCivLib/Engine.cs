@@ -91,6 +91,7 @@ namespace ErsatzCivLib
                 return _cities.Sum(c => c.Commerce + c.Tax);
             }
         }
+        public EraPivot CurrentEra { get { return (EraPivot)(_advances.Count == 0 ? 0 : _advances.Max(a => (int)a.Era)); } }
 
         [field: NonSerialized]
         public event EventHandler<NextUnitEventArgs> NextUnitEvent;
@@ -616,21 +617,62 @@ namespace ErsatzCivLib
             return city?.MapSquareLocation.Row == Map.Width - 1;
         }
 
+        /// <summary>
+        /// Tries to modify the <see cref="AdvancePivot"/> currently in progress.
+        /// </summary>
+        /// <remarks>
+        /// If an <see cref="AdvancePivot"/> was already in progress,
+        /// calling this method divide <see cref="ScienceStack"/> in half.
+        /// </remarks>
+        /// <param name="advance">The <see cref="AdvancePivot"/>.</param>
+        /// <returns><c>True</c> if the current advance has been changed; <c>False</c> otherwise.</returns>
         public bool ChangeCurrentAdvance(AdvancePivot advance)
         {
+            // Conditions to search :
+            // - not already known
+            // - prerequisites are known
+            // - same era as the current one, or next one if the current era is done
             if (advance == null
                 || _advances.Contains(advance)
-                || (advance.Prerequisite.Any() && !advance.Prerequisite.All(_advances.Contains)))
+                || (advance.Prerequisites.Any() && !advance.Prerequisites.All(_advances.Contains))
+                || ((int)advance.Era > (int)CurrentEra && GetAvailableAdvances().Any()))
             {
                 return false;
             }
 
-            if (CurrentAdvance != null)
+            if (CurrentAdvance != null && CurrentAdvance != advance)
             {
                 ScienceStack /= 2;
             }
             CurrentAdvance = advance;
             return true;
+        }
+
+        /// <summary>
+        /// Gets every <see cref="AdvancePivot"/> available to search in the current context.
+        /// </summary>
+        /// <returns>Collection of <see cref="AdvancePivot"/>.</returns>
+        public IReadOnlyCollection<AdvancePivot> GetAvailableAdvances()
+        {
+            var currentEraList = AdvancePivot.AdvancesByEra[CurrentEra]
+                .Where(a => !_advances.Contains(a) && a.Prerequisites.All(_advances.Contains))
+                .ToList();
+
+            if (!currentEraList.Any())
+            {
+                if (CurrentEra != EraPivot.ModernAge)
+                {
+                    // TODO : "futures advances"
+                }
+                else
+                {
+                    currentEraList = AdvancePivot.AdvancesByEra[(EraPivot)(((int)CurrentEra) + 1)]
+                        .Where(a => !_advances.Contains(a) && a.Prerequisites.All(_advances.Contains))
+                        .ToList();
+                }
+            }
+
+            return currentEraList;
         }
 
         public class NextUnitEventArgs : EventArgs
