@@ -14,6 +14,8 @@ namespace ErsatzCivLib
     {
         private const int TREASURE_START = 100;
 
+        private readonly PlayerPivot _humanPlayer;
+        private readonly List<PlayerPivot> _iaPlayers = new List<PlayerPivot>();
         private int _currentUnitIndex;
         private int _previousUnitIndex;
         private List<UnitPivot> _units = new List<UnitPivot>();
@@ -101,8 +103,32 @@ namespace ErsatzCivLib
             MapPivot.LandCoveragePivot landCoverage,
             MapPivot.TemperaturePivot temperature,
             MapPivot.AgePivot age,
-            MapPivot.HumidityPivot humidity)
+            MapPivot.HumidityPivot humidity,
+            CivilizationPivot playerCivilization,
+            int iaPlayersCount)
         {
+            if (playerCivilization == null)
+            {
+                throw new ArgumentNullException(nameof(playerCivilization));
+            }
+            iaPlayersCount = iaPlayersCount < 0 ? 0 : iaPlayersCount;
+            if (iaPlayersCount > CivilizationPivot.Instances.Count / (6 - (int)mapSize))
+            {
+                throw new ArgumentException("The IA players count is too high for this map size !", nameof(iaPlayersCount));
+            }
+
+            _humanPlayer = new PlayerPivot(playerCivilization, false);
+            for (int i = 0; i < iaPlayersCount; i++)
+            {
+                CivilizationPivot iaCiv = null;
+                do
+                {
+                    iaCiv = CivilizationPivot.Instances.ElementAt(Tools.Randomizer.Next(0, CivilizationPivot.Instances.Count));
+                }
+                while (_humanPlayer.Civilization == iaCiv || _iaPlayers.Any(ia => ia.Civilization == iaCiv));
+                _iaPlayers.Add(new PlayerPivot(iaCiv, true));
+            }
+
             CurrentRegime = RegimePivot.Despotism;
             Treasure = TREASURE_START;
 
