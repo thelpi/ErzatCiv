@@ -232,7 +232,7 @@ namespace ErsatzCivLib.Model
                     var currentRiver = new List<Tuple<int, int>> { riverPoint };
 
                     // A river can go randomly in 3 directions, but can't go back and forth.
-                    var forbiddenCardinal = (CardinalPivot)Tools.Randomizer.Next(0, 4);
+                    var forbiddenCardinal = (DirectionPivot)Tools.Randomizer.Next(0, 4);
 
                     // The process stops when the sea (or another river) is reached.
                     var reachOtherRiver = false;
@@ -244,25 +244,25 @@ namespace ErsatzCivLib.Model
                         do
                         {
                             // Randomize a cardinal (until not forbidden).
-                            CardinalPivot nextCardinal;
+                            DirectionPivot nextCardinal;
                             do
                             {
-                                nextCardinal = (CardinalPivot)Tools.Randomizer.Next(0, 4);
+                                nextCardinal = (DirectionPivot)Tools.Randomizer.Next(0, 4);
                             }
                             while (nextCardinal == forbiddenCardinal);
 
                             switch (nextCardinal)
                             {
-                                case CardinalPivot.Bottom:
+                                case DirectionPivot.Bottom:
                                     tmpRiverPoint = new Tuple<int, int>(riverPoint.Item1 + 1, riverPoint.Item2);
                                     break;
-                                case CardinalPivot.Top:
+                                case DirectionPivot.Top:
                                     tmpRiverPoint = new Tuple<int, int>(riverPoint.Item1 - 1, riverPoint.Item2);
                                     break;
-                                case CardinalPivot.Right:
+                                case DirectionPivot.Right:
                                     tmpRiverPoint = new Tuple<int, int>(riverPoint.Item1, riverPoint.Item2 + 1);
                                     break;
-                                case CardinalPivot.Left:
+                                case DirectionPivot.Left:
                                     tmpRiverPoint = new Tuple<int, int>(riverPoint.Item1, riverPoint.Item2 - 1);
                                     break;
                             }
@@ -487,24 +487,24 @@ namespace ErsatzCivLib.Model
 
             if (deltaRow > 0)
             {
-                topRightSquare?.SetRiver(CardinalPivot.Left, true);
-                topLeftSquare?.SetRiver(CardinalPivot.Right, true);
+                topRightSquare?.SetRiver(DirectionPivot.Left, true);
+                topLeftSquare?.SetRiver(DirectionPivot.Right, true);
             }
             else if (deltaRow < 0)
             {
-                bottomRightSquare?.SetRiver(CardinalPivot.Left, true);
-                bottomLeftSquare?.SetRiver(CardinalPivot.Right, true);
+                bottomRightSquare?.SetRiver(DirectionPivot.Left, true);
+                bottomLeftSquare?.SetRiver(DirectionPivot.Right, true);
             }
 
             if (deltaCol < 0)
             {
-                topRightSquare?.SetRiver(CardinalPivot.Bottom, true);
-                bottomRightSquare?.SetRiver(CardinalPivot.Top, true);
+                topRightSquare?.SetRiver(DirectionPivot.Bottom, true);
+                bottomRightSquare?.SetRiver(DirectionPivot.Top, true);
             }
             else if (deltaCol > 0)
             {
-                topLeftSquare?.SetRiver(CardinalPivot.Bottom, true);
-                bottomLeftSquare?.SetRiver(CardinalPivot.Top, true);
+                topLeftSquare?.SetRiver(DirectionPivot.Bottom, true);
+                bottomLeftSquare?.SetRiver(DirectionPivot.Top, true);
             }
         }
 

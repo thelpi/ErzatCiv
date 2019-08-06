@@ -49,7 +49,6 @@
     <Compile Include="Model\MapEnums\SizePivot.cs" />
     <Compile Include="Model\MapEnums\TemperaturePivot.cs" />
     <Compile Include="Model\Persistent\CapitalizationPivot.cs" />
-    <Compile Include="Model\Persistent\CardinalPivot.cs" />
     <Compile Include="Model\Persistent\CitizenPivot.cs" />
     <Compile Include="Model\Persistent\CitizenTypePivot.cs" />
     <Compile Include="Model\Persistent\CityImprovementPivot.cs" />
