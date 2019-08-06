@@ -50,6 +50,10 @@ namespace ErsatzCivLib.Model
         /// Current gold amount in the treasure.
         /// </summary>
         public int Treasure { get; private set; }
+        /// <summary>
+        /// Current capital.
+        /// </summary>
+        public CityPivot Capital { get; private set; }
 
         #endregion
 
@@ -349,6 +353,12 @@ namespace ErsatzCivLib.Model
             var city = new CityPivot(currentTurn, name, sq, computeCityAvailableMapSquaresCallback, CapitalizationPivot.Default);
             sq.ApplyCityActions(city);
 
+            if (Capital is null)
+            {
+                city.SetAsNewCapital(Capital);
+                Capital = city;
+            }
+
             _cities.Add(city);
             _units.Remove(settler);
             SetUnitIndex(true, false);
@@ -440,6 +450,11 @@ namespace ErsatzCivLib.Model
                     else if (!produced.Is<CapitalizationPivot>())
                     {
                         citiesWithDoneProduction.Add(city, produced);
+                    }
+                    else if (CityImprovementPivot.Palace == produced)
+                    {
+                        city.SetAsNewCapital(Capital);
+                        Capital = city;
                     }
                 }
             }
@@ -593,11 +608,33 @@ namespace ErsatzCivLib.Model
             // Already built for the current city.
             buildableDefaultInstances.RemoveAll(b => city.Improvements.Contains(b));
 
+            #region Special rules
+
             // No aqueduc required if a river is close to the city.
             if (city.MapSquareLocation.HasRiver)
             {
                 buildableDefaultInstances.RemoveAll(b => CityImprovementPivot.Aqueduc == b);
             }
+
+            // Bank not available if marketplace not built.
+            if (!city.Improvements.Contains(CityImprovementPivot.Marketplace))
+            {
+                buildableDefaultInstances.Remove(CityImprovementPivot.Bank);
+            }
+
+            // Courthouse not required for capital.
+            if (city == Capital)
+            {
+                buildableDefaultInstances.Remove(CityImprovementPivot.Courthouse);
+            }
+
+            // University not available if library not built.
+            if (!city.Improvements.Contains(CityImprovementPivot.Library))
+            {
+                buildableDefaultInstances.Remove(CityImprovementPivot.University);
+            }
+
+            #endregion
 
             indexOfDefault = buildableDefaultInstances.FindIndex(b =>
                 b.GetType() == city.Production.GetType() && b.Name == city.Production.Name);

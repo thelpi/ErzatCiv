@@ -360,7 +360,8 @@ namespace ErsatzCivLib.Model
             var entertainers = _citizens.Where(c => c.Type == CitizenTypePivot.Entertainer).Count();
             var templeEffect = _improvements.Contains(CityImprovementPivot.Temple) ? 1 : 0;
             var colosseumEffect = _improvements.Contains(CityImprovementPivot.Colosseum) ? 3 : 0;
-            for (int i = 0; i < (entertainers + templeEffect + colosseumEffect); i++)
+            var cathedralEffet = _improvements.Contains(CityImprovementPivot.Cathedral) ? 4 : 0;
+            for (int i = 0; i < (entertainers + templeEffect + colosseumEffect + cathedralEffet); i++)
             {
                 if (unhappyFaces > 0)
                 {
@@ -418,6 +419,16 @@ namespace ErsatzCivLib.Model
             }
 
             CheckCitizensMood();
+        }
+
+        internal void SetAsNewCapital(CityPivot oldCapital)
+        {
+            if (oldCapital != null)
+            {
+                oldCapital._improvements.Remove(CityImprovementPivot.Palace);
+            }
+            _improvements.Remove(CityImprovementPivot.Courthouse);
+            _improvements.Add(CityImprovementPivot.Palace);
         }
 
         public CitizenPivot GetAnySpecialistCitizen()
