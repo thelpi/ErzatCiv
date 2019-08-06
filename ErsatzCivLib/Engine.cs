@@ -138,10 +138,10 @@ namespace ErsatzCivLib
                 ms.UpdateActionsProgress();
             }
 
-            var turnConsequences = HumanPlayer.NextTurn();
+            var turnConsequences = HumanPlayer.NextTurn(Map.GetAdjacentMapSquares);
             foreach (var iaPlayer in _iaPlayers)
             {
-                var turnConsequencesIa = iaPlayer.NextTurn();
+                var turnConsequencesIa = iaPlayer.NextTurn(Map.GetAdjacentMapSquares);
                 // TODO : what do with this ?
             }
 
@@ -162,7 +162,7 @@ namespace ErsatzCivLib
                 return false;
             }
 
-            return HumanPlayer.WorkerAction(actionPivot, IsCity);
+            return HumanPlayer.WorkerAction(actionPivot, IsCity, Map.GetAdjacentMapSquares);
         }
 
         public void SubscribeToMapSquareChangeEvent(EventHandler<SquareChangedEventArgs> handler)
@@ -340,7 +340,7 @@ namespace ErsatzCivLib
                 return null;
             }
 
-            var buildableDefaultInstances = HumanPlayer.GetBuildableItemsForCity(city, out indexOfDefault);
+            var buildableDefaultInstances = HumanPlayer.GetBuildableItemsForCity(city, out indexOfDefault, Map.GetAdjacentMapSquares);
 
             // TODO : remove wonders already built globally.
 

@@ -420,14 +420,15 @@ namespace ErsatzCivLib.Model
         /// <summary>
         /// Proceeds to do every actions required by a move to the next turn.
         /// </summary>
+        /// <param name="getAdjacentSquaresCallback">Callback method to get adjacent squares of a single <see cref="MapSquarePivot"/>.</param>
         /// <returns>A <see cref="TurnConsequencesPivot"/>.</returns>
-        internal TurnConsequencesPivot NextTurn()
+        internal TurnConsequencesPivot NextTurn(Func<MapSquarePivot, IReadOnlyDictionary<DirectionPivot, MapSquarePivot>> getAdjacentSquaresCallback)
         {
             var citiesWithDoneProduction = new Dictionary<CityPivot, BuildablePivot>();
 
             foreach (var city in _cities)
             {
-                var produced = city.UpdateStatus();
+                var produced = city.UpdateStatus(getAdjacentSquaresCallback);
                 if (produced != null)
                 {
                     if (produced.Is<UnitPivot>())
@@ -519,8 +520,10 @@ namespace ErsatzCivLib.Model
         /// </summary>
         /// <param name="actionPivot">The <see cref="WorkerActionPivot"/>.</param>
         /// <param name="isCityCallback">Callback method to check if a city, on any civilization, already exists at this location.</param>
+        /// <param name="getAdjacentSquaresCallback">Callback method to get adjacent squares of a single <see cref="MapSquarePivot"/>.</param>
         /// <returns><c>True</c> if success; <c>False</c> otherwise.</returns>
-        internal bool WorkerAction(WorkerActionPivot actionPivot, Func<MapSquarePivot, bool> isCityCallback)
+        internal bool WorkerAction(WorkerActionPivot actionPivot, Func<MapSquarePivot, bool> isCityCallback,
+            Func<MapSquarePivot, IReadOnlyDictionary<DirectionPivot, MapSquarePivot>> getAdjacentSquaresCallback)
         {
             if (CurrentUnit == null || !CurrentUnit.Is<WorkerPivot>())
             {
@@ -546,14 +549,14 @@ namespace ErsatzCivLib.Model
             
             if (actionPivot == WorkerActionPivot.Road
                 && !_advances.Contains(AdvancePivot.BridgeBuilding)
-                && sq.HasRiver)
+                && sq.HasRiver(getAdjacentSquaresCallback(sq)))
             {
                 return false;
             }
             
             if (actionPivot == WorkerActionPivot.Irrigate
                 && !_advances.Contains(AdvancePivot.Electricity)
-                && !sq.HasRiver)
+                && !sq.IsIrrigable(getAdjacentSquaresCallback(sq)))
             {
                 return false;
             }
@@ -572,8 +575,10 @@ namespace ErsatzCivLib.Model
         /// </summary>
         /// <param name="city">The <see cref="CityPivot"/>.</param>
         /// <param name="indexOfDefault">Out; the index, in the result list, of the city current production.</param>
+        /// <param name="getAdjacentSquaresCallback">Callback method to get adjacent squares of a single <see cref="MapSquarePivot"/>.</param>
         /// <returns>List of <see cref="BuildablePivot"/> the city can build.</returns>
-        internal IReadOnlyCollection<BuildablePivot> GetBuildableItemsForCity(CityPivot city, out int indexOfDefault)
+        internal IReadOnlyCollection<BuildablePivot> GetBuildableItemsForCity(CityPivot city, out int indexOfDefault,
+            Func<MapSquarePivot, IReadOnlyDictionary<DirectionPivot, MapSquarePivot>> getAdjacentSquaresCallback)
         {
             indexOfDefault = -1;
 
@@ -590,7 +595,7 @@ namespace ErsatzCivLib.Model
             buildableDefaultInstances.RemoveAll(b => city.Improvements.Contains(b));
 
             // No aqueduc required if a river is close to the city.
-            if (city.MapSquareLocation.HasRiver)
+            if (city.MapSquareLocation.HasRiver(getAdjacentSquaresCallback(city.MapSquareLocation)))
             {
                 buildableDefaultInstances.RemoveAll(b => CityImprovementPivot.Aqueduc == b);
             }
