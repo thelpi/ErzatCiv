@@ -15,7 +15,7 @@ namespace ErsatzCivLib.Model.Static
         /// Constructor.
         /// </summary>
         /// <param name="mapSquare">Not used.</param>
-        private CapitalizationPivot() : base(PRODUCTIVITY_COST, null) { }
+        private CapitalizationPivot() : base(PRODUCTIVITY_COST, null, null) { }
 
         /// <summary>
         /// Default instance.

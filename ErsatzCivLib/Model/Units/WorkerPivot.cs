@@ -22,7 +22,7 @@ namespace ErsatzCivLib.Model.Units
         internal bool BusyOnAction { get { return _currentAction != null; } }
 
         private WorkerPivot(MapSquarePivot location)
-            : base(location, false, true, 0, 0, LIFE_POINTS, LIFE_POINTS, PRODUCTIVITY_COST, null, null, CITIZENS_COST)
+            : base(location, false, true, 0, 0, LIFE_POINTS, LIFE_POINTS, PRODUCTIVITY_COST, null, null, null, CITIZENS_COST)
         { }
 
         /// <summary>

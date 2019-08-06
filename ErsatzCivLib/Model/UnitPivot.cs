@@ -49,8 +49,9 @@ namespace ErsatzCivLib.Model
         public int CitizenCostToProduce { get; private set; }
 
         protected UnitPivot(MapSquarePivot location, bool seaNavigate, bool groundNavigate, int defensePoints, int offensePoints,
-            int lifePoints, int speed, int productivityCost, AdvancePivot advance, string name = null, int citizenCostToProduce = 0) :
-            base(productivityCost, advance, name)
+            int lifePoints, int speed, int productivityCost, AdvancePivot advancePrerequisite, AdvancePivot advanceObsolescence,
+            string name = null, int citizenCostToProduce = 0) :
+            base(productivityCost, advancePrerequisite, advanceObsolescence, name)
         {
             MapSquareLocation = location;
             SeaNavigate = seaNavigate;
