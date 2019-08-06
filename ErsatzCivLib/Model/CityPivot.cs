@@ -441,6 +441,18 @@ namespace ErsatzCivLib.Model
             return row == MapSquareLocation.Row && column == MapSquareLocation.Column;
         }
 
+        public bool OnLeftBorder()
+        {
+            return MapSquareLocation.Row == 0;
+        }
+
+        public bool OnRightBorder(int mapWidth)
+        {
+            return MapSquareLocation.Row == mapWidth - 1;
+        }
+
+        #region IEquatable implementation
+
         public bool Equals(CityPivot other)
         {
             return Name == other?.Name;
@@ -470,6 +482,8 @@ namespace ErsatzCivLib.Model
         {
             return Name.GetHashCode();
         }
+
+        #endregion
 
         [Serializable]
         public class CitizenPivot : IComparable<CitizenPivot>, IEquatable<CitizenPivot>

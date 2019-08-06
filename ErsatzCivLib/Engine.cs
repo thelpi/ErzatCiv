@@ -5,7 +5,6 @@ using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using ErsatzCivLib.Model;
 using ErsatzCivLib.Model.Persistent;
-using ErsatzCivLib.Model.Units;
 
 namespace ErsatzCivLib
 {
@@ -424,16 +423,6 @@ namespace ErsatzCivLib
                         break;
                 }
             }
-        }
-
-        public bool CityOnLeftBorder(CityPivot city)
-        {
-            return city?.MapSquareLocation.Row == 0;
-        }
-
-        public bool CityOnRightBorder(CityPivot city)
-        {
-            return city?.MapSquareLocation.Row == Map.Width - 1;
         }
 
         /// <summary>
