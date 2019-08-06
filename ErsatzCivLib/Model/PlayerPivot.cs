@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ErsatzCivLib.Model.Events;
 using ErsatzCivLib.Model.Persistent;
 using ErsatzCivLib.Model.Units;
 
@@ -17,6 +18,9 @@ namespace ErsatzCivLib.Model
 
         private List<CityPivot> _cities = new List<CityPivot>();
         private List<AdvancePivot> _advances = new List<AdvancePivot>();
+        private List<UnitPivot> _units = new List<UnitPivot>();
+        private int _currentUnitIndex;
+        private int _previousUnitIndex;
 
         #region Embedded properties
 
@@ -49,6 +53,52 @@ namespace ErsatzCivLib.Model
 
         #region Inferred properties
 
+        /// <summary>
+        /// Collection of <see cref="UnitPivot"/>.
+        /// </summary>
+        public IReadOnlyCollection<UnitPivot> Units { get { return _units; } }
+        /// <summary>
+        /// The current <see cref="UnitPivot"/>. Might be <c>null</c>.
+        /// </summary>
+        public UnitPivot CurrentUnit
+        {
+            get
+            {
+                if (_currentUnitIndex == -1)
+                {
+                    return null;
+                }
+
+                if (_currentUnitIndex < -1 || _currentUnitIndex >= _units.Count)
+                {
+                    // Anormal behavior.
+                    return null;
+                }
+
+                return _units[_currentUnitIndex];
+            }
+        }
+        /// <summary>
+        /// The previous <see cref="UnitPivot"/>. Might be <c>null</c>.
+        /// </summary>
+        public UnitPivot PreviousUnit
+        {
+            get
+            {
+                if (_previousUnitIndex == -1 || _previousUnitIndex == _currentUnitIndex)
+                {
+                    return null;
+                }
+
+                if (_previousUnitIndex < -1 || _previousUnitIndex >= _units.Count)
+                {
+                    // Anormal behavior.
+                    return null;
+                }
+
+                return _units[_previousUnitIndex];
+            }
+        }
         /// <summary>
         /// List of <see cref="CityPivot"/> built by the player.
         /// </summary>
@@ -103,12 +153,23 @@ namespace ErsatzCivLib.Model
 
         #endregion
 
+        #region Public events
+
+        /// <summary>
+        /// Triggered when a <see cref="UnitPivot"/> is moved.
+        /// </summary>
+        [field: NonSerialized]
+        public event EventHandler<NextUnitEventArgs> NextUnitEvent;
+
+        #endregion
+
         /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="civilization">The <see cref="Civilization"/> value.</param>
         /// <param name="isIa">The <see cref="IsIA"/> value.</param>
-        internal PlayerPivot(CivilizationPivot civilization, bool isIa)
+        /// <param name="beginLocation">Units position at the beginning.</param>
+        internal PlayerPivot(CivilizationPivot civilization, bool isIa, MapSquarePivot beginLocation)
         {
             Civilization = civilization;
             IsIA = isIa;
@@ -116,36 +177,11 @@ namespace ErsatzCivLib.Model
 
             CurrentRegime = RegimePivot.Despotism;
             Treasure = TREASURE_START;
-        }
 
-        /// <summary>
-        /// At the end of a turn, computes the new value of properties relatives to science.
-        /// </summary>
-        internal void CheckScienceAtNextTurn()
-        {
-            if (CurrentAdvance != null)
-            {
-                ScienceStack += ScienceByTurn;
-                if (ScienceStack >= AdvancePivot.SCIENCE_COST)
-                {
-                    _advances.Add(CurrentAdvance);
-                    ScienceStack = 0;
-                    CurrentAdvance = null;
-                }
-            }
-        }
+            _units.Add(SettlerPivot.CreateAtLocation(beginLocation));
+            _units.Add(WorkerPivot.CreateAtLocation(beginLocation));
 
-        /// <summary>
-        /// At the end of a turn, computes the new value of properties relatives to treasure / gold.
-        /// </summary>
-        internal void CheckTreasureAtNextTurn()
-        {
-            Treasure += TreasureByTurn;
-            if (Treasure < 0)
-            {
-                // TODO
-                throw new NotImplementedException();
-            }
+            SetUnitIndex(false, true);
         }
 
         /// <summary>
@@ -184,14 +220,16 @@ namespace ErsatzCivLib.Model
         /// <param name="currentTurn">The <see cref="Engine.CurrentTurn"/> value.</param>
         /// <param name="name">Name of the city.</param>
         /// <param name="notUniqueNameError">Out; indicates a failure caused by a non-unique city name.</param>
-        /// <param name="cityAtThisLocationCallback">Callback method to check if a city has been built by any civilisation at this location.</param>
+        /// <param name="isCityCallback">Callback method to check if a city, on any civilization, already exists at this location.</param>
+        /// <param name="computeCityAvailableMapSquaresCallback">Callback method to compute available <see cref="MapSquarePivot"/> around the city to build.</param>
         /// <returns>The <see cref="CityPivot"/> built; <c>Null</c> if failure.</returns>
         internal CityPivot BuildCity(int currentTurn, string name, out bool notUniqueNameError,
-            Func<MapSquarePivot, bool> cityAtThisLocationCallback)
+            Func<MapSquarePivot, bool> isCityCallback,
+            Func<CityPivot, List<MapSquarePivot>> computeCityAvailableMapSquaresCallback)
         {
             notUniqueNameError = false;
 
-            if (!CanBuildCity(cityAtThisLocationCallback))
+            if (!CanBuildCity(isCityCallback))
             {
                 return null;
             }
@@ -205,7 +243,7 @@ namespace ErsatzCivLib.Model
             var settler = CurrentUnit as SettlerPivot;
             var sq = CurrentUnit.MapSquareLocation;
 
-            var city = new CityPivot(currentTurn, name, sq, ComputeCityAvailableMapSquares, CapitalizationPivot.Default);
+            var city = new CityPivot(currentTurn, name, sq, computeCityAvailableMapSquaresCallback, CapitalizationPivot.Default);
             sq.ApplyCityActions(city);
 
             _cities.Add(city);
@@ -215,7 +253,188 @@ namespace ErsatzCivLib.Model
             return city;
         }
 
-        private IReadOnlyCollection<AdvancePivot> GetAvailableAdvances()
+        /// <summary>
+        /// Checks if a <see cref="CityPivot"/> can be built at the <see cref="CurrentUnit"/> location.
+        /// <see cref="CurrentUnit"/> must be a <see cref="SettlerPivot"/>.
+        /// </summary>
+        /// <param name="isCityCallback">Callback method to check if a city, on any civilization, already exists at this location.</param>
+        /// <returns><c>True</c> if a city can be build; <c>False</c> otherwise.</returns>
+        internal bool CanBuildCity(Func<MapSquarePivot, bool> isCityCallback)
+        {
+            if (CurrentUnit?.Is<SettlerPivot>() != true)
+            {
+                return false;
+            }
+
+            var sq = CurrentUnit.MapSquareLocation;
+
+            return sq?.Biome?.IsCityBuildable == true
+                && !isCityCallback(sq)
+                && sq.Pollution != true;
+        }
+
+        /// <summary>
+        /// Sets the <see cref="_currentUnitIndex"/> to next moveable unit.
+        /// Also changes <see cref="_previousUnitIndex"/> accordingly.
+        /// </summary>
+        /// <param name="currentJustBeenRemoved">
+        /// <c>True</c> if the <see cref="UnitPivot"/> at the current index has been removed; <c>False</c> otherwise.
+        /// </param>
+        /// <param name="reset"><c>True</c> to reset the value at the first available unit.</param>
+        internal void SetUnitIndex(bool currentJustBeenRemoved, bool reset)
+        {
+            if (reset)
+            {
+                _currentUnitIndex = _units.IndexOf(_units.FirstOrDefault(u => u.RemainingMoves > 0));
+                _previousUnitIndex = -1;
+            }
+            else
+            {
+                _previousUnitIndex = _currentUnitIndex;
+
+                for (int i = _currentUnitIndex + 1; i < _units.Count; i++)
+                {
+                    if (_units[i].RemainingMoves > 0)
+                    {
+                        _currentUnitIndex = i;
+                        NextUnitEvent?.Invoke(this, new NextUnitEventArgs(true));
+                        return;
+                    }
+                }
+                for (int i = 0; i < _currentUnitIndex + (currentJustBeenRemoved ? 1 : 0); i++)
+                {
+                    if (_units.Count > i && _units[i].RemainingMoves > 0)
+                    {
+                        _currentUnitIndex = i;
+                        NextUnitEvent?.Invoke(this, new NextUnitEventArgs(true));
+                        return;
+                    }
+                }
+                _currentUnitIndex = -1;
+            }
+            NextUnitEvent?.Invoke(this, new NextUnitEventArgs(_currentUnitIndex >= 0));
+        }
+
+        /// <summary>
+        /// Proceeds to do every actions required by a move to the next turn.
+        /// </summary>
+        /// <returns>Dictionary of <see cref="CityPivot"/> with a completed <see cref="BuildablePivot"/>.</returns>
+        internal Dictionary<CityPivot, BuildablePivot> NextTurn()
+        {
+            var citiesWithDoneProduction = new Dictionary<CityPivot, BuildablePivot>();
+
+            foreach (var city in _cities)
+            {
+                var produced = city.UpdateStatus();
+                if (produced != null)
+                {
+                    if (produced.Is<UnitPivot>())
+                    {
+                        _units.Add(produced as UnitPivot);
+                        SetUnitIndex(false, false);
+                    }
+                    else if (!produced.Is<CapitalizationPivot>())
+                    {
+                        citiesWithDoneProduction.Add(city, produced);
+                    }
+                }
+            }
+            foreach (var u in _units)
+            {
+                u.Release();
+            }
+
+            CheckScienceAtNextTurn();
+            CheckTreasureAtNextTurn();
+
+            SetUnitIndex(false, true);
+
+            return citiesWithDoneProduction;
+        }
+
+        /// <summary>
+        /// Tries to move the current unit.
+        /// </summary>
+        /// <param name="direction">The <see cref="DirectionPivot"/>; <c>Null</c> to skip unit turn without moving.</param>
+        /// <param name="getMapSquareCallback">Callback method to get the <see cref="MapSquarePivot"/> at the new coordinates.</param>
+        /// <returns><c>True</c> if success; <c>False</c> otherwise.</returns>
+        internal bool MoveCurrentUnit(DirectionPivot? direction, Func<int, int, MapSquarePivot> getMapSquareCallback)
+        {
+            if (CurrentUnit == null)
+            {
+                return false;
+            }
+
+            if (direction == null)
+            {
+                CurrentUnit.ForceNoMove();
+                SetUnitIndex(false, false);
+                return true;
+            }
+
+            var prevSq = CurrentUnit.MapSquareLocation;
+
+            var x = direction.Value.Row(prevSq.Row);
+            var y = direction.Value.Column(prevSq.Column);
+
+            var square = getMapSquareCallback(x, y);
+            if (square == null)
+            {
+                return false;
+            }
+
+            bool isCity = _cities.Any(c => c.MapSquareLocation == square);
+
+            var res = CurrentUnit.Move(direction.Value, isCity, prevSq, square);
+            if (res && CurrentUnit.RemainingMoves == 0)
+            {
+                SetUnitIndex(false, false);
+            }
+            return res;
+        }
+
+        /// <summary>
+        /// Tries to trigger a <see cref="WorkerActionPivot"/> for the <see cref="CurrentUnit"/>.
+        /// <see cref="CurrentUnit"/> must be a worker.
+        /// </summary>
+        /// <param name="actionPivot">The <see cref="WorkerActionPivot"/>.</param>
+        /// <param name="isCityCallback">Callback method to check if a city, on any civilization, already exists at this location.</param>
+        /// <returns><c>True</c> if success; <c>False</c> otherwise.</returns>
+        internal bool WorkerAction(WorkerActionPivot actionPivot, Func<MapSquarePivot, bool> isCityCallback)
+        {
+            if (CurrentUnit == null || !CurrentUnit.Is<WorkerPivot>())
+            {
+                return false;
+            }
+
+            var worker = CurrentUnit as WorkerPivot;
+            var sq = worker.MapSquareLocation;
+            if (sq == null || isCityCallback(sq))
+            {
+                return false;
+            }
+
+            if (actionPivot == WorkerActionPivot.RailRoad && !sq.Road)
+            {
+                actionPivot = WorkerActionPivot.Road;
+            }
+
+            var result = sq.ApplyAction(worker, actionPivot);
+            if (result)
+            {
+                worker.ForceNoMove();
+                SetUnitIndex(false, false);
+            }
+            return result;
+        }
+
+        #region Public methods
+
+        /// <summary>
+        /// Get the list of <see cref="AdvancePivot"/> the player can discover at this point.
+        /// </summary>
+        /// <returns>List of <see cref="AdvancePivot"/>.</returns>
+        public IReadOnlyCollection<AdvancePivot> GetAvailableAdvances()
         {
             var currentEraList = AdvancePivot.AdvancesByEra[CurrentEra]
                 .Where(a => !_advances.Contains(a) && a.Prerequisites.All(_advances.Contains))
@@ -238,19 +457,35 @@ namespace ErsatzCivLib.Model
             return currentEraList;
         }
 
-        private bool CanBuildCity(Func<MapSquarePivot, bool> cityAtThisLocationCallback)
+        #endregion
+
+        #region Private methods
+
+        private void CheckScienceAtNextTurn()
         {
-            if (CurrentUnit?.Is<SettlerPivot>() != true)
+            if (CurrentAdvance != null)
             {
-                return false;
+                ScienceStack += ScienceByTurn;
+                if (ScienceStack >= AdvancePivot.SCIENCE_COST)
+                {
+                    _advances.Add(CurrentAdvance);
+                    ScienceStack = 0;
+                    CurrentAdvance = null;
+                }
             }
-
-            var sq = CurrentUnit.MapSquareLocation;
-
-            return sq?.Biome?.IsCityBuildable == true
-                && !cityAtThisLocationCallback(sq)
-                && sq.Pollution != true;
         }
+
+        private void CheckTreasureAtNextTurn()
+        {
+            Treasure += TreasureByTurn;
+            if (Treasure < 0)
+            {
+                // TODO
+                throw new NotImplementedException();
+            }
+        }
+
+        #endregion
 
         #region IEquatable implementation
 

@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\Events\NextUnitEventArgs.cs" />
     <Compile Include="Model\Persistent\CapitalizationPivot.cs" />
     <Compile Include="Model\Persistent\CityImprovementPivot.cs" />
     <Compile Include="Model\BuildablePivot.cs" />

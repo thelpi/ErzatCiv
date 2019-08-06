@@ -12,63 +12,27 @@ namespace ErsatzCivLib
     [Serializable]
     public class Engine
     {
-        private readonly PlayerPivot _humanPlayer;
         private readonly List<PlayerPivot> _iaPlayers = new List<PlayerPivot>();
-        private int _currentUnitIndex;
-        private int _previousUnitIndex;
-        private List<UnitPivot> _units = new List<UnitPivot>();
 
         public int CurrentTurn { get; private set; }
         // TODO : wrong version.
         public int CurrentYear { get { return (CurrentTurn * 10) - 4000; } }
         public MapPivot Map { get; private set; }
-        public IReadOnlyCollection<UnitPivot> Units { get { return _units; } }
-        public UnitPivot CurrentUnit
-        {
-            get
-            {
-                if (_currentUnitIndex == -1)
-                {
-                    return null;
-                }
-
-                if (_currentUnitIndex < -1 || _currentUnitIndex >= _units.Count)
-                {
-                    // Anormal behavior.
-                    return null;
-                }
-
-                return _units[_currentUnitIndex];
-            }
-        }
-        public UnitPivot PreviousUnit
-        {
-            get
-            {
-                if (_previousUnitIndex == -1 || _previousUnitIndex == _currentUnitIndex)
-                {
-                    return null;
-                }
-
-                if (_previousUnitIndex < -1 || _previousUnitIndex >= _units.Count)
-                {
-                    // Anormal behavior.
-                    return null;
-                }
-
-                return _units[_previousUnitIndex];
-            }
-        }
         public IReadOnlyCollection<CityPivot> GlobalCities
         {
             get
             {
-                return _iaPlayers.SelectMany(iap => iap.Cities).Concat(_humanPlayer.Cities).ToList();
+                return _iaPlayers.SelectMany(iap => iap.Cities).Concat(HumanPlayer.Cities).ToList();
             }
         }
-
-        [field: NonSerialized]
-        public event EventHandler<NextUnitEventArgs> NextUnitEvent;
+        public PlayerPivot HumanPlayer { get; }
+        public IReadOnlyCollection<PlayerPivot> Players
+        {
+            get
+            {
+                return _iaPlayers.Concat(new[] { HumanPlayer }).ToList();
+            }
+        }
 
         public Engine(MapPivot.SizePivot mapSize,
             MapPivot.LandShapePivot mapShape,
@@ -89,7 +53,11 @@ namespace ErsatzCivLib
                 throw new ArgumentException("The IA players count is too high for this map size !", nameof(iaPlayersCount));
             }
 
-            _humanPlayer = new PlayerPivot(playerCivilization, false);
+            Map = new MapPivot(mapSize, mapShape, landCoverage, temperature, age, humidity);
+
+            List<MapSquarePivot> excludedSpots = new List<MapSquarePivot>();
+
+            HumanPlayer = new PlayerPivot(playerCivilization, false, GetRandomLocation(excludedSpots));
             for (int i = 0; i < iaPlayersCount; i++)
             {
                 CivilizationPivot iaCiv = null;
@@ -97,12 +65,15 @@ namespace ErsatzCivLib
                 {
                     iaCiv = CivilizationPivot.Instances.ElementAt(Tools.Randomizer.Next(0, CivilizationPivot.Instances.Count));
                 }
-                while (_humanPlayer.Civilization == iaCiv || _iaPlayers.Any(ia => ia.Civilization == iaCiv));
-                _iaPlayers.Add(new PlayerPivot(iaCiv, true));
+                while (HumanPlayer.Civilization == iaCiv || _iaPlayers.Any(ia => ia.Civilization == iaCiv));
+                _iaPlayers.Add(new PlayerPivot(iaCiv, true, GetRandomLocation(excludedSpots)));
             }
 
-            Map = new MapPivot(mapSize, mapShape, landCoverage, temperature, age, humidity);
+            CurrentTurn = 1;
+        }
 
+        private MapSquarePivot GetRandomLocation(List<MapSquarePivot> excludedSpots)
+        {
             MapSquarePivot ms = null;
             do
             {
@@ -110,25 +81,21 @@ namespace ErsatzCivLib
                 var column = Tools.Randomizer.Next(0, Map.Width);
                 ms = Map[row, column];
             }
-            while (ms == null || ms.Biome.IsSeaType);
+            while (ms == null || ms.Biome.IsSeaType || excludedSpots.Contains(ms));
 
-            _units.Add(SettlerPivot.CreateAtLocation(ms));
-            _units.Add(WorkerPivot.CreateAtLocation(ms));
-
-            SetUnitIndex(false, true);
-
-            CurrentTurn = 1;
+            excludedSpots.Add(ms);
+            return ms;
         }
 
-        public CityPivot BuildCity(PlayerPivot player, string name, out bool notUniqueNameError)
+        public CityPivot BuildCity(string name, out bool notUniqueNameError)
         {
             notUniqueNameError = false;
-            if (player == null || string.IsNullOrWhiteSpace(name))
+            if (string.IsNullOrWhiteSpace(name))
             {
                 return null;
             }
 
-            return player.BuildCity(CurrentTurn, name, out notUniqueNameError, IsCity);
+            return HumanPlayer.BuildCity(CurrentTurn, name, out notUniqueNameError, IsCity, ComputeCityAvailableMapSquares);
         }
 
         private List<MapSquarePivot> ComputeCityAvailableMapSquares(CityPivot city)
@@ -158,105 +125,31 @@ namespace ErsatzCivLib
 
         public bool CanBuildCity()
         {
-            if (CurrentUnit?.Is<SettlerPivot>() != true)
-            {
-                return false;
-            }
-
-            var sq = CurrentUnit.MapSquareLocation;
-
-            return sq?.Biome?.IsCityBuildable == true
-                && !IsCity(sq)
-                && sq.Pollution != true;
+            return HumanPlayer.CanBuildCity(IsCity) == true;
         }
 
         public void ToNextUnit()
         {
-            SetUnitIndex(false, false);
-        }
-
-        private void SetUnitIndex(bool currentJustBeenRemoved, bool reset)
-        {
-            if (reset)
-            {
-                _currentUnitIndex = _units.IndexOf(_units.FirstOrDefault(u => u.RemainingMoves > 0));
-                _previousUnitIndex = -1;
-            }
-            else
-            {
-                _previousUnitIndex = _currentUnitIndex;
-
-                for (int i = _currentUnitIndex + 1; i < _units.Count; i++)
-                {
-                    if (_units[i].RemainingMoves > 0)
-                    {
-                        _currentUnitIndex = i;
-                        NextUnitEvent?.Invoke(this, new NextUnitEventArgs(true));
-                        return;
-                    }
-                }
-                for (int i = 0; i < _currentUnitIndex + (currentJustBeenRemoved ? 1 : 0); i++)
-                {
-                    if (_units.Count > i && _units[i].RemainingMoves > 0)
-                    {
-                        _currentUnitIndex = i;
-                        NextUnitEvent?.Invoke(this, new NextUnitEventArgs(true));
-                        return;
-                    }
-                }
-                _currentUnitIndex = -1;
-            }
-            NextUnitEvent?.Invoke(this, new NextUnitEventArgs(_currentUnitIndex >= 0));
+            HumanPlayer.SetUnitIndex(false, false);
         }
 
         public IDictionary<CityPivot, BuildablePivot> NewTurn()
         {
             // TODO : run IA actions !
 
-            var citiesWithDoneProduction = NextTurnForPlayer(_humanPlayer);
-            foreach (var iaPlayer in _iaPlayers)
-            {
-                NextTurnForPlayer(iaPlayer);
-            }
 
-            CurrentTurn++;
-
-            return citiesWithDoneProduction;
-        }
-
-        private Dictionary<CityPivot, BuildablePivot> NextTurnForPlayer(PlayerPivot player)
-        {
-            var citiesWithDoneProduction = new Dictionary<CityPivot, BuildablePivot>();
-
-            foreach (var city in player.Cities)
-            {
-                var produced = city.UpdateStatus();
-                if (produced != null)
-                {
-                    if (produced.Is<UnitPivot>())
-                    {
-                        _units.Add(produced as UnitPivot);
-                        SetUnitIndex(false, false);
-                    }
-                    else if (!produced.Is<CapitalizationPivot>())
-                    {
-                        citiesWithDoneProduction.Add(city, produced);
-                    }
-                }
-            }
             foreach (var ms in Map)
             {
                 ms.UpdateActionsProgress();
             }
-            foreach (var u in _units)
+
+            var citiesWithDoneProduction = HumanPlayer.NextTurn();
+            foreach (var iaPlayer in _iaPlayers)
             {
-                u.Release();
+                iaPlayer.NextTurn();
             }
 
-            player.CheckScienceAtNextTurn();
-            player.CheckTreasureAtNextTurn();
-
-            SetUnitIndex(false, true);
+            CurrentTurn++;
 
             return citiesWithDoneProduction;
         }
@@ -268,30 +161,7 @@ namespace ErsatzCivLib
 
         public bool WorkerAction(WorkerActionPivot actionPivot)
         {
-            if (CurrentUnit == null || !CurrentUnit.Is<WorkerPivot>() || actionPivot == null)
-            {
-                return false;
-            }
-
-            var worker = CurrentUnit as WorkerPivot;
-            var sq = worker.MapSquareLocation;
-            if (sq == null || IsCity(sq))
-            {
-                return false;
-            }
-
-            if (actionPivot == WorkerActionPivot.RailRoad && !sq.Road)
-            {
-                actionPivot = WorkerActionPivot.Road;
-            }
-
-            var result = sq.ApplyAction(worker, actionPivot);
-            if (result)
-            {
-                worker.ForceNoMove();
-                ToNextUnit();
-            }
-            return result;
+            return HumanPlayer.WorkerAction(actionPivot, IsCity);
         }
 
         public void SubscribeToMapSquareChangeEvent(EventHandler<MapSquarePivot.SquareChangedEventArgs> handler)
@@ -304,37 +174,7 @@ namespace ErsatzCivLib
 
         public bool MoveCurrentUnit(DirectionPivot? direction)
         {
-            if (CurrentUnit == null)
-            {
-                return false;
-            }
-
-            if (direction == null)
-            {
-                CurrentUnit.ForceNoMove();
-                ToNextUnit();
-                return true;
-            }
-
-            var prevSq = CurrentUnit.MapSquareLocation;
-
-            var x = direction.Value.Row(prevSq.Row);
-            var y = direction.Value.Column(prevSq.Column);
-
-            var square = Map[x, y];
-            if (square == null)
-            {
-                return false;
-            }
-
-            bool isCity = IsCity(square);
-
-            var res = CurrentUnit.Move(direction.Value, isCity, prevSq, square);
-            if (res && CurrentUnit.RemainingMoves == 0)
-            {
-                ToNextUnit();
-            }
-            return res;
+            return HumanPlayer.MoveCurrentUnit(direction, delegate(int x, int y) { return Map[x, y]; });
         }
 
         /// <summary>
@@ -597,29 +437,19 @@ namespace ErsatzCivLib
         }
 
         /// <summary>
-        /// Calls <see cref="PlayerPivot.ChangeCurrentAdvance(AdvancePivot)"/> for the specified player.
+        /// Calls <see cref="PlayerPivot.ChangeCurrentAdvance(AdvancePivot)"/> for <see cref="HumanPlayer"/>.
         /// </summary>
         /// <param name="player">The <see cref="PlayerPivot"/>.</param>
         /// <param name="advance">The <see cref="AdvancePivot"/>.</param>
         /// <returns><c>True</c> if success; <c>False</c> if failure.</returns>
-        public bool ChangeCurrentAdvance(PlayerPivot player, AdvancePivot advance)
+        public bool ChangeCurrentAdvance(AdvancePivot advance)
         {
-            if (player == null || advance == null)
+            if (advance == null)
             {
                 return false;
             }
 
-            return player.ChangeCurrentAdvance(advance);
-        }
-
-        public class NextUnitEventArgs : EventArgs
-        {
-            public bool MoreUnit { get; private set; }
-
-            internal NextUnitEventArgs(bool moreUnit)
-            {
-                MoreUnit = moreUnit;
-            }
+            return HumanPlayer.ChangeCurrentAdvance(advance);
         }
     }
 }

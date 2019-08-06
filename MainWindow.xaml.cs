@@ -6,6 +6,7 @@ using System.Windows.Shapes;
 using ErsatzCiv.Properties;
 using ErsatzCivLib;
 using ErsatzCivLib.Model;
+using ErsatzCivLib.Model.Events;
 using ErsatzCivLib.Model.Persistent;
 
 namespace ErsatzCiv
@@ -129,9 +130,9 @@ namespace ErsatzCiv
             // Moves a unit.
             else if (Move(e.Key).HasValue)
             {
-                if (_engine.CurrentUnit != null)
+                if (_engine.HumanPlayer.CurrentUnit != null)
                 {
-                    var unitToMove = _engine.CurrentUnit; // do not remove this line ! ("MoveCurrentUnit()" changes the value of "CurrentUnit")
+                    var unitToMove = _engine.HumanPlayer.CurrentUnit; // do not remove this line ! ("MoveCurrentUnit()" changes the value of "CurrentUnit")
                     if (_engine.MoveCurrentUnit(Move(e.Key).Value))
                     {
                         var spritesToMove = MapGrid.GetChildrenByTag(unitToMove);
@@ -167,7 +168,7 @@ namespace ErsatzCiv
             // Forces turn for current unit.
             else if (e.Key == Key.Space)
             {
-                if (_engine.CurrentUnit != null)
+                if (_engine.HumanPlayer.CurrentUnit != null)
                 {
                     _engine.MoveCurrentUnit(null);
                 }
@@ -208,7 +209,7 @@ namespace ErsatzCiv
             RefreshMiniMapSelector();
         }
 
-        private void FocusOnUnit(object sender, Engine.NextUnitEventArgs eventArgs)
+        private void FocusOnUnit(object sender, NextUnitEventArgs eventArgs)
         {
             if (!eventArgs.MoreUnit && !Settings.Default.waitEndTurn)
             {
@@ -417,27 +418,30 @@ namespace ErsatzCiv
 
         private void InitializeEngineEvents()
         {
-            _engine.NextUnitEvent += FocusOnUnit;
+            _engine.HumanPlayer.NextUnitEvent += FocusOnUnit;
             _engine.SubscribeToMapSquareChangeEvent(UpdateSquareMap);
         }
 
         private void RefreshDynamicView()
         {
             LabelYearInfo.Content = $"Current year : {_engine.CurrentYear} (turn {_engine.CurrentTurn})";
-            LabelCurrentRegime.Content = $"Current regime : {_engine.CurrentRegime.Name}";
-            LabelTreasureInfo.Content = $"Treasure : {_engine.Treasure} gold ({_engine.TreasureByTurn} by turn)";
-            LabelCurrentAdvance.Content = $"Advance in proress : {_engine.CurrentAdvance?.Name ?? "{none}"} (in {_engine.RemainingScience} turn(s))";
+            LabelCurrentRegime.Content = $"Current regime : {_engine.HumanPlayer.CurrentRegime.Name}";
+            LabelTreasureInfo.Content = $"Treasure : {_engine.HumanPlayer.Treasure} gold ({_engine.HumanPlayer.TreasureByTurn} by turn)";
+            LabelCurrentAdvance.Content = $"Advance in proress : {_engine.HumanPlayer.CurrentAdvance?.Name ?? "{none}"} (in {_engine.HumanPlayer.TurnsBeforeNewAdvance} turn(s))";
 
-            foreach (var unit in _engine.Units)
+            foreach (var player in _engine.Players)
             {
-                MapGrid.DrawUnit(unit, DEFAULT_SIZE, UNIT_ZINDEX, false, true);
-            }
+                foreach (var unit in player.Units)
+                {
+                    MapGrid.DrawUnit(unit, DEFAULT_SIZE, UNIT_ZINDEX, false, true);
+                }
 
-            foreach (var city in _engine.Cities)
-            {
-                MapGrid.DrawMapCity(city, DEFAULT_SIZE, CITY_ZINDEX, false);
-                DisplayCityName(city);
-                DrawMiniMapCity(city, false);
+                foreach (var city in player.Cities)
+                {
+                    MapGrid.DrawMapCity(city, DEFAULT_SIZE, CITY_ZINDEX, false);
+                    DisplayCityName(city);
+                    DrawMiniMapCity(city, false);
+                }
             }
 
             // Ensures a refresh of the blinking current unit.
@@ -454,17 +458,17 @@ namespace ErsatzCiv
 
         private void RecomputeFocus()
         {
-            if (_engine.PreviousUnit != null)
+            if (_engine.HumanPlayer.PreviousUnit != null)
             {
-                MapGrid.DrawUnit(_engine.PreviousUnit, DEFAULT_SIZE, UNIT_ZINDEX, false, true);
+                MapGrid.DrawUnit(_engine.HumanPlayer.PreviousUnit, DEFAULT_SIZE, UNIT_ZINDEX, false, true);
             }
 
-            if (_engine.CurrentUnit != null)
+            if (_engine.HumanPlayer.CurrentUnit != null)
             {
-                var newX = ((MapGrid.ActualWidth * _engine.CurrentUnit.MapSquareLocation.Column) / _engine.Map.Width) - (MapScroller.ActualWidth / 2);
-                var newY = ((MapGrid.ActualHeight * _engine.CurrentUnit.MapSquareLocation.Row) / _engine.Map.Height) - (MapScroller.ActualHeight / 2);
+                var newX = ((MapGrid.ActualWidth * _engine.HumanPlayer.CurrentUnit.MapSquareLocation.Column) / _engine.Map.Width) - (MapScroller.ActualWidth / 2);
+                var newY = ((MapGrid.ActualHeight * _engine.HumanPlayer.CurrentUnit.MapSquareLocation.Row) / _engine.Map.Height) - (MapScroller.ActualHeight / 2);
                 FocusOn(newX, newY);
-                MapGrid.DrawUnit(_engine.CurrentUnit, DEFAULT_SIZE, UNIT_ZINDEX, true, true);
+                MapGrid.DrawUnit(_engine.HumanPlayer.CurrentUnit, DEFAULT_SIZE, UNIT_ZINDEX, true, true);
             }
         }
 
@@ -507,7 +511,7 @@ namespace ErsatzCiv
                     }
                 }
             }
-            if (_engine.CurrentAdvance == null)
+            if (_engine.HumanPlayer.CurrentAdvance == null)
             {
                 new WindowAdvancePick(_engine).ShowDialog();
             }

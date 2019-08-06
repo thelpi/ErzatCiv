@@ -20,8 +20,8 @@ namespace ErsatzCiv
         {
             InitializeComponent();
             _engine = engine;
-            ComboBoxAdvancePick.ItemsSource = _engine.GetAvailableAdvances();
-            ComboBoxAdvancePick.SelectedItem = _engine.CurrentAdvance;
+            ComboBoxAdvancePick.ItemsSource = _engine.HumanPlayer.GetAvailableAdvances();
+            ComboBoxAdvancePick.SelectedItem = _engine.HumanPlayer.CurrentAdvance;
             ComboBoxEra.ItemsSource = Enum.GetValues(typeof(EraPivot));
         }
 

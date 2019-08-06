@@ -36,7 +36,7 @@ namespace ErsatzCiv
         {
             if (!string.IsNullOrWhiteSpace(TextBoxCityName.Text))
             {
-                UnitUsed = _engine.CurrentUnit; // important because "BuildCity()" changes the "CurrentUnit" value !
+                UnitUsed = _engine.HumanPlayer.CurrentUnit; // important because "BuildCity()" changes the "CurrentUnit" value !
                 City = _engine.BuildCity(TextBoxCityName.Text.Trim(), out bool nonUniquenameError);
                 if (nonUniquenameError)
                 {
