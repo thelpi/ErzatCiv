@@ -204,6 +204,7 @@ namespace ErsatzCivLib.Model.Persistent
                 if (_instances == null)
                 {
                     _instances = Tools.GetInstancesOfTypeFromStaticFields<RegimePivot>();
+                    _instances.Remove(RegimePivot.Anarchy);
                 }
                 return _instances;
             }
