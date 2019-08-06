@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
 namespace ErsatzCivLib.Model.Persistent
 {
@@ -326,11 +325,7 @@ namespace ErsatzCivLib.Model.Persistent
             {
                 if (_instances == null)
                 {
-                    _instances = typeof(CivilizationPivot)
-                        .GetFields(BindingFlags.Static | BindingFlags.Public)
-                        .Select(f => f.GetValue(null) as CivilizationPivot)
-                        .Where(v => !(v is null))
-                        .ToList();
+                    _instances = Tools.GetInstancesOfTypeFromStaticFields<CivilizationPivot>();
                 }
                 return _instances;
             }

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 
 namespace ErsatzCivLib.Model.Persistent
 {
@@ -205,11 +203,7 @@ namespace ErsatzCivLib.Model.Persistent
             {
                 if (_instances == null)
                 {
-                    _instances = typeof(RegimePivot)
-                        .GetFields(BindingFlags.Static | BindingFlags.Public)
-                        .Select(f => f.GetValue(null) as RegimePivot)
-                        .Where(v => !(v is null) && v != Anarchy)
-                        .ToList();
+                    _instances = Tools.GetInstancesOfTypeFromStaticFields<RegimePivot>();
                 }
                 return _instances;
             }

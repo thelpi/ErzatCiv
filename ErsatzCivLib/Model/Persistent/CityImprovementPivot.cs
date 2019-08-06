@@ -24,8 +24,8 @@ namespace ErsatzCivLib.Model.Persistent
         public int SellValue { get; private set; }
 
         private CityImprovementPivot(int productivityCost, int maintenanceCost, int purchasePrice,
-            int sellValue, string name, bool hasCitizenMoodEffect) :
-            base (productivityCost, name, hasCitizenMoodEffect)
+            int sellValue, string name, bool hasCitizenMoodEffect, AdvancePivot advance) :
+            base (productivityCost, advance, name, hasCitizenMoodEffect)
         {
             MaintenanceCost = maintenanceCost;
             PurchasePrice = purchasePrice;
@@ -79,29 +79,32 @@ namespace ErsatzCivLib.Model.Persistent
 
         #region Static instances
 
-        public static readonly CityImprovementPivot Aqueduc = new CityImprovementPivot(120, 2, 480, 120, "Aqueduc", false);
-        public static readonly CityImprovementPivot Barracks = new CityImprovementPivot(40, 2, 160, 40, "Barracks", false);
-        public static readonly CityImprovementPivot CityWalls = new CityImprovementPivot(120, 2, 480, 120, "CityWalls", false);
-        public static readonly CityImprovementPivot Colosseum = new CityImprovementPivot(100, 4, 400, 100, "Colosseum", true);
-        public static readonly CityImprovementPivot Courthouse = new CityImprovementPivot(80, 1, 320, 80, "Courthouse", false);
-        public static readonly CityImprovementPivot Granary = new CityImprovementPivot(60, 1, 240, 60, "Granary", false);
-        public static readonly CityImprovementPivot Library = new CityImprovementPivot(80, 1, 320, 80, "Library", false);
-        public static readonly CityImprovementPivot Marketplace = new CityImprovementPivot(80, 1, 320, 80, "Marketplace", false);
-        public static readonly CityImprovementPivot Temple = new CityImprovementPivot(40, 1, 160, 40, "Temple", true);
-        // TODO : add new instances to "Instances".
+        public static readonly CityImprovementPivot Aqueduc = new CityImprovementPivot(120, 2, 480, 120, "Aqueduc", false, AdvancePivot.Construction);
+        public static readonly CityImprovementPivot Barracks = new CityImprovementPivot(40, 2, 160, 40, "Barracks", false, null);
+        public static readonly CityImprovementPivot CityWalls = new CityImprovementPivot(120, 2, 480, 120, "CityWalls", false, AdvancePivot.Masonry);
+        public static readonly CityImprovementPivot Colosseum = new CityImprovementPivot(100, 4, 400, 100, "Colosseum", true, AdvancePivot.Construction);
+        public static readonly CityImprovementPivot Courthouse = new CityImprovementPivot(80, 1, 320, 80, "Courthouse", false, AdvancePivot.CodeOfLaws);
+        public static readonly CityImprovementPivot Granary = new CityImprovementPivot(60, 1, 240, 60, "Granary", false, AdvancePivot.Pottery);
+        public static readonly CityImprovementPivot Library = new CityImprovementPivot(80, 1, 320, 80, "Library", false, AdvancePivot.Writing);
+        public static readonly CityImprovementPivot Marketplace = new CityImprovementPivot(80, 1, 320, 80, "Marketplace", false, AdvancePivot.Currency);
+        public static readonly CityImprovementPivot Temple = new CityImprovementPivot(40, 1, 160, 40, "Temple", true, AdvancePivot.CeremonialBurial);
 
-        public static readonly IReadOnlyCollection<CityImprovementPivot> Instances = new List<CityImprovementPivot>
+        private static List<CityImprovementPivot> _instances = null;
+
+        /// <summary>
+        /// List of every <see cref="CityImprovementPivot"/> instances.
+        /// </summary>
+        public static IReadOnlyCollection<CityImprovementPivot> Instances
         {
-            Aqueduc,
-            Barracks,
-            CityWalls,
-            Colosseum,
-            Courthouse,
-            Granary,
-            Library,
-            Marketplace,
-            Temple
-        };
+            get
+            {
+                if (_instances == null)
+                {
+                    _instances = Tools.GetInstancesOfTypeFromStaticFields<CityImprovementPivot>();
+                }
+                return _instances;
+            }
+        }
 
         #endregion
     }

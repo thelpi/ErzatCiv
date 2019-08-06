@@ -9,6 +9,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using ErsatzCiv.Properties;
 using ErsatzCivLib.Model;
+using ErsatzCivLib.Model.Persistent;
 using Biome = ErsatzCivLib.Model.Persistent.BiomePivot;
 
 namespace ErsatzCiv
@@ -226,22 +227,22 @@ namespace ErsatzCiv
             var b3 = new Border { BorderThickness = new Thickness(0.5), BorderBrush = Brushes.DarkGray };
             var b4 = new Border { BorderThickness = new Thickness(0.5), BorderBrush = Brushes.DarkGray };
 
-            if (square.Rivers.Contains(MapSquarePivot.CardinalPivot.Top))
+            if (square.Rivers.Contains(CardinalPivot.Top))
             {
                 b1.BorderBrush = Brushes.Blue;
                 b1.BorderThickness = new Thickness(1);
             }
-            if (square.Rivers.Contains(MapSquarePivot.CardinalPivot.Right))
+            if (square.Rivers.Contains(CardinalPivot.Right))
             {
                 b2.BorderBrush = Brushes.Blue;
                 b2.BorderThickness = new Thickness(1);
             }
-            if (square.Rivers.Contains(MapSquarePivot.CardinalPivot.Bottom))
+            if (square.Rivers.Contains(CardinalPivot.Bottom))
             {
                 b3.BorderBrush = Brushes.Blue;
                 b3.BorderThickness = new Thickness(1);
             }
-            if (square.Rivers.Contains(MapSquarePivot.CardinalPivot.Left))
+            if (square.Rivers.Contains(CardinalPivot.Left))
             {
                 b4.BorderBrush = Brushes.Blue;
                 b4.BorderThickness = new Thickness(1);

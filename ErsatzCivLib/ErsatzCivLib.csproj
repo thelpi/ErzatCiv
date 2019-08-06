@@ -41,7 +41,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Model\Events\NextUnitEventArgs.cs" />
+    <Compile Include="Model\Events\SquareChangedEventArgs.cs" />
     <Compile Include="Model\Persistent\CapitalizationPivot.cs" />
+    <Compile Include="Model\Persistent\CardinalPivot.cs" />
     <Compile Include="Model\Persistent\CityImprovementPivot.cs" />
     <Compile Include="Model\BuildablePivot.cs" />
     <Compile Include="Model\Persistent\AdvancePivot.cs" />

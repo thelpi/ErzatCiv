@@ -43,7 +43,7 @@ namespace ErsatzCiv
 
         #region Events
 
-        private void UpdateSquareMap(object sender, MapSquarePivot.SquareChangedEventArgs evt)
+        private void UpdateSquareMap(object sender, SquareChangedEventArgs evt)
         {
             if (evt?.MapSquare != null)
             {

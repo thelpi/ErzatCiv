@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ErsatzCivLib.Model.Events;
 using ErsatzCivLib.Model.Persistent;
 using ErsatzCivLib.Model.Units;
 
@@ -399,26 +400,6 @@ namespace ErsatzCivLib.Model
         public override int GetHashCode()
         {
             return Row ^ Column;
-        }
-
-        [Serializable]
-        public class SquareChangedEventArgs : EventArgs
-        {
-            public MapSquarePivot MapSquare { get; private set; }
-
-            public SquareChangedEventArgs(MapSquarePivot mapSquare)
-            {
-                MapSquare = mapSquare;
-            }
-        }
-
-        [Serializable]
-        public enum CardinalPivot
-        {
-            Top,
-            Bottom,
-            Right,
-            Left
         }
     }
 }

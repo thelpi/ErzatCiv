@@ -6,8 +6,8 @@ namespace ErsatzCivLib.Model.Persistent
     [Serializable]
     public class WonderPivot : BuildablePivot
     {
-        private WonderPivot(int productivityCost, string name = null, bool hasCitizenMoodEffect = false) :
-            base(productivityCost, name, hasCitizenMoodEffect)
+        private WonderPivot(int productivityCost, AdvancePivot advance, string name = null, bool hasCitizenMoodEffect = false) :
+            base(productivityCost, advance, name, hasCitizenMoodEffect)
         { }
 
         public bool Equals(WonderPivot other)
@@ -57,12 +57,24 @@ namespace ErsatzCivLib.Model.Persistent
 
         #region Static instances
 
-        // TODO : add new instances to "Instances".
+        // TODO
 
-        public static readonly IReadOnlyCollection<WonderPivot> Instances = new List<WonderPivot>
+        private static List<WonderPivot> _instances = null;
+
+        /// <summary>
+        /// List of every <see cref="WonderPivot"/> instances.
+        /// </summary>
+        public static IReadOnlyCollection<WonderPivot> Instances
         {
-
-        };
+            get
+            {
+                if (_instances == null)
+                {
+                    _instances = Tools.GetInstancesOfTypeFromStaticFields<WonderPivot>();
+                }
+                return _instances;
+            }
+        }
 
         #endregion
     }

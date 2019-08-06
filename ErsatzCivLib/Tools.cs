@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using ErsatzCivLib.Model.Persistent;
 
 namespace ErsatzCivLib
@@ -52,6 +55,15 @@ namespace ErsatzCivLib
             }
 
             return row;
+        }
+
+        internal static List<T> GetInstancesOfTypeFromStaticFields<T>() where T : class
+        {
+            return typeof(T)
+                .GetFields(BindingFlags.Static | BindingFlags.Public)
+                .Select(f => f.GetValue(null) as T)
+                .Where(v => !(v is null))
+                .ToList();
         }
     }
 }

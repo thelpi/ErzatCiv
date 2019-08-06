@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using ErsatzCivLib.Model;
+using ErsatzCivLib.Model.Events;
 using ErsatzCivLib.Model.Persistent;
 
 namespace ErsatzCivLib
@@ -164,7 +165,7 @@ namespace ErsatzCivLib
             return HumanPlayer.WorkerAction(actionPivot, IsCity);
         }
 
-        public void SubscribeToMapSquareChangeEvent(EventHandler<MapSquarePivot.SquareChangedEventArgs> handler)
+        public void SubscribeToMapSquareChangeEvent(EventHandler<SquareChangedEventArgs> handler)
         {
             foreach (var ms in Map)
             {

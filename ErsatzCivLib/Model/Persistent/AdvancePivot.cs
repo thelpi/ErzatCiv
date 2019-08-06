@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
 namespace ErsatzCivLib.Model.Persistent
 {
@@ -454,27 +453,24 @@ namespace ErsatzCivLib.Model.Persistent
             Name = "Genetic Engineering",
             _prerequisites = new List<AdvancePivot> { Medicine, Corporation }
         };
+        // TODO : manage future techs.
+
+        private static Dictionary<EraPivot, List<AdvancePivot>> _advancesByEra = null;
 
         public static IReadOnlyDictionary<EraPivot, List<AdvancePivot>> AdvancesByEra
         {
             get
             {
-                return typeof(AdvancePivot)
-                    .GetFields(BindingFlags.Static | BindingFlags.Public)
-                    .Select(m => m.GetValue(null) as AdvancePivot)
-                    .Where(v => !(v is null))
-                    .GroupBy(a => a.Era)
-                    .ToDictionary(a => a.Key, a => a.ToList());
+                if (_advancesByEra == null)
+                {
+                    _advancesByEra =
+                        Tools.GetInstancesOfTypeFromStaticFields<AdvancePivot>()
+                            .GroupBy(a => a.Era)
+                            .ToDictionary(a => a.Key, a => a.ToList());
+                }
+                return _advancesByEra;
             }
         }
-
-        // TODO : manage future techs.
-        /*public static readonly AdvancePivot FutureTech = new AdvancePivot
-        {
-            Era = EraPivot.ModernAge,
-            Name = "Future Tech",
-            _prerequisite = new List<AdvancePivot> { FusionPower }
-        };*/
 
         #endregion
     }
