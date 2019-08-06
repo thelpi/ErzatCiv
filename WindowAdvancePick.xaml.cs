@@ -5,7 +5,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using ErsatzCivLib;
-using ErsatzCivLib.Model.Persistent;
+using ErsatzCivLib.Model.Enums;
+using ErsatzCivLib.Model.Static;
 
 namespace ErsatzCiv
 {

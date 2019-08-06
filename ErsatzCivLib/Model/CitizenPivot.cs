@@ -1,6 +1,7 @@
 ﻿using System;
+using ErsatzCivLib.Model.Enums;
 
-namespace ErsatzCivLib.Model.Persistent
+namespace ErsatzCivLib.Model
 {
     [Serializable]
     public class CitizenPivot : IComparable<CitizenPivot>, IEquatable<CitizenPivot>

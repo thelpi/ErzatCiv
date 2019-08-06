@@ -1,24 +1,24 @@
 ﻿using System;
 
-namespace ErsatzCivLib.Model.MapEnums
+namespace ErsatzCivLib.Model.Enums
 {
     /// <summary>
-    /// Levels of temperature.
+    /// Levels of humidity.
     /// </summary>
     [Serializable]
-    public enum TemperaturePivot
+    public enum HumidityPivot
     {
         /// <summary>
-        /// Cold.
+        /// Dry.
         /// </summary>
-        Cold,
+        Dry,
         /// <summary>
-        /// Temperate.
+        /// Average.
         /// </summary>
-        Temperate,
+        Average,
         /// <summary>
-        /// Hot.
+        /// Wet.
         /// </summary>
-        Hot
+        Wet
     }
 }

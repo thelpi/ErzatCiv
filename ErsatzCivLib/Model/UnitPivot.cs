@@ -1,5 +1,7 @@
-﻿using System;
-using ErsatzCivLib.Model.Persistent;
+﻿
+using System;
+using ErsatzCivLib.Model.Enums;
+using ErsatzCivLib.Model.Static;
 
 namespace ErsatzCivLib.Model
 {

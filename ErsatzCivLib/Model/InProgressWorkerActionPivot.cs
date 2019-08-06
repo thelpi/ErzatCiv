@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using ErsatzCivLib.Model.Persistent;
+using ErsatzCivLib.Model.Static;
 using ErsatzCivLib.Model.Units;
 
 namespace ErsatzCivLib.Model

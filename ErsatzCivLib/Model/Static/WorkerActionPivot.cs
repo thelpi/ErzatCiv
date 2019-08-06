@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ErsatzCivLib.Model.Persistent
+namespace ErsatzCivLib.Model.Static
 {
     /// <summary>
     /// Represents a worker action.

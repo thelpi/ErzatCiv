@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ErsatzCivLib.Model.Persistent
+namespace ErsatzCivLib.Model.Static
 {
     [Serializable]
     public class WonderPivot : BuildablePivot

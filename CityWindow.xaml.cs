@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Shapes;
 using ErsatzCivLib;
 using ErsatzCivLib.Model;
-using ErsatzCivLib.Model.Persistent;
 
 namespace ErsatzCiv
 {

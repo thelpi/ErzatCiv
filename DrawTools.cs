@@ -9,8 +9,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using ErsatzCiv.Properties;
 using ErsatzCivLib.Model;
-using ErsatzCivLib.Model.Persistent;
-using Biome = ErsatzCivLib.Model.Persistent.BiomePivot;
+using ErsatzCivLib.Model.Enums;
+using Biome = ErsatzCivLib.Model.Static.BiomePivot;
 
 namespace ErsatzCiv
 {

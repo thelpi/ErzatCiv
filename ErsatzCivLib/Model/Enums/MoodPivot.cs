@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ErsatzCivLib.Model.Persistent
+namespace ErsatzCivLib.Model.Enums
 {
     [Serializable]
     public enum MoodPivot

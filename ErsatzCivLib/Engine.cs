@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using ErsatzCivLib.Model;
+using ErsatzCivLib.Model.Enums;
 using ErsatzCivLib.Model.Events;
-using ErsatzCivLib.Model.MapEnums;
-using ErsatzCivLib.Model.Persistent;
+using ErsatzCivLib.Model.Static;
 
 namespace ErsatzCivLib
 {

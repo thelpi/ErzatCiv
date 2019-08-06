@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ErsatzCivLib.Model.MapEnums
+namespace ErsatzCivLib.Model.Enums
 {
     /// <summary>
     /// Represents the land organization inside the map.

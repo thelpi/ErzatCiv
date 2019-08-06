@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 using ErsatzCivLib;
-using ErsatzCivLib.Model.Persistent;
+using ErsatzCivLib.Model.Static;
 
 namespace ErsatzCiv
 {

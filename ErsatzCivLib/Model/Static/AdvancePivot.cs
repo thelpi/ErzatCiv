@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ErsatzCivLib.Model.Enums;
 
-namespace ErsatzCivLib.Model.Persistent
+namespace ErsatzCivLib.Model.Static
 {
     [Serializable]
     public class AdvancePivot : IEquatable<AdvancePivot>

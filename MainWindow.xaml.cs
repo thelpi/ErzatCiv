@@ -7,8 +7,9 @@ using System.Windows.Shapes;
 using ErsatzCiv.Properties;
 using ErsatzCivLib;
 using ErsatzCivLib.Model;
+using ErsatzCivLib.Model.Enums;
 using ErsatzCivLib.Model.Events;
-using ErsatzCivLib.Model.Persistent;
+using ErsatzCivLib.Model.Static;
 
 namespace ErsatzCiv
 {
@@ -248,11 +249,18 @@ namespace ErsatzCiv
                 else
                 {
                     MessageBox.Show("Save done !", "ErsatzCiv");
+                    // Quit hard.
+                    Environment.Exit(0);
                 }
             }
             else if (res == MessageBoxResult.Cancel)
             {
                 e.Cancel = true;
+            }
+            else
+            {
+                // Quit hard.
+                Environment.Exit(0);
             }
         }
 

@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ErsatzCivLib.Model.Enums;
 using ErsatzCivLib.Model.Events;
-using ErsatzCivLib.Model.Persistent;
+using ErsatzCivLib.Model.Static;
 using ErsatzCivLib.Model.Units;
 
 namespace ErsatzCivLib.Model

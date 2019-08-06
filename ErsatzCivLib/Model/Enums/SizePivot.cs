@@ -1,32 +1,32 @@
 ﻿using System;
 
-namespace ErsatzCivLib.Model.MapEnums
+namespace ErsatzCivLib.Model.Enums
 {
     /// <summary>
-    /// Represents the land coverage of the map.
+    /// Represents the map size.
     /// </summary>
     [Serializable]
-    public enum LandCoveragePivot
+    public enum SizePivot
     {
         /// <summary>
-        /// Very low.
+        /// Very small.
         /// </summary>
-        VeryLow,
+        VerySmall = 1, // do not change the indice !
         /// <summary>
-        /// Low.
+        /// Small.
         /// </summary>
-        Low,
+        Small,
         /// <summary>
         /// Medium.
         /// </summary>
         Medium,
         /// <summary>
-        /// High.
+        /// Large.
         /// </summary>
-        High,
+        Large,
         /// <summary>
-        /// Very high.
+        /// Very large.
         /// </summary>
-        VeryHigh
+        VeryLarge
     }
 }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ErsatzCivLib.Model.Persistent
+namespace ErsatzCivLib.Model.Static
 {
     /// <summary>
     /// Represents a civilization pick.

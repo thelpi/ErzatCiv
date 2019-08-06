@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ErsatzCivLib.Model.Persistent
+namespace ErsatzCivLib.Model.Static
 {
     /// <summary>
     /// Represents a political regime.

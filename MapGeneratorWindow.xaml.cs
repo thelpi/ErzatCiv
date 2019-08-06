@@ -3,8 +3,8 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using ErsatzCivLib;
-using ErsatzCivLib.Model;
-using ErsatzCivLib.Model.MapEnums;
+using ErsatzCivLib.Model.Enums;
+using ErsatzCivLib.Model.Static;
 
 namespace ErsatzCiv
 {
@@ -28,7 +28,7 @@ namespace ErsatzCiv
             ComboBoxTemperature.ItemsSource = Enum.GetValues(typeof(TemperaturePivot));
             ComboBoxAge.ItemsSource = Enum.GetValues(typeof(AgePivot));
             ComboBoxHumidity.ItemsSource = Enum.GetValues(typeof(HumidityPivot));
-            ComboBoxCivilization.ItemsSource = ErsatzCivLib.Model.Persistent.CivilizationPivot.Instances;
+            ComboBoxCivilization.ItemsSource = CivilizationPivot.Instances;
 
             ComboBoxSize.SelectedValue = SizePivot.Medium;
             ComboBoxLandShape.SelectedValue = LandShapePivot.Continent;
@@ -36,7 +36,7 @@ namespace ErsatzCiv
             ComboBoxTemperature.SelectedValue = TemperaturePivot.Temperate;
             ComboBoxAge.SelectedValue = AgePivot.Average;
             ComboBoxHumidity.SelectedValue = HumidityPivot.Average;
-            ComboBoxCivilization.SelectedValue = ErsatzCivLib.Model.Persistent.CivilizationPivot.French;
+            ComboBoxCivilization.SelectedValue = CivilizationPivot.French;
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
@@ -85,7 +85,7 @@ namespace ErsatzCiv
             e.Result = new Engine((SizePivot)parameters[0], (LandShapePivot)parameters[1],
                 (LandCoveragePivot)parameters[2], (TemperaturePivot)parameters[3],
                 (AgePivot)parameters[4], (HumidityPivot)parameters[5],
-                (ErsatzCivLib.Model.Persistent.CivilizationPivot)parameters[6], (int)parameters[7]);
+                (CivilizationPivot)parameters[6], (int)parameters[7]);
         }
 
         private void EndOfMapGeneration(object sender, RunWorkerCompletedEventArgs e)
@@ -112,7 +112,7 @@ namespace ErsatzCiv
 
         private void ComboBoxSize_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            var count = ErsatzCivLib.Model.Persistent.CivilizationPivot.Instances.Count;
+            var count = CivilizationPivot.Instances.Count;
             if (ComboBoxSize.SelectedItem != null)
             {
                 count /= (6 - (int)ComboBoxSize.SelectedItem);
