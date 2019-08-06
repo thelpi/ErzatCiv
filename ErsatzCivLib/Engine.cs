@@ -12,23 +12,17 @@ namespace ErsatzCivLib
     [Serializable]
     public class Engine
     {
-        private const int TREASURE_START = 100;
-
         private readonly PlayerPivot _humanPlayer;
         private readonly List<PlayerPivot> _iaPlayers = new List<PlayerPivot>();
         private int _currentUnitIndex;
         private int _previousUnitIndex;
         private List<UnitPivot> _units = new List<UnitPivot>();
-        private List<CityPivot> _cities = new List<CityPivot>();
-        private List<AdvancePivot> _advances = new List<AdvancePivot>();
 
         public int CurrentTurn { get; private set; }
         // TODO : wrong version.
         public int CurrentYear { get { return (CurrentTurn * 10) - 4000; } }
         public MapPivot Map { get; private set; }
         public IReadOnlyCollection<UnitPivot> Units { get { return _units; } }
-        public IReadOnlyCollection<CityPivot> Cities { get { return _cities; } }
-        public IReadOnlyCollection<AdvancePivot> Advances { get { return _advances; } }
         public UnitPivot CurrentUnit
         {
             get
@@ -65,35 +59,13 @@ namespace ErsatzCivLib
                 return _units[_previousUnitIndex];
             }
         }
-        public int ScienceByTurn
+        public IReadOnlyCollection<CityPivot> GlobalCities
         {
             get
             {
-                return _cities.Sum(c => c.Science);
+                return _iaPlayers.SelectMany(iap => iap.Cities).Concat(_humanPlayer.Cities).ToList();
             }
         }
-        public int ScienceStack { get; private set; }
-        public int RemainingScience
-        {
-            get
-            {
-                return CurrentAdvance == null ? 0 : (
-                    (int)Math.Ceiling((AdvancePivot.SCIENCE_COST - ScienceStack) / (double)ScienceByTurn)
-                );
-            }
-        }
-        public AdvancePivot CurrentAdvance { get; private set; }
-        public RegimePivot CurrentRegime { get; private set; }
-        public int Treasure { get; private set; }
-        public int TreasureByTurn
-        {
-            get
-            {
-                // TODO
-                return _cities.Sum(c => c.Commerce + c.Tax);
-            }
-        }
-        public EraPivot CurrentEra { get { return (EraPivot)(_advances.Count == 0 ? 0 : _advances.Max(a => (int)a.Era)); } }
 
         [field: NonSerialized]
         public event EventHandler<NextUnitEventArgs> NextUnitEvent;
@@ -129,9 +101,6 @@ namespace ErsatzCivLib
                 _iaPlayers.Add(new PlayerPivot(iaCiv, true));
             }
 
-            CurrentRegime = RegimePivot.Despotism;
-            Treasure = TREASURE_START;
-
             Map = new MapPivot(mapSize, mapShape, landCoverage, temperature, age, humidity);
 
             MapSquarePivot ms = null;
@@ -151,32 +120,15 @@ namespace ErsatzCivLib
             CurrentTurn = 1;
         }
 
-        public CityPivot BuildCity(string name, out bool notUniqueNameError)
+        public CityPivot BuildCity(PlayerPivot player, string name, out bool notUniqueNameError)
         {
             notUniqueNameError = false;
-
-            if (!CanBuildCity() || string.IsNullOrWhiteSpace(name))
+            if (player == null || string.IsNullOrWhiteSpace(name))
             {
                 return null;
             }
 
-            if (_cities.Any(c => c.Name.Equals(name.ToLower(), StringComparison.InvariantCultureIgnoreCase)))
-            {
-                notUniqueNameError = true;
-                return null;
-            }
-
-            var settler = CurrentUnit as SettlerPivot;
-            var sq = CurrentUnit.MapSquareLocation;
-
-            var city = new CityPivot(CurrentTurn, name, sq, ComputeCityAvailableMapSquares, CapitalizationPivot.Default);
-            sq.ApplyCityActions(city);
-
-            _cities.Add(city);
-            _units.Remove(settler);
-            SetUnitIndex(true, false);
-
-            return city;
+            return player.BuildCity(CurrentTurn, name, out notUniqueNameError, IsCity);
         }
 
         private List<MapSquarePivot> ComputeCityAvailableMapSquares(CityPivot city)
@@ -259,8 +211,24 @@ namespace ErsatzCivLib
 
         public IDictionary<CityPivot, BuildablePivot> NewTurn()
         {
+            // TODO : run IA actions !
+
+            var citiesWithDoneProduction = NextTurnForPlayer(_humanPlayer);
+            foreach (var iaPlayer in _iaPlayers)
+            {
+                NextTurnForPlayer(iaPlayer);
+            }
+
+            CurrentTurn++;
+
+            return citiesWithDoneProduction;
+        }
+
+        private Dictionary<CityPivot, BuildablePivot> NextTurnForPlayer(PlayerPivot player)
+        {
             var citiesWithDoneProduction = new Dictionary<CityPivot, BuildablePivot>();
-            foreach (var city in _cities)
+
+            foreach (var city in player.Cities)
             {
                 var produced = city.UpdateStatus();
                 if (produced != null)
@@ -285,24 +253,9 @@ namespace ErsatzCivLib
                 u.Release();
             }
 
-            if (CurrentAdvance != null)
-            {
-                ScienceStack += ScienceByTurn;
-                if (ScienceStack >= AdvancePivot.SCIENCE_COST)
-                {
-                    _advances.Add(CurrentAdvance);
-                    ScienceStack = 0;
-                    CurrentAdvance = null;
-                }
-            }
-            Treasure += TreasureByTurn;
-            if (Treasure < 0)
-            {
-                // TODO
-                throw new NotImplementedException();
-            }
+            player.CheckScienceAtNextTurn();
+            player.CheckTreasureAtNextTurn();
 
-            CurrentTurn++;
             SetUnitIndex(false, true);
 
             return citiesWithDoneProduction;
@@ -310,7 +263,7 @@ namespace ErsatzCivLib
 
         internal bool IsCity(MapSquarePivot square)
         {
-            return _cities.Any(c => c.MapSquareLocation == square);
+            return GlobalCities.Any(c => c.MapSquareLocation == square);
         }
 
         public bool WorkerAction(WorkerActionPivot actionPivot)
@@ -492,12 +445,12 @@ namespace ErsatzCivLib
 
         private CityPivot GetCityFromCitizen(CityPivot.CitizenPivot citizenSource)
         {
-            return _cities.SingleOrDefault(c => c.Citizens.Contains(citizenSource));
+            return GlobalCities.SingleOrDefault(c => c.Citizens.Contains(citizenSource));
         }
 
         internal bool OccupiedByCity(MapSquarePivot mapSquare, CityPivot exceptCity = null)
         {
-            return _cities.Any(c => (exceptCity == null || exceptCity != c) && c.Citizens.Any(cc =>  cc.MapSquare == mapSquare));
+            return GlobalCities.Any(c => (exceptCity == null || exceptCity != c) && c.Citizens.Any(cc =>  cc.MapSquare == mapSquare));
         }
 
         /// <summary>
@@ -644,61 +597,19 @@ namespace ErsatzCivLib
         }
 
         /// <summary>
-        /// Tries to modify the <see cref="AdvancePivot"/> currently in progress.
+        /// Calls <see cref="PlayerPivot.ChangeCurrentAdvance(AdvancePivot)"/> for the specified player.
         /// </summary>
-        /// <remarks>
-        /// If an <see cref="AdvancePivot"/> was already in progress,
-        /// calling this method divide <see cref="ScienceStack"/> in half.
-        /// </remarks>
+        /// <param name="player">The <see cref="PlayerPivot"/>.</param>
         /// <param name="advance">The <see cref="AdvancePivot"/>.</param>
-        /// <returns><c>True</c> if the current advance has been changed; <c>False</c> otherwise.</returns>
-        public bool ChangeCurrentAdvance(AdvancePivot advance)
+        /// <returns><c>True</c> if success; <c>False</c> if failure.</returns>
+        public bool ChangeCurrentAdvance(PlayerPivot player, AdvancePivot advance)
         {
-            // Conditions to search :
-            // - not already known
-            // - prerequisites are known
-            // - same era as the current one, or next one if the current era is done
-            if (advance == null
-                || _advances.Contains(advance)
-                || (advance.Prerequisites.Any() && !advance.Prerequisites.All(_advances.Contains))
-                || ((int)advance.Era > (int)CurrentEra && GetAvailableAdvances().Any()))
+            if (player == null || advance == null)
             {
                 return false;
             }
 
-            if (CurrentAdvance != null && CurrentAdvance != advance)
-            {
-                ScienceStack /= 2;
-            }
-            CurrentAdvance = advance;
-            return true;
-        }
-
-        /// <summary>
-        /// Gets every <see cref="AdvancePivot"/> available to search in the current context.
-        /// </summary>
-        /// <returns>Collection of <see cref="AdvancePivot"/>.</returns>
-        public IReadOnlyCollection<AdvancePivot> GetAvailableAdvances()
-        {
-            var currentEraList = AdvancePivot.AdvancesByEra[CurrentEra]
-                .Where(a => !_advances.Contains(a) && a.Prerequisites.All(_advances.Contains))
-                .ToList();
-
-            if (!currentEraList.Any())
-            {
-                if (CurrentEra != EraPivot.ModernAge)
-                {
-                    // TODO : "futures advances"
-                }
-                else
-                {
-                    currentEraList = AdvancePivot.AdvancesByEra[(EraPivot)(((int)CurrentEra) + 1)]
-                        .Where(a => !_advances.Contains(a) && a.Prerequisites.All(_advances.Contains))
-                        .ToList();
-                }
-            }
-
-            return currentEraList;
+            return player.ChangeCurrentAdvance(advance);
         }
 
         public class NextUnitEventArgs : EventArgs
