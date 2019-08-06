@@ -313,6 +313,29 @@ namespace ErsatzCivLib.Model
         #region Public and internal methods
 
         /// <summary>
+        /// Gets the <c>8</c> adjacent squares of a <see cref="MapSquarePivot"/>.
+        /// Invalid values are cleaned, so the final list might not contains <c>8</c> elements.
+        /// </summary>
+        /// <param name="mapSquare">The location.</param>
+        /// <returns>List of <see cref="MapSquarePivot"/>, one by <see cref="DirectionPivot"/>.</returns>
+        internal IReadOnlyDictionary<DirectionPivot, MapSquarePivot> GetAdjacentMapSquares(MapSquarePivot mapSquare)
+        {
+            var msList = new Dictionary<DirectionPivot, MapSquarePivot>
+            {
+                { DirectionPivot.TopLeft, this[mapSquare.Row - 1, mapSquare.Column - 1] },
+                { DirectionPivot.Left, this[mapSquare.Row, mapSquare.Column - 1] },
+                { DirectionPivot.BottomLeft, this[mapSquare.Row + 1, mapSquare.Column - 1] },
+                { DirectionPivot.Top, this[mapSquare.Row - 1, mapSquare.Column] },
+                { DirectionPivot.Bottom, this[mapSquare.Row + 1, mapSquare.Column] },
+                { DirectionPivot.TopRight, this[mapSquare.Row - 1, mapSquare.Column + 1] },
+                { DirectionPivot.Right, this[mapSquare.Row, mapSquare.Column + 1] },
+                { DirectionPivot.BottomRight, this[mapSquare.Row + 1, mapSquare.Column + 1] },
+            };
+
+            return msList.Where(x => x.Value != null).ToDictionary(x => x.Key, x => x.Value);
+        }
+
+        /// <summary>
         /// Computes the <see cref="TemperaturePivot"/> at a specified height.
         /// </summary>
         /// <param name="y">The height.</param>

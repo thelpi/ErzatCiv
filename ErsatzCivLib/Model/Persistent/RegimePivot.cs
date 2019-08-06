@@ -67,8 +67,8 @@ namespace ErsatzCivLib.Model.Persistent
         /// <summary>
         /// Operator "==" override. Checks equality between two instances.
         /// </summary>
-        /// <param name="r1">The first <see cref="CivilizationPivot"/>.</param>
-        /// <param name="r2">The second <see cref="CivilizationPivot"/>.</param>
+        /// <param name="r1">The first <see cref="RegimePivot"/>.</param>
+        /// <param name="r2">The second <see cref="RegimePivot"/>.</param>
         /// <returns><c>True</c> if equals; <c>False</c> otherwise.</returns>
         public static bool operator ==(RegimePivot r1, RegimePivot r2)
         {
@@ -83,8 +83,8 @@ namespace ErsatzCivLib.Model.Persistent
         /// <summary>
         /// Operator "!=" override. Checks non-equality between two instances.
         /// </summary>
-        /// <param name="r1">The first <see cref="CivilizationPivot"/>.</param>
-        /// <param name="r2">The second <see cref="CivilizationPivot"/>.</param>
+        /// <param name="r1">The first <see cref="RegimePivot"/>.</param>
+        /// <param name="r2">The second <see cref="RegimePivot"/>.</param>
         /// <returns><c>False</c> if equals; <c>True</c> otherwise.</returns>
         public static bool operator !=(RegimePivot r1, RegimePivot r2)
         {
