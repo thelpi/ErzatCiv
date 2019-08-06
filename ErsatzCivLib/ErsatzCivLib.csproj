@@ -58,6 +58,7 @@
     <Compile Include="Model\MapSquarePivot.cs" />
     <Compile Include="Model\Persistent\BiomePivot.cs" />
     <Compile Include="Model\PlayerPivot.cs" />
+    <Compile Include="Model\TurnConsequencesPivot.cs" />
     <Compile Include="Model\Units\SettlerPivot.cs" />
     <Compile Include="Model\UnitPivot.cs" />
     <Compile Include="Model\Units\WorkerPivot.cs" />

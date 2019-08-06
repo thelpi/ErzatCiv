@@ -25,6 +25,7 @@ namespace ErsatzCivLib
             }
         }
         public PlayerPivot HumanPlayer { get; }
+
         public IReadOnlyCollection<PlayerPivot> Players
         {
             get
@@ -132,25 +133,25 @@ namespace ErsatzCivLib
             HumanPlayer.SetUnitIndex(false, false);
         }
 
-        public IDictionary<CityPivot, BuildablePivot> NewTurn()
+        public TurnConsequencesPivot NewTurn()
         {
             // TODO : run IA actions !
-
 
             foreach (var ms in Map)
             {
                 ms.UpdateActionsProgress();
             }
 
-            var citiesWithDoneProduction = HumanPlayer.NextTurn();
+            var turnConsequences = HumanPlayer.NextTurn();
             foreach (var iaPlayer in _iaPlayers)
             {
-                iaPlayer.NextTurn();
+                var turnConsequencesIa = iaPlayer.NextTurn();
+                // TODO : what do with this ?
             }
 
             CurrentTurn++;
 
-            return citiesWithDoneProduction;
+            return turnConsequences;
         }
 
         internal bool IsCity(MapSquarePivot square)
@@ -439,6 +440,22 @@ namespace ErsatzCivLib
             }
 
             return HumanPlayer.ChangeCurrentAdvance(advance);
+        }
+
+        public bool ChangeCurrentRegime(RegimePivot regimePivot)
+        {
+            if (regimePivot is null || regimePivot == RegimePivot.Anarchy || !HumanPlayer.RevolutionIsDone)
+            {
+                return false;
+            }
+
+            HumanPlayer.ChangeCurrentRegime(regimePivot);
+            return true;
+        }
+
+        public void TriggerRevolution()
+        {
+            HumanPlayer.TriggerRevolution();
         }
     }
 }

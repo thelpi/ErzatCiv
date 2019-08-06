@@ -21,6 +21,7 @@ namespace ErsatzCivLib.Model
         private List<UnitPivot> _units = new List<UnitPivot>();
         private int _currentUnitIndex;
         private int _previousUnitIndex;
+        private int _anarchyTurnsCount;
 
         #region Embedded properties
 
@@ -125,7 +126,7 @@ namespace ErsatzCivLib.Model
             get
             {
                 return CurrentAdvance == null ? 0 : (
-                    (int)Math.Ceiling((AdvancePivot.SCIENCE_COST - ScienceStack) / (double)ScienceByTurn)
+                    ScienceByTurn == 0 ? 9999 : (int)Math.Ceiling((AdvancePivot.SCIENCE_COST - ScienceStack) / (double)ScienceByTurn)
                 );
             }
         }
@@ -150,6 +151,27 @@ namespace ErsatzCivLib.Model
                 return _cities.Sum(c => c.Commerce + c.Tax);
             }
         }
+        /// <summary>
+        /// Number of turns left before the end of a revolution (if any).
+        /// </summary>
+        public int RevolutionTurnsCount
+        {
+            get
+            {
+                var turnsLeft = ((_cities.Count * RegimePivot.REVOLUTION_TURNS_BY_CITY) + 1) - _anarchyTurnsCount;
+                return (int)Math.Ceiling(turnsLeft < 0 ? 0 : turnsLeft);
+            }
+        }
+        /// <summary>
+        /// Gets if a revolution was in progress and now done.
+        /// </summary>
+        public bool RevolutionIsDone
+        {
+            get
+            {
+                return CurrentRegime == RegimePivot.Anarchy && RevolutionTurnsCount == 0;
+            }
+        }
 
         #endregion
 
@@ -160,6 +182,16 @@ namespace ErsatzCivLib.Model
         /// </summary>
         [field: NonSerialized]
         public event EventHandler<NextUnitEventArgs> NextUnitEvent;
+        /// <summary>
+        /// Triggered when <see cref="CurrentRegime"/> changes.
+        /// </summary>
+        [field: NonSerialized]
+        public event EventHandler<EventArgs> NewRegimeEvent;
+        /// <summary>
+        /// Triggered when <see cref="CurrentAdvance"/> changes.
+        /// </summary>
+        [field: NonSerialized]
+        public event EventHandler<EventArgs> NewAdvanceEvent;
 
         #endregion
 
@@ -182,6 +214,64 @@ namespace ErsatzCivLib.Model
             _units.Add(WorkerPivot.CreateAtLocation(beginLocation));
 
             SetUnitIndex(false, true);
+        }
+
+        #region Public methods
+
+        /// <summary>
+        /// Get the list of <see cref="AdvancePivot"/> the player can discover at this point.
+        /// </summary>
+        /// <returns>List of <see cref="AdvancePivot"/>.</returns>
+        public IReadOnlyCollection<AdvancePivot> GetAvailableAdvances()
+        {
+            var currentEraList = AdvancePivot.AdvancesByEra[CurrentEra]
+                .Where(a => !_advances.Contains(a) && a.Prerequisites.All(_advances.Contains))
+                .ToList();
+
+            if (!currentEraList.Any())
+            {
+                if (CurrentEra != EraPivot.ModernAge)
+                {
+                    // TODO : "futures advances"
+                }
+                else
+                {
+                    currentEraList = AdvancePivot.AdvancesByEra[(EraPivot)(((int)CurrentEra) + 1)]
+                        .Where(a => !_advances.Contains(a) && a.Prerequisites.All(_advances.Contains))
+                        .ToList();
+                }
+            }
+
+            return currentEraList;
+        }
+
+        /// <summary>
+        /// Gets every <see cref="RegimePivot"/> instances the player can access to.
+        /// </summary>
+        /// <returns>List of <see cref="RegimePivot"/>.</returns>
+        public IReadOnlyCollection<RegimePivot> GetAvailableRegimes()
+        {
+            return RegimePivot
+                    .Instances
+                    .Where(r => r.AdvancePrerequisite is null || _advances.Contains(r.AdvancePrerequisite))
+                    .ToList();
+        }
+
+        #endregion
+
+        #region Internal methods
+
+        /// <summary>
+        /// Triggrs a revolution; sets <see cref="CurrentRegime"/> to <see cref="RegimePivot.Anarchy"/> for a while.
+        /// </summary>
+        internal void TriggerRevolution()
+        {
+            if (CurrentRegime != RegimePivot.Anarchy)
+            {
+                CurrentRegime = RegimePivot.Anarchy;
+                _anarchyTurnsCount = 0;
+                NewRegimeEvent?.Invoke(this, new EventArgs());
+            }
         }
 
         /// <summary>
@@ -211,6 +301,7 @@ namespace ErsatzCivLib.Model
                 ScienceStack /= 2;
             }
             CurrentAdvance = advance;
+            NewAdvanceEvent?.Invoke(this, new EventArgs());
             return true;
         }
 
@@ -318,8 +409,8 @@ namespace ErsatzCivLib.Model
         /// <summary>
         /// Proceeds to do every actions required by a move to the next turn.
         /// </summary>
-        /// <returns>Dictionary of <see cref="CityPivot"/> with a completed <see cref="BuildablePivot"/>.</returns>
-        internal Dictionary<CityPivot, BuildablePivot> NextTurn()
+        /// <returns>A <see cref="TurnConsequencesPivot"/>.</returns>
+        internal TurnConsequencesPivot NextTurn()
         {
             var citiesWithDoneProduction = new Dictionary<CityPivot, BuildablePivot>();
 
@@ -349,7 +440,14 @@ namespace ErsatzCivLib.Model
 
             SetUnitIndex(false, true);
 
-            return citiesWithDoneProduction;
+            _anarchyTurnsCount++;
+
+            return new TurnConsequencesPivot
+            {
+                EndOfProduction = citiesWithDoneProduction,
+                EndOfRevolution = RevolutionIsDone,
+                EndOfAdvance = CurrentAdvance is null
+            };
         }
 
         /// <summary>
@@ -394,6 +492,17 @@ namespace ErsatzCivLib.Model
         }
 
         /// <summary>
+        /// Sets a new <see cref="RegimePivot"/>.
+        /// </summary>
+        /// <param name="regimePivot">The new <see cref="RegimePivot"/>.</param>
+        internal void ChangeCurrentRegime(RegimePivot regimePivot)
+        {
+            CurrentRegime = regimePivot;
+            _anarchyTurnsCount = 0;
+            NewRegimeEvent?.Invoke(this, new EventArgs());
+        }
+
+        /// <summary>
         /// Tries to trigger a <see cref="WorkerActionPivot"/> for the <see cref="CurrentUnit"/>.
         /// <see cref="CurrentUnit"/> must be a worker.
         /// </summary>
@@ -428,35 +537,6 @@ namespace ErsatzCivLib.Model
             return result;
         }
 
-        #region Public methods
-
-        /// <summary>
-        /// Get the list of <see cref="AdvancePivot"/> the player can discover at this point.
-        /// </summary>
-        /// <returns>List of <see cref="AdvancePivot"/>.</returns>
-        public IReadOnlyCollection<AdvancePivot> GetAvailableAdvances()
-        {
-            var currentEraList = AdvancePivot.AdvancesByEra[CurrentEra]
-                .Where(a => !_advances.Contains(a) && a.Prerequisites.All(_advances.Contains))
-                .ToList();
-
-            if (!currentEraList.Any())
-            {
-                if (CurrentEra != EraPivot.ModernAge)
-                {
-                    // TODO : "futures advances"
-                }
-                else
-                {
-                    currentEraList = AdvancePivot.AdvancesByEra[(EraPivot)(((int)CurrentEra) + 1)]
-                        .Where(a => !_advances.Contains(a) && a.Prerequisites.All(_advances.Contains))
-                        .ToList();
-                }
-            }
-
-            return currentEraList;
-        }
-
         #endregion
 
         #region Private methods
@@ -471,6 +551,7 @@ namespace ErsatzCivLib.Model
                     _advances.Add(CurrentAdvance);
                     ScienceStack = 0;
                     CurrentAdvance = null;
+                    NewAdvanceEvent?.Invoke(this, new EventArgs());
                 }
             }
         }

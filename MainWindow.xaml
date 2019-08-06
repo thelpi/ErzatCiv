@@ -73,7 +73,7 @@
                                 <Label Height="25" Name="LabelYearInfo" />
                                 <Label Margin="0, 2, 0, 0" Height="25" Name="LabelTreasureInfo" />
                                 <StackPanel Margin="0, 2, 0, 0" Height="25" Orientation="Horizontal">
-                                    <Button Height="25" Width="25" ToolTip="Change regime" Name="ButtonChangeRegime" Click="ButtonChangeRegime_Click" />
+                                    <Button Height="25" Width="25" ToolTip="Start a REVOLUTION !" Content="R!" Name="ButtonChangeRegime" Click="ButtonChangeRegime_Click" VerticalAlignment="Top" />
                                     <Label Margin="5, 0, 0, 0" Height="25"  Name="LabelCurrentRegime" />
                                 </StackPanel>
                                 <StackPanel Margin="0, 2, 0, 0" Height="25" Orientation="Horizontal">

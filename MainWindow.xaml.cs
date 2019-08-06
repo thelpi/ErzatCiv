@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -285,7 +286,19 @@ namespace ErsatzCiv
             }
             _freezeActions = true;
 
-            MessageBox.Show("Not implemented yet !");
+            if (_engine.HumanPlayer.CurrentRegime == RegimePivot.Anarchy)
+            {
+                MessageBox.Show("A revolution is already in progress !", "ErsatzCiv");
+            }
+            else
+            {
+                var promptAnswer = MessageBox.Show("Are you sure you want to start a revolution ?", "ErsatzCiv", MessageBoxButton.YesNo);
+                if (promptAnswer == MessageBoxResult.Yes)
+                {
+                    _engine.TriggerRevolution();
+                    MessageBox.Show($"Revolution ! Anarchy will stays for {_engine.HumanPlayer.RevolutionTurnsCount} turns.", "ErsatzCiv");
+                }
+            }
 
             _freezeActions = false;
         }
@@ -419,15 +432,17 @@ namespace ErsatzCiv
         private void InitializeEngineEvents()
         {
             _engine.HumanPlayer.NextUnitEvent += FocusOnUnit;
+            _engine.HumanPlayer.NewAdvanceEvent += delegate (object sender, EventArgs e) { RefreshAdvanceInformations(); };
+            _engine.HumanPlayer.NewRegimeEvent += delegate (object sender, EventArgs e) { RefreshRegimeInformations(); };
             _engine.SubscribeToMapSquareChangeEvent(UpdateSquareMap);
         }
 
         private void RefreshDynamicView()
         {
             LabelYearInfo.Content = $"Current year : {_engine.CurrentYear} (turn {_engine.CurrentTurn})";
-            LabelCurrentRegime.Content = $"Current regime : {_engine.HumanPlayer.CurrentRegime.Name}";
+            RefreshRegimeInformations();
             LabelTreasureInfo.Content = $"Treasure : {_engine.HumanPlayer.Treasure} gold ({_engine.HumanPlayer.TreasureByTurn} by turn)";
-            LabelCurrentAdvance.Content = $"Advance in proress : {_engine.HumanPlayer.CurrentAdvance?.Name ?? "{none}"} (in {_engine.HumanPlayer.TurnsBeforeNewAdvance} turn(s))";
+            RefreshAdvanceInformations();
 
             foreach (var player in _engine.Players)
             {
@@ -446,6 +461,16 @@ namespace ErsatzCiv
 
             // Ensures a refresh of the blinking current unit.
             RecomputeFocus();
+        }
+
+        private void RefreshAdvanceInformations()
+        {
+            LabelCurrentAdvance.Content = $"Advance in proress : {_engine.HumanPlayer.CurrentAdvance?.Name ?? "{none}"} (in {_engine.HumanPlayer.TurnsBeforeNewAdvance} turn(s))";
+        }
+
+        private void RefreshRegimeInformations()
+        {
+            LabelCurrentRegime.Content = $"Current regime : {_engine.HumanPlayer.CurrentRegime.Name}";
         }
 
         private void FocusOn(double nexX, double newY)
@@ -499,9 +524,14 @@ namespace ErsatzCiv
 
         private void MoveToNextTurnAndActAccordingly()
         {
-            var citiesWithDoneProduction = _engine.NewTurn();
+            var turnConsequences = _engine.NewTurn();
+            if (turnConsequences.EndOfRevolution)
+            {
+                new WindowRegimePick(_engine).ShowDialog();
+            }
             if (Settings.Default.openCityWindowAtProductionEnd)
             {
+                var citiesWithDoneProduction = turnConsequences.EndOfProduction;
                 foreach (var city in citiesWithDoneProduction.Keys)
                 {
                     var result = MessageBox.Show($"{city.Name} has built {citiesWithDoneProduction[city].Name} ! Zoom on city ?", "ErsatzCiv", MessageBoxButton.YesNo);
@@ -511,7 +541,7 @@ namespace ErsatzCiv
                     }
                 }
             }
-            if (_engine.HumanPlayer.CurrentAdvance == null)
+            if (turnConsequences.EndOfAdvance)
             {
                 new WindowAdvancePick(_engine).ShowDialog();
             }

@@ -13,6 +13,12 @@ namespace ErsatzCivLib.Model.Persistent
     public class RegimePivot : IEquatable<RegimePivot>
     {
         /// <summary>
+        /// Number of turns before a new <see cref="RegimePivot"/> can be fixed for each city of the civilization.
+        /// </summary>
+        /// <remarks>This value has no meaning per se, but gives the total number of turns in <see cref="Anarchy"/> if multiplied by the civilization's cities count.</remarks>
+        public const double REVOLUTION_TURNS_BY_CITY = 0.5;
+
+        /// <summary>
         /// Name.
         /// </summary>
         public string Name { get; private set; }
@@ -41,6 +47,10 @@ namespace ErsatzCivLib.Model.Persistent
         /// Science discovery speed rate.
         /// </summary>
         public double ScienceRate { get; private set; }
+        /// <summary>
+        /// <see cref="AdvancePivot"/> required to access the instance.
+        /// </summary>
+        public AdvancePivot AdvancePrerequisite { get; private set; }
 
         private RegimePivot() { }
 
@@ -110,7 +120,8 @@ namespace ErsatzCivLib.Model.Persistent
             CommerceBonus = 0,
             CorruptionRate = 0.5,
             WorkerEffiencyRate = 0.5,
-            ScienceRate = 0.5
+            ScienceRate = 0.5,
+            AdvancePrerequisite = null
         };
         /// <summary>
         /// Monarchy regime.
@@ -123,7 +134,8 @@ namespace ErsatzCivLib.Model.Persistent
             CommerceBonus = 0,
             CorruptionRate = 0.75,
             WorkerEffiencyRate = 1,
-            ScienceRate = 0.75
+            ScienceRate = 0.75,
+            AdvancePrerequisite = AdvancePivot.Monarchy
         };
         /// <summary>
         /// Republic regime.
@@ -136,7 +148,8 @@ namespace ErsatzCivLib.Model.Persistent
             CommerceBonus = 0,
             CorruptionRate = 0.75,
             WorkerEffiencyRate = 1,
-            ScienceRate = 1
+            ScienceRate = 1,
+            AdvancePrerequisite = AdvancePivot.Republic
         };
         /// <summary>
         /// Anarchy regime.
@@ -149,7 +162,8 @@ namespace ErsatzCivLib.Model.Persistent
             CommerceBonus = 0,
             CorruptionRate = 0,
             WorkerEffiencyRate = 0.5,
-            ScienceRate = 0
+            ScienceRate = 0,
+            AdvancePrerequisite = null
         };
         /// <summary>
         /// Democraty regime.
@@ -162,7 +176,8 @@ namespace ErsatzCivLib.Model.Persistent
             CommerceBonus = 1,
             CorruptionRate = 0,
             WorkerEffiencyRate = 1.5,
-            ScienceRate = 1.5
+            ScienceRate = 1.5,
+            AdvancePrerequisite = AdvancePivot.Democracy
         };
         /// <summary>
         /// Communism regime.
@@ -175,13 +190,14 @@ namespace ErsatzCivLib.Model.Persistent
             CommerceBonus = 0,
             CorruptionRate = 0.75,
             WorkerEffiencyRate = 1,
-            ScienceRate = 1
+            ScienceRate = 1,
+            AdvancePrerequisite = AdvancePivot.Communism
         };
 
         private static List<RegimePivot> _instances = null;
 
         /// <summary>
-        /// List of every <see cref="RegimePivot"/> instances.
+        /// List of every <see cref="RegimePivot"/> instances, except <see cref="Anarchy"/>.
         /// </summary>
         public static IReadOnlyCollection<RegimePivot> Instances
         {
@@ -192,7 +208,7 @@ namespace ErsatzCivLib.Model.Persistent
                     _instances = typeof(RegimePivot)
                         .GetFields(BindingFlags.Static | BindingFlags.Public)
                         .Select(f => f.GetValue(null) as RegimePivot)
-                        .Where(v => !(v is null))
+                        .Where(v => !(v is null) && v != Anarchy)
                         .ToList();
                 }
                 return _instances;
