@@ -294,6 +294,36 @@ namespace ErsatzCivLib.Model
                 }
             }
 
+            // Check rivers on corners of the square.
+            foreach (var msq in this.Where(msq => !msq.Biome.IsSeaType))
+            {
+                var sidesMsq = GetAdjacentMapSquares(msq);
+                if (sidesMsq[DirectionPivot.TopLeft].Rivers.Any(r => r == DirectionPivot.Bottom || r == DirectionPivot.Right)
+                    || sidesMsq[DirectionPivot.Top].Rivers.Any(r => r == DirectionPivot.Bottom)
+                    || sidesMsq[DirectionPivot.Left].Rivers.Any(r => r == DirectionPivot.Right))
+                {
+                    msq.SetRiver(DirectionPivot.TopLeft, true);
+                }
+                if (sidesMsq[DirectionPivot.BottomLeft].Rivers.Any(r => r == DirectionPivot.Top || r == DirectionPivot.Right)
+                    || sidesMsq[DirectionPivot.Bottom].Rivers.Any(r => r == DirectionPivot.Top)
+                    || sidesMsq[DirectionPivot.Left].Rivers.Any(r => r == DirectionPivot.Right))
+                {
+                    msq.SetRiver(DirectionPivot.BottomLeft, true);
+                }
+                if (sidesMsq[DirectionPivot.TopRight].Rivers.Any(r => r == DirectionPivot.Bottom || r == DirectionPivot.Left)
+                    || sidesMsq[DirectionPivot.Top].Rivers.Any(r => r == DirectionPivot.Bottom)
+                    || sidesMsq[DirectionPivot.Right].Rivers.Any(r => r == DirectionPivot.Left))
+                {
+                    msq.SetRiver(DirectionPivot.TopRight, true);
+                }
+                if (sidesMsq[DirectionPivot.BottomRight].Rivers.Any(r => r == DirectionPivot.Top || r == DirectionPivot.Left)
+                    || sidesMsq[DirectionPivot.Bottom].Rivers.Any(r => r == DirectionPivot.Top)
+                    || sidesMsq[DirectionPivot.Right].Rivers.Any(r => r == DirectionPivot.Left))
+                {
+                    msq.SetRiver(DirectionPivot.BottomRight, true);
+                }
+            }
+
             foreach (var type in chunksByType.Keys)
             {
                 foreach (var chunkOfType in chunksByType[type])

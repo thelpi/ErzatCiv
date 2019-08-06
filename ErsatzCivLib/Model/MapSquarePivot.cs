@@ -21,7 +21,7 @@ namespace ErsatzCivLib.Model
 
         private List<InProgressWorkerActionPivot> _currentActions = new List<InProgressWorkerActionPivot>();
         private readonly Dictionary<DirectionPivot, bool> _rivers =
-            Enum.GetValues(typeof(DirectionPivot)).Cast<DirectionPivot>().Where(x => (int)x < 4).ToDictionary(x => x, x => false);
+            Enum.GetValues(typeof(DirectionPivot)).Cast<DirectionPivot>().ToDictionary(x => x, x => false);
 
         public int Row { get; private set; }
         public int Column { get; private set; }
