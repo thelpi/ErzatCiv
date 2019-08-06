@@ -316,6 +316,14 @@ namespace ErsatzCiv
             _freezeActions = false;
         }
 
+        private void MiniMapCanvas_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                MiniMapCanvas_MouseDown(sender, new MouseButtonEventArgs(e.MouseDevice, e.Timestamp, MouseButton.Left));
+            }
+        }
+
         #endregion
 
         #region Draw methods

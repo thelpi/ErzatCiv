@@ -10,7 +10,7 @@
     <DockPanel Margin="5">
         <Expander IsExpanded="True" Name="ExpanderMenu" DockPanel.Dock="Bottom">
             <DockPanel>
-                <Canvas Margin="2" Name="MiniMapCanvas" DockPanel.Dock="Right" MouseDown="MiniMapCanvas_MouseDown" />
+                <Canvas Margin="2" Name="MiniMapCanvas" DockPanel.Dock="Right" MouseDown="MiniMapCanvas_MouseDown" MouseMove="MiniMapCanvas_MouseMove" />
                 <GroupBox Header="Keyboard controls" DockPanel.Dock="Left">
                     <ScrollViewer CanContentScroll="True">
                         <Grid>
