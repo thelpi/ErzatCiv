@@ -243,7 +243,7 @@ namespace ErsatzCivLib
             }
         }
 
-        private void ChangeCitizenToSpecialist(CityPivot.CitizenPivot citizenSource, CityPivot.CitizenTypePivot citizenType)
+        private void ChangeCitizenToSpecialist(CitizenPivot citizenSource, CitizenTypePivot citizenType)
         {
             var theCity = GetCityFromCitizen(citizenSource);
             if (theCity == null)
@@ -255,7 +255,7 @@ namespace ErsatzCivLib
             theCity.CheckCitizensMood();
         }
 
-        public void ChangeCitizenToDefault(CityPivot.CitizenPivot citizenSource, MapSquarePivot mapSquare)
+        public void ChangeCitizenToDefault(CitizenPivot citizenSource, MapSquarePivot mapSquare)
         {
             if (citizenSource == null)
             {
@@ -284,7 +284,7 @@ namespace ErsatzCivLib
             }
         }
 
-        private CityPivot GetCityFromCitizen(CityPivot.CitizenPivot citizenSource)
+        private CityPivot GetCityFromCitizen(CitizenPivot citizenSource)
         {
             return GlobalCities.SingleOrDefault(c => c.Citizens.Contains(citizenSource));
         }
@@ -299,16 +299,16 @@ namespace ErsatzCivLib
         /// </summary>
         /// <param name="city">The <see cref="CityPivot"/>.</param>
         /// <returns>A dictionary where the key is the <see cref="MapSquarePivot"/>,
-        /// and the value is a tuple [<see cref="CityPivot.CitizenPivot"/> status, occupied by another city y/n].</returns>
+        /// and the value is a tuple [<see cref="CitizenPivot"/> status, occupied by another city y/n].</returns>
         /// <exception cref="ArgumentNullException">The parameter <paramref name="city"/> is <c>Null</c>.</exception>
-        public Dictionary<MapSquarePivot, Tuple<CityPivot.CitizenPivot, bool>> GetMapSquaresAroundCity(CityPivot city)
+        public Dictionary<MapSquarePivot, Tuple<CitizenPivot, bool>> GetMapSquaresAroundCity(CityPivot city)
         {
             if (city == null)
             {
                 throw new ArgumentNullException(nameof(city));
             }
 
-            var result = new Dictionary<MapSquarePivot, Tuple<CityPivot.CitizenPivot, bool>>();
+            var result = new Dictionary<MapSquarePivot, Tuple<CitizenPivot, bool>>();
             for (var i = city.MapSquareLocation.Row - 3; i <= city.MapSquareLocation.Row + 3; i++)
             {
                 for (var j = city.MapSquareLocation.Column - 3; j <= city.MapSquareLocation.Column + 3; j++)
@@ -316,7 +316,7 @@ namespace ErsatzCivLib
                     var msq = Map[i, j];
                     if (msq != null)
                     {
-                        result.Add(msq, new Tuple<CityPivot.CitizenPivot, bool>(
+                        result.Add(msq, new Tuple<CitizenPivot, bool>(
                             city.Citizens.SingleOrDefault(c => c.MapSquare == msq), OccupiedByCity(msq, city)));
                     }
                 }
@@ -384,7 +384,7 @@ namespace ErsatzCivLib
             city.ResetCitizens();
         }
 
-        public void SwitchCitizenType(CityPivot.CitizenPivot citizenSource)
+        public void SwitchCitizenType(CitizenPivot citizenSource)
         {
             if (citizenSource == null)
             {
@@ -393,19 +393,19 @@ namespace ErsatzCivLib
 
             if (!citizenSource.Type.HasValue)
             {
-                ChangeCitizenToSpecialist(citizenSource, CityPivot.CitizenTypePivot.Entertainer);
+                ChangeCitizenToSpecialist(citizenSource, CitizenTypePivot.Entertainer);
             }
             else
             {
                 switch (citizenSource.Type.Value)
                 {
-                    case CityPivot.CitizenTypePivot.Entertainer:
-                        ChangeCitizenToSpecialist(citizenSource, CityPivot.CitizenTypePivot.Scientist);
+                    case CitizenTypePivot.Entertainer:
+                        ChangeCitizenToSpecialist(citizenSource, CitizenTypePivot.Scientist);
                         break;
-                    case CityPivot.CitizenTypePivot.Scientist:
-                        ChangeCitizenToSpecialist(citizenSource, CityPivot.CitizenTypePivot.TaxCollector);
+                    case CitizenTypePivot.Scientist:
+                        ChangeCitizenToSpecialist(citizenSource, CitizenTypePivot.TaxCollector);
                         break;
-                    case CityPivot.CitizenTypePivot.TaxCollector:
+                    case CitizenTypePivot.TaxCollector:
                         ChangeCitizenToDefault(citizenSource, null);
                         break;
                 }

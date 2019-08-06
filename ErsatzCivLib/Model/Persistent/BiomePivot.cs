@@ -75,7 +75,8 @@ namespace ErsatzCivLib.Model.Persistent
         /// Medium size of a chunk of this biome.
         /// Is ignored for <see cref="IsSeaType"/> biomes and <see cref="Default"/>.
         /// </summary>
-        internal BiomeSizePivot Size { get; private set; }
+        private BiomeSizePivot Size { get; set; }
+        public int SizeInt { get { return (int)Size; } }
         /// <summary>
         /// Biome's humidity level.
         /// </summary>
@@ -568,6 +569,15 @@ namespace ErsatzCivLib.Model.Persistent
         public override int GetHashCode()
         {
             return Name.GetHashCode();
+        }
+
+        // sizes of biome.
+        [Serializable]
+        private enum BiomeSizePivot
+        {
+            Small = 1,
+            Medium,
+            Large
         }
     }
 }

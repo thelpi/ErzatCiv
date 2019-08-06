@@ -211,7 +211,7 @@ namespace ErsatzCivLib.Model
                 {
                     chunksByType[chunkType].AddRange(FiilContinentBlueprintWithBiomeChunks(
                         chunksCountByType[chunkType],
-                        (int)chunkType.Size * CHUNK_SIZE_RATIO,
+                        chunkType.SizeInt * CHUNK_SIZE_RATIO,
                         topY, leftX, bottomY, rightX, ratioHeightWidth, chunkType.Temperatures));
                 }
 

@@ -6,6 +6,7 @@ using System.Windows.Input;
 using System.Windows.Shapes;
 using ErsatzCivLib;
 using ErsatzCivLib.Model;
+using ErsatzCivLib.Model.Persistent;
 
 namespace ErsatzCiv
 {
@@ -118,7 +119,7 @@ namespace ErsatzCiv
             }
         }
 
-        private static Image DrawCitizen(CityPivot.CitizenPivot citizen, int size, double opacity,
+        private static Image DrawCitizen(CitizenPivot citizen, int size, double opacity,
             Action<object, MouseButtonEventArgs> MouseLeftButtonCallback)
         {
             Style style = new Style
@@ -158,7 +159,7 @@ namespace ErsatzCiv
         }
 
         private void DrawCitySquare(Tuple<int, int> gridOffset, MapSquarePivot current,
-            CityPivot.CitizenPivot citizen, bool occupiedByOtherCity, int row, int column)
+            CitizenPivot citizen, bool occupiedByOtherCity, int row, int column)
         {
             if (current == null)
             {
@@ -238,7 +239,7 @@ namespace ErsatzCiv
 
         private void MouseClickOnCitizen(object sender, MouseButtonEventArgs e)
         {
-            if ((sender as Image)?.Tag is CityPivot.CitizenPivot citizenSource)
+            if ((sender as Image)?.Tag is CitizenPivot citizenSource)
             {
                 _engine.SwitchCitizenType(citizenSource);
                 RefreshDisplay();
