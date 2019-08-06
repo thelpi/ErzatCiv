@@ -340,7 +340,7 @@ namespace ErsatzCivLib
                 return null;
             }
 
-            var buildableDefaultInstances = HumanPlayer.GetBuildableItemsForCity(city, out indexOfDefault, Map.GetAdjacentMapSquares);
+            var buildableDefaultInstances = HumanPlayer.GetBuildableItemsForCity(city, out indexOfDefault);
 
             // TODO : remove wonders already built globally.
 

@@ -230,7 +230,7 @@ namespace ErsatzCivLib.Model
             Production = buildable;
         }
 
-        internal BuildablePivot UpdateStatus(Func<MapSquarePivot, IReadOnlyDictionary<DirectionPivot, MapSquarePivot>> getAdjacentSquaresCallback)
+        internal BuildablePivot UpdateStatus()
         {
             BuildablePivot produced = null;
             bool resetCitizensRequired = false;
@@ -274,7 +274,7 @@ namespace ErsatzCivLib.Model
             else if (FoodStorage >= NextCitizenFoodRequirement)
             {
                 if (_citizens.Count < MAX_POPULATION_WITHOUT_WATER_SUPPLY
-                    || MapSquareLocation.HasRiver(getAdjacentSquaresCallback(MapSquareLocation))
+                    || MapSquareLocation.HasRiver
                     || _improvements.Contains(CityImprovementPivot.Aqueduc))
                 {
                     FoodStorage = 0; // Note : excess is not keeped.

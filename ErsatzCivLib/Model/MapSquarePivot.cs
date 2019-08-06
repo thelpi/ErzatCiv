@@ -64,62 +64,12 @@ namespace ErsatzCivLib.Model
         public IReadOnlyCollection<InProgressWorkerActionPivot> CurrentActions { get { return _currentActions; } }
         public IReadOnlyCollection<DirectionPivot> Rivers { get { return _rivers.Where(r => r.Value).Select(r => r.Key).ToList(); } }
 
-        internal bool HasRiver(IReadOnlyDictionary<DirectionPivot, MapSquarePivot> adjacentMapSquares)
+        public bool HasRiver
         {
-            if (_rivers.Any(r => r.Value))
+            get
             {
-                return true;
+                return _rivers.Any(r => r.Value);
             }
-
-            if (adjacentMapSquares.ContainsKey(DirectionPivot.TopLeft)
-                && adjacentMapSquares[DirectionPivot.TopLeft].Rivers.Any(r => r == DirectionPivot.Bottom || r == DirectionPivot.Right))
-            {
-                return true;
-            }
-
-            if (adjacentMapSquares.ContainsKey(DirectionPivot.Top)
-                && adjacentMapSquares[DirectionPivot.Top].Rivers.Any(r => r == DirectionPivot.Left || r == DirectionPivot.Right))
-            {
-                return true;
-            }
-
-            if (adjacentMapSquares.ContainsKey(DirectionPivot.TopRight)
-                && adjacentMapSquares[DirectionPivot.TopRight].Rivers.Any(r => r == DirectionPivot.Bottom || r == DirectionPivot.Left))
-            {
-                return true;
-            }
-
-            if (adjacentMapSquares.ContainsKey(DirectionPivot.Left)
-                && adjacentMapSquares[DirectionPivot.Left].Rivers.Any(r => r == DirectionPivot.Top || r == DirectionPivot.Bottom))
-            {
-                return true;
-            }
-
-            if (adjacentMapSquares.ContainsKey(DirectionPivot.Right)
-                && adjacentMapSquares[DirectionPivot.Right].Rivers.Any(r => r == DirectionPivot.Top || r == DirectionPivot.Bottom))
-            {
-                return true;
-            }
-
-            if (adjacentMapSquares.ContainsKey(DirectionPivot.BottomLeft)
-                && adjacentMapSquares[DirectionPivot.BottomLeft].Rivers.Any(r => r == DirectionPivot.Top || r == DirectionPivot.Right))
-            {
-                return true;
-            }
-
-            if (adjacentMapSquares.ContainsKey(DirectionPivot.Bottom)
-                && adjacentMapSquares[DirectionPivot.Bottom].Rivers.Any(r => r == DirectionPivot.Left || r == DirectionPivot.Right))
-            {
-                return true;
-            }
-
-            if (adjacentMapSquares.ContainsKey(DirectionPivot.BottomRight)
-                && adjacentMapSquares[DirectionPivot.BottomRight].Rivers.Any(r => r == DirectionPivot.Top || r == DirectionPivot.Left))
-            {
-                return true;
-            }
-
-            return false;
         }
 
         public int Food
@@ -418,11 +368,6 @@ namespace ErsatzCivLib.Model
         internal void SetRiver(DirectionPivot cardinal, bool isRiver)
         {
             _rivers[cardinal] = isRiver ? !Biome.IsSeaType : isRiver;
-        }
-
-        internal bool IsIrrigable(IReadOnlyDictionary<DirectionPivot, MapSquarePivot> adjacentSquares)
-        {
-            return HasRiver(adjacentSquares) || adjacentSquares.Values.Any(a => a.Irrigate);
         }
 
         public bool Equals(MapSquarePivot other)
