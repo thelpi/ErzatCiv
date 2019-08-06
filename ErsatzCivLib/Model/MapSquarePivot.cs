@@ -62,6 +62,7 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public IReadOnlyCollection<InProgressWorkerActionPivot> CurrentActions { get { return _currentActions; } }
         public IReadOnlyCollection<CardinalPivot> Rivers { get { return _rivers.Where(r => r.Value).Select(r => r.Key).ToList(); } }
+        // TODO : should check for rivers at corners of the square
         public bool HasRiver { get { return _rivers.Any(r => r.Value); } }
 
         public int Food
@@ -187,16 +188,6 @@ namespace ErsatzCivLib.Model
         /// </returns>
         internal bool ApplyAction(WorkerPivot worker, WorkerActionPivot action)
         {
-            if (worker == null)
-            {
-                throw new ArgumentNullException(nameof(worker));
-            }
-
-            if (action == null)
-            {
-                throw new ArgumentNullException(nameof(action));
-            }
-
             if (!action.AlwaysAvailable && !Biome.Actions.Contains(action))
             {
                 return false;

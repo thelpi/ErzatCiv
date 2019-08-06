@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using ErsatzCivLib.Model;
 using ErsatzCivLib.Model.Events;
+using ErsatzCivLib.Model.MapEnums;
 using ErsatzCivLib.Model.Persistent;
 
 namespace ErsatzCivLib
@@ -35,14 +36,8 @@ namespace ErsatzCivLib
             }
         }
 
-        public Engine(MapPivot.SizePivot mapSize,
-            MapPivot.LandShapePivot mapShape,
-            MapPivot.LandCoveragePivot landCoverage,
-            MapPivot.TemperaturePivot temperature,
-            MapPivot.AgePivot age,
-            MapPivot.HumidityPivot humidity,
-            CivilizationPivot playerCivilization,
-            int iaPlayersCount)
+        public Engine(SizePivot mapSize, LandShapePivot mapShape, LandCoveragePivot landCoverage, TemperaturePivot temperature,
+            AgePivot age, HumidityPivot humidity, CivilizationPivot playerCivilization, int iaPlayersCount)
         {
             if (playerCivilization == null)
             {
@@ -126,7 +121,7 @@ namespace ErsatzCivLib
 
         public bool CanBuildCity()
         {
-            return HumanPlayer.CanBuildCity(IsCity) == true;
+            return HumanPlayer.CanBuildCity(IsCity);
         }
 
         public void ToNextUnit()
@@ -162,6 +157,11 @@ namespace ErsatzCivLib
 
         public bool WorkerAction(WorkerActionPivot actionPivot)
         {
+            if (actionPivot == null)
+            {
+                return false;
+            }
+
             return HumanPlayer.WorkerAction(actionPivot, IsCity);
         }
 
@@ -289,7 +289,7 @@ namespace ErsatzCivLib
             return GlobalCities.SingleOrDefault(c => c.Citizens.Contains(citizenSource));
         }
 
-        internal bool OccupiedByCity(MapSquarePivot mapSquare, CityPivot exceptCity = null)
+        private bool OccupiedByCity(MapSquarePivot mapSquare, CityPivot exceptCity = null)
         {
             return GlobalCities.Any(c => (exceptCity == null || exceptCity != c) && c.Citizens.Any(cc =>  cc.MapSquare == mapSquare));
         }
@@ -335,30 +335,15 @@ namespace ErsatzCivLib
         {
             indexOfDefault = -1;
 
-            if (city == null)
+            if (city == null || !HumanPlayer.Cities.Contains(city))
             {
                 return null;
             }
 
-            var buildableDefaultInstances = BuildablePivot.GetEveryDefaultInstances.ToList();
-            if (buildableDefaultInstances == null)
-            {
-                return null;
-            }
-
-            // Already built for the current city.
-            buildableDefaultInstances.RemoveAll(b => city.Improvements.Contains(b));
-
-            // No aqueduc required if a river is close to the city.
-            if (city.MapSquareLocation.HasRiver)
-            {
-                buildableDefaultInstances.RemoveAll(b => CityImprovementPivot.Aqueduc == b);
-            }
+            var buildableDefaultInstances = HumanPlayer.GetBuildableItemsForCity(city, out indexOfDefault);
 
             // TODO : remove wonders already built globally.
 
-            indexOfDefault = buildableDefaultInstances.FindIndex(b =>
-                b.GetType() == city.Production.GetType() && b.Name == city.Production.Name);
             return buildableDefaultInstances;
         }
 

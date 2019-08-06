@@ -172,6 +172,17 @@ namespace ErsatzCivLib.Model
                 return CurrentRegime == RegimePivot.Anarchy && RevolutionTurnsCount == 0;
             }
         }
+        /// <summary>
+        /// Gets the name of the next city to build.
+        /// </summary>
+        /// <returns>Name of the next city.</returns>
+        public string GetNextCityName
+        {
+            get
+            {
+                return Civilization.NextCityName(_cities);
+            }
+        }
 
         #endregion
 
@@ -528,6 +539,25 @@ namespace ErsatzCivLib.Model
                 actionPivot = WorkerActionPivot.Road;
             }
 
+            if (actionPivot.AdvancePrerequisite != null && !_advances.Contains(actionPivot.AdvancePrerequisite))
+            {
+                return false;
+            }
+            
+            if (actionPivot == WorkerActionPivot.Road
+                && !_advances.Contains(AdvancePivot.BridgeBuilding)
+                && sq.HasRiver)
+            {
+                return false;
+            }
+            
+            if (actionPivot == WorkerActionPivot.Irrigate
+                && !_advances.Contains(AdvancePivot.Electricity)
+                && !sq.HasRiver)
+            {
+                return false;
+            }
+
             var result = sq.ApplyAction(worker, actionPivot);
             if (result)
             {
@@ -535,6 +565,39 @@ namespace ErsatzCivLib.Model
                 SetUnitIndex(false, false);
             }
             return result;
+        }
+
+        /// <summary>
+        /// Gets, for a specified <see cref="CityPivot"/>, the list of <see cref="BuildablePivot"/> which can be built.
+        /// </summary>
+        /// <param name="city">The <see cref="CityPivot"/>.</param>
+        /// <param name="indexOfDefault">Out; the index, in the result list, of the city current production.</param>
+        /// <returns>List of <see cref="BuildablePivot"/> the city can build.</returns>
+        internal IReadOnlyCollection<BuildablePivot> GetBuildableItemsForCity(CityPivot city, out int indexOfDefault)
+        {
+            indexOfDefault = -1;
+
+            var buildableDefaultInstances = BuildablePivot.GetEveryDefaultInstances.ToList();
+            if (buildableDefaultInstances == null)
+            {
+                return null;
+            }
+
+            // Scientific requirement not achieved yet.
+            buildableDefaultInstances.RemoveAll(b => b.AdvancePrerequisite != null && !_advances.Contains(b.AdvancePrerequisite));
+
+            // Already built for the current city.
+            buildableDefaultInstances.RemoveAll(b => city.Improvements.Contains(b));
+
+            // No aqueduc required if a river is close to the city.
+            if (city.MapSquareLocation.HasRiver)
+            {
+                buildableDefaultInstances.RemoveAll(b => CityImprovementPivot.Aqueduc == b);
+            }
+
+            indexOfDefault = buildableDefaultInstances.FindIndex(b =>
+                b.GetType() == city.Production.GetType() && b.Name == city.Production.Name);
+            return buildableDefaultInstances;
         }
 
         #endregion

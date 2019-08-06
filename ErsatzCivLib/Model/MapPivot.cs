@@ -2,10 +2,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using ErsatzCivLib.Model.MapEnums;
 using ErsatzCivLib.Model.Persistent;
 
 namespace ErsatzCivLib.Model
 {
+    /// <summary>
+    /// Represents a map mades of <see cref="MapSquarePivot"/>.
+    /// </summary>
+    /// <seealso cref="IEnumerable{T}"/>
     [Serializable]
     public class MapPivot : IEnumerable<MapSquarePivot>
     {
@@ -37,7 +42,7 @@ namespace ErsatzCivLib.Model
 
         private MapSquarePivot[,] _mapSquareList;
 
-        #region Properties (public)
+        #region Public properties
 
         /// <summary>
         /// Single <see cref="MapSquarePivot"/> access.
@@ -75,7 +80,7 @@ namespace ErsatzCivLib.Model
 
         #endregion
 
-        #region Properties (private)
+        #region Private properties
 
         private double ColdRatio { get { return GlobalTemperature == TemperaturePivot.Temperate ? AVG_RATIO_TEMPERATURE : (GlobalTemperature == TemperaturePivot.Cold ? MAX_RATIO_TEMPERATURE : MIN_RATIO_TEMPERATURE); } }
         private double HotRatio { get { return GlobalTemperature == TemperaturePivot.Temperate ? AVG_RATIO_TEMPERATURE : (GlobalTemperature == TemperaturePivot.Hot ? MAX_RATIO_TEMPERATURE : MIN_RATIO_TEMPERATURE); } }
@@ -305,39 +310,7 @@ namespace ErsatzCivLib.Model
             coastSquares.ForEach(ms => ms.ChangeBiome(BiomePivot.Coast));
         }
 
-        private void SetMapSquareRiversAroundPoint(List<Tuple<int, int>> riverPoints, int i)
-        {
-            // "MapSquarePivot" around the current point.
-            var topRightSquare = this[riverPoints[i].Item1 - 1, riverPoints[i].Item2];
-            var topLeftSquare = this[riverPoints[i].Item1 - 1, riverPoints[i].Item2 - 1];
-            var bottomRightSquare = this[riverPoints[i].Item1, riverPoints[i].Item2];
-            var bottomLeftSquare = this[riverPoints[i].Item1, riverPoints[i].Item2 - 1];
-
-            var deltaRow = riverPoints[i].Item1 - riverPoints[i - 1].Item1;
-            var deltaCol = riverPoints[i].Item2 - riverPoints[i - 1].Item2;
-
-            if (deltaRow > 0)
-            {
-                topRightSquare?.SetRiver(CardinalPivot.Left, true);
-                topLeftSquare?.SetRiver(CardinalPivot.Right, true);
-            }
-            else if (deltaRow < 0)
-            {
-                bottomRightSquare?.SetRiver(CardinalPivot.Left, true);
-                bottomLeftSquare?.SetRiver(CardinalPivot.Right, true);
-            }
-
-            if (deltaCol < 0)
-            {
-                topRightSquare?.SetRiver(CardinalPivot.Bottom, true);
-                bottomRightSquare?.SetRiver(CardinalPivot.Top, true);
-            }
-            else if (deltaCol > 0)
-            {
-                topLeftSquare?.SetRiver(CardinalPivot.Bottom, true);
-                bottomLeftSquare?.SetRiver(CardinalPivot.Top, true);
-            }
-        }
+        #region Public and internal methods
 
         /// <summary>
         /// Computes the <see cref="TemperaturePivot"/> at a specified height.
@@ -359,6 +332,22 @@ namespace ErsatzCivLib.Model
                 return TemperaturePivot.Temperate;
             }
         }
+
+        /// <inheritdoc />
+        public IEnumerator<MapSquarePivot> GetEnumerator()
+        {
+            return new MapSquareEnumerator(_mapSquareList);
+        }
+
+        /// <inheritdoc />
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return new MapSquareEnumerator(_mapSquareList);
+        }
+
+        #endregion
+
+        #region Private methods
 
         private List<MapSquarePivot> ConvertContinentBlueprintToMapSquares(double landRatio, ContinentBlueprint contBound, out List<MapSquarePivot> costSquares)
         {
@@ -383,8 +372,8 @@ namespace ErsatzCivLib.Model
             }
             while (startChunkY + continentHeight > (contBound.Height - 1));
 
-            Func<int, bool> IsGroundXFunc = delegate(int x) { return x >= startChunkX + (contBound.StartX - 1) && x <= (startChunkX + (contBound.StartX - 1) + continentWidth); };
-            Func<int, bool> IsGroundYFunc = delegate(int y) { return y >= startChunkY + (contBound.StartY - 1) && y <= (startChunkY + (contBound.StartY - 1) + continentHeight); };
+            Func<int, bool> IsGroundXFunc = delegate (int x) { return x >= startChunkX + (contBound.StartX - 1) && x <= (startChunkX + (contBound.StartX - 1) + continentWidth); };
+            Func<int, bool> IsGroundYFunc = delegate (int y) { return y >= startChunkY + (contBound.StartY - 1) && y <= (startChunkY + (contBound.StartY - 1) + continentHeight); };
             Func<int, int, bool> IsGroundFunc = delegate (int x, int y) { return IsGroundXFunc(x) && IsGroundYFunc(y); };
 
             var continentSquares = new List<MapSquarePivot>();
@@ -462,159 +451,43 @@ namespace ErsatzCivLib.Model
             return chunksList;
         }
 
-        /// <inheritdoc />
-        public IEnumerator<MapSquarePivot> GetEnumerator()
+        private void SetMapSquareRiversAroundPoint(List<Tuple<int, int>> riverPoints, int i)
         {
-            return new MapSquareEnumerator(_mapSquareList);
+            // "MapSquarePivot" around the current point.
+            var topRightSquare = this[riverPoints[i].Item1 - 1, riverPoints[i].Item2];
+            var topLeftSquare = this[riverPoints[i].Item1 - 1, riverPoints[i].Item2 - 1];
+            var bottomRightSquare = this[riverPoints[i].Item1, riverPoints[i].Item2];
+            var bottomLeftSquare = this[riverPoints[i].Item1, riverPoints[i].Item2 - 1];
+
+            var deltaRow = riverPoints[i].Item1 - riverPoints[i - 1].Item1;
+            var deltaCol = riverPoints[i].Item2 - riverPoints[i - 1].Item2;
+
+            if (deltaRow > 0)
+            {
+                topRightSquare?.SetRiver(CardinalPivot.Left, true);
+                topLeftSquare?.SetRiver(CardinalPivot.Right, true);
+            }
+            else if (deltaRow < 0)
+            {
+                bottomRightSquare?.SetRiver(CardinalPivot.Left, true);
+                bottomLeftSquare?.SetRiver(CardinalPivot.Right, true);
+            }
+
+            if (deltaCol < 0)
+            {
+                topRightSquare?.SetRiver(CardinalPivot.Bottom, true);
+                bottomRightSquare?.SetRiver(CardinalPivot.Top, true);
+            }
+            else if (deltaCol > 0)
+            {
+                topLeftSquare?.SetRiver(CardinalPivot.Bottom, true);
+                bottomLeftSquare?.SetRiver(CardinalPivot.Top, true);
+            }
         }
 
-        /// <inheritdoc />
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return new MapSquareEnumerator(_mapSquareList);
-        }
+        #endregion
 
-        /// <summary>
-        /// Represents the map size.
-        /// </summary>
-        [Serializable]
-        public enum SizePivot
-        {
-            /// <summary>
-            /// Very small.
-            /// </summary>
-            VerySmall = 1, // do not change the indice !
-            /// <summary>
-            /// Small.
-            /// </summary>
-            Small,
-            /// <summary>
-            /// Medium.
-            /// </summary>
-            Medium,
-            /// <summary>
-            /// Large.
-            /// </summary>
-            Large,
-            /// <summary>
-            /// Very large.
-            /// </summary>
-            VeryLarge
-        }
-
-        /// <summary>
-        /// Represents the land coverage of the map.
-        /// </summary>
-        [Serializable]
-        public enum LandCoveragePivot
-        {
-            /// <summary>
-            /// Very low.
-            /// </summary>
-            VeryLow,
-            /// <summary>
-            /// Low.
-            /// </summary>
-            Low,
-            /// <summary>
-            /// Medium.
-            /// </summary>
-            Medium,
-            /// <summary>
-            /// High.
-            /// </summary>
-            High,
-            /// <summary>
-            /// Very high.
-            /// </summary>
-            VeryHigh
-        }
-
-        /// <summary>
-        /// Represents the land organization inside the map.
-        /// </summary>
-        [Serializable]
-        public enum LandShapePivot
-        {
-            /// <summary>
-            /// Single pangaea.
-            /// </summary>
-            Pangaea,
-            /// <summary>
-            /// Few continents.
-            /// </summary>
-            Continent,
-            /// <summary>
-            /// Several islands.
-            /// </summary>
-            Island
-        }
-
-        /// <summary>
-        /// Levels of temperature.
-        /// </summary>
-        [Serializable]
-        public enum TemperaturePivot
-        {
-            /// <summary>
-            /// Cold.
-            /// </summary>
-            Cold,
-            /// <summary>
-            /// Temperate.
-            /// </summary>
-            Temperate,
-            /// <summary>
-            /// Hot.
-            /// </summary>
-            Hot
-        }
-
-        /// <summary>
-        /// Levels of humidity.
-        /// </summary>
-        [Serializable]
-        public enum HumidityPivot
-        {
-            /// <summary>
-            /// Dry.
-            /// </summary>
-            Dry,
-            /// <summary>
-            /// Average.
-            /// </summary>
-            Average,
-            /// <summary>
-            /// Wet.
-            /// </summary>
-            Wet
-        }
-
-        /// <summary>
-        /// Age of the map.
-        /// </summary>
-        /// <remarks>The agest the flatness.</remarks>
-        [Serializable]
-        public enum AgePivot
-        {
-            /// <summary>
-            /// Old.
-            /// </summary>
-            Old,
-            /// <summary>
-            /// Average.
-            /// </summary>
-            Average,
-            /// <summary>
-            /// New.
-            /// </summary>
-            New
-        }
-
-        /// <summary>
-        /// Enumerator for the list of <see cref="MapSquarePivot"/> inside <see cref="MapPivot"/>.
-        /// </summary>
-        /// <seealso cref="IEnumerator"/>
+        // Enumerator for the list of squares inside the map.
         private class MapSquareEnumerator : IEnumerator<MapSquarePivot>
         {
             private MapSquarePivot[,] _mapSquares;
@@ -675,7 +548,7 @@ namespace ErsatzCivLib.Model
             }
         }
 
-        // Tool to represent a continent square.
+        // Represents a blueprint to create a continent of land squares inside the map.
         private class ContinentBlueprint
         {
             public int Width { get; private set; }

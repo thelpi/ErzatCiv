@@ -32,6 +32,10 @@ namespace ErsatzCivLib.Model.Persistent
         /// Indicates if the action is always available for a worker.
         /// </summary>
         public bool AlwaysAvailable { get; private set; }
+        /// <summary>
+        /// <see cref="AdvancePivot"/> required to access the instance.
+        /// </summary>
+        public AdvancePivot AdvancePrerequisite { get; private set; }
 
         #endregion
 
@@ -132,7 +136,8 @@ namespace ErsatzCivLib.Model.Persistent
                     {
                         Name = "RailRoad",
                         TurnCost = 2,
-                        AlwaysAvailable = false
+                        AlwaysAvailable = false,
+                        AdvancePrerequisite = AdvancePivot.Railroad
                     };
                 }
                 return _railRoad;
@@ -176,7 +181,8 @@ namespace ErsatzCivLib.Model.Persistent
                     {
                         Name = "Plant forest",
                         TurnCost = 3,
-                        AlwaysAvailable = false
+                        AlwaysAvailable = false,
+                        AdvancePrerequisite = AdvancePivot.Engineering
                     };
                 }
                 return _plant;
@@ -215,7 +221,8 @@ namespace ErsatzCivLib.Model.Persistent
                     {
                         Name = "Build fortress",
                         TurnCost = 3,
-                        AlwaysAvailable = false
+                        AlwaysAvailable = false,
+                        AdvancePrerequisite = AdvancePivot.Masonry
                     };
                 }
                 return _buildFortress;

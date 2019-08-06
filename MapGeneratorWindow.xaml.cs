@@ -4,6 +4,7 @@ using System.Linq;
 using System.Windows;
 using ErsatzCivLib;
 using ErsatzCivLib.Model;
+using ErsatzCivLib.Model.MapEnums;
 
 namespace ErsatzCiv
 {
@@ -21,20 +22,20 @@ namespace ErsatzCiv
 
             ShowAgain();
 
-            ComboBoxSize.ItemsSource = Enum.GetValues(typeof(MapPivot.SizePivot));
-            ComboBoxLandShape.ItemsSource = Enum.GetValues(typeof(MapPivot.LandShapePivot));
-            ComboBoxLandCoverage.ItemsSource = Enum.GetValues(typeof(MapPivot.LandCoveragePivot));
-            ComboBoxTemperature.ItemsSource = Enum.GetValues(typeof(MapPivot.TemperaturePivot));
-            ComboBoxAge.ItemsSource = Enum.GetValues(typeof(MapPivot.AgePivot));
-            ComboBoxHumidity.ItemsSource = Enum.GetValues(typeof(MapPivot.HumidityPivot));
+            ComboBoxSize.ItemsSource = Enum.GetValues(typeof(SizePivot));
+            ComboBoxLandShape.ItemsSource = Enum.GetValues(typeof(LandShapePivot));
+            ComboBoxLandCoverage.ItemsSource = Enum.GetValues(typeof(LandCoveragePivot));
+            ComboBoxTemperature.ItemsSource = Enum.GetValues(typeof(TemperaturePivot));
+            ComboBoxAge.ItemsSource = Enum.GetValues(typeof(AgePivot));
+            ComboBoxHumidity.ItemsSource = Enum.GetValues(typeof(HumidityPivot));
             ComboBoxCivilization.ItemsSource = ErsatzCivLib.Model.Persistent.CivilizationPivot.Instances;
 
-            ComboBoxSize.SelectedValue = MapPivot.SizePivot.Medium;
-            ComboBoxLandShape.SelectedValue = MapPivot.LandShapePivot.Continent;
-            ComboBoxLandCoverage.SelectedValue = MapPivot.LandCoveragePivot.Medium;
-            ComboBoxTemperature.SelectedValue = MapPivot.TemperaturePivot.Temperate;
-            ComboBoxAge.SelectedValue = MapPivot.AgePivot.Average;
-            ComboBoxHumidity.SelectedValue = MapPivot.HumidityPivot.Average;
+            ComboBoxSize.SelectedValue = SizePivot.Medium;
+            ComboBoxLandShape.SelectedValue = LandShapePivot.Continent;
+            ComboBoxLandCoverage.SelectedValue = LandCoveragePivot.Medium;
+            ComboBoxTemperature.SelectedValue = TemperaturePivot.Temperate;
+            ComboBoxAge.SelectedValue = AgePivot.Average;
+            ComboBoxHumidity.SelectedValue = HumidityPivot.Average;
             ComboBoxCivilization.SelectedValue = ErsatzCivLib.Model.Persistent.CivilizationPivot.French;
         }
 
@@ -81,9 +82,9 @@ namespace ErsatzCiv
         {
             object[] parameters = e.Argument as object[];
 
-            e.Result = new Engine((MapPivot.SizePivot)parameters[0], (MapPivot.LandShapePivot)parameters[1],
-                (MapPivot.LandCoveragePivot)parameters[2], (MapPivot.TemperaturePivot)parameters[3],
-                (MapPivot.AgePivot)parameters[4], (MapPivot.HumidityPivot)parameters[5],
+            e.Result = new Engine((SizePivot)parameters[0], (LandShapePivot)parameters[1],
+                (LandCoveragePivot)parameters[2], (TemperaturePivot)parameters[3],
+                (AgePivot)parameters[4], (HumidityPivot)parameters[5],
                 (ErsatzCivLib.Model.Persistent.CivilizationPivot)parameters[6], (int)parameters[7]);
         }
 

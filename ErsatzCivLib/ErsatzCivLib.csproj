@@ -42,6 +42,12 @@
   <ItemGroup>
     <Compile Include="Model\Events\NextUnitEventArgs.cs" />
     <Compile Include="Model\Events\SquareChangedEventArgs.cs" />
+    <Compile Include="Model\MapEnums\AgePivot.cs" />
+    <Compile Include="Model\MapEnums\HumidityPivot.cs" />
+    <Compile Include="Model\MapEnums\LandCoveragePivot.cs" />
+    <Compile Include="Model\MapEnums\LandShapePivot.cs" />
+    <Compile Include="Model\MapEnums\SizePivot.cs" />
+    <Compile Include="Model\MapEnums\TemperaturePivot.cs" />
     <Compile Include="Model\Persistent\CapitalizationPivot.cs" />
     <Compile Include="Model\Persistent\CardinalPivot.cs" />
     <Compile Include="Model\Persistent\CityImprovementPivot.cs" />

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ErsatzCivLib.Model.MapEnums;
 
 namespace ErsatzCivLib.Model.Persistent
 {
@@ -11,8 +12,8 @@ namespace ErsatzCivLib.Model.Persistent
     public class BiomePivot : IEquatable<BiomePivot>
     {
         private List<WorkerActionPivot> _actions;
-        private List<MapPivot.TemperaturePivot> _temperatures;
-        private Dictionary<MapPivot.TemperaturePivot, BiomePivot> _underlyingBiomes;
+        private List<TemperaturePivot> _temperatures;
+        private Dictionary<TemperaturePivot, BiomePivot> _underlyingBiomes;
 
         #region Properties
 
@@ -60,7 +61,7 @@ namespace ErsatzCivLib.Model.Persistent
         /// <summary>
         /// List of <see cref="TemperaturePivot"/> (depending on latitude) where the biome can appears.
         /// </summary>
-        public IReadOnlyCollection<MapPivot.TemperaturePivot> Temperatures
+        public IReadOnlyCollection<TemperaturePivot> Temperatures
         {
             get { return _temperatures; }
         }
@@ -78,16 +79,16 @@ namespace ErsatzCivLib.Model.Persistent
         /// <summary>
         /// Biome's humidity level.
         /// </summary>
-        internal MapPivot.HumidityPivot Humidity { get; private set; }
+        internal HumidityPivot Humidity { get; private set; }
         /// <summary>
         /// Biome's flatness level.
         /// </summary>
-        internal MapPivot.AgePivot Age { get; private set; }
+        internal AgePivot Age { get; private set; }
 
         /// <summary>
         /// Underlying biome by temperature (if <see cref="WorkerActionPivot.Clear"/> available).
         /// </summary>
-        internal IReadOnlyDictionary<MapPivot.TemperaturePivot, BiomePivot> UnderlyingBiomes
+        internal IReadOnlyDictionary<TemperaturePivot, BiomePivot> UnderlyingBiomes
         {
             get { return _underlyingBiomes; }
         }
@@ -114,19 +115,19 @@ namespace ErsatzCivLib.Model.Persistent
                     WorkerActionPivot.Road,
                     WorkerActionPivot.BuildFortress
                 },
-            _temperatures = new List<MapPivot.TemperaturePivot>
+            _temperatures = new List<TemperaturePivot>
             {
-                MapPivot.TemperaturePivot.Hot,
-                MapPivot.TemperaturePivot.Temperate
+                TemperaturePivot.Hot,
+                TemperaturePivot.Temperate
             },
-            _underlyingBiomes = new Dictionary<MapPivot.TemperaturePivot, BiomePivot>(),
+            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
             IsSeaType = false,
             IsCityBuildable = true,
             SpeedCost = 1,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Medium,
-            Humidity = MapPivot.HumidityPivot.Average,
-            Age = MapPivot.AgePivot.Old
+            Humidity = HumidityPivot.Average,
+            Age = AgePivot.Old
         };
         public static BiomePivot Sea { get; } = new BiomePivot
         {
@@ -136,15 +137,15 @@ namespace ErsatzCivLib.Model.Persistent
             Productivity = 0,
             Defense = 0,
             _actions = new List<WorkerActionPivot>(),
-            _temperatures = new List<MapPivot.TemperaturePivot>(),
-            _underlyingBiomes = new Dictionary<MapPivot.TemperaturePivot, BiomePivot>(),
+            _temperatures = new List<TemperaturePivot>(),
+            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
             IsSeaType = true,
             IsCityBuildable = false,
             SpeedCost = 1,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Large,
-            Humidity = MapPivot.HumidityPivot.Average,
-            Age = MapPivot.AgePivot.Average
+            Humidity = HumidityPivot.Average,
+            Age = AgePivot.Average
         };
         public static BiomePivot Ice { get; } = new BiomePivot
         {
@@ -160,18 +161,18 @@ namespace ErsatzCivLib.Model.Persistent
                     WorkerActionPivot.Road,
                     WorkerActionPivot.BuildFortress
                 },
-            _temperatures = new List<MapPivot.TemperaturePivot>
+            _temperatures = new List<TemperaturePivot>
             {
-                MapPivot.TemperaturePivot.Cold
+                TemperaturePivot.Cold
             },
-            _underlyingBiomes = new Dictionary<MapPivot.TemperaturePivot, BiomePivot>(),
+            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
             IsSeaType = false,
             IsCityBuildable = false,
             SpeedCost = 2,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Large,
-            Humidity = MapPivot.HumidityPivot.Dry,
-            Age = MapPivot.AgePivot.Average
+            Humidity = HumidityPivot.Dry,
+            Age = AgePivot.Average
         };
         public static BiomePivot Toundra { get; } = new BiomePivot
         {
@@ -189,18 +190,18 @@ namespace ErsatzCivLib.Model.Persistent
                     WorkerActionPivot.Road,
                     WorkerActionPivot.BuildFortress
                 },
-            _temperatures = new List<MapPivot.TemperaturePivot>
+            _temperatures = new List<TemperaturePivot>
             {
-                MapPivot.TemperaturePivot.Cold
+                TemperaturePivot.Cold
             },
-            _underlyingBiomes = new Dictionary<MapPivot.TemperaturePivot, BiomePivot>(),
+            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
             IsSeaType = false,
             IsCityBuildable = true,
             SpeedCost = 1,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Medium,
-            Humidity = MapPivot.HumidityPivot.Average,
-            Age = MapPivot.AgePivot.Old
+            Humidity = HumidityPivot.Average,
+            Age = AgePivot.Old
         };
         public static BiomePivot Desert { get; } = new BiomePivot
         {
@@ -217,18 +218,18 @@ namespace ErsatzCivLib.Model.Persistent
                     WorkerActionPivot.Road,
                     WorkerActionPivot.BuildFortress
                 },
-            _temperatures = new List<MapPivot.TemperaturePivot>
+            _temperatures = new List<TemperaturePivot>
             {
-                MapPivot.TemperaturePivot.Hot
+                TemperaturePivot.Hot
             },
-            _underlyingBiomes = new Dictionary<MapPivot.TemperaturePivot, BiomePivot>(),
+            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
             IsSeaType = false,
             IsCityBuildable = true,
             SpeedCost = 2,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Large,
-            Humidity = MapPivot.HumidityPivot.Dry,
-            Age = MapPivot.AgePivot.Average
+            Humidity = HumidityPivot.Dry,
+            Age = AgePivot.Average
         };
         public static BiomePivot Jungle { get; } = new BiomePivot
         {
@@ -244,21 +245,21 @@ namespace ErsatzCivLib.Model.Persistent
                     WorkerActionPivot.Road,
                     WorkerActionPivot.BuildFortress
                 },
-            _temperatures = new List<MapPivot.TemperaturePivot>
+            _temperatures = new List<TemperaturePivot>
             {
-                MapPivot.TemperaturePivot.Hot
+                TemperaturePivot.Hot
             },
-            _underlyingBiomes = new Dictionary<MapPivot.TemperaturePivot, BiomePivot>
+            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>
             {
-                { MapPivot.TemperaturePivot.Hot, Plain }
+                { TemperaturePivot.Hot, Plain }
             },
             IsSeaType = false,
             IsCityBuildable = false,
             SpeedCost = 3,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Medium,
-            Humidity = MapPivot.HumidityPivot.Wet,
-            Age = MapPivot.AgePivot.Average
+            Humidity = HumidityPivot.Wet,
+            Age = AgePivot.Average
         };
         public static BiomePivot Mountain { get; } = new BiomePivot
         {
@@ -274,20 +275,20 @@ namespace ErsatzCivLib.Model.Persistent
                     WorkerActionPivot.Road,
                     WorkerActionPivot.BuildFortress
                 },
-            _temperatures = new List<MapPivot.TemperaturePivot>
+            _temperatures = new List<TemperaturePivot>
             {
-                MapPivot.TemperaturePivot.Cold,
-                MapPivot.TemperaturePivot.Hot,
-                MapPivot.TemperaturePivot.Temperate
+                TemperaturePivot.Cold,
+                TemperaturePivot.Hot,
+                TemperaturePivot.Temperate
             },
-            _underlyingBiomes = new Dictionary<MapPivot.TemperaturePivot, BiomePivot>(),
+            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
             IsSeaType = false,
             IsCityBuildable = false,
             SpeedCost = 3,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Medium,
-            Humidity = MapPivot.HumidityPivot.Average,
-            Age = MapPivot.AgePivot.New
+            Humidity = HumidityPivot.Average,
+            Age = AgePivot.New
         };
         public static BiomePivot Hill { get; } = new BiomePivot
         {
@@ -303,20 +304,20 @@ namespace ErsatzCivLib.Model.Persistent
                     WorkerActionPivot.Road,
                     WorkerActionPivot.BuildFortress
                 },
-            _temperatures = new List<MapPivot.TemperaturePivot>
+            _temperatures = new List<TemperaturePivot>
             {
-                MapPivot.TemperaturePivot.Cold,
-                MapPivot.TemperaturePivot.Hot,
-                MapPivot.TemperaturePivot.Temperate
+                TemperaturePivot.Cold,
+                TemperaturePivot.Hot,
+                TemperaturePivot.Temperate
             },
-            _underlyingBiomes = new Dictionary<MapPivot.TemperaturePivot, BiomePivot>(),
+            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
             IsSeaType = false,
             IsCityBuildable = true,
             SpeedCost = 2,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Small,
-            Humidity = MapPivot.HumidityPivot.Average,
-            Age = MapPivot.AgePivot.New
+            Humidity = HumidityPivot.Average,
+            Age = AgePivot.New
         };
         public static BiomePivot Swamp { get; } = new BiomePivot
         {
@@ -332,25 +333,25 @@ namespace ErsatzCivLib.Model.Persistent
                     WorkerActionPivot.BuildFortress,
                     WorkerActionPivot.Clear
                 },
-            _temperatures = new List<MapPivot.TemperaturePivot>
+            _temperatures = new List<TemperaturePivot>
             {
-                MapPivot.TemperaturePivot.Cold,
-                MapPivot.TemperaturePivot.Hot,
-                MapPivot.TemperaturePivot.Temperate
+                TemperaturePivot.Cold,
+                TemperaturePivot.Hot,
+                TemperaturePivot.Temperate
             },
-            _underlyingBiomes = new Dictionary<MapPivot.TemperaturePivot, BiomePivot>
+            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>
             {
-                { MapPivot.TemperaturePivot.Cold, Toundra },
-                { MapPivot.TemperaturePivot.Temperate, Grassland },
-                { MapPivot.TemperaturePivot.Hot, Plain }
+                { TemperaturePivot.Cold, Toundra },
+                { TemperaturePivot.Temperate, Grassland },
+                { TemperaturePivot.Hot, Plain }
             },
             IsSeaType = false,
             IsCityBuildable = false,
             SpeedCost = 2,
             AppearanceRatio = 0.02,
             Size = BiomeSizePivot.Small,
-            Humidity = MapPivot.HumidityPivot.Wet,
-            Age = MapPivot.AgePivot.Old
+            Humidity = HumidityPivot.Wet,
+            Age = AgePivot.Old
         };
         public static BiomePivot Forest { get; } = new BiomePivot
         {
@@ -366,23 +367,23 @@ namespace ErsatzCivLib.Model.Persistent
                     WorkerActionPivot.Road,
                     WorkerActionPivot.BuildFortress
                 },
-            _temperatures = new List<MapPivot.TemperaturePivot>
+            _temperatures = new List<TemperaturePivot>
             {
-                MapPivot.TemperaturePivot.Cold,
-                MapPivot.TemperaturePivot.Temperate
+                TemperaturePivot.Cold,
+                TemperaturePivot.Temperate
             },
-            _underlyingBiomes = new Dictionary<MapPivot.TemperaturePivot, BiomePivot>
+            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>
             {
-                { MapPivot.TemperaturePivot.Cold, Toundra },
-                { MapPivot.TemperaturePivot.Temperate, Grassland }
+                { TemperaturePivot.Cold, Toundra },
+                { TemperaturePivot.Temperate, Grassland }
             },
             IsSeaType = false,
             IsCityBuildable = true,
             SpeedCost = 2,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Medium,
-            Humidity = MapPivot.HumidityPivot.Wet,
-            Age = MapPivot.AgePivot.Average
+            Humidity = HumidityPivot.Wet,
+            Age = AgePivot.Average
         };
         public static BiomePivot Plain { get; } = new BiomePivot
         {
@@ -400,20 +401,20 @@ namespace ErsatzCivLib.Model.Persistent
                     WorkerActionPivot.Road,
                     WorkerActionPivot.BuildFortress
                 },
-            _temperatures = new List<MapPivot.TemperaturePivot>
+            _temperatures = new List<TemperaturePivot>
             {
-                MapPivot.TemperaturePivot.Cold,
-                MapPivot.TemperaturePivot.Hot,
-                MapPivot.TemperaturePivot.Temperate
+                TemperaturePivot.Cold,
+                TemperaturePivot.Hot,
+                TemperaturePivot.Temperate
             },
-            _underlyingBiomes = new Dictionary<MapPivot.TemperaturePivot, BiomePivot>(),
+            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
             IsSeaType = false,
             IsCityBuildable = true,
             SpeedCost = 1,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Large,
-            Humidity = MapPivot.HumidityPivot.Dry,
-            Age = MapPivot.AgePivot.Old
+            Humidity = HumidityPivot.Dry,
+            Age = AgePivot.Old
         };
         public static BiomePivot Coast { get; } = new BiomePivot
         {
@@ -423,15 +424,15 @@ namespace ErsatzCivLib.Model.Persistent
             Productivity = 0,
             Defense = 0,
             _actions = new List<WorkerActionPivot>(),
-            _temperatures = new List<MapPivot.TemperaturePivot>(),
-            _underlyingBiomes = new Dictionary<MapPivot.TemperaturePivot, BiomePivot>(),
+            _temperatures = new List<TemperaturePivot>(),
+            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
             IsSeaType = true,
             IsCityBuildable = false,
             SpeedCost = 1,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Small,
-            Humidity = MapPivot.HumidityPivot.Average,
-            Age = MapPivot.AgePivot.Average
+            Humidity = HumidityPivot.Average,
+            Age = AgePivot.Average
         };
 
         /// <summary>
@@ -487,50 +488,50 @@ namespace ErsatzCivLib.Model.Persistent
         /// <param name="totalSquaresCount">Total count of squares in the continent.</param>
         /// <param name="chunkCoeff">Number real of squares in a <see cref="BiomeSizePivot.Small"/> chunk.</param>
         /// <returns>Number of squares </returns>
-        internal int ChunkSquaresCount(int totalSquaresCount, double chunkCoeff, MapPivot.HumidityPivot humidity, MapPivot.AgePivot age)
+        internal int ChunkSquaresCount(int totalSquaresCount, double chunkCoeff, HumidityPivot humidity, AgePivot age)
         {
-            if (age == MapPivot.AgePivot.New)
+            if (age == AgePivot.New)
             {
-                if (Age == MapPivot.AgePivot.Old)
+                if (Age == AgePivot.Old)
                 {
                     chunkCoeff += 1.5;
                 }
-                else if (Age == MapPivot.AgePivot.New)
+                else if (Age == AgePivot.New)
                 {
                     chunkCoeff -= 1.5;
                 }
             }
-            else if (age == MapPivot.AgePivot.Old)
+            else if (age == AgePivot.Old)
             {
-                if (Age == MapPivot.AgePivot.Old)
+                if (Age == AgePivot.Old)
                 {
                     chunkCoeff -= 1.5;
                 }
-                else if (Age == MapPivot.AgePivot.New)
+                else if (Age == AgePivot.New)
                 {
                     chunkCoeff += 1.5;
                 }
             }
 
             var realRatio = AppearanceRatio;
-            if (humidity == MapPivot.HumidityPivot.Dry)
+            if (humidity == HumidityPivot.Dry)
             {
-                if (Humidity == MapPivot.HumidityPivot.Dry)
+                if (Humidity == HumidityPivot.Dry)
                 {
                     realRatio *= 2;
                 }
-                else if (Humidity == MapPivot.HumidityPivot.Wet)
+                else if (Humidity == HumidityPivot.Wet)
                 {
                     realRatio /= 2;
                 }
             }
-            else if (humidity == MapPivot.HumidityPivot.Wet)
+            else if (humidity == HumidityPivot.Wet)
             {
-                if (Humidity == MapPivot.HumidityPivot.Dry)
+                if (Humidity == HumidityPivot.Dry)
                 {
                     realRatio /= 2;
                 }
-                else if (Humidity == MapPivot.HumidityPivot.Wet)
+                else if (Humidity == HumidityPivot.Wet)
                 {
                     realRatio *= 2;
                 }

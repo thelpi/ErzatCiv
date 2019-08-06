@@ -29,7 +29,7 @@ namespace ErsatzCiv
             InitializeComponent();
             _engine = engine;
             City = null;
-            TextBoxCityName.Text = Properties.Settings.Default.defaultCityName;
+            TextBoxCityName.Text = _engine.HumanPlayer.GetNextCityName;
         }
 
         private void ButtonValidate_Click(object sender, RoutedEventArgs e)

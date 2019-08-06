@@ -70,7 +70,7 @@ namespace ErsatzCivLib.Model.Persistent
             {
                 if (cities.Any(c =>
                     c.Name.Equals(
-                        string.Concat(_cities[i], " ", topRank),
+                        (topRank == 0 ? _cities[i] : string.Concat(_cities[i], " ", topRank)),
                         StringComparison.InvariantCultureIgnoreCase)))
                 {
                     lastIndexWithThisRank = i;
