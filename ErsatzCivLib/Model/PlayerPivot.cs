@@ -26,6 +26,7 @@ namespace ErsatzCivLib.Model
         private int _previousUnitIndex;
         private int _anarchyTurnsCount;
         private readonly EnginePivot _engine;
+        private RegimePivot _regime;
 
         #region Embedded properties
 
@@ -45,10 +46,6 @@ namespace ErsatzCivLib.Model
         /// <see cref="AdvancePivot"/> currently in discovery.
         /// </summary>
         public AdvancePivot CurrentAdvance { get; private set; }
-        /// <summary>
-        /// Current <see cref="RegimePivot"/>.
-        /// </summary>
-        public RegimePivot CurrentRegime { get; private set; }
         /// <summary>
         /// Current gold amount in the treasure.
         /// </summary>
@@ -191,7 +188,7 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                return CurrentRegime == RegimePivot.Anarchy && RevolutionTurnsCount == 0;
+                return _regime == RegimePivot.Anarchy && RevolutionTurnsCount == 0;
             }
         }
         /// <summary>
@@ -248,7 +245,7 @@ namespace ErsatzCivLib.Model
             IsIA = isIa;
             _advances.AddRange(civilization.Advances);
 
-            CurrentRegime = RegimePivot.Despotism;
+            _regime = RegimePivot.Despotism;
             Treasure = TREASURE_START;
 
             _units.Add(SettlerPivot.CreateAtLocation(beginLocation));
@@ -300,6 +297,15 @@ namespace ErsatzCivLib.Model
                     .ToList();
         }
 
+        /// <summary>
+        /// Gets the current <see cref="RegimePivot"/>.
+        /// </summary>
+        /// <returns>The <see cref="RegimePivot"/>.</returns>
+        public RegimePivot GetCurrentRegime()
+        {
+            return _regime;
+        }
+
         #endregion
 
         #region Internal methods
@@ -309,9 +315,9 @@ namespace ErsatzCivLib.Model
         /// </summary>
         internal void TriggerRevolution()
         {
-            if (CurrentRegime != RegimePivot.Anarchy)
+            if (_regime != RegimePivot.Anarchy)
             {
-                CurrentRegime = RegimePivot.Anarchy;
+                _regime = RegimePivot.Anarchy;
                 _anarchyTurnsCount = 0;
                 NewRegimeEvent?.Invoke(this, new EventArgs());
             }
@@ -373,11 +379,8 @@ namespace ErsatzCivLib.Model
             var settler = CurrentUnit as SettlerPivot;
             var sq = CurrentUnit.MapSquareLocation;
 
-            var city = new CityPivot(currentTurn, name, sq, CapitalizationPivot.Default,
-                _engine.ComputeCityAvailableMapSquares,
-                GetDistanceToCapitalRate,
-                new Func<RegimePivot>(delegate() { return CurrentRegime; })
-            );
+            var city = new CityPivot(currentTurn, name, sq, CapitalizationPivot.Default, _engine.ComputeCityAvailableMapSquares,
+                GetDistanceToCapitalRate, GetCurrentRegime);
             sq.ApplyCityActions(city);
 
             if (Capital is null)
@@ -571,7 +574,7 @@ namespace ErsatzCivLib.Model
         /// <param name="regimePivot">The new <see cref="RegimePivot"/>.</param>
         internal void ChangeCurrentRegime(RegimePivot regimePivot)
         {
-            CurrentRegime = regimePivot;
+            _regime = regimePivot;
             _anarchyTurnsCount = 0;
             NewRegimeEvent?.Invoke(this, new EventArgs());
         }
