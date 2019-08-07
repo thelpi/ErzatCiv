@@ -65,7 +65,7 @@ namespace ErsatzCivLib.Model.Static
             }).ToList();
 
             var topRank = ranks.Count > 0 ? ranks.Max() : 0;
-            var lastIndexWithThisRank = 0;
+            var lastIndexWithThisRank = -1;
             for (var i = 0; i < _cities.Count; i++)
             {
                 if (cities.Any(c =>
@@ -79,17 +79,17 @@ namespace ErsatzCivLib.Model.Static
 
             if (lastIndexWithThisRank == _cities.Count - 1)
             {
-                lastIndexWithThisRank = 0;
+                lastIndexWithThisRank = -1;
                 topRank++;
             }
 
             if (topRank == 0)
             {
-                return _cities[lastIndexWithThisRank];
+                return _cities[lastIndexWithThisRank + 1];
             }
             else
             {
-                return string.Concat(_cities[lastIndexWithThisRank], " ", topRank);
+                return string.Concat(_cities[lastIndexWithThisRank + 1], " ", topRank);
             }
         }
 

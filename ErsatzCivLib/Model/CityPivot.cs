@@ -21,7 +21,7 @@ namespace ErsatzCivLib.Model
         private const double NUCLEARPLANT_POLLUTION_INCREASE_RATIO = 0.5;
         private const double RECYCLINGCENTER_POLLUTION_INCREASE_RATIO = 1 / (double)3;
         private const double POWERPLANT_PRODUCTIVITY_INCREASE_RATIO = 1.5;
-        private const double GRANARY_FOOD_INCREASE_RATIO = 2;
+        private const double GRANARY_FOOD_INCREASE_RATIO = 0.5;
         private const double MASSTRANSIT_POLLUTION_INCREASE_RATIO = 0;
         private const double PALACE_CORRUPTION_INCREASE_RATE = 0.5;
         private const double COURTHOUSE_CORRUPTION_INCREASE_RATE = 0.5;
