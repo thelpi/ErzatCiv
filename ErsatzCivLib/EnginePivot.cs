@@ -127,6 +127,18 @@ namespace ErsatzCivLib
             return GetEveryCities().Any(c => (exceptCity == null || exceptCity != c) && c.Citizens.Any(cc => cc.MapSquare == mapSquare));
         }
 
+        private bool ChangeCitizenToDefaultAtTheBestSpotInternal(CitizenPivot citizenSource)
+        {
+            var mapSquare = citizenSource.City.BestVacantSpot();
+            if (mapSquare != null)
+            {
+                citizenSource.ToCitizen(mapSquare);
+                citizenSource.City.CheckCitizensMood();
+                return true;
+            }
+            return false;
+        }
+
         #endregion
 
         #region Internal methods
@@ -336,43 +348,42 @@ namespace ErsatzCivLib
         }
 
         /// <summary>
-        /// Makes a citizen a regular worker on the specified location.
+        /// Gets a specialist citizen of the specified city (if any), and makes it a regular worker on the specified location.
         /// </summary>
-        /// <param name="citizenSource">The citizen.</param>
-        /// <param name="mapSquare">The location; <c>Null</c> to let the engine decides the best location.</param>
-        /// <returns><c>True</c> if success; <c>False</c> if the engine can't decide for a location.</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="citizenSource"/> is <c>Null</c>.</exception>
+        /// <param name="city">The city.</param>
+        /// <param name="mapSquare">The location.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="city"/> is <c>Null</c>.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="mapSquare"/> is <c>Null</c>.</exception>
         /// <exception cref="ArgumentException">The city is not manage by the human player !</exception>
-        /// <exception cref="InvalidOperationException">The specified square can't be used by the citizen !</exception>
-        public bool ChangeCitizenToDefault(CitizenPivot citizenSource, MapSquarePivot mapSquare)
+        /// <exception cref="ArgumentException">The specified square can't be used by the citizen !</exception>
+        public void ChangeAnyCitizenToDefault(CityPivot city, MapSquarePivot mapSquare)
         {
-            if (citizenSource == null)
+            if (city == null)
             {
-                throw new ArgumentNullException(nameof(citizenSource));
-            }
-
-            if (!HumanPlayer.Cities.Contains(citizenSource.City))
-            {
-                throw new ArgumentException("The city is not manage by the human player !", nameof(citizenSource));
+                throw new ArgumentNullException(nameof(city));
             }
 
             if (mapSquare == null)
             {
-                mapSquare = citizenSource.City.BestVacantSpot();
-            }
-            else if (!ComputeCityAvailableMapSquares(citizenSource.City).Contains(mapSquare))
-            {
-                throw new InvalidOperationException("The specified square can't be used by the citizen !");
+                throw new ArgumentNullException(nameof(mapSquare));
             }
 
-            if (mapSquare != null)
+            if (!HumanPlayer.Cities.Contains(city))
+            {
+                throw new ArgumentException("The city is not manage by the human player !", nameof(city));
+            }
+
+            if (!ComputeCityAvailableMapSquares(city).Contains(mapSquare))
+            {
+                throw new ArgumentException("The specified square can't be used by the citizen !");
+            }
+
+            var citizenSource = city.GetAnySpecialistCitizen();
+            if (citizenSource != null)
             {
                 citizenSource.ToCitizen(mapSquare);
                 citizenSource.City.CheckCitizensMood();
-                return true;
             }
-
-            return false;
         }
 
         /// <summary>
@@ -520,7 +531,7 @@ namespace ErsatzCivLib
                         ChangeCitizenToSpecialist(citizenSource, CitizenTypePivot.TaxCollector);
                         break;
                     case CitizenTypePivot.TaxCollector:
-                        ChangeCitizenToDefault(citizenSource, null);
+                        ChangeCitizenToDefaultAtTheBestSpotInternal(citizenSource);
                         break;
                 }
             }

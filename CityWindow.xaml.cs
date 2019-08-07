@@ -247,7 +247,7 @@ namespace ErsatzCiv
         {
             if ((sender as Rectangle)?.Tag is MapSquarePivot squareSource)
             {
-                _engine.ChangeCitizenToDefault(_city.GetAnySpecialistCitizen(), squareSource);
+                _engine.ChangeAnyCitizenToDefault(_city, squareSource);
                 RefreshDisplay();
             }
         }

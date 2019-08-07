@@ -565,11 +565,6 @@ namespace ErsatzCivLib.Model
             _improvements.Add(CityImprovementPivot.Palace);
         }
 
-        public CitizenPivot GetAnySpecialistCitizen()
-        {
-            return _citizens.FirstOrDefault(c => c.Type.HasValue);
-        }
-
         public bool CoordinatesAreCityRadius(int row, int column)
         {
             return (row >= MapSquareLocation.Row - 2)
@@ -595,6 +590,11 @@ namespace ErsatzCivLib.Model
         public bool OnRightBorder(int mapWidth)
         {
             return MapSquareLocation.Row == mapWidth - 1;
+        }
+
+        internal CitizenPivot GetAnySpecialistCitizen()
+        {
+            return _citizens.FirstOrDefault(c => c.Type.HasValue);
         }
 
         #region IEquatable implementation

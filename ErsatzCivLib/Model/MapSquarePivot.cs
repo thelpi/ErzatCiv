@@ -437,7 +437,7 @@ namespace ErsatzCivLib.Model
         /// <returns><c>True</c> if equals; <c>False</c> otherwise.</returns>
         public bool Equals(MapSquarePivot other)
         {
-            return Row == other?.Row && Column == other?.Commerce;
+            return Row == other?.Row && Column == other?.Column;
         }
 
         /// <summary>
