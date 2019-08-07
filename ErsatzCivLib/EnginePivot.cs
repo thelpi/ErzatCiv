@@ -108,11 +108,6 @@ namespace ErsatzCivLib
             return GetEveryCities().Any(c => (exceptCity == null || exceptCity != c) && c.Citizens.Any(cc => cc.MapSquare == mapSquare));
         }
 
-        private IReadOnlyCollection<WonderPivot> GetEveryWonders()
-        {
-            return Players.SelectMany(p => p.Wonders).ToList();
-        }
-
         #endregion
 
         #region Internal methods
@@ -145,6 +140,11 @@ namespace ErsatzCivLib
             }
 
             return citySquares;
+        }
+
+        internal IReadOnlyCollection<WonderPivot> GetEveryWonders()
+        {
+            return Players.SelectMany(p => p.Wonders).ToList();
         }
 
         #endregion

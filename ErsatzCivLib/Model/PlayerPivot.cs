@@ -613,6 +613,15 @@ namespace ErsatzCivLib.Model
             // Already built for the current city.
             buildableDefaultInstances.RemoveAll(b => city.Improvements.Contains(b));
 
+            // Removes global wonder already built.
+            buildableDefaultInstances.RemoveAll(b => b.Is<WonderPivot>() && _engine.GetEveryWonders().Contains(b as WonderPivot));
+
+            // Another improvement is required in the first place.
+            buildableDefaultInstances.RemoveAll(b =>
+                b.Is<CityImprovementPivot>()
+                && (b as CityImprovementPivot).ImprovementPrerequisite != null
+                && !city.Improvements.Contains((b as CityImprovementPivot).ImprovementPrerequisite));
+
             #region Special rules
 
             // No aqueduc required if a river is close to the city.
@@ -621,22 +630,10 @@ namespace ErsatzCivLib.Model
                 buildableDefaultInstances.RemoveAll(b => CityImprovementPivot.Aqueduc == b);
             }
 
-            // Bank not available if marketplace not built.
-            if (!city.Improvements.Contains(CityImprovementPivot.Marketplace))
-            {
-                buildableDefaultInstances.Remove(CityImprovementPivot.Bank);
-            }
-
             // Courthouse not required for capital.
             if (city == Capital)
             {
                 buildableDefaultInstances.Remove(CityImprovementPivot.Courthouse);
-            }
-
-            // University not available if library not built.
-            if (!city.Improvements.Contains(CityImprovementPivot.Library))
-            {
-                buildableDefaultInstances.Remove(CityImprovementPivot.University);
             }
 
             #endregion

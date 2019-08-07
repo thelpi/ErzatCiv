@@ -12,7 +12,7 @@ namespace ErsatzCivLib
         private static readonly Random _randomizer =
             new Random(DateTime.Now.Millisecond * DateTime.Now.Second * DateTime.Now.Minute * DateTime.Now.Hour);
 
-        public static Random Randomizer
+        internal static Random Randomizer
         {
             get
             {
