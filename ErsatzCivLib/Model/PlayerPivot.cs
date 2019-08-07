@@ -213,7 +213,7 @@ namespace ErsatzCivLib.Model
         [field: NonSerialized]
         public event EventHandler<NextUnitEventArgs> NextUnitEvent;
         /// <summary>
-        /// Triggered when <see cref="CurrentRegime"/> changes.
+        /// Triggered when <see cref="_regime"/> changes.
         /// </summary>
         [field: NonSerialized]
         public event EventHandler<EventArgs> NewRegimeEvent;
@@ -311,7 +311,7 @@ namespace ErsatzCivLib.Model
         #region Internal methods
 
         /// <summary>
-        /// Triggrs a revolution; sets <see cref="CurrentRegime"/> to <see cref="RegimePivot.Anarchy"/> for a while.
+        /// Triggrs a revolution; sets <see cref="_regime"/> to <see cref="RegimePivot.Anarchy"/> for a while.
         /// </summary>
         internal void TriggerRevolution()
         {
@@ -370,7 +370,7 @@ namespace ErsatzCivLib.Model
                 return null;
             }
 
-            if (_cities.Any(c => c.Name.Equals(name.ToLower(), StringComparison.InvariantCultureIgnoreCase)))
+            if (_engine.Players.Any(p => p._cities.Any(c => c.Name.Equals(name.ToLower(), StringComparison.InvariantCultureIgnoreCase))))
             {
                 notUniqueNameError = true;
                 return null;

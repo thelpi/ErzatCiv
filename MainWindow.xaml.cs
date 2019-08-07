@@ -476,7 +476,10 @@ namespace ErsatzCiv
             _engine.HumanPlayer.NextUnitEvent += FocusOnUnit;
             _engine.HumanPlayer.NewAdvanceEvent += delegate (object sender, EventArgs e) { RefreshAdvanceInformations(); };
             _engine.HumanPlayer.NewRegimeEvent += delegate (object sender, EventArgs e) { RefreshRegimeInformations(); };
-            _engine.SubscribeToMapSquareChangeEvent(OnTriggerUpdateMapSquare);
+            foreach (var msq in _engine.Map)
+            {
+                msq.SquareChangeEvent += OnTriggerUpdateMapSquare;
+            }
             _engine.HumanPlayer.DiscoverNewSquareEvent += OnTriggerUpdateMapSquares;
         }
 
@@ -569,7 +572,7 @@ namespace ErsatzCiv
 
         private void MoveToNextTurnAndActAccordingly()
         {
-            var turnConsequences = _engine.NewTurn();
+            var turnConsequences = _engine.NextTurn();
             if (turnConsequences.EndOfRevolution)
             {
                 new WindowRegimePick(_engine).ShowDialog();

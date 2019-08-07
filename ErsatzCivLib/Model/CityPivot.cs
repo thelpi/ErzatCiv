@@ -328,7 +328,7 @@ namespace ErsatzCivLib.Model
 
             _citizens = new List<CitizenPivot>
             {
-                new CitizenPivot(BestVacantSpot())
+                new CitizenPivot(BestVacantSpot(), this)
             };
         }
 
@@ -393,7 +393,7 @@ namespace ErsatzCivLib.Model
                     || _improvements.Contains(CityImprovementPivot.Aqueduc))
                 {
                     FoodStorage = 0; // Note : excess is not keeped.
-                    _citizens.Add(new CitizenPivot(null));
+                    _citizens.Add(new CitizenPivot(null, this));
                     resetCitizensRequired = true;
                 }
                 else

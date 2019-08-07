@@ -57,7 +57,7 @@ namespace ErsatzCivLib
         /// Extension; gets the next row index related to a <see cref="DirectionPivot"/> from a specified row index.
         /// </summary>
         /// <param name="direction">The direction.</param>
-        /// <param name="column">The row index.</param>
+        /// <param name="row">The row index.</param>
         /// <returns>The next row index.</returns>
         internal static int Row(this DirectionPivot direction, int row)
         {
