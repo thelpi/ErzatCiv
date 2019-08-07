@@ -22,7 +22,7 @@ namespace ErsatzCivLib.Model
         private const double PRODUCTIVITY_TO_COMMERCE_RATIO = 0.1;
         private const int MAX_POPULATION_WITHOUT_WATER_SUPPLY = 10;
 
-        private readonly Func<CityPivot, List<MapSquarePivot>> _availableMapSquaresFunc;
+        private readonly Func<CityPivot, IReadOnlyCollection<MapSquarePivot>> _availableMapSquaresFunc;
         private readonly List<CitizenPivot> _citizens;
         private readonly List<CityImprovementPivot> _improvements;
         private readonly List<WonderPivot> _wonders;
@@ -200,7 +200,7 @@ namespace ErsatzCivLib.Model
         }
 
         internal CityPivot(int currentTurn, string name, MapSquarePivot location,
-            Func<CityPivot, List<MapSquarePivot>> availableMapSquaresFunc, BuildablePivot production)
+            Func<CityPivot, IReadOnlyCollection<MapSquarePivot>> availableMapSquaresFunc, BuildablePivot production)
         {
             Name = name;
             MapSquareLocation = location;

@@ -15,19 +15,13 @@ namespace ErsatzCivLib
     {
         private readonly List<PlayerPivot> _iaPlayers = new List<PlayerPivot>();
 
+        #region Public properties
+
         public int CurrentTurn { get; private set; }
         // TODO : wrong version.
         public int CurrentYear { get { return (CurrentTurn * 10) - 4000; } }
         public MapPivot Map { get; private set; }
-        public IReadOnlyCollection<CityPivot> GlobalCities
-        {
-            get
-            {
-                return _iaPlayers.SelectMany(iap => iap.Cities).Concat(HumanPlayer.Cities).ToList();
-            }
-        }
         public PlayerPivot HumanPlayer { get; }
-
         public IReadOnlyCollection<PlayerPivot> Players
         {
             get
@@ -35,6 +29,8 @@ namespace ErsatzCivLib
                 return _iaPlayers.Concat(new[] { HumanPlayer }).ToList();
             }
         }
+
+        #endregion
 
         public Engine(SizePivot mapSize, LandShapePivot mapShape, LandCoveragePivot landCoverage, TemperaturePivot temperature,
             AgePivot age, HumidityPivot humidity, CivilizationPivot playerCivilization, int iaPlayersCount)
@@ -53,7 +49,7 @@ namespace ErsatzCivLib
 
             List<MapSquarePivot> excludedSpots = new List<MapSquarePivot>();
 
-            HumanPlayer = new PlayerPivot(playerCivilization, false, GetRandomLocation(excludedSpots));
+            HumanPlayer = new PlayerPivot(this, playerCivilization, false, GetRandomLocation(excludedSpots));
             for (int i = 0; i < iaPlayersCount; i++)
             {
                 CivilizationPivot iaCiv = null;
@@ -62,10 +58,17 @@ namespace ErsatzCivLib
                     iaCiv = CivilizationPivot.Instances.ElementAt(Tools.Randomizer.Next(0, CivilizationPivot.Instances.Count));
                 }
                 while (HumanPlayer.Civilization == iaCiv || _iaPlayers.Any(ia => ia.Civilization == iaCiv));
-                _iaPlayers.Add(new PlayerPivot(iaCiv, true, GetRandomLocation(excludedSpots)));
+                _iaPlayers.Add(new PlayerPivot(this, iaCiv, true, GetRandomLocation(excludedSpots)));
             }
 
             CurrentTurn = 1;
+        }
+
+        #region Private methods
+
+        private IReadOnlyCollection<CityPivot> GetEveryCities()
+        {
+            return _iaPlayers.SelectMany(iap => iap.Cities).Concat(HumanPlayer.Cities).ToList();
         }
 
         private MapSquarePivot GetRandomLocation(List<MapSquarePivot> excludedSpots)
@@ -83,18 +86,43 @@ namespace ErsatzCivLib
             return ms;
         }
 
-        public CityPivot BuildCity(string name, out bool notUniqueNameError)
+        private void ChangeCitizenToSpecialist(CitizenPivot citizenSource, CitizenTypePivot citizenType)
         {
-            notUniqueNameError = false;
-            if (string.IsNullOrWhiteSpace(name))
+            var theCity = GetCityFromCitizen(citizenSource);
+            if (theCity == null)
             {
-                return null;
+                return;
             }
 
-            return HumanPlayer.BuildCity(CurrentTurn, name, out notUniqueNameError, IsCity, ComputeCityAvailableMapSquares);
+            citizenSource.ToSpecialist(citizenType);
+            theCity.CheckCitizensMood();
         }
 
-        private List<MapSquarePivot> ComputeCityAvailableMapSquares(CityPivot city)
+        private CityPivot GetCityFromCitizen(CitizenPivot citizenSource)
+        {
+            return GetEveryCities().SingleOrDefault(c => c.Citizens.Contains(citizenSource));
+        }
+
+        private bool OccupiedByCity(MapSquarePivot mapSquare, CityPivot exceptCity = null)
+        {
+            return GetEveryCities().Any(c => (exceptCity == null || exceptCity != c) && c.Citizens.Any(cc => cc.MapSquare == mapSquare));
+        }
+
+        private IReadOnlyCollection<WonderPivot> GetEveryWonders()
+        {
+            return Players.SelectMany(p => p.Wonders).ToList();
+        }
+
+        #endregion
+
+        #region Internal methods
+
+        internal bool IsCity(MapSquarePivot square)
+        {
+            return GetEveryCities().Any(c => c.MapSquareLocation == square);
+        }
+
+        internal IReadOnlyCollection<MapSquarePivot> ComputeCityAvailableMapSquares(CityPivot city)
         {
             var sq = city.MapSquareLocation;
 
@@ -119,9 +147,24 @@ namespace ErsatzCivLib
             return citySquares;
         }
 
+        #endregion
+
+        #region Public methods (used by the GUI)
+
+        public CityPivot BuildCity(string name, out bool notUniqueNameError)
+        {
+            notUniqueNameError = false;
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return null;
+            }
+
+            return HumanPlayer.BuildCity(CurrentTurn, name, out notUniqueNameError);
+        }
+
         public bool CanBuildCity()
         {
-            return HumanPlayer.CanBuildCity(IsCity);
+            return HumanPlayer.CanBuildCity();
         }
 
         public void ToNextUnit()
@@ -138,21 +181,16 @@ namespace ErsatzCivLib
                 ms.UpdateActionsProgress();
             }
 
-            var turnConsequences = HumanPlayer.NextTurn(Map.GetAdjacentMapSquares);
+            var turnConsequences = HumanPlayer.NextTurn();
             foreach (var iaPlayer in _iaPlayers)
             {
-                var turnConsequencesIa = iaPlayer.NextTurn(Map.GetAdjacentMapSquares);
+                var turnConsequencesIa = iaPlayer.NextTurn();
                 // TODO : what do with this ?
             }
 
             CurrentTurn++;
 
             return turnConsequences;
-        }
-
-        internal bool IsCity(MapSquarePivot square)
-        {
-            return GlobalCities.Any(c => c.MapSquareLocation == square);
         }
 
         public bool WorkerAction(WorkerActionPivot actionPivot)
@@ -162,7 +200,7 @@ namespace ErsatzCivLib
                 return false;
             }
 
-            return HumanPlayer.WorkerAction(actionPivot, IsCity, Map.GetAdjacentMapSquares);
+            return HumanPlayer.WorkerAction(actionPivot);
         }
 
         public void SubscribeToMapSquareChangeEvent(EventHandler<SquareChangedEventArgs> handler)
@@ -175,14 +213,9 @@ namespace ErsatzCivLib
 
         public bool MoveCurrentUnit(DirectionPivot? direction)
         {
-            return HumanPlayer.MoveCurrentUnit(direction, delegate(int x, int y) { return Map[x, y]; });
+            return HumanPlayer.MoveCurrentUnit(direction);
         }
-
-        /// <summary>
-        /// Deserializes a save file into an <see cref="Engine"/>.
-        /// </summary>
-        /// <param name="saveFullPath">Path to save do deserialize.</param>
-        /// <returns>Engine and error message.</returns>
+        
         public static Tuple<Engine, string> DeserializeSave(string saveFullPath)
         {
             try
@@ -207,12 +240,7 @@ namespace ErsatzCivLib
                 return new Tuple<Engine, string>(null, ex.Message);
             }
         }
-
-        /// <summary>
-        /// Serialize the instance into a file.
-        /// </summary>
-        /// <param name="folder">Folder.</param>
-        /// <returns>Error message.</returns>
+        
         public string SerializeToFile(string folder)
         {
             try
@@ -243,18 +271,6 @@ namespace ErsatzCivLib
             }
         }
 
-        private void ChangeCitizenToSpecialist(CitizenPivot citizenSource, CitizenTypePivot citizenType)
-        {
-            var theCity = GetCityFromCitizen(citizenSource);
-            if (theCity == null)
-            {
-                return;
-            }
-
-            citizenSource.ToSpecialist(citizenType);
-            theCity.CheckCitizensMood();
-        }
-
         public void ChangeCitizenToDefault(CitizenPivot citizenSource, MapSquarePivot mapSquare)
         {
             if (citizenSource == null)
@@ -283,24 +299,7 @@ namespace ErsatzCivLib
                 theCity.CheckCitizensMood();
             }
         }
-
-        private CityPivot GetCityFromCitizen(CitizenPivot citizenSource)
-        {
-            return GlobalCities.SingleOrDefault(c => c.Citizens.Contains(citizenSource));
-        }
-
-        private bool OccupiedByCity(MapSquarePivot mapSquare, CityPivot exceptCity = null)
-        {
-            return GlobalCities.Any(c => (exceptCity == null || exceptCity != c) && c.Citizens.Any(cc =>  cc.MapSquare == mapSquare));
-        }
-
-        /// <summary>
-        /// Gets, for a specified city, the list of <see cref="MapSquarePivot"/> around it.
-        /// </summary>
-        /// <param name="city">The <see cref="CityPivot"/>.</param>
-        /// <returns>A dictionary where the key is the <see cref="MapSquarePivot"/>,
-        /// and the value is a tuple [<see cref="CitizenPivot"/> status, occupied by another city y/n].</returns>
-        /// <exception cref="ArgumentNullException">The parameter <paramref name="city"/> is <c>Null</c>.</exception>
+        
         public Dictionary<MapSquarePivot, Tuple<CitizenPivot, bool>> GetMapSquaresAroundCity(CityPivot city)
         {
             if (city == null)
@@ -324,13 +323,7 @@ namespace ErsatzCivLib
 
             return result;
         }
-
-        /// <summary>
-        /// Gets, for a specified <see cref="CityPivot"/>, the list of <see cref="BuildablePivot"/> which can be built.
-        /// </summary>
-        /// <param name="city">The <see cref="CityPivot"/>.</param>
-        /// <param name="indexOfDefault">Out; the index, in the result list, of the city current production.</param>
-        /// <returns>List of <see cref="BuildablePivot"/> (<c>Default</c> instance for each) the city can build.</returns>
+        
         public IReadOnlyCollection<BuildablePivot> GetBuildableItemsForCity(CityPivot city, out int indexOfDefault)
         {
             indexOfDefault = -1;
@@ -346,13 +339,7 @@ namespace ErsatzCivLib
 
             return buildableDefaultInstances;
         }
-
-        /// <summary>
-        /// Tries to change the production of a <see cref="CityPivot"/>.
-        /// </summary>
-        /// <param name="city">The <see cref="CityPivot"/>.</param>
-        /// <param name="buildableDefaultInstance">The <see cref="BuildablePivot"/> (<c>Default</c> instance).</param>
-        /// <returns><c>True</c> if success; <c>False</c> otherwise.</returns>
+        
         public bool ChangeCityProduction(CityPivot city, BuildablePivot buildableDefaultInstance)
         {
             if (city == null || buildableDefaultInstance == null)
@@ -369,11 +356,7 @@ namespace ErsatzCivLib
             city.ChangeProduction(invokedInstance);
             return true;
         }
-
-        /// <summary>
-        /// Resets the position on the working area of each citizen of a <see cref="CityPivot"/>.
-        /// </summary>
-        /// <param name="city">The city to reset.</param>
+        
         public void ResetCitizens(CityPivot city)
         {
             if (city == null)
@@ -411,13 +394,7 @@ namespace ErsatzCivLib
                 }
             }
         }
-
-        /// <summary>
-        /// Calls <see cref="PlayerPivot.ChangeCurrentAdvance(AdvancePivot)"/> for <see cref="HumanPlayer"/>.
-        /// </summary>
-        /// <param name="player">The <see cref="PlayerPivot"/>.</param>
-        /// <param name="advance">The <see cref="AdvancePivot"/>.</param>
-        /// <returns><c>True</c> if success; <c>False</c> if failure.</returns>
+        
         public bool ChangeCurrentAdvance(AdvancePivot advance)
         {
             if (advance == null)
@@ -443,5 +420,7 @@ namespace ErsatzCivLib
         {
             HumanPlayer.TriggerRevolution();
         }
+
+        #endregion
     }
 }

@@ -17,12 +17,13 @@ namespace ErsatzCivLib.Model
     {
         private const int TREASURE_START = 100;
 
-        private List<CityPivot> _cities = new List<CityPivot>();
-        private List<AdvancePivot> _advances = new List<AdvancePivot>();
-        private List<UnitPivot> _units = new List<UnitPivot>();
+        private readonly List<CityPivot> _cities = new List<CityPivot>();
+        private readonly List<AdvancePivot> _advances = new List<AdvancePivot>();
+        private readonly List<UnitPivot> _units = new List<UnitPivot>();
         private int _currentUnitIndex;
         private int _previousUnitIndex;
         private int _anarchyTurnsCount;
+        private readonly Engine _engine;
 
         #region Embedded properties
 
@@ -109,6 +110,16 @@ namespace ErsatzCivLib.Model
         /// List of <see cref="CityPivot"/> built by the player.
         /// </summary>
         public IReadOnlyCollection<CityPivot> Cities { get { return _cities; } }
+        /// <summary>
+        /// List of every <see cref="WonderPivot"/> for this player / civilization.
+        /// </summary>
+        public IReadOnlyCollection<WonderPivot> Wonders
+        {
+            get
+            {
+                return _cities.SelectMany(c => c.Wonders).ToList();
+            }
+        }
         /// <summary>
         /// List of discovered <see cref="AdvancePivot"/>.
         /// </summary>
@@ -214,11 +225,14 @@ namespace ErsatzCivLib.Model
         /// <summary>
         /// Constructor.
         /// </summary>
+        /// <param name="owner">The <see cref="Engine"/> related to this instance.</param>
         /// <param name="civilization">The <see cref="Civilization"/> value.</param>
         /// <param name="isIa">The <see cref="IsIA"/> value.</param>
         /// <param name="beginLocation">Units position at the beginning.</param>
-        internal PlayerPivot(CivilizationPivot civilization, bool isIa, MapSquarePivot beginLocation)
+        internal PlayerPivot(Engine owner, CivilizationPivot civilization, bool isIa, MapSquarePivot beginLocation)
         {
+            _engine = owner;
+
             Civilization = civilization;
             IsIA = isIa;
             _advances.AddRange(civilization.Advances);
@@ -327,16 +341,12 @@ namespace ErsatzCivLib.Model
         /// <param name="currentTurn">The <see cref="Engine.CurrentTurn"/> value.</param>
         /// <param name="name">Name of the city.</param>
         /// <param name="notUniqueNameError">Out; indicates a failure caused by a non-unique city name.</param>
-        /// <param name="isCityCallback">Callback method to check if a city, on any civilization, already exists at this location.</param>
-        /// <param name="computeCityAvailableMapSquaresCallback">Callback method to compute available <see cref="MapSquarePivot"/> around the city to build.</param>
         /// <returns>The <see cref="CityPivot"/> built; <c>Null</c> if failure.</returns>
-        internal CityPivot BuildCity(int currentTurn, string name, out bool notUniqueNameError,
-            Func<MapSquarePivot, bool> isCityCallback,
-            Func<CityPivot, List<MapSquarePivot>> computeCityAvailableMapSquaresCallback)
+        internal CityPivot BuildCity(int currentTurn, string name, out bool notUniqueNameError)
         {
             notUniqueNameError = false;
 
-            if (!CanBuildCity(isCityCallback))
+            if (!CanBuildCity())
             {
                 return null;
             }
@@ -350,7 +360,7 @@ namespace ErsatzCivLib.Model
             var settler = CurrentUnit as SettlerPivot;
             var sq = CurrentUnit.MapSquareLocation;
 
-            var city = new CityPivot(currentTurn, name, sq, computeCityAvailableMapSquaresCallback, CapitalizationPivot.Default);
+            var city = new CityPivot(currentTurn, name, sq, _engine.ComputeCityAvailableMapSquares, CapitalizationPivot.Default);
             sq.ApplyCityActions(city);
 
             if (Capital is null)
@@ -370,9 +380,8 @@ namespace ErsatzCivLib.Model
         /// Checks if a <see cref="CityPivot"/> can be built at the <see cref="CurrentUnit"/> location.
         /// <see cref="CurrentUnit"/> must be a <see cref="SettlerPivot"/>.
         /// </summary>
-        /// <param name="isCityCallback">Callback method to check if a city, on any civilization, already exists at this location.</param>
         /// <returns><c>True</c> if a city can be build; <c>False</c> otherwise.</returns>
-        internal bool CanBuildCity(Func<MapSquarePivot, bool> isCityCallback)
+        internal bool CanBuildCity()
         {
             if (CurrentUnit?.Is<SettlerPivot>() != true)
             {
@@ -382,7 +391,7 @@ namespace ErsatzCivLib.Model
             var sq = CurrentUnit.MapSquareLocation;
 
             return sq?.Biome?.IsCityBuildable == true
-                && !isCityCallback(sq)
+                && !_engine.IsCity(sq)
                 && sq.Pollution != true;
         }
 
@@ -431,9 +440,8 @@ namespace ErsatzCivLib.Model
         /// <summary>
         /// Proceeds to do every actions required by a move to the next turn.
         /// </summary>
-        /// <param name="getAdjacentSquaresCallback">Callback method to get adjacent squares of a single <see cref="MapSquarePivot"/>.</param>
         /// <returns>A <see cref="TurnConsequencesPivot"/>.</returns>
-        internal TurnConsequencesPivot NextTurn(Func<MapSquarePivot, IReadOnlyDictionary<DirectionPivot, MapSquarePivot>> getAdjacentSquaresCallback)
+        internal TurnConsequencesPivot NextTurn()
         {
             var citiesWithDoneProduction = new Dictionary<CityPivot, BuildablePivot>();
 
@@ -482,9 +490,8 @@ namespace ErsatzCivLib.Model
         /// Tries to move the current unit.
         /// </summary>
         /// <param name="direction">The <see cref="DirectionPivot"/>; <c>Null</c> to skip unit turn without moving.</param>
-        /// <param name="getMapSquareCallback">Callback method to get the <see cref="MapSquarePivot"/> at the new coordinates.</param>
         /// <returns><c>True</c> if success; <c>False</c> otherwise.</returns>
-        internal bool MoveCurrentUnit(DirectionPivot? direction, Func<int, int, MapSquarePivot> getMapSquareCallback)
+        internal bool MoveCurrentUnit(DirectionPivot? direction)
         {
             if (CurrentUnit == null)
             {
@@ -503,7 +510,7 @@ namespace ErsatzCivLib.Model
             var x = direction.Value.Row(prevSq.Row);
             var y = direction.Value.Column(prevSq.Column);
 
-            var square = getMapSquareCallback(x, y);
+            var square = _engine.Map[x, y];
             if (square == null)
             {
                 return false;
@@ -535,10 +542,8 @@ namespace ErsatzCivLib.Model
         /// <see cref="CurrentUnit"/> must be a worker.
         /// </summary>
         /// <param name="actionPivot">The <see cref="WorkerActionPivot"/>.</param>
-        /// <param name="isCityCallback">Callback method to check if a city, on any civilization, already exists at this location.</param>
         /// <returns><c>True</c> if success; <c>False</c> otherwise.</returns>
-        internal bool WorkerAction(WorkerActionPivot actionPivot, Func<MapSquarePivot, bool> isCityCallback,
-            Func<MapSquarePivot, IReadOnlyDictionary<DirectionPivot, MapSquarePivot>> getAdjacentSquaresCallback)
+        internal bool WorkerAction(WorkerActionPivot actionPivot)
         {
             if (CurrentUnit == null || !CurrentUnit.Is<WorkerPivot>())
             {
@@ -547,7 +552,7 @@ namespace ErsatzCivLib.Model
 
             var worker = CurrentUnit as WorkerPivot;
             var sq = worker.MapSquareLocation;
-            if (sq == null || isCityCallback(sq))
+            if (sq == null || _engine.IsCity(sq))
             {
                 return false;
             }
@@ -572,7 +577,7 @@ namespace ErsatzCivLib.Model
             if (actionPivot == WorkerActionPivot.Irrigate
                 && !_advances.Contains(AdvancePivot.Electricity)
                 && !sq.HasRiver
-                && !getAdjacentSquaresCallback(sq).Values.Any(asq => asq.Irrigate))
+                && !_engine.Map.GetAdjacentMapSquares(sq).Values.Any(asq => asq.Irrigate))
             {
                 return false;
             }
