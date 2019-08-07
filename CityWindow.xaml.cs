@@ -174,7 +174,7 @@ namespace ErsatzCiv
                     callback = null;
                 }
 
-                GridCityMap.DrawSingleMapSquare(CITY_GRID_SIZE, current, false, gridOffset, callback);
+                GridCityMap.DrawSingleMapSquare(CITY_GRID_SIZE, current, true, gridOffset, callback);
                 if (isCity)
                 {
                     GridCityMap.DrawMapCity(_city, CITY_GRID_SIZE, 5, true, gridOffset, MouseClickOnCity);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
@@ -209,7 +210,7 @@ namespace ErsatzCiv
         }
 
         internal static void DrawSingleMapSquare(this Panel panel, double defaultDim, MapSquarePivot square, bool cleanPreviousSquare,
-            Tuple<int, int> gridPositionOffset = null, Action<object, System.Windows.Input.MouseButtonEventArgs> mouseLeftButtonDownCallback = null)
+            Tuple<int, int> gridPositionOffset = null, Action<object, MouseButtonEventArgs> mouseLeftButtonDownCallback = null)
         {
             if (panel == null)
             {
@@ -219,6 +220,21 @@ namespace ErsatzCiv
             if (cleanPreviousSquare)
             {
                 panel.CleanPreviousChildrenByTag(square);
+            }
+            else
+            {
+                var blackRectangle = new Rectangle
+                {
+                    Fill = Brushes.Black,
+                    Width = defaultDim,
+                    Height = defaultDim,
+                    Tag = square
+                };
+
+                blackRectangle.SetValue(Grid.RowProperty, square.Row - (gridPositionOffset == null ? 0 : gridPositionOffset.Item1));
+                blackRectangle.SetValue(Grid.ColumnProperty, square.Column - (gridPositionOffset == null ? 0 : gridPositionOffset.Item2));
+                panel.Children.Add(blackRectangle);
+                return;
             }
 
             var dockPanel = new DockPanel { LastChildFill = true };
@@ -303,7 +319,7 @@ namespace ErsatzCiv
                     Fill = Brushes.Transparent,
                     Tag = square
                 };
-                transparentLayer.MouseLeftButtonDown += new System.Windows.Input.MouseButtonEventHandler(mouseLeftButtonDownCallback);
+                transparentLayer.MouseLeftButtonDown += new MouseButtonEventHandler(mouseLeftButtonDownCallback);
                 transparentLayer.SetValue(Grid.RowProperty, square.Row - (gridPositionOffset == null ? 0 : gridPositionOffset.Item1));
                 transparentLayer.SetValue(Grid.ColumnProperty, square.Column - (gridPositionOffset == null ? 0 : gridPositionOffset.Item2));
                 transparentLayer.SetValue(Panel.ZIndexProperty, 10);
@@ -312,7 +328,7 @@ namespace ErsatzCiv
         }
 
         internal static void DrawMapCity(this Panel panel, CityPivot city, double defaultDim, int cityZindex, bool skipPreviousCheck,
-            Tuple<int, int> gridPositionOffset = null, Action<object, System.Windows.Input.MouseButtonEventArgs> mouseLeftButtonDownCallback = null)
+            Tuple<int, int> gridPositionOffset = null, Action<object, MouseButtonEventArgs> mouseLeftButtonDownCallback = null)
         {
             if (panel == null)
             {
@@ -340,7 +356,7 @@ namespace ErsatzCiv
 
             if (mouseLeftButtonDownCallback != null)
             {
-                img.MouseLeftButtonDown += new System.Windows.Input.MouseButtonEventHandler(mouseLeftButtonDownCallback);
+                img.MouseLeftButtonDown += new MouseButtonEventHandler(mouseLeftButtonDownCallback);
             }
 
             panel.Children.Add(img);

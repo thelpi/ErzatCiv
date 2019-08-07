@@ -20,6 +20,7 @@ namespace ErsatzCivLib.Model
         private readonly List<CityPivot> _cities = new List<CityPivot>();
         private readonly List<AdvancePivot> _advances = new List<AdvancePivot>();
         private readonly List<UnitPivot> _units = new List<UnitPivot>();
+        private readonly List<MapSquarePivot> _knownMapSquares = new List<MapSquarePivot>();
         private int _currentUnitIndex;
         private int _previousUnitIndex;
         private int _anarchyTurnsCount;
@@ -60,6 +61,10 @@ namespace ErsatzCivLib.Model
 
         #region Inferred properties
 
+        /// <summary>
+        /// Collection of <see cref="MapSquarePivot"/> discovered by the player / civilization.
+        /// </summary>
+        public IReadOnlyCollection<MapSquarePivot> KnownMapSquares { get { return _knownMapSquares; } }
         /// <summary>
         /// Collection of <see cref="UnitPivot"/>.
         /// </summary>
@@ -219,6 +224,11 @@ namespace ErsatzCivLib.Model
         /// </summary>
         [field: NonSerialized]
         public event EventHandler<EventArgs> NewAdvanceEvent;
+        /// <summary>
+        /// Triggered when new <see cref="MapSquarePivot"/> is discovered.
+        /// </summary>
+        [field: NonSerialized]
+        public event EventHandler<DiscoverNewSquareEventArgs> DiscoverNewSquareEvent;
 
         #endregion
 
@@ -242,6 +252,8 @@ namespace ErsatzCivLib.Model
 
             _units.Add(SettlerPivot.CreateAtLocation(beginLocation));
             _units.Add(WorkerPivot.CreateAtLocation(beginLocation));
+
+            MapSquareDiscoveryInvokator(beginLocation, _engine.Map.GetAdjacentMapSquares(beginLocation).Values);
 
             SetUnitIndex(false, true);
         }
@@ -368,6 +380,8 @@ namespace ErsatzCivLib.Model
                 city.SetAsNewCapital(Capital);
                 Capital = city;
             }
+
+            MapSquareDiscoveryInvokator(city.MapSquareLocation, _engine.GetMapSquaresAroundCity(city).Keys);
 
             _cities.Add(city);
             _units.Remove(settler);
@@ -523,6 +537,12 @@ namespace ErsatzCivLib.Model
             {
                 SetUnitIndex(false, false);
             }
+
+            if (res)
+            {
+                MapSquareDiscoveryInvokator(square, _engine.Map.GetAdjacentMapSquares(square).Values);
+            }
+
             return res;
         }
 
@@ -669,6 +689,16 @@ namespace ErsatzCivLib.Model
             {
                 // TODO
                 throw new NotImplementedException();
+            }
+        }
+
+        private void MapSquareDiscoveryInvokator(MapSquarePivot location, IEnumerable<MapSquarePivot> aroundLocation)
+        {
+            var squares = aroundLocation.Concat(new[] { location }).Where(msq => !_knownMapSquares.Contains(msq)).ToList();
+            if (squares.Any())
+            {
+                _knownMapSquares.AddRange(squares);
+                DiscoverNewSquareEvent?.Invoke(this, new DiscoverNewSquareEventArgs(squares));
             }
         }
 

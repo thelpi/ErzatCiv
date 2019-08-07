@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -44,12 +46,28 @@ namespace ErsatzCiv
 
         #region Events
 
-        private void UpdateSquareMap(object sender, SquareChangedEventArgs evt)
+        private void OnTriggerUpdateMapSquares(object sender, DiscoverNewSquareEventArgs evt)
+        {
+            if (evt?.MapSquares != null)
+            {
+                UpdateMapSquares(evt.MapSquares);
+            }
+        }
+
+        private void OnTriggerUpdateMapSquare(object sender, SquareChangedEventArgs evt)
         {
             if (evt?.MapSquare != null)
             {
-                MapGrid.DrawSingleMapSquare(DEFAULT_SIZE, evt.MapSquare, true);
-                DrawSingleMiniMapSquare(evt.MapSquare, true);
+                UpdateMapSquares(new[] { evt.MapSquare });
+            }
+        }
+
+        private void UpdateMapSquares(IEnumerable<MapSquarePivot> msqList)
+        {
+            foreach (var msq in msqList)
+            {
+                MapGrid.DrawSingleMapSquare(DEFAULT_SIZE, msq, true);
+                DrawSingleMiniMapSquare(msq, true);
             }
         }
 
@@ -379,20 +397,28 @@ namespace ErsatzCiv
                 MapGrid.DrawSingleMapSquare(DEFAULT_SIZE, ms, false);
                 DrawSingleMiniMapSquare(ms, false);
             }
+
+            // Without this line, no square at the first turn !
+            UpdateMapSquares(_engine.HumanPlayer.KnownMapSquares);
         }
         
         private void DrawSingleMiniMapSquare(MapSquarePivot square, bool cleanPreviousSquare)
         {
+            var brush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(DrawTools.MAP_SQUARE_COLORS[square.Biome.Name]));
             if (cleanPreviousSquare)
             {
                 MiniMapCanvas.CleanPreviousChildrenByTag(square);
+            }
+            else
+            {
+                brush = Brushes.Black;
             }
 
             Rectangle rctMinimap = new Rectangle
             {
                 Width = _minimapSquareSize,
                 Height = _minimapSquareSize,
-                Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(DrawTools.MAP_SQUARE_COLORS[square.Biome.Name]))
+                Fill = brush
             };
             rctMinimap.SetValue(Canvas.TopProperty, square.Row * _minimapSquareSize);
             rctMinimap.SetValue(Canvas.LeftProperty, square.Column * _minimapSquareSize);
@@ -450,7 +476,8 @@ namespace ErsatzCiv
             _engine.HumanPlayer.NextUnitEvent += FocusOnUnit;
             _engine.HumanPlayer.NewAdvanceEvent += delegate (object sender, EventArgs e) { RefreshAdvanceInformations(); };
             _engine.HumanPlayer.NewRegimeEvent += delegate (object sender, EventArgs e) { RefreshRegimeInformations(); };
-            _engine.SubscribeToMapSquareChangeEvent(UpdateSquareMap);
+            _engine.SubscribeToMapSquareChangeEvent(OnTriggerUpdateMapSquare);
+            _engine.HumanPlayer.DiscoverNewSquareEvent += OnTriggerUpdateMapSquares;
         }
 
         private void RefreshDynamicView()
@@ -462,12 +489,14 @@ namespace ErsatzCiv
 
             foreach (var player in _engine.Players)
             {
-                foreach (var unit in player.Units)
+                foreach (var unit in player.Units.Where(u => player == _engine.HumanPlayer
+                    || _engine.HumanPlayer.KnownMapSquares.Contains(u.MapSquareLocation)))
                 {
                     MapGrid.DrawUnit(unit, DEFAULT_SIZE, UNIT_ZINDEX, false, true);
                 }
 
-                foreach (var city in player.Cities)
+                foreach (var city in player.Cities.Where(u => player == _engine.HumanPlayer
+                    || _engine.HumanPlayer.KnownMapSquares.Contains(u.MapSquareLocation)))
                 {
                     MapGrid.DrawMapCity(city, DEFAULT_SIZE, CITY_ZINDEX, false);
                     DisplayCityName(city);
