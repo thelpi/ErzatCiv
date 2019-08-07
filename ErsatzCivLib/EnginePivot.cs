@@ -129,7 +129,7 @@ namespace ErsatzCivLib
 
         private bool ChangeCitizenToDefaultAtTheBestSpotInternal(CitizenPivot citizenSource)
         {
-            var mapSquare = citizenSource.City.BestVacantSpot();
+            var mapSquare = citizenSource.City.BestVacantMapSquareLocation();
             if (mapSquare != null)
             {
                 citizenSource.ToCitizen(mapSquare);

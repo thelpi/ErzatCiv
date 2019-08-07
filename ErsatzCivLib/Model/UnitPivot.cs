@@ -16,6 +16,8 @@ namespace ErsatzCivLib.Model
     [Serializable]
     public abstract class UnitPivot : BuildablePivot
     {
+        private const int CITY_SPEED_COST = 1;
+
         /// <summary>
         /// Location on map.
         /// </summary>
@@ -119,7 +121,7 @@ namespace ErsatzCivLib.Model
             if (!previousMapSquare.RailRoad || !currentMapSquare.RailRoad)
             {
                 RemainingMoves -=
-                    (comeIntoCity ? CityPivot.CITY_SPEED_COST : currentMapSquare.Biome.SpeedCost)
+                    (comeIntoCity ? CITY_SPEED_COST : currentMapSquare.Biome.SpeedCost)
                     * (previousMapSquare.Road && currentMapSquare.Road ? WorkerActionPivot.ROAD_SPEED_COST_RATIO : 1);
             }
 

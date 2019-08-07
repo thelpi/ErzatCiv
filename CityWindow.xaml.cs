@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -101,7 +103,7 @@ namespace ErsatzCiv
                 StackCitizens.Children.Add(DrawCitizen(citizen, CITIZEN_SIZE_TOPBAR, 1, MouseClickOnCitizen));
             }
 
-            ListBoxImprovements.ItemsSource = _city.ImprovementsAndWonders;
+            ListBoxImprovements.ItemsSource = new List<BuildablePivot>(_city.Improvements).Concat(_city.Wonders);
 
             GridCityMap.Children.Clear();
             var gridOffset = new Tuple<int, int>(

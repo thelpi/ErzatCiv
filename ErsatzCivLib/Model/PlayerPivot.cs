@@ -482,7 +482,7 @@ namespace ErsatzCivLib.Model
 
             foreach (var city in _cities)
             {
-                var produced = city.UpdateStatus();
+                var produced = city.NextTurn();
                 if (produced != null)
                 {
                     if (produced.Is<UnitPivot>())

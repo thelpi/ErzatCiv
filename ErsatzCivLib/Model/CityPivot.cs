@@ -6,9 +6,19 @@ using ErsatzCivLib.Model.Static;
 
 namespace ErsatzCivLib.Model
 {
+    /// <summary>
+    /// Represents a city.
+    /// </summary>
+    /// <seealso cref="IEquatable{T}"/>
     [Serializable]
     public class CityPivot : IEquatable<CityPivot>
     {
+        private const int DEFAULT_RATIO_CITIZEN_UNHAPPY = 5;
+        private const int FOOD_RATIO_TO_NEXT_CITIZEN = 40;
+        private const int PRODUCTION_INFINITE = 9999;
+
+        #region Constants relative to improvements effects
+
         private const double MARKETPLACE_COMMERCE_INCREASE_RATIO = 1.5;
         private const double BANK_COMMERCE_INCREASE_RATIO = 1.5;
         private const double LIBRARY_SCIENCE_INCREASE_RATIO = 1.5;
@@ -25,34 +35,80 @@ namespace ErsatzCivLib.Model
         private const double MASSTRANSIT_POLLUTION_INCREASE_RATIO = 0;
         private const double PALACE_CORRUPTION_INCREASE_RATE = 0.5;
         private const double COURTHOUSE_CORRUPTION_INCREASE_RATE = 0.5;
+        private const int AQUEDUC_MAX_POPULATION_WITHOUT = 10;
+        private const double CAPITALIZATION_PRODUCTIVITY_TO_COMMERCE_RATIO = 0.1;
 
-        private const int PRODUCTION_INFINITE = 9999;
-        private const int DEFAULT_RATIO_CITIZEN_UNHAPPY = 5;
-        internal const int CITY_SPEED_COST = 1;
+        #endregion
+
+        #region Constants relative to real population computing
+
         private const double MAX_CITIZEN_COUNT = 40;
         private const double MIN_CC_POP = 1000;
         private const double MAX_CC_POP = 20000000;
         private static readonly double POP_GROWTH_RATIO = Math.Log(MIN_CC_POP / MAX_CC_POP) / (1 - MAX_CITIZEN_COUNT);
-        private const int FOOD_RATIO_TO_NEXT_CITIZEN = 40;
-        private const double PRODUCTIVITY_TO_COMMERCE_RATIO = 0.1;
-        private const int MAX_POPULATION_WITHOUT_WATER_SUPPLY = 10;
+
+        #endregion
 
         private readonly Func<CityPivot, double> _getDistanceToCapitalRateCallback;
         private readonly Func<RegimePivot> _getCurrentRegimeCallback;
         private readonly Func<CityPivot, IReadOnlyCollection<MapSquarePivot>> _getAvailableMapSquaresCallback;
-        private readonly List<CitizenPivot> _citizens;
-        private readonly List<CityImprovementPivot> _improvements;
-        private readonly List<WonderPivot> _wonders;
 
+        #region Embedded properties
+
+        /// <summary>
+        /// Current production.
+        /// </summary>
         public BuildablePivot Production { get; private set; }
+        /// <summary>
+        /// Creation turn.
+        /// </summary>
         public int CreationTurn { get; private set; }
+        /// <summary>
+        /// Food in store (outside granary).
+        /// </summary>
         public int FoodStorage { get; private set; }
+        /// <summary>
+        /// Food in store (inside granary).
+        /// </summary>
         public int FoodGranaryStorage { get; private set; }
+        /// <summary>
+        /// Productivity in store.
+        /// </summary>
         public int ProductivityStorage { get; private set; }
+        /// <summary>
+        /// Name.
+        /// </summary>
         public string Name { get; private set; }
+        /// <summary>
+        /// Location on the map.
+        /// </summary>
         public MapSquarePivot MapSquareLocation { get; private set; }
-        public bool HasWaterSupply { get { return MapSquareLocation.Rivers.Count > 0; } }
+
+        private readonly List<CitizenPivot> _citizens;
+        /// <summary>
+        /// List of <see cref="CitizenPivot"/>.
+        /// </summary>
         public IReadOnlyCollection<CitizenPivot> Citizens { get { return _citizens; } }
+
+        private readonly List<CityImprovementPivot> _improvements;
+        /// <summary>
+        /// List of <see cref="CityImprovementPivot"/>
+        /// </summary>
+        public IReadOnlyCollection<CityImprovementPivot> Improvements { get { return _improvements; } }
+
+        private readonly List<WonderPivot> _wonders;
+        /// <summary>
+        /// List of <see cref="WonderPivot"/>.
+        /// </summary>
+        public IReadOnlyCollection<WonderPivot> Wonders { get { return _wonders; } }
+
+        #endregion
+
+        #region Inferred properties
+
+        /// <summary>
+        /// Indicates if the city is in civil trouble (too much citizens in <see cref="MoodPivot.Unhappy"/> mood).
+        /// </summary>
         public bool InCivilTrouble
         {
             get
@@ -60,6 +116,9 @@ namespace ErsatzCivLib.Model
                 return _citizens.Count(c => c.Mood == MoodPivot.Unhappy) > _citizens.Count(c => c.Mood == MoodPivot.Happy);
             }
         }
+        /// <summary>
+        /// Indicates if the city is <see cref="InCivilTrouble"/> or the current regime is <see cref="RegimePivot.Anarchy"/>.
+        /// </summary>
         public bool InCivilTroubleOrAnarchy
         {
             get
@@ -67,6 +126,9 @@ namespace ErsatzCivLib.Model
                 return InCivilTrouble || _getCurrentRegimeCallback() == RegimePivot.Anarchy;
             }
         }
+        /// <summary>
+        /// Real population count.
+        /// </summary>
         public int Population
         {
             get
@@ -74,6 +136,9 @@ namespace ErsatzCivLib.Model
                 return (int)Math.Round((MIN_CC_POP / Math.Exp(POP_GROWTH_RATIO)) * Math.Exp(POP_GROWTH_RATIO * _citizens.Count));
             }
         }
+        /// <summary>
+        /// Treasure by turn.
+        /// </summary>
         public int Treasure
         {
             get
@@ -84,7 +149,7 @@ namespace ErsatzCivLib.Model
                 }
 
                 var capitalizationValue = Production.Is<CapitalizationPivot>() ?
-                    (int)Math.Ceiling(Productivity * PRODUCTIVITY_TO_COMMERCE_RATIO) : 0;
+                    (int)Math.Ceiling(Productivity * CAPITALIZATION_PRODUCTIVITY_TO_COMMERCE_RATIO) : 0;
                 var cityCommerceValue = MapSquareLocation.CityCommerce + (
                     MapSquareLocation.CityCommerce > 0 ? _getCurrentRegimeCallback().CommerceBonus : 0
                 );
@@ -122,6 +187,9 @@ namespace ErsatzCivLib.Model
                 return (int)Math.Round(totalValue * corruptionRate);
             }
         }
+        /// <summary>
+        /// Food production by turn.
+        /// </summary>
         public int Food
         {
             get
@@ -138,6 +206,9 @@ namespace ErsatzCivLib.Model
                 return foodValue;
             }
         }
+        /// <summary>
+        /// Productivity by turn.
+        /// </summary>
         public int Productivity
         {
             get
@@ -182,6 +253,9 @@ namespace ErsatzCivLib.Model
                 return baseValue;
             }
         }
+        /// <summary>
+        /// Science production by turn.
+        /// </summary>
         public int Science
         {
             get
@@ -206,6 +280,9 @@ namespace ErsatzCivLib.Model
                 return (int)Math.Ceiling(scienceValue * _getCurrentRegimeCallback().ScienceRate);
             }
         }
+        /// <summary>
+        /// Pollution value relative to industry.
+        /// </summary>
         public int IndustrialPollution
         {
             get
@@ -229,6 +306,9 @@ namespace ErsatzCivLib.Model
                 return baseValue;
             }
         }
+        /// <summary>
+        /// Pollution value relative to citizens.
+        /// </summary>
         public int CitizenPollution
         {
             get
@@ -243,6 +323,9 @@ namespace ErsatzCivLib.Model
                 return baseValue;
             }
         }
+        /// <summary>
+        /// Pollution value overall (citizens + industry).
+        /// </summary>
         public int Pollution
         {
             get
@@ -250,15 +333,9 @@ namespace ErsatzCivLib.Model
                 return IndustrialPollution + CitizenPollution;
             }
         }
-        public IReadOnlyCollection<CityImprovementPivot> Improvements { get { return _improvements; } }
-        public IReadOnlyCollection<WonderPivot> Wonders { get { return _wonders; } }
-        public IReadOnlyCollection<BuildablePivot> ImprovementsAndWonders
-        {
-            get
-            {
-                return new List<BuildablePivot>(_improvements).Concat(_wonders).ToList();
-            }
-        }
+        /// <summary>
+        /// Productivity cost remaining for the current production.
+        /// </summary>
         public int RemainingProductionCost
         {
             get
@@ -266,6 +343,9 @@ namespace ErsatzCivLib.Model
                 return Production.ProductivityCost - ProductivityStorage;
             }
         }
+        /// <summary>
+        /// Turns count before the current production is done.
+        /// </summary>
         public int RemainingProductionTurns
         {
             get
@@ -274,6 +354,9 @@ namespace ErsatzCivLib.Model
                     (int)Math.Ceiling(RemainingProductionCost / (double)Productivity));
             }
         }
+        /// <summary>
+        /// Total food required to produce a new citizen.
+        /// </summary>
         public int NextCitizenFoodRequirement
         {
             get
@@ -288,6 +371,9 @@ namespace ErsatzCivLib.Model
                 return baseValue;
             }
         }
+        /// <summary>
+        /// Extra food stored by turn.
+        /// </summary>
         public int ExtraFoodByTurn
         {
             get
@@ -295,6 +381,9 @@ namespace ErsatzCivLib.Model
                 return Food - (CitizenPivot.FOOD_BY_TURN * _citizens.Count);
             }
         }
+        /// <summary>
+        /// Turns count before the next citizen.
+        /// </summary>
         public int NextCitizenTurns
         {
             get
@@ -302,6 +391,9 @@ namespace ErsatzCivLib.Model
                 return ExtraFoodByTurn == 0 ? 0 : (int)Math.Ceiling((NextCitizenFoodRequirement - FoodStorage) / (double)ExtraFoodByTurn);
             }
         }
+        /// <summary>
+        /// Text indicating the food status [growth / balanced / famine].
+        /// </summary>
         public string FoodStatus
         {
             get
@@ -311,6 +403,18 @@ namespace ErsatzCivLib.Model
             }
         }
 
+        #endregion
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="currentTurn">The <see cref="CreationTurn"/> value.</param>
+        /// <param name="name">The <see cref="Name"/> value.</param>
+        /// <param name="location">The <see cref="MapSquareLocation"/> value.</param>
+        /// <param name="production">The <see cref="Production"/> value.</param>
+        /// <param name="getAvailableMapSquaresCallback">Callback method to computes available <see cref="MapSquarePivot"/> in the city radius.</param>
+        /// <param name="getDistanceToCapitalRateCallback">Callback method to computes the distance rate beetween the instance and the capital.</param>
+        /// <param name="getCurrentRegimeCallback">Callback method to get the current <see cref="RegimePivot"/>.</param>
         internal CityPivot(int currentTurn, string name, MapSquarePivot location, BuildablePivot production,
             Func<CityPivot, IReadOnlyCollection<MapSquarePivot>> getAvailableMapSquaresCallback,
             Func<CityPivot, double> getDistanceToCapitalRateCallback, Func<RegimePivot> getCurrentRegimeCallback)
@@ -328,11 +432,18 @@ namespace ErsatzCivLib.Model
 
             _citizens = new List<CitizenPivot>
             {
-                new CitizenPivot(BestVacantSpot(), this)
+                new CitizenPivot(BestVacantMapSquareLocation(), this)
             };
         }
 
-        internal MapSquarePivot BestVacantSpot()
+        #region Internal methods
+
+        /// <summary>
+        /// Tries to get the most productive [productivity / commerce / food] vacant location on the city radius;
+        /// doesn't include the city itself.
+        /// </summary>
+        /// <returns>The <see cref="MapSquarePivot"/> location; <c>Null</c> if no location available.</returns>
+        internal MapSquarePivot BestVacantMapSquareLocation()
         {
             return _getAvailableMapSquaresCallback(this)
                 .Where(x => _citizens?.Any(c => c.MapSquare == x) != true)
@@ -340,12 +451,20 @@ namespace ErsatzCivLib.Model
                 .FirstOrDefault();
         }
 
+        /// <summary>
+        /// Changes the city current production.
+        /// </summary>
+        /// <param name="buildable">The new production.</param>
         internal void ChangeProduction(BuildablePivot buildable)
         {
             Production = buildable;
         }
 
-        internal BuildablePivot UpdateStatus()
+        /// <summary>
+        /// Recomputes everything before passing to the next turn.
+        /// </summary>
+        /// <returns>A finished production, if any; otherwise <c>Null</c>.</returns>
+        internal BuildablePivot NextTurn()
         {
             BuildablePivot produced = null;
             bool resetCitizensRequired = false;
@@ -388,9 +507,7 @@ namespace ErsatzCivLib.Model
             }
             else if (FoodStorage >= NextCitizenFoodRequirement)
             {
-                if (_citizens.Count < MAX_POPULATION_WITHOUT_WATER_SUPPLY
-                    || MapSquareLocation.HasRiver
-                    || _improvements.Contains(CityImprovementPivot.Aqueduc))
+                if (_citizens.Count < AQUEDUC_MAX_POPULATION_WITHOUT || _improvements.Contains(CityImprovementPivot.Aqueduc))
                 {
                     FoodStorage = 0; // Note : excess is not keeped.
                     _citizens.Add(new CitizenPivot(null, this));
@@ -482,6 +599,9 @@ namespace ErsatzCivLib.Model
             return produced;
         }
 
+        /// <summary>
+        /// Recomputes the mood of every citizens.
+        /// </summary>
         internal void CheckCitizensMood()
         {
             // Default behavior.
@@ -527,6 +647,9 @@ namespace ErsatzCivLib.Model
             _citizens.Sort();
         }
 
+        /// <summary>
+        /// Reset the status and the type of every citizens to optimize [productivity / commerce / food].
+        /// </summary>
         internal void ResetCitizens()
         {
             var availableMapSquaresCount = _getAvailableMapSquaresCallback(this).Count;
@@ -543,7 +666,7 @@ namespace ErsatzCivLib.Model
                 }
                 else
                 {
-                    var newBestSpot = BestVacantSpot();
+                    var newBestSpot = BestVacantMapSquareLocation();
                     if (_citizens[i].MapSquare == null
                         || _citizens[i].MapSquare.TotalValue < newBestSpot.TotalValue)
                     {
@@ -555,6 +678,10 @@ namespace ErsatzCivLib.Model
             CheckCitizensMood();
         }
 
+        /// <summary>
+        /// Changes the capital (adds / removes <see cref="CityImprovementPivot.Palace"/> and <see cref="CityImprovementPivot.Courthouse"/>).
+        /// </summary>
+        /// <param name="oldCapital">The previous capital.</param>
         internal void SetAsNewCapital(CityPivot oldCapital)
         {
             if (oldCapital != null)
@@ -565,6 +692,25 @@ namespace ErsatzCivLib.Model
             _improvements.Add(CityImprovementPivot.Palace);
         }
 
+        /// <summary>
+        /// Gets a random specialist citizen, if any.
+        /// </summary>
+        /// <returns>The citizen; or <c>Null</c>.</returns>
+        internal CitizenPivot GetAnySpecialistCitizen()
+        {
+            return _citizens.FirstOrDefault(c => c.Type.HasValue);
+        }
+
+        #endregion
+
+        #region Public methods
+
+        /// <summary>
+        /// Checks if the specified coordinates are in the city radius.
+        /// </summary>
+        /// <param name="row">Row coordinate.</param>
+        /// <param name="column">Column coordinate.</param>
+        /// <returns><c>True</c> if in the city radius; <c>False</c> otherwise.</returns>
         public bool CoordinatesAreCityRadius(int row, int column)
         {
             return (row >= MapSquareLocation.Row - 2)
@@ -577,53 +723,84 @@ namespace ErsatzCivLib.Model
                 && (row != MapSquareLocation.Row + 2 || column != MapSquareLocation.Column + 2);
         }
 
+        /// <summary>
+        /// Checks if the specified coordinates are the city location.
+        /// </summary>
+        /// <param name="row">Row coordinate.</param>
+        /// <param name="column">Column coordinate.</param>
+        /// <returns><c>True</c> if it's the city location; <c>False</c> otherwise.</returns>
         public bool CoordinatesAreCityCenter(int row, int column)
         {
             return row == MapSquareLocation.Row && column == MapSquareLocation.Column;
         }
 
+        /// <summary>
+        /// Checks if the city is at the left border of the map.
+        /// </summary>
+        /// <returns><c>True</c> if it is; <c>False</c> otherwise.</returns>
         public bool OnLeftBorder()
         {
             return MapSquareLocation.Row == 0;
         }
 
+        /// <summary>
+        /// Checks if the city is at the right border of the map.
+        /// </summary>
+        /// <param name="mapWidth">Map width.</param>
+        /// <returns><c>True</c> if it is; <c>False</c> otherwise.</returns>
         public bool OnRightBorder(int mapWidth)
         {
             return MapSquareLocation.Row == mapWidth - 1;
         }
 
-        internal CitizenPivot GetAnySpecialistCitizen()
-        {
-            return _citizens.FirstOrDefault(c => c.Type.HasValue);
-        }
+        #endregion
 
         #region IEquatable implementation
 
+        /// <summary>
+        /// Checks if this instance is equal to another one.
+        /// </summary>
+        /// <param name="other">The other instance.</param>
+        /// <returns><c>True</c> if equals; <c>False</c> otherwise.</returns>
         public bool Equals(CityPivot other)
         {
             return Name == other?.Name;
         }
 
-        public static bool operator ==(CityPivot ms1, CityPivot ms2)
+        /// <summary>
+        /// Operator "==" override. Checks equality between two instances.
+        /// </summary>
+        /// <param name="r1">The first <see cref="CityPivot"/>.</param>
+        /// <param name="r2">The second <see cref="CityPivot"/>.</param>
+        /// <returns><c>True</c> if equals; <c>False</c> otherwise.</returns>
+        public static bool operator ==(CityPivot r1, CityPivot r2)
         {
-            if (ms1 is null)
+            if (r1 is null)
             {
-                return ms2 is null;
+                return r2 is null;
             }
 
-            return ms1.Equals(ms2) == true;
+            return r1.Equals(r2) == true;
         }
 
-        public static bool operator !=(CityPivot ms1, CityPivot ms2)
+        /// <summary>
+        /// Operator "!=" override. Checks non-equality between two instances.
+        /// </summary>
+        /// <param name="r1">The first <see cref="CityPivot"/>.</param>
+        /// <param name="r2">The second <see cref="CityPivot"/>.</param>
+        /// <returns><c>False</c> if equals; <c>True</c> otherwise.</returns>
+        public static bool operator !=(CityPivot r1, CityPivot r2)
         {
-            return !(ms1 == ms2);
+            return !(r1 == r2);
         }
 
+        /// <inheritdoc />
         public override bool Equals(object obj)
         {
             return obj is CityPivot && Equals(obj as CityPivot);
         }
 
+        /// <inheritdoc />
         public override int GetHashCode()
         {
             return Name.GetHashCode();
