@@ -8,6 +8,7 @@ namespace ErsatzCivLib.Model.Static
     /// <summary>
     /// Represents a type of square on the map.
     /// </summary>
+    /// <seealso cref="IEquatable{T}"/>
     [Serializable]
     public class BiomePivot : IEquatable<BiomePivot>
     {
@@ -15,7 +16,7 @@ namespace ErsatzCivLib.Model.Static
         private List<TemperaturePivot> _temperatures;
         private Dictionary<TemperaturePivot, BiomePivot> _underlyingBiomes;
 
-        #region Properties
+        #region Embedded properties
 
         /// <summary>
         /// Name.
@@ -49,23 +50,6 @@ namespace ErsatzCivLib.Model.Static
         /// Indicates the speed cost when a unit walks through it.
         /// </summary>
         public int SpeedCost { get; private set; }
-
-        /// <summary>
-        /// Available <see cref="WorkerActionPivot"/>.
-        /// Doesn't include <see cref="WorkerActionPivot.AlwaysAvailable"/>.
-        /// </summary>
-        public IReadOnlyCollection<WorkerActionPivot> Actions
-        {
-            get { return _actions; }
-        }
-        /// <summary>
-        /// List of <see cref="TemperaturePivot"/> (depending on latitude) where the biome can appears.
-        /// </summary>
-        public IReadOnlyCollection<TemperaturePivot> Temperatures
-        {
-            get { return _temperatures; }
-        }
-
         /// <summary>
         /// Appearance ratio on map (between 0 and 1).
         /// Is ignored for <see cref="IsSeaType"/> biomes and <see cref="Default"/>.
@@ -76,7 +60,6 @@ namespace ErsatzCivLib.Model.Static
         /// Is ignored for <see cref="IsSeaType"/> biomes and <see cref="Default"/>.
         /// </summary>
         private BiomeSizePivot Size { get; set; }
-        public int SizeInt { get { return (int)Size; } }
         /// <summary>
         /// Biome's humidity level.
         /// </summary>
@@ -86,21 +69,38 @@ namespace ErsatzCivLib.Model.Static
         /// </summary>
         internal AgePivot Age { get; private set; }
 
+        #endregion
+
+        #region Inferred properties
+
+        /// <summary>
+        /// The <see cref="Size"/> value as <c>integer</c>.
+        /// </summary>
+        public int SizeInt { get { return (int)Size; } }
         /// <summary>
         /// Underlying biome by temperature (if <see cref="WorkerActionPivot.Clear"/> available).
         /// </summary>
-        internal IReadOnlyDictionary<TemperaturePivot, BiomePivot> UnderlyingBiomes
-        {
-            get { return _underlyingBiomes; }
-        }
+        internal IReadOnlyDictionary<TemperaturePivot, BiomePivot> UnderlyingBiomes { get { return _underlyingBiomes; } }
+        /// <summary>
+        /// List of available <see cref="WorkerActionPivot"/>.
+        /// Doesn't include <see cref="WorkerActionPivot.AlwaysAvailable"/>.
+        /// </summary>
+        public IReadOnlyCollection<WorkerActionPivot> Actions { get { return _actions; } }
+        /// <summary>
+        /// List of <see cref="TemperaturePivot"/> (depending on latitude) where the biome can appears.
+        /// </summary>
+        public IReadOnlyCollection<TemperaturePivot> Temperatures { get { return _temperatures; } }
 
         #endregion
 
         private BiomePivot() { }
 
-        #region Direct access to instances
+        #region Static instances
 
-        public static BiomePivot Grassland { get; } = new BiomePivot
+        /// <summary>
+        /// Grassland.
+        /// </summary>
+        public static readonly BiomePivot Grassland = new BiomePivot
         {
             Name = "Grassland",
             Commerce = 1,
@@ -130,7 +130,10 @@ namespace ErsatzCivLib.Model.Static
             Humidity = HumidityPivot.Average,
             Age = AgePivot.Old
         };
-        public static BiomePivot Sea { get; } = new BiomePivot
+        /// <summary>
+        /// Sea.
+        /// </summary>
+        public static readonly BiomePivot Sea = new BiomePivot
         {
             Name = "Sea",
             Commerce = 1,
@@ -148,7 +151,10 @@ namespace ErsatzCivLib.Model.Static
             Humidity = HumidityPivot.Average,
             Age = AgePivot.Average
         };
-        public static BiomePivot Ice { get; } = new BiomePivot
+        /// <summary>
+        /// Ice.
+        /// </summary>
+        public static readonly BiomePivot Ice = new BiomePivot
         {
             Name = "Ice",
             Commerce = 0,
@@ -175,7 +181,10 @@ namespace ErsatzCivLib.Model.Static
             Humidity = HumidityPivot.Dry,
             Age = AgePivot.Average
         };
-        public static BiomePivot Toundra { get; } = new BiomePivot
+        /// <summary>
+        /// Toundra.
+        /// </summary>
+        public static readonly BiomePivot Toundra = new BiomePivot
         {
             Name = "Toundra",
             Commerce = 0,
@@ -204,7 +213,10 @@ namespace ErsatzCivLib.Model.Static
             Humidity = HumidityPivot.Average,
             Age = AgePivot.Old
         };
-        public static BiomePivot Desert { get; } = new BiomePivot
+        /// <summary>
+        /// Desert.
+        /// </summary>
+        public static readonly BiomePivot Desert = new BiomePivot
         {
             Name = "Desert",
             Commerce = 0,
@@ -232,7 +244,10 @@ namespace ErsatzCivLib.Model.Static
             Humidity = HumidityPivot.Dry,
             Age = AgePivot.Average
         };
-        public static BiomePivot Jungle { get; } = new BiomePivot
+        /// <summary>
+        /// Jungle.
+        /// </summary>
+        public static readonly BiomePivot Jungle = new BiomePivot
         {
             Name = "Jungle",
             Commerce = 0,
@@ -262,7 +277,10 @@ namespace ErsatzCivLib.Model.Static
             Humidity = HumidityPivot.Wet,
             Age = AgePivot.Average
         };
-        public static BiomePivot Mountain { get; } = new BiomePivot
+        /// <summary>
+        /// Mountain.
+        /// </summary>
+        public static readonly BiomePivot Mountain = new BiomePivot
         {
             Name = "Mountain",
             Commerce = 0,
@@ -291,7 +309,10 @@ namespace ErsatzCivLib.Model.Static
             Humidity = HumidityPivot.Average,
             Age = AgePivot.New
         };
-        public static BiomePivot Hill { get; } = new BiomePivot
+        /// <summary>
+        /// Hill.
+        /// </summary>
+        public static readonly BiomePivot Hill = new BiomePivot
         {
             Name = "Hill",
             Commerce = 1,
@@ -320,7 +341,10 @@ namespace ErsatzCivLib.Model.Static
             Humidity = HumidityPivot.Average,
             Age = AgePivot.New
         };
-        public static BiomePivot Swamp { get; } = new BiomePivot
+        /// <summary>
+        /// Swamp.
+        /// </summary>
+        public static readonly BiomePivot Swamp = new BiomePivot
         {
             Name = "Swamp",
             Commerce = 0,
@@ -354,7 +378,10 @@ namespace ErsatzCivLib.Model.Static
             Humidity = HumidityPivot.Wet,
             Age = AgePivot.Old
         };
-        public static BiomePivot Forest { get; } = new BiomePivot
+        /// <summary>
+        /// Forest.
+        /// </summary>
+        public static readonly BiomePivot Forest = new BiomePivot
         {
             Name = "Forest",
             Commerce = 1,
@@ -386,7 +413,10 @@ namespace ErsatzCivLib.Model.Static
             Humidity = HumidityPivot.Wet,
             Age = AgePivot.Average
         };
-        public static BiomePivot Plain { get; } = new BiomePivot
+        /// <summary>
+        /// Plain.
+        /// </summary>
+        public static readonly BiomePivot Plain = new BiomePivot
         {
             Name = "Plain",
             Commerce = 1,
@@ -417,7 +447,10 @@ namespace ErsatzCivLib.Model.Static
             Humidity = HumidityPivot.Dry,
             Age = AgePivot.Old
         };
-        public static BiomePivot Coast { get; } = new BiomePivot
+        /// <summary>
+        /// Coast.
+        /// </summary>
+        public static readonly BiomePivot Coast = new BiomePivot
         {
             Name = "Coast",
             Commerce = 1,
@@ -439,39 +472,27 @@ namespace ErsatzCivLib.Model.Static
         /// <summary>
         /// The biome by default when the map is built.
         /// </summary>
-        public static BiomePivot Default = Plain;
+        public static BiomePivot Default { get; } = Plain;
 
         #endregion
 
-        private static List<BiomePivot> _biomes = null;
+        private static List<BiomePivot> _instances = null;
+
         /// <summary>
-        /// List of every biomes.
+        /// List of every instances.
         /// </summary>
         public static IReadOnlyCollection<BiomePivot> Biomes
         {
             get
             {
-                if (_biomes == null)
+                if (_instances == null)
                 {
-                    _biomes = new List<BiomePivot>
-                    {
-                        Sea,
-                        Coast,
-                        Jungle,
-                        Desert,
-                        Swamp,
-                        Forest,
-                        Toundra,
-                        Ice,
-                        Mountain,
-                        Hill,
-                        Grassland,
-                        Plain
-                    };
+                    _instances = Tools.GetInstancesOfTypeFromStaticFields<BiomePivot>();
                 }
-                return _biomes;
+                return _instances;
             }
         }
+
         /// <summary>
         /// List of every biomes except <see cref="IsSeaType"/> ones and <see cref="Default"/> one.
         /// </summary>
@@ -484,10 +505,12 @@ namespace ErsatzCivLib.Model.Static
         }
 
         /// <summary>
-        /// Number of 
+        /// Computes the number of <see cref="MapSquarePivot"/> for a chunk of the current biome, in the specified context.
         /// </summary>
         /// <param name="totalSquaresCount">Total count of squares in the continent.</param>
         /// <param name="chunkCoeff">Number real of squares in a <see cref="BiomeSizePivot.Small"/> chunk.</param>
+        /// <param name="humidity">Level of <see cref="HumidityPivot"/> at the current latitude.</param>
+        /// <param name="age">Age of the map.</param>
         /// <returns>Number of squares </returns>
         internal int ChunkSquaresCount(int totalSquaresCount, double chunkCoeff, HumidityPivot humidity, AgePivot age)
         {
@@ -541,35 +564,58 @@ namespace ErsatzCivLib.Model.Static
             return (int)Math.Round((totalSquaresCount * (realRatio * 3)) / ((int)Size * chunkCoeff));
         }
 
+        #region IEquatable implementation
+
+        /// <summary>
+        /// Checks if this instance is equal to another one.
+        /// </summary>
+        /// <param name="other">The other instance.</param>
+        /// <returns><c>True</c> if equals; <c>False</c> otherwise.</returns>
         public bool Equals(BiomePivot other)
         {
             return Name == other?.Name;
         }
 
-        public static bool operator ==(BiomePivot ms1, BiomePivot ms2)
+        /// <summary>
+        /// Operator "==" override. Checks equality between two instances.
+        /// </summary>
+        /// <param name="r1">The first <see cref="BiomePivot"/>.</param>
+        /// <param name="r2">The second <see cref="BiomePivot"/>.</param>
+        /// <returns><c>True</c> if equals; <c>False</c> otherwise.</returns>
+        public static bool operator ==(BiomePivot r1, BiomePivot r2)
         {
-            if (ms1 is null)
+            if (r1 is null)
             {
-                return ms2 is null;
+                return r2 is null;
             }
 
-            return ms1.Equals(ms2) == true;
+            return r1.Equals(r2) == true;
         }
 
-        public static bool operator !=(BiomePivot ms1, BiomePivot ms2)
+        /// <summary>
+        /// Operator "!=" override. Checks non-equality between two instances.
+        /// </summary>
+        /// <param name="r1">The first <see cref="BiomePivot"/>.</param>
+        /// <param name="r2">The second <see cref="BiomePivot"/>.</param>
+        /// <returns><c>False</c> if equals; <c>True</c> otherwise.</returns>
+        public static bool operator !=(BiomePivot r1, BiomePivot r2)
         {
-            return !(ms1 == ms2);
+            return !(r1 == r2);
         }
 
+        /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            return obj is BiomePivot && Equals(obj as BiomePivot);
+            return obj is RegimePivot && Equals(obj as RegimePivot);
         }
 
+        /// <inheritdoc />
         public override int GetHashCode()
         {
             return Name.GetHashCode();
         }
+
+        #endregion
 
         // sizes of biome.
         [Serializable]
