@@ -18,7 +18,7 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public IReadOnlyDictionary<CityPivot, BuildablePivot> EndOfProduction { get; internal set; }
         /// <summary>
-        /// Indicates the discovery of a <see cref="Persistent.AdvancePivot"/> is completed.
+        /// Indicates the discovery of a <see cref="Static.AdvancePivot"/> is completed.
         /// </summary>
         public bool EndOfAdvance { get; internal set; }
 

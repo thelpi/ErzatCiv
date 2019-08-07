@@ -16,6 +16,7 @@ namespace ErsatzCivLib.Model
     public class PlayerPivot : IEquatable<PlayerPivot>
     {
         private const int TREASURE_START = 100;
+        private const int SCIENCE_COST = 100;
 
         private readonly List<CityPivot> _cities = new List<CityPivot>();
         private readonly List<AdvancePivot> _advances = new List<AdvancePivot>();
@@ -147,7 +148,7 @@ namespace ErsatzCivLib.Model
             get
             {
                 return CurrentAdvance == null ? 0 : (
-                    ScienceByTurn == 0 ? 9999 : (int)Math.Ceiling((AdvancePivot.SCIENCE_COST - ScienceStack) / (double)ScienceByTurn)
+                    ScienceByTurn == 0 ? 9999 : (int)Math.Ceiling((SCIENCE_COST - ScienceStack) / (double)ScienceByTurn)
                 );
             }
         }
@@ -703,7 +704,7 @@ namespace ErsatzCivLib.Model
             if (CurrentAdvance != null)
             {
                 ScienceStack += ScienceByTurn;
-                if (ScienceStack >= AdvancePivot.SCIENCE_COST)
+                if (ScienceStack >= SCIENCE_COST)
                 {
                     _advances.Add(CurrentAdvance);
                     ScienceStack = 0;

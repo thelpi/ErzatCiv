@@ -9,12 +9,6 @@ namespace ErsatzCivLib.Model
     /// <summary>
     /// Represents an item a city can build.
     /// </summary>
-    /// <remarks>
-    /// Each concrete implementation must implement :
-    /// - A <c>static internal readonly</c> field "Default" used as a template.
-    /// - A <c>static internal</c> method "CreateAtLocation" used to create instances, based on the default template. The method must have a single parameter, of type <see cref="MapSquarePivot"/>.
-    /// - Every constructors must be <c>private</c>.
-    /// </remarks>
     [Serializable]
     public abstract class BuildablePivot
     {
@@ -77,6 +71,7 @@ namespace ErsatzCivLib.Model
         /// <summary>
         /// Creates a new instance from the current one.
         /// </summary>
+        /// <param name="location">The <see cref="MapSquarePivot"/> location; pertinent for <see cref="UnitPivot"/> only.</param>
         /// <returns>The instance location; might be <c>Null</c> if non-pertinent.</returns>
         internal BuildablePivot CreateOrGetInstance(MapSquarePivot location)
         {

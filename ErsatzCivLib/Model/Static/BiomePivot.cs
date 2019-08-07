@@ -606,7 +606,7 @@ namespace ErsatzCivLib.Model.Static
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            return obj is RegimePivot && Equals(obj as RegimePivot);
+            return obj is BiomePivot && Equals(obj as BiomePivot);
         }
 
         /// <inheritdoc />

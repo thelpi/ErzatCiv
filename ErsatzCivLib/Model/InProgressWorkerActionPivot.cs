@@ -35,7 +35,6 @@ namespace ErsatzCivLib.Model
         /// Constructor.
         /// </summary>
         /// <remarks>The task has no worker by default.</remarks>
-        /// <param name="guid">Caller key.</param>
         /// <param name="action">The action to start.</param>
         internal InProgressWorkerActionPivot(WorkerActionPivot action)
         {
@@ -60,6 +59,9 @@ namespace ErsatzCivLib.Model
             return canWork;
         }
 
+        /// <summary>
+        /// Removes every workers from the current action.
+        /// </summary>
         internal void RemoveWorkers()
         {
             _workers.ForEach(w => w.SetAction(null));

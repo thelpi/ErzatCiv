@@ -13,10 +13,8 @@ namespace ErsatzCivLib.Model.Static
         internal const int RAILROAD_PRODUCTIVITY_BONUS = 1;
         internal const int RAILROAD_COMMERCE_BONUS = 1;
         internal const int ROAD_COMMERCE_BONUS = 1;
-        internal const int MINE_PRODUCTIVITY_MULTIPLE = 2;
-        internal const int MINE_PRODUCTIVITY_BONUS_IF_ZERO = 1;
-        internal const int IRRIGATE_FOOD_MULTIPLE = 2;
-        internal const int IRRIGATE_FOOD_BONUS_IF_ZERO = 1;
+        internal const int MINE_PRODUCTIVITY_BONUS = 1;
+        internal const int IRRIGATE_FOOD_BONUS = 1;
 
         #region Properties
 
@@ -41,17 +39,6 @@ namespace ErsatzCivLib.Model.Static
 
         private WorkerActionPivot() { }
 
-        private static WorkerActionPivot _mine = null;
-        private static WorkerActionPivot _irrigate = null;
-        private static WorkerActionPivot _road = null;
-        private static WorkerActionPivot _railRoad = null;
-        private static WorkerActionPivot _clear = null;
-        private static WorkerActionPivot _plant = null;
-        private static WorkerActionPivot _clearPollution = null;
-        private static WorkerActionPivot _buildFortress = null;
-        private static WorkerActionPivot _destroyRoad = null;
-        private static WorkerActionPivot _destroyImprovement = null;
-
         /// <summary>
         /// Mines.
         /// </summary>
@@ -59,22 +46,12 @@ namespace ErsatzCivLib.Model.Static
         /// Doubles the productivity value (or makes it 1 if 0).
         /// Not cumulable with <see cref="Irrigate"/>.
         /// </remarks>
-        public static WorkerActionPivot Mine
+        public static readonly WorkerActionPivot Mine = new WorkerActionPivot
         {
-            get
-            {
-                if (_mine == null)
-                {
-                    _mine = new WorkerActionPivot
-                    {
-                        Name = "Mine",
-                        TurnCost = 2,
-                        AlwaysAvailable = false
-                    };
-                }
-                return _mine;
-            }
-        }
+            Name = "Mine",
+            TurnCost = 2,
+            AlwaysAvailable = false
+        };
         /// <summary>
         /// Irrigates.
         /// </summary>
@@ -82,223 +59,156 @@ namespace ErsatzCivLib.Model.Static
         /// Doubles the food value (or makes it 1 if 0).
         /// Not cumulable with <see cref="Mine"/>.
         /// </remarks>
-        public static WorkerActionPivot Irrigate
+        public static readonly WorkerActionPivot Irrigate = new WorkerActionPivot
         {
-            get
-            {
-                if (_irrigate == null)
-                {
-                    _irrigate = new WorkerActionPivot
-                    {
-                        Name = "Irrigate",
-                        TurnCost = 2,
-                        AlwaysAvailable = false
-                    };
-                }
-                return _irrigate;
-            }
-        }
+            Name = "Irrigate",
+            TurnCost = 2,
+            AlwaysAvailable = false
+        };
         /// <summary>
         /// Builds a road.
         /// </summary>
         /// <remarks>
         /// Increase the unit speed (x3), and the commerce by one unit.
         /// </remarks>
-        public static WorkerActionPivot Road
+        public static readonly WorkerActionPivot Road = new WorkerActionPivot
         {
-            get
-            {
-                if (_road == null)
-                {
-                    _road = new WorkerActionPivot
-                    {
-                        Name = "Road",
-                        TurnCost = 1,
-                        AlwaysAvailable = false
-                    };
-                }
-                return _road;
-            }
-        }
+            Name = "Road",
+            TurnCost = 1,
+            AlwaysAvailable = false
+        };
         /// <summary>
         /// Builds a rail road.
         /// </summary>
         /// <remarks>
         /// Increase the unit speed (no cost), and the commerce and productivity by one unit.
         /// </remarks>
-        public static WorkerActionPivot RailRoad
+        public static readonly WorkerActionPivot RailRoad = new WorkerActionPivot
         {
-            get
-            {
-                if (_railRoad == null)
-                {
-                    _railRoad = new WorkerActionPivot
-                    {
-                        Name = "RailRoad",
-                        TurnCost = 2,
-                        AlwaysAvailable = false,
-                        AdvancePrerequisite = AdvancePivot.Railroad
-                    };
-                }
-                return _railRoad;
-            }
-        }
+            Name = "RailRoad",
+            TurnCost = 2,
+            AlwaysAvailable = false,
+            AdvancePrerequisite = AdvancePivot.Railroad
+        };
         /// <summary>
         /// Clears a forest, a swamp or a jungle.
         /// </summary>
         /// <remarks>
-        /// Transforms a <see cref="MapSquarePivot"/> into its <see cref="MapSquarePivot._underlyingType"/>.
+        /// Transforms the biome of a <see cref="MapSquarePivot"/> into its <see cref="BiomePivot.UnderlyingBiomes"/>.
         /// </remarks>
-        public static WorkerActionPivot Clear
+        public static readonly WorkerActionPivot Clear = new WorkerActionPivot
         {
-            get
-            {
-                if (_clear == null)
-                {
-                    _clear = new WorkerActionPivot
-                    {
-                        Name = "Clear",
-                        TurnCost = 2,
-                        AlwaysAvailable = false
-                    };
-                }
-                return _clear;
-            }
-        }
+            Name = "Clear",
+            TurnCost = 2,
+            AlwaysAvailable = false
+        };
         /// <summary>
         /// Plants a forest.
         /// </summary>
         /// <remarks>
         /// Changes the <see cref="BiomePivot"/> when applied on a <see cref="MapSquarePivot"/>.
         /// </remarks>
-        public static WorkerActionPivot Plant
+        public static readonly WorkerActionPivot Plant = new WorkerActionPivot
         {
-            get
-            {
-                if (_plant == null)
-                {
-                    _plant = new WorkerActionPivot
-                    {
-                        Name = "Plant forest",
-                        TurnCost = 3,
-                        AlwaysAvailable = false,
-                        AdvancePrerequisite = AdvancePivot.Engineering
-                    };
-                }
-                return _plant;
-            }
-        }
+            Name = "Plant forest",
+            TurnCost = 3,
+            AlwaysAvailable = false,
+            AdvancePrerequisite = AdvancePivot.Engineering
+        };
         /// <summary>
         /// Clears pollution.
         /// </summary>
-        public static WorkerActionPivot ClearPollution
+        public static readonly WorkerActionPivot ClearPollution = new WorkerActionPivot
         {
-            get
-            {
-                if (_clearPollution == null)
-                {
-                    _clearPollution = new WorkerActionPivot
-                    {
-                        Name = "Clear pollution",
-                        TurnCost = 3,
-                        AlwaysAvailable = true
-                    };
-}
-                return _clearPollution;
-            }
-        }
+            Name = "Clear pollution",
+            TurnCost = 3,
+            AlwaysAvailable = true
+        };
         /// <summary>
         /// Builds a fortress.
         /// </summary>
         /// <remarks>Fortress triple the defensive value of a map square.</remarks>
-        public static WorkerActionPivot BuildFortress
+        public static readonly WorkerActionPivot BuildFortress = new WorkerActionPivot
         {
-            get
-            {
-                if (_buildFortress == null)
-                {
-                    _buildFortress = new WorkerActionPivot
-                    {
-                        Name = "Build fortress",
-                        TurnCost = 3,
-                        AlwaysAvailable = false,
-                        AdvancePrerequisite = AdvancePivot.Masonry
-                    };
-                }
-                return _buildFortress;
-            }
-        }
+            Name = "Build fortress",
+            TurnCost = 3,
+            AlwaysAvailable = false,
+            AdvancePrerequisite = AdvancePivot.Masonry
+        };
         /// <summary>
         /// Destroys road and railroad.
         /// </summary>
         /// <remarks>
         /// Removes the railroad if applicable, then the road.
         /// </remarks>
-        public static WorkerActionPivot DestroyRoad
+        public static readonly WorkerActionPivot DestroyRoad = new WorkerActionPivot
         {
-            get
-            {
-                if (_destroyRoad == null)
-                {
-                    _destroyRoad = new WorkerActionPivot
-                    {
-                        Name = "Destroy road",
-                        TurnCost = 1,
-                        AlwaysAvailable = true
-                    };
-                }
-                return _destroyRoad;
-            }
-        }
+            Name = "Destroy road",
+            TurnCost = 1,
+            AlwaysAvailable = true
+        };
         /// <summary>
         /// Destroys irrigation system, mine and fortress.
         /// </summary>
         /// <remarks>Fortress comes first.</remarks>
-        public static WorkerActionPivot DestroyImprovement
+        public static readonly WorkerActionPivot DestroyImprovement = new WorkerActionPivot
         {
-            get
-            {
-                if (_destroyImprovement == null)
-                {
-                    _destroyImprovement = new WorkerActionPivot
-                    {
-                        Name = "Destroy improvement",
-                        TurnCost = 1,
-                        AlwaysAvailable = true
-                    };
-                }
-                return _destroyImprovement;
-            }
-        }
+            Name = "Destroy improvement",
+            TurnCost = 1,
+            AlwaysAvailable = true
+        };
 
+        #region IEquatable implementation
+
+        /// <summary>
+        /// Checks if this instance is equal to another one.
+        /// </summary>
+        /// <param name="other">The other instance.</param>
+        /// <returns><c>True</c> if equals; <c>False</c> otherwise.</returns>
         public bool Equals(WorkerActionPivot other)
         {
             return Name == other?.Name;
         }
 
-        public static bool operator ==(WorkerActionPivot ms1, WorkerActionPivot ms2)
+        /// <summary>
+        /// Operator "==" override. Checks equality between two instances.
+        /// </summary>
+        /// <param name="r1">The first <see cref="WorkerActionPivot"/>.</param>
+        /// <param name="r2">The second <see cref="WorkerActionPivot"/>.</param>
+        /// <returns><c>True</c> if equals; <c>False</c> otherwise.</returns>
+        public static bool operator ==(WorkerActionPivot r1, WorkerActionPivot r2)
         {
-            if (ms1 is null)
+            if (r1 is null)
             {
-                return ms2 is null;
+                return r2 is null;
             }
 
-            return ms1.Equals(ms2) == true;
+            return r1.Equals(r2) == true;
         }
 
-        public static bool operator !=(WorkerActionPivot ms1, WorkerActionPivot ms2)
+        /// <summary>
+        /// Operator "!=" override. Checks non-equality between two instances.
+        /// </summary>
+        /// <param name="r1">The first <see cref="WorkerActionPivot"/>.</param>
+        /// <param name="r2">The second <see cref="WorkerActionPivot"/>.</param>
+        /// <returns><c>False</c> if equals; <c>True</c> otherwise.</returns>
+        public static bool operator !=(WorkerActionPivot r1, WorkerActionPivot r2)
         {
-            return !(ms1 == ms2);
+            return !(r1 == r2);
         }
 
+        /// <inheritdoc />
         public override bool Equals(object obj)
         {
             return obj is WorkerActionPivot && Equals(obj as WorkerActionPivot);
         }
 
+        /// <inheritdoc />
         public override int GetHashCode()
         {
             return Name.GetHashCode();
         }
+
+        #endregion
     }
 }

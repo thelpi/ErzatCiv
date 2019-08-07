@@ -3,7 +3,7 @@
 namespace ErsatzCivLib.Model.Static
 {
     /// <summary>
-    /// Capitalization (city production).
+    /// Capitalization (transforms city productivity in treasure).
     /// </summary>
     /// <seealso cref="BuildablePivot"/>
     [Serializable]
@@ -14,7 +14,6 @@ namespace ErsatzCivLib.Model.Static
         /// <summary>
         /// Constructor.
         /// </summary>
-        /// <param name="mapSquare">Not used.</param>
         private CapitalizationPivot() : base(PRODUCTIVITY_COST, null, null) { }
 
         /// <summary>

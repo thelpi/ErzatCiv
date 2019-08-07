@@ -26,7 +26,7 @@ namespace ErsatzCivLib.Model.Units
         { }
 
         /// <summary>
-        /// Resets the <see cref="RemainingMoves"/> if the instance is not <see cref="BusyOnAction"/>.
+        /// Resets the <see cref="UnitPivot.RemainingMoves"/> if the instance is not <see cref="BusyOnAction"/>.
         /// </summary>
         internal override void Release()
         {

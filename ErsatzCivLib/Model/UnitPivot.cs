@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using ErsatzCivLib.Model.Enums;
 using ErsatzCivLib.Model.Static;
 
@@ -8,6 +7,12 @@ namespace ErsatzCivLib.Model
     /// <summary>
     /// Represents an unit.
     /// </summary>
+    /// <remarks>
+    /// Each concrete implementation must implement :
+    /// - A <c>static internal readonly</c> field "Default" used as a template.
+    /// - A <c>static internal</c> method "CreateAtLocation" used to create instances, based on the default template. The method must have a single parameter, of type <see cref="MapSquarePivot"/>.
+    /// - Every constructors must be <c>private</c>.
+    /// </remarks>
     [Serializable]
     public abstract class UnitPivot : BuildablePivot
     {
@@ -48,6 +53,21 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public int CitizenCostToProduce { get; private set; }
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="location">The <see cref="MapSquareLocation"/> value.</param>
+        /// <param name="seaNavigate">The <see cref="SeaNavigate"/> value.</param>
+        /// <param name="groundNavigate">The <see cref="GroundNavigate"/> value.</param>
+        /// <param name="defensePoints">The <see cref="DefensePoints"/> value.</param>
+        /// <param name="offensePoints">The <see cref="OffensePoints"/> value.</param>
+        /// <param name="lifePoints">The intial <see cref="CurrentLifePoints"/> value.</param>
+        /// <param name="speed">The <see cref="Speed"/> value.</param>
+        /// <param name="productivityCost">The <see cref="BuildablePivot.ProductivityCost"/> value.</param>
+        /// <param name="advancePrerequisite">The <see cref="BuildablePivot.AdvancePrerequisite"/> value.</param>
+        /// <param name="advanceObsolescence">The <see cref="BuildablePivot.AdvanceObsolescence"/> value.</param>
+        /// <param name="name">The <see cref="BuildablePivot.Name"/> value.</param>
+        /// <param name="citizenCostToProduce">The <see cref="CitizenCostToProduce"/> value.</param>
         protected UnitPivot(MapSquarePivot location, bool seaNavigate, bool groundNavigate, int defensePoints, int offensePoints,
             int lifePoints, int speed, int productivityCost, AdvancePivot advancePrerequisite, AdvancePivot advanceObsolescence,
             string name = null, int citizenCostToProduce = 0) :
@@ -64,6 +84,9 @@ namespace ErsatzCivLib.Model
             CitizenCostToProduce = citizenCostToProduce;
         }
 
+        /// <summary>
+        /// Sets <see cref="RemainingMoves"/> to <c>0</c> without actually moving the instance.
+        /// </summary>
         internal void ForceNoMove()
         {
             if (RemainingMoves > 0)
@@ -72,6 +95,14 @@ namespace ErsatzCivLib.Model
             }
         }
 
+        /// <summary>
+        /// Tries to move the instance.
+        /// </summary>
+        /// <param name="direction">The <see cref="DirectionPivot"/>.</param>
+        /// <param name="comeIntoCity"><c>True</c> if the unit comes into a city.</param>
+        /// <param name="previousMapSquare">The previous <see cref="MapSquarePivot"/>.</param>
+        /// <param name="currentMapSquare">The new <see cref="MapSquarePivot"/>.</param>
+        /// <returns><c>True</c> if success; <c>False</c> otherwise.</returns>
         internal bool Move(DirectionPivot direction, bool comeIntoCity, MapSquarePivot previousMapSquare, MapSquarePivot currentMapSquare)
         {
             if (RemainingMoves == 0)
@@ -102,6 +133,9 @@ namespace ErsatzCivLib.Model
             return true;
         }
 
+        /// <summary>
+        /// Overriden; Resets the <see cref="RemainingMoves"/> value.
+        /// </summary>
         internal virtual void Release()
         {
             RemainingMoves = Speed;

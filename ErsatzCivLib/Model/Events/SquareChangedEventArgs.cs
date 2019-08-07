@@ -6,7 +6,6 @@ namespace ErsatzCivLib.Model.Events
     /// Event informations when a part of the map is discovered.
     /// </summary>
     /// <seealso cref="EventArgs"/>
-    [Serializable]
     public class SquareChangedEventArgs : EventArgs
     {
         /// <summary>

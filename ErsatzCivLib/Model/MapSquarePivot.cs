@@ -11,11 +11,13 @@ namespace ErsatzCivLib.Model
     /// <summary>
     /// Represents a map square.
     /// </summary>
+    /// <seealso cref="IEquatable{T}"/>
     [Serializable]
     public class MapSquarePivot : IEquatable<MapSquarePivot>
     {
-        #region Properties
-
+        /// <summary>
+        /// Event triggered when the instance is edited.
+        /// </summary>
         [field: NonSerialized]
         public event EventHandler<SquareChangedEventArgs> SquareChangeEvent;
 
@@ -23,7 +25,15 @@ namespace ErsatzCivLib.Model
         private readonly Dictionary<DirectionPivot, bool> _rivers =
             Enum.GetValues(typeof(DirectionPivot)).Cast<DirectionPivot>().ToDictionary(x => x, x => false);
 
+        #region Embedded properties
+
+        /// <summary>
+        /// Row on the map.
+        /// </summary>
         public int Row { get; private set; }
+        /// <summary>
+        /// Column on the map.
+        /// </summary>
         public int Column { get; private set; }
         /// <summary>
         /// Square type.
@@ -33,7 +43,6 @@ namespace ErsatzCivLib.Model
         /// Underlying type in case of clearage (forest, jungle...).
         /// </summary>
         public BiomePivot UnderlyingBiome { get; private set; }
-
         /// <summary>
         /// Mine built y/n.
         /// </summary>
@@ -58,12 +67,22 @@ namespace ErsatzCivLib.Model
         /// Fortress built y/n.
         /// </summary>
         public bool Fortress { get; private set; }
+
+        #endregion
+
+        #region Inferred properties
+
         /// <summary>
         /// List of <see cref="InProgressWorkerActionPivot"/> in progress for this instance.
         /// </summary>
         public IReadOnlyCollection<InProgressWorkerActionPivot> CurrentActions { get { return _currentActions; } }
+        /// <summary>
+        /// List of <see cref="DirectionPivot"/> around the instance where a river is set.
+        /// </summary>
         public IReadOnlyCollection<DirectionPivot> Rivers { get { return _rivers.Where(r => r.Value).Select(r => r.Key).ToList(); } }
-
+        /// <summary>
+        /// Indicates if there's at least one river around the instance.
+        /// </summary>
         public bool HasRiver
         {
             get
@@ -71,7 +90,10 @@ namespace ErsatzCivLib.Model
                 return _rivers.Any(r => r.Value);
             }
         }
-
+        /// <summary>
+        /// Food value of this instance.
+        /// </summary>
+        /// <remarks>Pollution and worker actions included.</remarks>
         public int Food
         {
             get
@@ -82,14 +104,16 @@ namespace ErsatzCivLib.Model
                     baseValue = Biome.Food;
                     if (Irrigate)
                     {
-                        baseValue = baseValue == 0 ?
-                            WorkerActionPivot.IRRIGATE_FOOD_BONUS_IF_ZERO :
-                            baseValue * WorkerActionPivot.IRRIGATE_FOOD_MULTIPLE;
+                        baseValue += WorkerActionPivot.IRRIGATE_FOOD_BONUS;
                     }
                 }
                 return baseValue;
             }
         }
+        /// <summary>
+        /// Productivity value of this instance.
+        /// </summary>
+        /// <remarks>Pollution and worker actions included.</remarks>
         public int Productivity
         {
             get
@@ -100,9 +124,7 @@ namespace ErsatzCivLib.Model
                     baseValue = Biome.Productivity;
                     if (Mine)
                     {
-                        baseValue = baseValue == 0 ?
-                            WorkerActionPivot.MINE_PRODUCTIVITY_BONUS_IF_ZERO :
-                            baseValue * WorkerActionPivot.MINE_PRODUCTIVITY_MULTIPLE;
+                        baseValue += WorkerActionPivot.MINE_PRODUCTIVITY_BONUS;
                     }
                     if (RailRoad && baseValue > 0)
                     {
@@ -112,6 +134,10 @@ namespace ErsatzCivLib.Model
                 return baseValue;
             }
         }
+        /// <summary>
+        /// Commerce value of this instance.
+        /// </summary>
+        /// <remarks>Pollution and worker actions included.</remarks>
         public int Commerce
         {
             get
@@ -132,8 +158,13 @@ namespace ErsatzCivLib.Model
                 return baseValue;
             }
         }
+        /// <summary>
+        /// Sum of food, productivity and commerce statistics.
+        /// </summary>
         public int TotalValue { get { return Food + Productivity + Commerce; } }
-
+        /// <summary>
+        /// Food value if the square is a city.
+        /// </summary>
         public int CityFood
         {
             get
@@ -141,6 +172,9 @@ namespace ErsatzCivLib.Model
                 return Biome.Food < 2 ? 2 : Biome.Food;
             }
         }
+        /// <summary>
+        /// Productivity value if the square is a city.
+        /// </summary>
         public int CityProductivity
         {
             get
@@ -148,6 +182,9 @@ namespace ErsatzCivLib.Model
                 return Biome.Productivity < 1 ? 1 : Biome.Productivity;
             }
         }
+        /// <summary>
+        /// Commerce value if the square is a city.
+        /// </summary>
         public int CityCommerce
         {
             get
@@ -158,6 +195,13 @@ namespace ErsatzCivLib.Model
 
         #endregion
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="row">The <see cref="Row"/> value.</param>
+        /// <param name="column">The <see cref="Column"/> value.</param>
+        /// <param name="biome">The <see cref="Biome"/> value.</param>
+        /// <param name="underlyingType">The underlying biome if <see cref="WorkerActionPivot.Clear"/> action possible.</param>
         internal MapSquarePivot(int row, int column, BiomePivot biome, BiomePivot underlyingType = null)
         {
             Row = row;
@@ -169,6 +213,11 @@ namespace ErsatzCivLib.Model
             }
         }
 
+        /// <summary>
+        /// Changes the <see cref="BiomePivot"/> of this instance.
+        /// </summary>
+        /// <param name="biome">The biome.</param>
+        /// <param name="underlyingType">The underlying biome if <see cref="WorkerActionPivot.Clear"/> action possible.</param>
         internal void ChangeBiome(BiomePivot biome, BiomePivot underlyingType = null)
         {
             Biome = biome ?? throw new ArgumentNullException(nameof(biome));
@@ -178,6 +227,10 @@ namespace ErsatzCivLib.Model
             }
         }
 
+        /// <summary>
+        /// Applies default actions of the instance when a <see cref="CitizenPivot"/> is built on it.
+        /// </summary>
+        /// <param name="city">The city.</param>
         internal void ApplyCityActions(CityPivot city)
         {
             Road = true;
@@ -251,23 +304,6 @@ namespace ErsatzCivLib.Model
             }
 
             return false;
-        }
-
-        private bool ApplyActionInternal(WorkerPivot worker, WorkerActionPivot action, bool currentApplianceValue)
-        {
-            if (currentApplianceValue)
-            {
-                return false;
-            }
-
-            var actionInProgress = CurrentActions.SingleOrDefault(a => a.Action == action);
-            if (actionInProgress == null)
-            {
-                actionInProgress = new InProgressWorkerActionPivot(action);
-                _currentActions.Add(actionInProgress);
-            }
-
-            return actionInProgress.AddWorker(worker);
         }
 
         /// <summary>
@@ -365,39 +401,84 @@ namespace ErsatzCivLib.Model
             }
         }
 
+        /// <summary>
+        /// Sets a river at a specified cardinal around the instance.
+        /// </summary>
+        /// <param name="cardinal">The <see cref="DirectionPivot"/>.</param>
+        /// <param name="isRiver"><c>True</c> to set a river; <c>False</c> otherwise.</param>
         internal void SetRiver(DirectionPivot cardinal, bool isRiver)
         {
             _rivers[cardinal] = isRiver ? !Biome.IsSeaType : isRiver;
         }
 
-        public bool Equals(MapSquarePivot other)
+        private bool ApplyActionInternal(WorkerPivot worker, WorkerActionPivot action, bool currentApplianceValue)
         {
-            return Row == other?.Row && Column == other?.Column;
-        }
-
-        public static bool operator ==(MapSquarePivot ms1, MapSquarePivot ms2)
-        {
-            if (ms1 is null)
+            if (currentApplianceValue)
             {
-                return ms2 is null;
+                return false;
             }
 
-            return ms1.Equals(ms2) == true;
+            var actionInProgress = CurrentActions.SingleOrDefault(a => a.Action == action);
+            if (actionInProgress == null)
+            {
+                actionInProgress = new InProgressWorkerActionPivot(action);
+                _currentActions.Add(actionInProgress);
+            }
+
+            return actionInProgress.AddWorker(worker);
         }
 
-        public static bool operator !=(MapSquarePivot ms1, MapSquarePivot ms2)
+        #region IEquatable implementation
+
+        /// <summary>
+        /// Checks if this instance is equal to another one.
+        /// </summary>
+        /// <param name="other">The other instance.</param>
+        /// <returns><c>True</c> if equals; <c>False</c> otherwise.</returns>
+        public bool Equals(MapSquarePivot other)
         {
-            return !(ms1 == ms2);
+            return Row == other?.Row && Column == other?.Commerce;
         }
 
+        /// <summary>
+        /// Operator "==" override. Checks equality between two instances.
+        /// </summary>
+        /// <param name="p1">The first <see cref="MapSquarePivot"/>.</param>
+        /// <param name="p2">The second <see cref="MapSquarePivot"/>.</param>
+        /// <returns><c>True</c> if equals; <c>False</c> otherwise.</returns>
+        public static bool operator ==(MapSquarePivot p1, MapSquarePivot p2)
+        {
+            if (p1 is null)
+            {
+                return p2 is null;
+            }
+
+            return p1.Equals(p2) == true;
+        }
+
+        /// <summary>
+        /// Operator "!=" override. Checks non-equality between two instances.
+        /// </summary>
+        /// <param name="p1">The first <see cref="MapSquarePivot"/>.</param>
+        /// <param name="p2">The second <see cref="MapSquarePivot"/>.</param>
+        /// <returns><c>False</c> if equals; <c>True</c> otherwise.</returns>
+        public static bool operator !=(MapSquarePivot p1, MapSquarePivot p2)
+        {
+            return !(p1 == p2);
+        }
+
+        /// <inhrritdoc />
         public override bool Equals(object obj)
         {
             return obj is MapSquarePivot && Equals(obj as MapSquarePivot);
         }
 
+        /// <inhrritdoc />
         public override int GetHashCode()
         {
-            return Row ^ Column;
+            return Row.GetHashCode() ^ Column.GetHashCode();
         }
+
+        #endregion
     }
 }

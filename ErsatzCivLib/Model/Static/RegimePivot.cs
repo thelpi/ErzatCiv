@@ -39,7 +39,7 @@ namespace ErsatzCivLib.Model.Static
         /// <summary>
         /// Impact on mood for each military unit in garrison in a city.
         /// </summary>
-        /// <example>A <c>0.5</c> value means that 2 units make 1 <see cref="CityPivot.CitizenPivot"/> from unhappy to content.</example>
+        /// <example>A <c>0.5</c> value means that 2 units make 1 <see cref="CitizenPivot"/> from unhappy to content.</example>
         public double GarrisonMoodRate { get; private set; }
         /// <summary>
         /// Science discovery speed rate.
