@@ -130,7 +130,7 @@ namespace ErsatzCivLib.Model.Static
             UnitCost = 0,
             GarrisonMoodRate = 0.5,
             CommerceBonus = 0,
-            CorruptionRate = 0.75,
+            CorruptionRate = 0.25,
             WorkerEffiencyRate = 1,
             ScienceRate = 0.75,
             AdvancePrerequisite = AdvancePivot.Monarchy
@@ -144,7 +144,7 @@ namespace ErsatzCivLib.Model.Static
             UnitCost = 1,
             GarrisonMoodRate = 1 / (double)3,
             CommerceBonus = 0,
-            CorruptionRate = 0.75,
+            CorruptionRate = 0.25,
             WorkerEffiencyRate = 1,
             ScienceRate = 1,
             AdvancePrerequisite = AdvancePivot.Republic
@@ -158,7 +158,7 @@ namespace ErsatzCivLib.Model.Static
             UnitCost = 0,
             GarrisonMoodRate = 0,
             CommerceBonus = 0,
-            CorruptionRate = 0,
+            CorruptionRate = 1,
             WorkerEffiencyRate = 0.5,
             ScienceRate = 0,
             AdvancePrerequisite = null
@@ -166,7 +166,7 @@ namespace ErsatzCivLib.Model.Static
         /// <summary>
         /// Democraty regime.
         /// </summary>
-        public static readonly RegimePivot Democraty = new RegimePivot
+        public static readonly RegimePivot Democracy = new RegimePivot
         {
             Name = "Democraty",
             UnitCost = 1,
@@ -186,7 +186,7 @@ namespace ErsatzCivLib.Model.Static
             UnitCost = 0,
             GarrisonMoodRate = 0.5,
             CommerceBonus = 0,
-            CorruptionRate = 0.75,
+            CorruptionRate = 0.25,
             WorkerEffiencyRate = 1,
             ScienceRate = 1,
             AdvancePrerequisite = AdvancePivot.Communism

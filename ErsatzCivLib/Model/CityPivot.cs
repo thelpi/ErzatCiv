@@ -10,7 +10,22 @@ namespace ErsatzCivLib.Model
     public class CityPivot : IEquatable<CityPivot>
     {
         private const double MARKETPLACE_COMMERCE_INCREASE_RATIO = 1.5;
+        private const double BANK_COMMERCE_INCREASE_RATIO = 1.5;
         private const double LIBRARY_SCIENCE_INCREASE_RATIO = 1.5;
+        private const double UNIVERSITY_SCIENCE_INCREASE_RATIO = 1.5;
+        private const double FACTORY_PRODUCTIVITY_INCREASE_RATIO = 1.5;
+        private const double MFGPLANT_PRODUCTIVITY_INCREASE_RATIO = 2;
+        private const double HYDROPLANT_PRODUCTIVITY_INCREASE_RATIO = 1.5;
+        private const double NUCLEARPLANT_PRODUCTIVITY_INCREASE_RATIO = 1.5;
+        private const double HYDROPLANT_POLLUTION_INCREASE_RATIO = 0.5;
+        private const double NUCLEARPLANT_POLLUTION_INCREASE_RATIO = 0.5;
+        private const double RECYCLINGCENTER_POLLUTION_INCREASE_RATIO = 1 / (double)3;
+        private const double POWERPLANT_PRODUCTIVITY_INCREASE_RATIO = 1.5;
+        private const double GRANARY_FOOD_INCREASE_RATIO = 2;
+        private const double MASSTRANSIT_POLLUTION_INCREASE_RATIO = 0;
+        private const double PALACE_CORRUPTION_INCREASE_RATE = 0.5;
+        private const double COURTHOUSE_CORRUPTION_INCREASE_RATE = 0.5;
+
         private const int PRODUCTION_INFINITE = 9999;
         private const int DEFAULT_RATIO_CITIZEN_UNHAPPY = 5;
         internal const int CITY_SPEED_COST = 1;
@@ -22,7 +37,9 @@ namespace ErsatzCivLib.Model
         private const double PRODUCTIVITY_TO_COMMERCE_RATIO = 0.1;
         private const int MAX_POPULATION_WITHOUT_WATER_SUPPLY = 10;
 
-        private readonly Func<CityPivot, IReadOnlyCollection<MapSquarePivot>> _availableMapSquaresFunc;
+        private readonly Func<CityPivot, double> _getDistanceToCapitalRateCallback;
+        private readonly Func<RegimePivot> _getCurrentRegimeCallback;
+        private readonly Func<CityPivot, IReadOnlyCollection<MapSquarePivot>> _getAvailableMapSquaresCallback;
         private readonly List<CitizenPivot> _citizens;
         private readonly List<CityImprovementPivot> _improvements;
         private readonly List<WonderPivot> _wonders;
@@ -43,6 +60,13 @@ namespace ErsatzCivLib.Model
                 return _citizens.Count(c => c.Mood == MoodPivot.Unhappy) > _citizens.Count(c => c.Mood == MoodPivot.Happy);
             }
         }
+        public bool InCivilTroubleOrAnarchy
+        {
+            get
+            {
+                return InCivilTrouble || _getCurrentRegimeCallback() == RegimePivot.Anarchy;
+            }
+        }
         public int Population
         {
             get
@@ -50,16 +74,63 @@ namespace ErsatzCivLib.Model
                 return (int)Math.Round((MIN_CC_POP / Math.Exp(POP_GROWTH_RATIO)) * Math.Exp(POP_GROWTH_RATIO * _citizens.Count));
             }
         }
+        public int Treasure
+        {
+            get
+            {
+                if (InCivilTroubleOrAnarchy)
+                {
+                    return 0;
+                }
+
+                var capitalizationValue = Production.Is<CapitalizationPivot>() ?
+                    (int)Math.Ceiling(Productivity * PRODUCTIVITY_TO_COMMERCE_RATIO) : 0;
+                var cityCommerceValue = MapSquareLocation.CityCommerce + (
+                    MapSquareLocation.CityCommerce > 0 ? _getCurrentRegimeCallback().CommerceBonus : 0
+                );
+                var aroundCityCommerceValue = _citizens
+                    .Where(c => !c.Type.HasValue)
+                    .Sum(c => c.MapSquare.Commerce + (c.MapSquare.Commerce > 0 ? _getCurrentRegimeCallback().CommerceBonus : 0));
+
+                var commerceValue = cityCommerceValue + capitalizationValue + aroundCityCommerceValue;
+
+                if (_improvements.Contains(CityImprovementPivot.Marketplace))
+                {
+                    commerceValue = (int)Math.Floor(MARKETPLACE_COMMERCE_INCREASE_RATIO * commerceValue);
+                }
+
+                if (_improvements.Contains(CityImprovementPivot.Bank))
+                {
+                    commerceValue = (int)Math.Floor(BANK_COMMERCE_INCREASE_RATIO * commerceValue);
+                }
+
+                var taxValue = _citizens.Count(c => c.Type == CitizenTypePivot.TaxCollector || !c.Type.HasValue);
+
+                var totalValue = taxValue + commerceValue;
+
+                double corruptionRate = (_getCurrentRegimeCallback().CorruptionRate * _getDistanceToCapitalRateCallback(this));
+
+                if (_improvements.Contains(CityImprovementPivot.Palace))
+                {
+                    corruptionRate *= PALACE_CORRUPTION_INCREASE_RATE;
+                }
+                else if (_improvements.Contains(CityImprovementPivot.Courthouse))
+                {
+                    corruptionRate *= COURTHOUSE_CORRUPTION_INCREASE_RATE;
+                }
+
+                return (int)Math.Round(totalValue * corruptionRate);
+            }
+        }
         public int Food
         {
             get
             {
-                // TODO : include city improvements
                 var foodValue = MapSquareLocation.CityFood + _citizens
                         .Where(c => !c.Type.HasValue)
                         .Sum(c => c.MapSquare.Food);
 
-                if (InCivilTrouble && foodValue > _citizens.Count * CitizenPivot.FOOD_BY_TURN)
+                if (InCivilTroubleOrAnarchy && foodValue > _citizens.Count * CitizenPivot.FOOD_BY_TURN)
                 {
                     foodValue = _citizens.Count * CitizenPivot.FOOD_BY_TURN;
                 }
@@ -67,62 +138,55 @@ namespace ErsatzCivLib.Model
                 return foodValue;
             }
         }
-        public int Commerce
-        {
-            get
-            {
-                if (InCivilTrouble)
-                {
-                    return 0;
-                }
-                
-                var commerceValue = MapSquareLocation.CityCommerce
-                    + (Production.Is<CapitalizationPivot>() ? (int)Math.Ceiling(Productivity * PRODUCTIVITY_TO_COMMERCE_RATIO) : 0)
-                    + _citizens
-                        .Where(c => !c.Type.HasValue)
-                        .Sum(c => c.MapSquare.Commerce);
-
-                if (_improvements.Contains(CityImprovementPivot.Marketplace))
-                {
-                    commerceValue = (int)Math.Floor(MARKETPLACE_COMMERCE_INCREASE_RATIO * commerceValue);
-                }
-
-                return commerceValue;
-            }
-        }
-        public int Tax
-        {
-            get
-            {
-                if (InCivilTrouble)
-                {
-                    return 0;
-                }
-
-                // TODO : include city improvements
-                return _citizens.Count(c => c.Type == CitizenTypePivot.TaxCollector || !c.Type.HasValue);
-            }
-        }
         public int Productivity
         {
             get
             {
-                if (InCivilTrouble)
+                if (InCivilTroubleOrAnarchy)
                 {
                     return 0;
                 }
 
-                // TODO : include city improvements
-                return MapSquareLocation.CityProductivity + _citizens
-                        .Where(c => !c.Type.HasValue)
-                        .Sum(c => c.MapSquare.Productivity);
+                var baseValue = MapSquareLocation.CityProductivity + _citizens
+                    .Where(c => !c.Type.HasValue)
+                    .Sum(c => c.MapSquare.Productivity);
+
+                bool hasProdImprovement = false;
+                if (_improvements.Contains(CityImprovementPivot.MfgPlant))
+                {
+                    baseValue = (int)Math.Floor(MFGPLANT_PRODUCTIVITY_INCREASE_RATIO * baseValue);
+                    hasProdImprovement = true;
+                }
+                else if (_improvements.Contains(CityImprovementPivot.Factory))
+                {
+                    baseValue = (int)Math.Floor(FACTORY_PRODUCTIVITY_INCREASE_RATIO * baseValue);
+                    hasProdImprovement = true;
+                }
+
+                if (hasProdImprovement)
+                {
+                    if (_improvements.Contains(CityImprovementPivot.HydroPlant))
+                    {
+                        baseValue = (int)Math.Floor(HYDROPLANT_PRODUCTIVITY_INCREASE_RATIO * baseValue);
+                    }
+                    else if (_improvements.Contains(CityImprovementPivot.NuclearPlant))
+                    {
+                        baseValue = (int)Math.Floor(NUCLEARPLANT_PRODUCTIVITY_INCREASE_RATIO * baseValue);
+                    }
+                    else if (_improvements.Contains(CityImprovementPivot.PowerPlant))
+                    {
+                        baseValue = (int)Math.Floor(POWERPLANT_PRODUCTIVITY_INCREASE_RATIO * baseValue);
+                    }
+                }
+
+                return baseValue;
             }
         }
         public int Science
         {
             get
             {
-                if (InCivilTrouble)
+                if (InCivilTroubleOrAnarchy)
                 {
                     return 0;
                 }
@@ -134,15 +198,56 @@ namespace ErsatzCivLib.Model
                     scienceValue = (int)Math.Floor(scienceValue * LIBRARY_SCIENCE_INCREASE_RATIO);
                 }
 
-                return scienceValue;
+                if (_improvements.Contains(CityImprovementPivot.University))
+                {
+                    scienceValue = (int)Math.Floor(scienceValue * UNIVERSITY_SCIENCE_INCREASE_RATIO);
+                }
+
+                return (int)Math.Ceiling(scienceValue * _getCurrentRegimeCallback().ScienceRate);
+            }
+        }
+        public int IndustrialPollution
+        {
+            get
+            {
+                var baseValue = 0; // TODO (based on current productivity)
+
+                if (_improvements.Contains(CityImprovementPivot.HydroPlant))
+                {
+                    baseValue = (int)Math.Floor(HYDROPLANT_POLLUTION_INCREASE_RATIO * baseValue);
+                }
+                else if (_improvements.Contains(CityImprovementPivot.NuclearPlant))
+                {
+                    baseValue = (int)Math.Floor(NUCLEARPLANT_POLLUTION_INCREASE_RATIO * baseValue);
+                }
+
+                if (_improvements.Contains(CityImprovementPivot.RecyclingCenter))
+                {
+                    baseValue = (int)Math.Floor(RECYCLINGCENTER_POLLUTION_INCREASE_RATIO * baseValue);
+                }
+
+                return baseValue;
+            }
+        }
+        public int CitizenPollution
+        {
+            get
+            {
+                var baseValue = 0; // TODO (based on current population)
+
+                if (_improvements.Contains(CityImprovementPivot.MassTransit))
+                {
+                    baseValue = (int)Math.Floor(MASSTRANSIT_POLLUTION_INCREASE_RATIO * baseValue);
+                }
+
+                return baseValue;
             }
         }
         public int Pollution
         {
             get
             {
-                // TODO
-                return 0;
+                return IndustrialPollution + CitizenPollution;
             }
         }
         public IReadOnlyCollection<CityImprovementPivot> Improvements { get { return _improvements; } }
@@ -173,7 +278,14 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                return (FOOD_RATIO_TO_NEXT_CITIZEN * _citizens.Count) / (_improvements.Contains(CityImprovementPivot.Granary) ? 2 : 1);
+                var baseValue = FOOD_RATIO_TO_NEXT_CITIZEN * _citizens.Count;
+
+                if (_improvements.Contains(CityImprovementPivot.Granary))
+                {
+                    baseValue = (int)Math.Ceiling(baseValue * GRANARY_FOOD_INCREASE_RATIO);
+                }
+
+                return baseValue;
             }
         }
         public int ExtraFoodByTurn
@@ -199,15 +311,18 @@ namespace ErsatzCivLib.Model
             }
         }
 
-        internal CityPivot(int currentTurn, string name, MapSquarePivot location,
-            Func<CityPivot, IReadOnlyCollection<MapSquarePivot>> availableMapSquaresFunc, BuildablePivot production)
+        internal CityPivot(int currentTurn, string name, MapSquarePivot location, BuildablePivot production,
+            Func<CityPivot, IReadOnlyCollection<MapSquarePivot>> getAvailableMapSquaresCallback,
+            Func<CityPivot, double> getDistanceToCapitalRateCallback, Func<RegimePivot> getCurrentRegimeCallback)
         {
             Name = name;
             MapSquareLocation = location;
             CreationTurn = currentTurn;
             Production = production;
 
-            _availableMapSquaresFunc = availableMapSquaresFunc;
+            _getAvailableMapSquaresCallback = getAvailableMapSquaresCallback;
+            _getDistanceToCapitalRateCallback = getDistanceToCapitalRateCallback;
+            _getCurrentRegimeCallback = getCurrentRegimeCallback;
             _improvements = new List<CityImprovementPivot>();
             _wonders = new List<WonderPivot>();
 
@@ -219,7 +334,7 @@ namespace ErsatzCivLib.Model
 
         internal MapSquarePivot BestVacantSpot()
         {
-            return _availableMapSquaresFunc(this)
+            return _getAvailableMapSquaresCallback(this)
                 .Where(x => _citizens?.Any(c => c.MapSquare == x) != true)
                 .OrderByDescending(x => x.TotalValue)
                 .FirstOrDefault();
@@ -345,6 +460,25 @@ namespace ErsatzCivLib.Model
                 CheckCitizensMood();
             }
 
+            if (produced != null)
+            {
+                if (CityImprovementPivot.HydroPlant == produced)
+                {
+                    _improvements.Remove(CityImprovementPivot.NuclearPlant);
+                    _improvements.Remove(CityImprovementPivot.PowerPlant);
+                }
+                else if (CityImprovementPivot.NuclearPlant == produced)
+                {
+                    _improvements.Remove(CityImprovementPivot.PowerPlant);
+                    _improvements.Remove(CityImprovementPivot.HydroPlant);
+                }
+                else if (CityImprovementPivot.PowerPlant == produced)
+                {
+                    _improvements.Remove(CityImprovementPivot.NuclearPlant);
+                    _improvements.Remove(CityImprovementPivot.HydroPlant);
+                }
+            }
+
             return produced;
         }
 
@@ -395,7 +529,7 @@ namespace ErsatzCivLib.Model
 
         internal void ResetCitizens()
         {
-            var availableMapSquaresCount = _availableMapSquaresFunc(this).Count;
+            var availableMapSquaresCount = _getAvailableMapSquaresCallback(this).Count;
 
             _citizens.Sort();
             for (int i = 0; i < _citizens.Count; i++)

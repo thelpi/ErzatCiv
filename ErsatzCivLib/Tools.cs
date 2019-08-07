@@ -243,5 +243,16 @@ namespace ErsatzCivLib
                     return new Tuple<DirectionPivot, DirectionPivot>(DirectionPivot.Top, DirectionPivot.Right);
             }
         }
+
+        /// <summary>
+        /// Computes the distance between two <see cref="MapSquarePivot"/>.
+        /// </summary>
+        /// <param name="loc1">The first point.</param>
+        /// <param name="loc2">The second point.</param>
+        /// <returns>The distance.</returns>
+        internal static double DistanceBetweenTwoPoints(MapSquarePivot loc1, MapSquarePivot loc2)
+        {
+            return Math.Sqrt(Math.Pow(loc2.Row - loc1.Row, 2) + Math.Pow(loc2.Column - loc1.Column, 2));
+        }
     }
 }

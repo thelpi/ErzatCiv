@@ -46,12 +46,11 @@ namespace ErsatzCiv
         private void RefreshDisplay()
         {
             LabelCityInfos.Content = $"{_city.Name}, founded in {_city.CreationTurn}";
-            LabelCommerceStat.Content = _city.Commerce;
+            LabelTreasureStat.Content = _city.Treasure;
             LabelFoodStat.Content = _city.Food;
             LabelPollutionStat.Content = _city.Pollution;
             LabelProductionStat.Content = _city.Productivity;
             LabelScienceStat.Content = _city.Science;
-            LabelTaxStat.Content = _city.Tax;
             
             ComboBoxProduction.ItemsSource = _engine.GetBuildableItemsForCity(_city, out int indexOfDefault);
             ComboBoxProduction.SelectedIndex = indexOfDefault;

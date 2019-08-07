@@ -169,7 +169,7 @@ namespace ErsatzCivLib.Model
             get
             {
                 // TODO
-                return _cities.Sum(c => c.Commerce + c.Tax);
+                return _cities.Sum(c => c.Treasure);
             }
         }
         /// <summary>
@@ -372,7 +372,11 @@ namespace ErsatzCivLib.Model
             var settler = CurrentUnit as SettlerPivot;
             var sq = CurrentUnit.MapSquareLocation;
 
-            var city = new CityPivot(currentTurn, name, sq, _engine.ComputeCityAvailableMapSquares, CapitalizationPivot.Default);
+            var city = new CityPivot(currentTurn, name, sq, CapitalizationPivot.Default,
+                _engine.ComputeCityAvailableMapSquares,
+                GetDistanceToCapitalRate,
+                new Func<RegimePivot>(delegate() { return CurrentRegime; })
+            );
             sq.ApplyCityActions(city);
 
             if (Capital is null)
@@ -388,6 +392,19 @@ namespace ErsatzCivLib.Model
             SetUnitIndex(true, false);
 
             return city;
+        }
+
+        /// <summary>
+        /// Computes a rate which represents hte distance between a city and the capital.
+        /// <c>0</c> is the closest (the capital itself) and <c>1</c> the furthest (distance between the corner of the map and the center; beyond that distance the value stays <c>1</c>).
+        /// </summary>
+        /// <param name="city">The city.</param>
+        /// <returns>A distance rate.</returns>
+        internal double GetDistanceToCapitalRate(CityPivot city)
+        {
+            var distanceBetweenCityAndCapital = Tools.DistanceBetweenTwoPoints(city.MapSquareLocation, Capital.MapSquareLocation);
+
+            return distanceBetweenCityAndCapital > _engine.Map.DiagonalRadius ? 1 : (distanceBetweenCityAndCapital / _engine.Map.DiagonalRadius);
         }
 
         /// <summary>
@@ -473,7 +490,8 @@ namespace ErsatzCivLib.Model
                     {
                         citiesWithDoneProduction.Add(city, produced);
                     }
-                    else if (CityImprovementPivot.Palace == produced)
+
+                    if (CityImprovementPivot.Palace == produced)
                     {
                         city.SetAsNewCapital(Capital);
                         Capital = city;
@@ -654,6 +672,19 @@ namespace ErsatzCivLib.Model
             if (city == Capital)
             {
                 buildableDefaultInstances.Remove(CityImprovementPivot.Courthouse);
+            }
+
+            // Can't build factory if manufacturing plant exists.
+            if (city.Improvements.Contains(CityImprovementPivot.MfgPlant))
+            {
+                buildableDefaultInstances.Remove(CityImprovementPivot.Factory);
+            }
+
+            // No hydroplant if no water.
+            if (!city.MapSquareLocation.HasRiver
+                && !_engine.Map.GetAdjacentMapSquares(city.MapSquareLocation).Values.Any(msq => msq.Biome.IsSeaType))
+            {
+                buildableDefaultInstances.Remove(CityImprovementPivot.HydroPlant);
             }
 
             #endregion

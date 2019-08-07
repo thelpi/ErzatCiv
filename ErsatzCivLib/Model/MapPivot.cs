@@ -77,6 +77,10 @@ namespace ErsatzCivLib.Model
         /// Inferred; <see cref="Width"/> to <see cref="Height"/> ratio.
         /// </summary>
         public int WidthHeighRatio { get { return Width / Height; } }
+        /// <summary>
+        /// Distance between a corder and the center of the map.
+        /// </summary>
+        public double DiagonalRadius { get { return Tools.DistanceBetweenTwoPoints(this[0, 0], this[(Height / 2) - 1, (Width / 2) - 1]); } }
 
         #endregion
 

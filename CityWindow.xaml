@@ -42,18 +42,16 @@
                     <RowDefinition Height="25" />
                 </Grid.RowDefinitions>
                 <Label BorderThickness="1" BorderBrush="Black" Grid.Column="0" Grid.Row="0" Content="Food :" HorizontalAlignment="Stretch" HorizontalContentAlignment="Right" />
-                <Label BorderThickness="1" BorderBrush="Black" Grid.Column="0" Grid.Row="1" Content="Commerce :" HorizontalAlignment="Stretch" HorizontalContentAlignment="Right" />
+                <Label BorderThickness="1" BorderBrush="Black" Grid.Column="0" Grid.Row="1" Content="Trésor :" HorizontalAlignment="Stretch" HorizontalContentAlignment="Right" />
                 <Label BorderThickness="1" BorderBrush="Black" Grid.Column="0" Grid.Row="2" Content="Production :" HorizontalAlignment="Stretch" HorizontalContentAlignment="Right" />
-                <Label BorderThickness="1" BorderBrush="Black" Grid.Column="0" Grid.Row="3" Content="Tax :" HorizontalAlignment="Stretch" HorizontalContentAlignment="Right" />
-                <Label BorderThickness="1" BorderBrush="Black" Grid.Column="0" Grid.Row="4" Content="Science :" HorizontalAlignment="Stretch" HorizontalContentAlignment="Right" />
-                <Label BorderThickness="1" BorderBrush="Black" Grid.Column="0" Grid.Row="5" Content="Pollution :" HorizontalAlignment="Stretch" HorizontalContentAlignment="Right" />
+                <Label BorderThickness="1" BorderBrush="Black" Grid.Column="0" Grid.Row="3" Content="Science :" HorizontalAlignment="Stretch" HorizontalContentAlignment="Right" />
+                <Label BorderThickness="1" BorderBrush="Black" Grid.Column="0" Grid.Row="4" Content="Pollution :" HorizontalAlignment="Stretch" HorizontalContentAlignment="Right" />
 
                 <Label BorderThickness="1" BorderBrush="Black" Grid.Column="1" Grid.Row="0" Name="LabelFoodStat" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" />
-                <Label BorderThickness="1" BorderBrush="Black" Grid.Column="1" Grid.Row="1" Name="LabelCommerceStat" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" />
+                <Label BorderThickness="1" BorderBrush="Black" Grid.Column="1" Grid.Row="1" Name="LabelTreasureStat" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" />
                 <Label BorderThickness="1" BorderBrush="Black" Grid.Column="1" Grid.Row="2" Name="LabelProductionStat" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" />
-                <Label BorderThickness="1" BorderBrush="Black" Grid.Column="1" Grid.Row="3" Name="LabelTaxStat" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" />
-                <Label BorderThickness="1" BorderBrush="Black" Grid.Column="1" Grid.Row="4" Name="LabelScienceStat" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" />
-                <Label BorderThickness="1" BorderBrush="Black" Grid.Column="1" Grid.Row="5" Name="LabelPollutionStat" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" />
+                <Label BorderThickness="1" BorderBrush="Black" Grid.Column="1" Grid.Row="3" Name="LabelScienceStat" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" />
+                <Label BorderThickness="1" BorderBrush="Black" Grid.Column="1" Grid.Row="4" Name="LabelPollutionStat" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" />
             </Grid>
             <Label BorderThickness="1" BorderBrush="Black" Height="25" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Content="Améliorations de ville" />
             <ScrollViewer CanContentScroll="True">
