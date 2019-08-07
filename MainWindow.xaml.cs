@@ -23,12 +23,12 @@ namespace ErsatzCiv
         private const int UNIT_ZINDEX = 50;
         private const int CITY_ZINDEX = 25;
 
-        private Engine _engine;
+        private EnginePivot _engine;
         private double _minimapSquareSize;
         private Rectangle _rCapture;
         private bool _freezeActions = false;
 
-        public MainWindow(Engine engine)
+        public MainWindow(EnginePivot engine)
         {
             InitializeComponent();
             ExpanderMenu.ExpandDirection = ExpandDirection.Up;

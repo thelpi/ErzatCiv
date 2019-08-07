@@ -18,16 +18,16 @@ namespace ErsatzCiv
         private const int CITIZEN_SIZE_CITYGRID = 35;
         private const int COUNT_SHOW_CITY_SQUARES = 7; // ODD NUMBER !
 
-        private readonly Engine _engine;
+        private readonly EnginePivot _engine;
         private readonly CityPivot _city;
         private bool _checkComboSelection = false;
 
         /// <summary>
         /// Constructor.
         /// </summary>
-        /// <param name="engine">The <see cref="Engine"/>.</param>
+        /// <param name="engine">The <see cref="EnginePivot"/>.</param>
         /// <param name="city">The <see cref="CityPivot"/> to manage.</param>
-        public CityWindow(Engine engine, CityPivot city)
+        public CityWindow(EnginePivot engine, CityPivot city)
         {
             InitializeComponent();
 

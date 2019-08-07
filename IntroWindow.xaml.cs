@@ -29,7 +29,7 @@ namespace ErsatzCiv
             };
             if (openFileDialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(openFileDialog.FileName))
             {
-                var desRes = ErsatzCivLib.Engine.DeserializeSave(openFileDialog.FileName);
+                var desRes = ErsatzCivLib.EnginePivot.DeserializeSave(openFileDialog.FileName);
                 if (string.IsNullOrWhiteSpace(desRes.Item2))
                 {
 

@@ -9,9 +9,9 @@ namespace ErsatzCiv
     /// </summary>
     public partial class WindowRegimePick : Window
     {
-        private Engine _engine;
+        private EnginePivot _engine;
 
-        public WindowRegimePick(Engine engine)
+        public WindowRegimePick(EnginePivot engine)
         {
             InitializeComponent();
             _engine = engine;

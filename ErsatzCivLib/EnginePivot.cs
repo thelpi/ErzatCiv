@@ -11,7 +11,7 @@ using ErsatzCivLib.Model.Static;
 namespace ErsatzCivLib
 {
     [Serializable]
-    public class Engine
+    public class EnginePivot
     {
         private readonly List<PlayerPivot> _iaPlayers = new List<PlayerPivot>();
 
@@ -32,7 +32,7 @@ namespace ErsatzCivLib
 
         #endregion
 
-        public Engine(SizePivot mapSize, LandShapePivot mapShape, LandCoveragePivot landCoverage, TemperaturePivot temperature,
+        public EnginePivot(SizePivot mapSize, LandShapePivot mapShape, LandCoveragePivot landCoverage, TemperaturePivot temperature,
             AgePivot age, HumidityPivot humidity, CivilizationPivot playerCivilization, int iaPlayersCount)
         {
             if (playerCivilization == null)
@@ -216,7 +216,7 @@ namespace ErsatzCivLib
             return HumanPlayer.MoveCurrentUnit(direction);
         }
         
-        public static Tuple<Engine, string> DeserializeSave(string saveFullPath)
+        public static Tuple<EnginePivot, string> DeserializeSave(string saveFullPath)
         {
             try
             {
@@ -231,13 +231,13 @@ namespace ErsatzCivLib
                 {
                     var formatter = new BinaryFormatter();
                     stream.Seek(0, SeekOrigin.Begin);
-                    var engine = (Engine)formatter.Deserialize(stream);
-                    return new Tuple<Engine, string>(engine, engine == null ? "Failure to deserialize the save !" : null);
+                    var engine = (EnginePivot)formatter.Deserialize(stream);
+                    return new Tuple<EnginePivot, string>(engine, engine == null ? "Failure to deserialize the save !" : null);
                 }
             }
             catch (Exception ex)
             {
-                return new Tuple<Engine, string>(null, ex.Message);
+                return new Tuple<EnginePivot, string>(null, ex.Message);
             }
         }
         

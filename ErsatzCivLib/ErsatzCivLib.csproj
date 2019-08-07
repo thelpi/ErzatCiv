@@ -59,7 +59,7 @@
     <Compile Include="Model\CityPivot.cs" />
     <Compile Include="Model\InProgressWorkerActionPivot.cs" />
     <Compile Include="Model\Enums\DirectionPivot.cs" />
-    <Compile Include="Engine.cs" />
+    <Compile Include="EnginePivot.cs" />
     <Compile Include="Model\MapPivot.cs" />
     <Compile Include="Model\Enums\MoodPivot.cs" />
     <Compile Include="Model\Static\RegimePivot.cs" />

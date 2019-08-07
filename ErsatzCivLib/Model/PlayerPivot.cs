@@ -23,7 +23,7 @@ namespace ErsatzCivLib.Model
         private int _currentUnitIndex;
         private int _previousUnitIndex;
         private int _anarchyTurnsCount;
-        private readonly Engine _engine;
+        private readonly EnginePivot _engine;
 
         #region Embedded properties
 
@@ -225,11 +225,11 @@ namespace ErsatzCivLib.Model
         /// <summary>
         /// Constructor.
         /// </summary>
-        /// <param name="owner">The <see cref="Engine"/> related to this instance.</param>
+        /// <param name="owner">The <see cref="EnginePivot"/> related to this instance.</param>
         /// <param name="civilization">The <see cref="Civilization"/> value.</param>
         /// <param name="isIa">The <see cref="IsIA"/> value.</param>
         /// <param name="beginLocation">Units position at the beginning.</param>
-        internal PlayerPivot(Engine owner, CivilizationPivot civilization, bool isIa, MapSquarePivot beginLocation)
+        internal PlayerPivot(EnginePivot owner, CivilizationPivot civilization, bool isIa, MapSquarePivot beginLocation)
         {
             _engine = owner;
 
@@ -338,7 +338,7 @@ namespace ErsatzCivLib.Model
         /// <summary>
         /// Tries to create a city at the location of the <see cref="CurrentUnit"/>.
         /// </summary>
-        /// <param name="currentTurn">The <see cref="Engine.CurrentTurn"/> value.</param>
+        /// <param name="currentTurn">The <see cref="EnginePivot.CurrentTurn"/> value.</param>
         /// <param name="name">Name of the city.</param>
         /// <param name="notUniqueNameError">Out; indicates a failure caused by a non-unique city name.</param>
         /// <returns>The <see cref="CityPivot"/> built; <c>Null</c> if failure.</returns>

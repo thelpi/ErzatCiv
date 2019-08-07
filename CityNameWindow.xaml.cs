@@ -9,7 +9,7 @@ namespace ErsatzCiv
     /// </summary>
     public partial class CityNameWindow : Window
     {
-        private readonly Engine _engine;
+        private readonly EnginePivot _engine;
 
         /// <summary>
         /// The city built; <c>Null</c> by default.
@@ -23,8 +23,8 @@ namespace ErsatzCiv
         /// <summary>
         /// Constructor.
         /// </summary>
-        /// <param name="engine">The <see cref="Engine"/>.</param>
-        public CityNameWindow(Engine engine)
+        /// <param name="engine">The <see cref="EnginePivot"/>.</param>
+        public CityNameWindow(EnginePivot engine)
         {
             InitializeComponent();
             _engine = engine;

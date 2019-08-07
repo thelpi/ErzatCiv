@@ -82,7 +82,7 @@ namespace ErsatzCiv
         {
             object[] parameters = e.Argument as object[];
 
-            e.Result = new Engine((SizePivot)parameters[0], (LandShapePivot)parameters[1],
+            e.Result = new EnginePivot((SizePivot)parameters[0], (LandShapePivot)parameters[1],
                 (LandCoveragePivot)parameters[2], (TemperaturePivot)parameters[3],
                 (AgePivot)parameters[4], (HumidityPivot)parameters[5],
                 (CivilizationPivot)parameters[6], (int)parameters[7]);
@@ -99,7 +99,7 @@ namespace ErsatzCiv
             {
                 ShowAgain();
                 Hide();
-                new MainWindow(e.Result as Engine).ShowDialog();
+                new MainWindow(e.Result as EnginePivot).ShowDialog();
                 ShowDialog();
             }
         }
