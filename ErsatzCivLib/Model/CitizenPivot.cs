@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using ErsatzCivLib.Model.Enums;
 
 namespace ErsatzCivLib.Model
@@ -31,17 +30,10 @@ namespace ErsatzCivLib.Model
         /// Type of citizen. <c>Null</c> for regular.
         /// </summary>
         public CitizenTypePivot? Type { get; private set; }
-
         /// <summary>
         /// The <see cref="CityPivot"/> which owns the citizen.
         /// </summary>
-        public CityPivot City
-        {
-            get
-            {
-                return EnginePivot.Default.Players.SelectMany(p => p.Cities).Single(c => c.Citizens.Contains(this));
-            }
-        }
+        public CityPivot City { get; private set; }
 
         /// <summary>
         /// Constructor.
@@ -49,12 +41,14 @@ namespace ErsatzCivLib.Model
         /// otherwise it's an <see cref="CitizenTypePivot.Entertainer"/>.
         /// </summary>
         /// <param name="mapSquare">The <see cref="MapSquare"/> value.</param>
-        internal CitizenPivot(MapSquarePivot mapSquare)
+        /// <param name="city">The <see cref="City"/> value.</param>
+        internal CitizenPivot(MapSquarePivot mapSquare, CityPivot city)
         {
             _uniqueId = Guid.NewGuid();
             MapSquare = mapSquare;
             Mood = MoodPivot.Content;
             Type = mapSquare == null ? CitizenTypePivot.Entertainer : (CitizenTypePivot?)null;
+            City = city;
         }
 
         /// <summary>

@@ -154,7 +154,7 @@ namespace ErsatzCivLib
 
             List<MapSquarePivot> excludedSpots = new List<MapSquarePivot>();
 
-            HumanPlayer = new PlayerPivot(playerCivilization, false, GetRandomLocation(excludedSpots));
+            HumanPlayer = new PlayerPivot(this, playerCivilization, false, GetRandomLocation(excludedSpots));
             for (int i = 0; i < iaPlayersCount; i++)
             {
                 CivilizationPivot iaCiv = null;
@@ -163,7 +163,7 @@ namespace ErsatzCivLib
                     iaCiv = CivilizationPivot.Instances.ElementAt(Tools.Randomizer.Next(0, CivilizationPivot.Instances.Count));
                 }
                 while (HumanPlayer.Civilization == iaCiv || _iaPlayers.Any(ia => ia.Civilization == iaCiv));
-                _iaPlayers.Add(new PlayerPivot(iaCiv, true, GetRandomLocation(excludedSpots)));
+                _iaPlayers.Add(new PlayerPivot(this, iaCiv, true, GetRandomLocation(excludedSpots)));
             }
 
             CurrentTurn = 0;
