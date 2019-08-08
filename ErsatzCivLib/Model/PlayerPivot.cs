@@ -18,8 +18,6 @@ namespace ErsatzCivLib.Model
         private const int TREASURE_START = 100;
         private const int SCIENCE_COST = 100;
 
-        #region Embedded properties
-
         private readonly List<CityPivot> _cities = new List<CityPivot>();
         private readonly List<AdvancePivot> _advances = new List<AdvancePivot>();
         private readonly List<UnitPivot> _units = new List<UnitPivot>();
@@ -28,11 +26,10 @@ namespace ErsatzCivLib.Model
         private int _previousUnitIndex;
         private int _anarchyTurnsCount;
         private readonly EnginePivot _engine;
+        private RegimePivot _regime;
 
-        /// <summary>
-        /// The current regime.
-        /// </summary>
-        public RegimePivot CurrentRegime { get; private set; }
+        #region Embedded properties
+
         /// <summary>
         /// The player civilization.
         /// </summary>
@@ -57,6 +54,11 @@ namespace ErsatzCivLib.Model
         /// Current capital.
         /// </summary>
         public CityPivot Capital { get; private set; }
+
+        #endregion
+
+        #region Inferred properties
+
         /// <summary>
         /// Collection of <see cref="MapSquarePivot"/> discovered by the player / civilization.
         /// </summary>
@@ -65,19 +67,6 @@ namespace ErsatzCivLib.Model
         /// Collection of <see cref="UnitPivot"/>.
         /// </summary>
         public IReadOnlyCollection<UnitPivot> Units { get { return _units; } }
-        /// <summary>
-        /// List of <see cref="CityPivot"/> built by the player.
-        /// </summary>
-        public IReadOnlyCollection<CityPivot> Cities { get { return _cities; } }
-        /// <summary>
-        /// List of discovered <see cref="AdvancePivot"/>.
-        /// </summary>
-        public IReadOnlyCollection<AdvancePivot> Advances { get { return _advances; } }
-
-        #endregion
-
-        #region Inferred properties
-
         /// <summary>
         /// The current <see cref="UnitPivot"/>. Might be <c>null</c>.
         /// </summary>
@@ -121,6 +110,10 @@ namespace ErsatzCivLib.Model
             }
         }
         /// <summary>
+        /// List of <see cref="CityPivot"/> built by the player.
+        /// </summary>
+        public IReadOnlyCollection<CityPivot> Cities { get { return _cities; } }
+        /// <summary>
         /// List of every <see cref="WonderPivot"/> for this player / civilization.
         /// </summary>
         public IReadOnlyCollection<WonderPivot> Wonders
@@ -130,6 +123,10 @@ namespace ErsatzCivLib.Model
                 return _cities.SelectMany(c => c.Wonders).ToList();
             }
         }
+        /// <summary>
+        /// List of discovered <see cref="AdvancePivot"/>.
+        /// </summary>
+        public IReadOnlyCollection<AdvancePivot> Advances { get { return _advances; } }
         /// <summary>
         /// Science points at each turn.
         /// </summary>
@@ -191,7 +188,7 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                return CurrentRegime == RegimePivot.Anarchy && RevolutionTurnsCount == 0;
+                return _regime == RegimePivot.Anarchy && RevolutionTurnsCount == 0;
             }
         }
         /// <summary>
@@ -216,7 +213,7 @@ namespace ErsatzCivLib.Model
         [field: NonSerialized]
         public event EventHandler<NextUnitEventArgs> NextUnitEvent;
         /// <summary>
-        /// Triggered when <see cref="CurrentRegime"/> changes.
+        /// Triggered when <see cref="_regime"/> changes.
         /// </summary>
         [field: NonSerialized]
         public event EventHandler<EventArgs> NewRegimeEvent;
@@ -248,7 +245,7 @@ namespace ErsatzCivLib.Model
             IsIA = isIa;
             _advances.AddRange(civilization.Advances);
 
-            CurrentRegime = RegimePivot.Despotism;
+            _regime = RegimePivot.Despotism;
             Treasure = TREASURE_START;
 
             _units.Add(SettlerPivot.CreateAtLocation(beginLocation));
@@ -300,18 +297,27 @@ namespace ErsatzCivLib.Model
                     .ToList();
         }
 
+        /// <summary>
+        /// Gets the current <see cref="RegimePivot"/>.
+        /// </summary>
+        /// <returns>The <see cref="RegimePivot"/>.</returns>
+        public RegimePivot GetCurrentRegime()
+        {
+            return _regime;
+        }
+
         #endregion
 
         #region Internal methods
 
         /// <summary>
-        /// Triggrs a revolution; sets <see cref="CurrentRegime"/> to <see cref="RegimePivot.Anarchy"/> for a while.
+        /// Triggrs a revolution; sets <see cref="_regime"/> to <see cref="RegimePivot.Anarchy"/> for a while.
         /// </summary>
         internal void TriggerRevolution()
         {
-            if (CurrentRegime != RegimePivot.Anarchy)
+            if (_regime != RegimePivot.Anarchy)
             {
-                CurrentRegime = RegimePivot.Anarchy;
+                _regime = RegimePivot.Anarchy;
                 _anarchyTurnsCount = 0;
                 NewRegimeEvent?.Invoke(this, new EventArgs());
             }
@@ -373,7 +379,8 @@ namespace ErsatzCivLib.Model
             var settler = CurrentUnit as SettlerPivot;
             var sq = CurrentUnit.MapSquareLocation;
 
-            var city = new CityPivot(currentTurn, name, sq, CapitalizationPivot.Default, this);
+            var city = new CityPivot(currentTurn, name, sq, CapitalizationPivot.Default, _engine.ComputeCityAvailableMapSquares,
+                GetDistanceToCapitalRate, GetCurrentRegime);
             sq.ApplyCityActions(city);
 
             if (Capital is null)
@@ -389,16 +396,6 @@ namespace ErsatzCivLib.Model
             SetUnitIndex(true, false);
 
             return city;
-        }
-
-        /// <summary>
-        /// Gets, for a <see cref="CityPivot"/>, the list of available <see cref="MapSquarePivot"/> (for regular citizens).
-        /// </summary>
-        /// <param name="city">The city.</param>
-        /// <returns>List of <see cref="MapSquarePivot"/>.</returns>
-        internal IReadOnlyCollection<MapSquarePivot> ComputeCityAvailableMapSquares(CityPivot city)
-        {
-            return _engine.ComputeCityAvailableMapSquares(city);
         }
 
         /// <summary>
@@ -498,17 +495,10 @@ namespace ErsatzCivLib.Model
                         citiesWithDoneProduction.Add(city, produced);
                     }
 
-                    // Changes the capital.
                     if (CityImprovementPivot.Palace == produced)
                     {
                         city.SetAsNewCapital(Capital);
                         Capital = city;
-                    }
-
-                    // Reveals the full map.
-                    if (WonderPivot.ApolloProgram == produced)
-                    {
-                        MapSquareDiscoveryInvokator(city.MapSquareLocation, _engine.Map);
                     }
                 }
             }
@@ -584,7 +574,7 @@ namespace ErsatzCivLib.Model
         /// <param name="regimePivot">The new <see cref="RegimePivot"/>.</param>
         internal void ChangeCurrentRegime(RegimePivot regimePivot)
         {
-            CurrentRegime = regimePivot;
+            _regime = regimePivot;
             _anarchyTurnsCount = 0;
             NewRegimeEvent?.Invoke(this, new EventArgs());
         }

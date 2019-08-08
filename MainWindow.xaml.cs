@@ -312,7 +312,7 @@ namespace ErsatzCiv
             }
             _freezeActions = true;
 
-            if (_engine.HumanPlayer.CurrentRegime == RegimePivot.Anarchy)
+            if (_engine.HumanPlayer.GetCurrentRegime() == RegimePivot.Anarchy)
             {
                 MessageBox.Show("A revolution is already in progress !", "ErsatzCiv");
             }
@@ -518,7 +518,7 @@ namespace ErsatzCiv
 
         private void RefreshRegimeInformations()
         {
-            LabelCurrentRegime.Content = $"Current regime : {_engine.HumanPlayer.CurrentRegime.Name}";
+            LabelCurrentRegime.Content = $"Current regime : {_engine.HumanPlayer.GetCurrentRegime().Name}";
         }
 
         private void FocusOn(double nexX, double newY)
