@@ -27,7 +27,6 @@ namespace ErsatzCivLib.Model
         private int _currentUnitIndex;
         private int _previousUnitIndex;
         private int _anarchyTurnsCount;
-        private readonly EnginePivot _engine;
 
         /// <summary>
         /// The current regime.
@@ -236,14 +235,11 @@ namespace ErsatzCivLib.Model
         /// <summary>
         /// Constructor.
         /// </summary>
-        /// <param name="owner">The <see cref="EnginePivot"/> related to this instance.</param>
         /// <param name="civilization">The <see cref="Civilization"/> value.</param>
         /// <param name="isIa">The <see cref="IsIA"/> value.</param>
         /// <param name="beginLocation">Units position at the beginning.</param>
-        internal PlayerPivot(EnginePivot owner, CivilizationPivot civilization, bool isIa, MapSquarePivot beginLocation)
+        internal PlayerPivot(CivilizationPivot civilization, bool isIa, MapSquarePivot beginLocation)
         {
-            _engine = owner;
-
             Civilization = civilization;
             IsIA = isIa;
             _advances.AddRange(civilization.Advances);
@@ -254,7 +250,7 @@ namespace ErsatzCivLib.Model
             _units.Add(SettlerPivot.CreateAtLocation(beginLocation));
             _units.Add(WorkerPivot.CreateAtLocation(beginLocation));
 
-            MapSquareDiscoveryInvokator(beginLocation, _engine.Map.GetAdjacentMapSquares(beginLocation).Values);
+            MapSquareDiscoveryInvokator(beginLocation, EnginePivot.Default.Map.GetAdjacentMapSquares(beginLocation).Values);
 
             SetUnitIndex(false, true);
         }
@@ -364,7 +360,7 @@ namespace ErsatzCivLib.Model
                 return null;
             }
 
-            if (_engine.Players.Any(p => p._cities.Any(c => c.Name.Equals(name.ToLower(), StringComparison.InvariantCultureIgnoreCase))))
+            if (EnginePivot.Default.Players.Any(p => p._cities.Any(c => c.Name.Equals(name.ToLower(), StringComparison.InvariantCultureIgnoreCase))))
             {
                 notUniqueNameError = true;
                 return null;
@@ -373,7 +369,7 @@ namespace ErsatzCivLib.Model
             var settler = CurrentUnit as SettlerPivot;
             var sq = CurrentUnit.MapSquareLocation;
 
-            var city = new CityPivot(currentTurn, name, sq, CapitalizationPivot.Default, this);
+            var city = new CityPivot(currentTurn, name, sq, CapitalizationPivot.Default);
             sq.ApplyCityActions(city);
 
             if (Capital is null)
@@ -382,7 +378,7 @@ namespace ErsatzCivLib.Model
                 Capital = city;
             }
 
-            MapSquareDiscoveryInvokator(city.MapSquareLocation, _engine.GetMapSquaresAroundCity(city).Keys);
+            MapSquareDiscoveryInvokator(city.MapSquareLocation, EnginePivot.Default.GetMapSquaresAroundCity(city).Keys);
 
             _cities.Add(city);
             _units.Remove(settler);
@@ -398,7 +394,7 @@ namespace ErsatzCivLib.Model
         /// <returns>List of <see cref="MapSquarePivot"/>.</returns>
         internal IReadOnlyCollection<MapSquarePivot> ComputeCityAvailableMapSquares(CityPivot city)
         {
-            return _engine.ComputeCityAvailableMapSquares(city);
+            return EnginePivot.Default.ComputeCityAvailableMapSquares(city);
         }
 
         /// <summary>
@@ -411,7 +407,7 @@ namespace ErsatzCivLib.Model
         {
             var distanceBetweenCityAndCapital = Tools.DistanceBetweenTwoPoints(city.MapSquareLocation, Capital.MapSquareLocation);
 
-            return distanceBetweenCityAndCapital > _engine.Map.DiagonalRadius ? 1 : (distanceBetweenCityAndCapital / _engine.Map.DiagonalRadius);
+            return distanceBetweenCityAndCapital > EnginePivot.Default.Map.DiagonalRadius ? 1 : (distanceBetweenCityAndCapital / EnginePivot.Default.Map.DiagonalRadius);
         }
 
         /// <summary>
@@ -429,7 +425,7 @@ namespace ErsatzCivLib.Model
             var sq = CurrentUnit.MapSquareLocation;
 
             return sq?.Biome?.IsCityBuildable == true
-                && !_engine.IsCity(sq)
+                && !EnginePivot.Default.IsCity(sq)
                 && sq.Pollution != true;
         }
 
@@ -508,7 +504,7 @@ namespace ErsatzCivLib.Model
                     // Reveals the full map.
                     if (WonderPivot.ApolloProgram == produced)
                     {
-                        MapSquareDiscoveryInvokator(city.MapSquareLocation, _engine.Map);
+                        MapSquareDiscoveryInvokator(city.MapSquareLocation, EnginePivot.Default.Map);
                     }
                 }
             }
@@ -556,7 +552,7 @@ namespace ErsatzCivLib.Model
             var x = direction.Value.Row(prevSq.Row);
             var y = direction.Value.Column(prevSq.Column);
 
-            var square = _engine.Map[x, y];
+            var square = EnginePivot.Default.Map[x, y];
             if (square == null)
             {
                 return false;
@@ -572,7 +568,7 @@ namespace ErsatzCivLib.Model
 
             if (res)
             {
-                MapSquareDiscoveryInvokator(square, _engine.Map.GetAdjacentMapSquares(square).Values);
+                MapSquareDiscoveryInvokator(square, EnginePivot.Default.Map.GetAdjacentMapSquares(square).Values);
             }
 
             return res;
@@ -604,7 +600,7 @@ namespace ErsatzCivLib.Model
 
             var worker = CurrentUnit as WorkerPivot;
             var sq = worker.MapSquareLocation;
-            if (sq == null || _engine.IsCity(sq))
+            if (sq == null || EnginePivot.Default.IsCity(sq))
             {
                 return false;
             }
@@ -629,7 +625,7 @@ namespace ErsatzCivLib.Model
             if (actionPivot == WorkerActionPivot.Irrigate
                 && !_advances.Contains(AdvancePivot.Electricity)
                 && !sq.HasRiver
-                && !_engine.Map.GetAdjacentMapSquares(sq).Values.Any(asq => asq.Irrigate))
+                && !EnginePivot.Default.Map.GetAdjacentMapSquares(sq).Values.Any(asq => asq.Irrigate))
             {
                 return false;
             }
@@ -666,7 +662,7 @@ namespace ErsatzCivLib.Model
             buildableDefaultInstances.RemoveAll(b => city.Improvements.Contains(b));
 
             // Removes global wonder already built.
-            buildableDefaultInstances.RemoveAll(b => b.Is<WonderPivot>() && _engine.GetEveryWonders().Contains(b as WonderPivot));
+            buildableDefaultInstances.RemoveAll(b => b.Is<WonderPivot>() && EnginePivot.Default.GetEveryWonders().Contains(b as WonderPivot));
 
             // Another improvement is required in the first place.
             buildableDefaultInstances.RemoveAll(b =>
@@ -696,7 +692,7 @@ namespace ErsatzCivLib.Model
 
             // No hydroplant if no water.
             if (!city.MapSquareLocation.HasRiver
-                && !_engine.Map.GetAdjacentMapSquares(city.MapSquareLocation).Values.Any(msq => msq.Biome.IsSeaType))
+                && !EnginePivot.Default.Map.GetAdjacentMapSquares(city.MapSquareLocation).Values.Any(msq => msq.Biome.IsSeaType))
             {
                 buildableDefaultInstances.Remove(CityImprovementPivot.HydroPlant);
             }

@@ -50,8 +50,7 @@ namespace ErsatzCivLib.Model
         #endregion
 
         #region Embedded properties
-
-        private readonly PlayerPivot _player;
+        
         private readonly List<WonderPivot> _wonders;
         private readonly List<CityImprovementPivot> _improvements;
         private readonly List<CitizenPivot> _citizens;
@@ -102,6 +101,16 @@ namespace ErsatzCivLib.Model
         #region Inferred properties
 
         /// <summary>
+        /// The <see cref="PlayerPivot"/> which owns the city.
+        /// </summary>
+        public PlayerPivot Player
+        {
+            get
+            {
+                return EnginePivot.Default.Players.Single(p => p.Cities.Contains(this));
+            }
+        }
+        /// <summary>
         /// Indicates if the city is in civil trouble (too much citizens in <see cref="MoodPivot.Unhappy"/> mood).
         /// </summary>
         public bool InCivilTrouble
@@ -118,7 +127,7 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                return InCivilTrouble || _player.CurrentRegime == RegimePivot.Anarchy;
+                return InCivilTrouble || Player.CurrentRegime == RegimePivot.Anarchy;
             }
         }
         /// <summary>
@@ -146,12 +155,12 @@ namespace ErsatzCivLib.Model
                 var capitalizationValue = Production.Is<CapitalizationPivot>() ?
                     (int)Math.Ceiling(Productivity * CAPITALIZATION_PRODUCTIVITY_TO_COMMERCE_RATIO) : 0;
                 var cityCommerceValue = MapSquareLocation.CityCommerce + (
-                    MapSquareLocation.CityCommerce > 0 ? _player.CurrentRegime.CommerceBonus : 0
+                    MapSquareLocation.CityCommerce > 0 ? Player.CurrentRegime.CommerceBonus : 0
                 );
                 var aroundCityCommerceValue = _citizens
                     .Where(c => !c.Type.HasValue)
                     .Sum(c => c.MapSquare.Commerce +
-                        (c.MapSquare.Commerce > 0 ? _player.CurrentRegime.CommerceBonus +
+                        (c.MapSquare.Commerce > 0 ? Player.CurrentRegime.CommerceBonus +
                             (_wonders.Contains(WonderPivot.Colossus) ? 1 : 0) : 0)
                     );
 
@@ -171,7 +180,7 @@ namespace ErsatzCivLib.Model
 
                 var totalValue = taxValue + commerceValue;
 
-                double corruptionRate = (_player.CurrentRegime.CorruptionRate * _player.GetDistanceToCapitalRate(this));
+                double corruptionRate = (Player.CurrentRegime.CorruptionRate * Player.GetDistanceToCapitalRate(this));
 
                 if (_improvements.Contains(CityImprovementPivot.Palace))
                 {
@@ -275,7 +284,7 @@ namespace ErsatzCivLib.Model
                     scienceValue = (int)Math.Floor(scienceValue * UNIVERSITY_SCIENCE_INCREASE_RATIO);
                 }
 
-                return (int)Math.Ceiling(scienceValue * _player.CurrentRegime.ScienceRate);
+                return (int)Math.Ceiling(scienceValue * Player.CurrentRegime.ScienceRate);
             }
         }
         /// <summary>
@@ -410,10 +419,8 @@ namespace ErsatzCivLib.Model
         /// <param name="name">The <see cref="Name"/> value.</param>
         /// <param name="location">The <see cref="MapSquareLocation"/> value.</param>
         /// <param name="production">The <see cref="Production"/> value.</param>
-        /// <param name="player">The <see cref="PlayerPivot"/> which built the city.</param>
-        internal CityPivot(int currentTurn, string name, MapSquarePivot location, BuildablePivot production, PlayerPivot player)
+        internal CityPivot(int currentTurn, string name, MapSquarePivot location, BuildablePivot production)
         {
-            _player = player;
             Name = name;
             MapSquareLocation = location;
             CreationTurn = currentTurn;
@@ -424,7 +431,7 @@ namespace ErsatzCivLib.Model
 
             _citizens = new List<CitizenPivot>
             {
-                new CitizenPivot(BestVacantMapSquareLocation(), this)
+                new CitizenPivot(BestVacantMapSquareLocation())
             };
         }
 
@@ -437,7 +444,7 @@ namespace ErsatzCivLib.Model
         /// <returns>The <see cref="MapSquarePivot"/> location; <c>Null</c> if no location available.</returns>
         internal MapSquarePivot BestVacantMapSquareLocation()
         {
-            return _player.ComputeCityAvailableMapSquares(this)
+            return Player.ComputeCityAvailableMapSquares(this)
                 .Where(x => _citizens?.Any(c => c.MapSquare == x) != true)
                 .OrderByDescending(x => x.TotalValue)
                 .FirstOrDefault();
@@ -502,7 +509,7 @@ namespace ErsatzCivLib.Model
                 if (_citizens.Count < AQUEDUC_MAX_POPULATION_WITHOUT || _improvements.Contains(CityImprovementPivot.Aqueduc))
                 {
                     FoodStorage = 0; // Note : excess is not keeped.
-                    _citizens.Add(new CitizenPivot(null, this));
+                    _citizens.Add(new CitizenPivot(null));
                     resetCitizensRequired = true;
                 }
                 else
@@ -644,7 +651,7 @@ namespace ErsatzCivLib.Model
         /// </summary>
         internal void ResetCitizens()
         {
-            var availableMapSquaresCount = _player.ComputeCityAvailableMapSquares(this).Count;
+            var availableMapSquaresCount = Player.ComputeCityAvailableMapSquares(this).Count;
 
             _citizens.Sort();
             for (int i = 0; i < _citizens.Count; i++)
