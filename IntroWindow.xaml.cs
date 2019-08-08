@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Microsoft.Win32;
@@ -30,19 +29,18 @@ namespace ErsatzCiv
             };
             if (openFileDialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(openFileDialog.FileName))
             {
-                try
+                var desRes = ErsatzCivLib.EnginePivot.DeserializeSave(openFileDialog.FileName);
+                if (string.IsNullOrWhiteSpace(desRes.Item2))
                 {
-                    ErsatzCivLib.EnginePivot.DeserializeSave(openFileDialog.FileName);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"The save can't be loaded because of the following error : {ex.Message}", "ErsatzCiv");
-                    return;
-                }
 
-                Hide();
-                new MainWindow().ShowDialog();
-                ShowDialog();
+                    Hide();
+                    new MainWindow(desRes.Item1).ShowDialog();
+                    ShowDialog();
+                }
+                else
+                {
+                    MessageBox.Show($"The save can't be loaded because of the following error : {desRes.Item2}", "ErsatzCiv");
+                }
             }
         }
 

@@ -24,20 +24,20 @@ namespace ErsatzCiv
         private const int MENU_HEIGHT = 200;
         private const int UNIT_ZINDEX = 50;
         private const int CITY_ZINDEX = 25;
-        
+
+        private EnginePivot _engine;
         private double _minimapSquareSize;
         private Rectangle _rCapture;
         private bool _freezeActions = false;
-        private readonly EnginePivot _engine;
 
-        public MainWindow()
+        public MainWindow(EnginePivot engine)
         {
             InitializeComponent();
             ExpanderMenu.ExpandDirection = ExpandDirection.Up;
-            
+
+            _engine = engine;
             CheckBoxWaitTurn.IsChecked = Settings.Default.waitEndTurn;
 
-            _engine = EnginePivot.Default;
             InitializeEngineEvents();
 
             DrawFullMapAndMiniMap();
@@ -258,20 +258,18 @@ namespace ErsatzCiv
             var res = MessageBox.Show("Save the game ?", "ErsatzCiv", MessageBoxButton.YesNoCancel);
             if (res == MessageBoxResult.Yes)
             {
-                try
+                var serRes = _engine.SerializeToFile(Settings.Default.datasPath + Settings.Default.savesSubFolder);
+                if (!string.IsNullOrWhiteSpace(serRes))
                 {
-                    EnginePivot.SerializeToFile(Settings.Default.datasPath + Settings.Default.savesSubFolder);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Save has failed with the following error : {ex.Message}", "ErsatzCiv");
+                    MessageBox.Show($"Save has failed with the following error : {serRes}", "ErsatzCiv");
                     e.Cancel = true;
-                    return;
                 }
-
-                MessageBox.Show("Save done !", "ErsatzCiv");
-                // Quit hard.
-                Environment.Exit(0);
+                else
+                {
+                    MessageBox.Show("Save done !", "ErsatzCiv");
+                    // Quit hard.
+                    Environment.Exit(0);
+                }
             }
             else if (res == MessageBoxResult.Cancel)
             {
