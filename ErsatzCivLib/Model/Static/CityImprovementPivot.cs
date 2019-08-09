@@ -11,6 +11,8 @@ namespace ErsatzCivLib.Model.Static
     [Serializable]
     public class CityImprovementPivot : BuildablePivot, IEquatable<CityImprovementPivot>
     {
+        #region Embedded properties
+
         /// <summary>
         /// The maintenance cost, in gold by turn.
         /// </summary>
@@ -27,6 +29,8 @@ namespace ErsatzCivLib.Model.Static
         /// A <see cref="CityImprovementPivot"/> requried to built this instance.
         /// </summary>
         public CityImprovementPivot ImprovementPrerequisite { get; private set; }
+
+        #endregion
 
         private CityImprovementPivot(int productivityCost, int maintenanceCost, int purchasePrice, int sellValue, string name,
             bool hasCitizenMoodEffect, AdvancePivot advancePrerequisite, CityImprovementPivot improvementPrerequisite) :
@@ -205,8 +209,9 @@ namespace ErsatzCivLib.Model.Static
         /// </summary>
         public static readonly CityImprovementPivot SdiDefense = new CityImprovementPivot(200, 4, 800, 200, "SDI Defense", false, AdvancePivot.Superconductor, null);
 
-        private static List<CityImprovementPivot> _instances = null;
+        #endregion
 
+        private static List<CityImprovementPivot> _instances = null;
         /// <summary>
         /// List of every <see cref="CityImprovementPivot"/> instances.
         /// </summary>
@@ -221,7 +226,5 @@ namespace ErsatzCivLib.Model.Static
                 return _instances;
             }
         }
-
-        #endregion
     }
 }

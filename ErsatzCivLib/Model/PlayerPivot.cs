@@ -15,21 +15,65 @@ namespace ErsatzCivLib.Model
     [Serializable]
     public class PlayerPivot : IEquatable<PlayerPivot>
     {
+        private const double REVOLUTION_TURNS_BY_CITY = 0.5;
         private const int TREASURE_START = 100;
         private const int SCIENCE_COST = 100;
 
-        private readonly List<CityPivot> _cities = new List<CityPivot>();
-        private readonly List<AdvancePivot> _advances = new List<AdvancePivot>();
-        private readonly List<UnitPivot> _units = new List<UnitPivot>();
-        private readonly List<MapSquarePivot> _knownMapSquares = new List<MapSquarePivot>();
-        private int _currentUnitIndex;
-        private int _previousUnitIndex;
-        private int _anarchyTurnsCount;
-        private readonly EnginePivot _engine;
-        private RegimePivot _regime;
-
         #region Embedded properties
 
+        private int _anarchyTurnsCount;
+        private readonly EnginePivot _engine;
+
+        private int _currentUnitIndex;
+        /// <summary>
+        /// The current <see cref="UnitPivot"/>. Might be <c>null</c>.
+        /// </summary>
+        public UnitPivot CurrentUnit
+        {
+            get
+            {
+                if (_currentUnitIndex == -1)
+                {
+                    return null;
+                }
+
+                if (_currentUnitIndex < -1 || _currentUnitIndex >= _units.Count)
+                {
+                    // Anormal behavior.
+                    return null;
+                }
+
+                return _units[_currentUnitIndex];
+            }
+        }
+
+        private int _previousUnitIndex;
+        /// <summary>
+        /// The previous <see cref="UnitPivot"/>. Might be <c>null</c>.
+        /// </summary>
+        public UnitPivot PreviousUnit
+        {
+            get
+            {
+                if (_previousUnitIndex == -1 || _previousUnitIndex == _currentUnitIndex)
+                {
+                    return null;
+                }
+
+                if (_previousUnitIndex < -1 || _previousUnitIndex >= _units.Count)
+                {
+                    // Anormal behavior.
+                    return null;
+                }
+
+                return _units[_previousUnitIndex];
+            }
+        }
+
+        /// <summary>
+        /// The current <see cref="RegimePivot"/>.
+        /// </summary>
+        public RegimePivot Regime { get; private set; }
         /// <summary>
         /// The player civilization.
         /// </summary>
@@ -55,64 +99,34 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public CityPivot Capital { get; private set; }
 
-        #endregion
-
-        #region Inferred properties
-
+        private readonly List<MapSquarePivot> _knownMapSquares = new List<MapSquarePivot>();
         /// <summary>
         /// Collection of <see cref="MapSquarePivot"/> discovered by the player / civilization.
         /// </summary>
         public IReadOnlyCollection<MapSquarePivot> KnownMapSquares { get { return _knownMapSquares; } }
+
+        private readonly List<UnitPivot> _units = new List<UnitPivot>();
         /// <summary>
         /// Collection of <see cref="UnitPivot"/>.
         /// </summary>
         public IReadOnlyCollection<UnitPivot> Units { get { return _units; } }
-        /// <summary>
-        /// The current <see cref="UnitPivot"/>. Might be <c>null</c>.
-        /// </summary>
-        public UnitPivot CurrentUnit
-        {
-            get
-            {
-                if (_currentUnitIndex == -1)
-                {
-                    return null;
-                }
 
-                if (_currentUnitIndex < -1 || _currentUnitIndex >= _units.Count)
-                {
-                    // Anormal behavior.
-                    return null;
-                }
-
-                return _units[_currentUnitIndex];
-            }
-        }
-        /// <summary>
-        /// The previous <see cref="UnitPivot"/>. Might be <c>null</c>.
-        /// </summary>
-        public UnitPivot PreviousUnit
-        {
-            get
-            {
-                if (_previousUnitIndex == -1 || _previousUnitIndex == _currentUnitIndex)
-                {
-                    return null;
-                }
-
-                if (_previousUnitIndex < -1 || _previousUnitIndex >= _units.Count)
-                {
-                    // Anormal behavior.
-                    return null;
-                }
-
-                return _units[_previousUnitIndex];
-            }
-        }
+        private readonly List<CityPivot> _cities = new List<CityPivot>();
         /// <summary>
         /// List of <see cref="CityPivot"/> built by the player.
         /// </summary>
         public IReadOnlyCollection<CityPivot> Cities { get { return _cities; } }
+
+        private readonly List<AdvancePivot> _advances = new List<AdvancePivot>();
+        /// <summary>
+        /// List of discovered <see cref="AdvancePivot"/>.
+        /// </summary>
+        public IReadOnlyCollection<AdvancePivot> Advances { get { return _advances; } }
+
+        #endregion
+
+        #region Inferred properties
+
         /// <summary>
         /// List of every <see cref="WonderPivot"/> for this player / civilization.
         /// </summary>
@@ -123,10 +137,6 @@ namespace ErsatzCivLib.Model
                 return _cities.SelectMany(c => c.Wonders).ToList();
             }
         }
-        /// <summary>
-        /// List of discovered <see cref="AdvancePivot"/>.
-        /// </summary>
-        public IReadOnlyCollection<AdvancePivot> Advances { get { return _advances; } }
         /// <summary>
         /// Science points at each turn.
         /// </summary>
@@ -177,7 +187,7 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                var turnsLeft = ((_cities.Count * RegimePivot.REVOLUTION_TURNS_BY_CITY) + 1) - _anarchyTurnsCount;
+                var turnsLeft = ((_cities.Count * REVOLUTION_TURNS_BY_CITY) + 1) - _anarchyTurnsCount;
                 return (int)Math.Ceiling(turnsLeft < 0 ? 0 : turnsLeft);
             }
         }
@@ -188,7 +198,7 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                return _regime == RegimePivot.Anarchy && RevolutionTurnsCount == 0;
+                return Regime == RegimePivot.Anarchy && RevolutionTurnsCount == 0;
             }
         }
         /// <summary>
@@ -213,7 +223,7 @@ namespace ErsatzCivLib.Model
         [field: NonSerialized]
         public event EventHandler<NextUnitEventArgs> NextUnitEvent;
         /// <summary>
-        /// Triggered when <see cref="_regime"/> changes.
+        /// Triggered when <see cref="Regime"/> changes.
         /// </summary>
         [field: NonSerialized]
         public event EventHandler<EventArgs> NewRegimeEvent;
@@ -245,7 +255,7 @@ namespace ErsatzCivLib.Model
             IsIA = isIa;
             _advances.AddRange(civilization.Advances);
 
-            _regime = RegimePivot.Despotism;
+            Regime = RegimePivot.Despotism;
             Treasure = TREASURE_START;
 
             _units.Add(SettlerPivot.CreateAtLocation(beginLocation));
@@ -297,27 +307,18 @@ namespace ErsatzCivLib.Model
                     .ToList();
         }
 
-        /// <summary>
-        /// Gets the current <see cref="RegimePivot"/>.
-        /// </summary>
-        /// <returns>The <see cref="RegimePivot"/>.</returns>
-        public RegimePivot GetCurrentRegime()
-        {
-            return _regime;
-        }
-
         #endregion
 
         #region Internal methods
 
         /// <summary>
-        /// Triggrs a revolution; sets <see cref="_regime"/> to <see cref="RegimePivot.Anarchy"/> for a while.
+        /// Triggrs a revolution; sets <see cref="Regime"/> to <see cref="RegimePivot.Anarchy"/> for a while.
         /// </summary>
         internal void TriggerRevolution()
         {
-            if (_regime != RegimePivot.Anarchy)
+            if (Regime != RegimePivot.Anarchy)
             {
-                _regime = RegimePivot.Anarchy;
+                Regime = RegimePivot.Anarchy;
                 _anarchyTurnsCount = 0;
                 NewRegimeEvent?.Invoke(this, new EventArgs());
             }
@@ -379,8 +380,7 @@ namespace ErsatzCivLib.Model
             var settler = CurrentUnit as SettlerPivot;
             var sq = CurrentUnit.MapSquareLocation;
 
-            var city = new CityPivot(currentTurn, name, sq, CapitalizationPivot.Default, _engine.ComputeCityAvailableMapSquares,
-                GetDistanceToCapitalRate, GetCurrentRegime);
+            var city = new CityPivot(this, currentTurn, name, sq, CapitalizationPivot.Default);
             sq.ApplyCityActions(city);
 
             if (Capital is null)
@@ -396,6 +396,16 @@ namespace ErsatzCivLib.Model
             SetUnitIndex(true, false);
 
             return city;
+        }
+
+        /// <summary>
+        /// Gets, for a specified <see cref="CityPivot"/>, the list of available <see cref="MapSquarePivot"/>.
+        /// </summary>
+        /// <param name="city">The city.</param>
+        /// <returns>List of <see cref="MapSquarePivot"/>.</returns>
+        internal IReadOnlyCollection<MapSquarePivot> ComputeCityAvailableMapSquares(CityPivot city)
+        {
+            return _engine.ComputeCityAvailableMapSquares(city);
         }
 
         /// <summary>
@@ -514,12 +524,7 @@ namespace ErsatzCivLib.Model
 
             _anarchyTurnsCount++;
 
-            return new TurnConsequencesPivot
-            {
-                EndOfProduction = citiesWithDoneProduction,
-                EndOfRevolution = RevolutionIsDone,
-                EndOfAdvance = CurrentAdvance is null
-            };
+            return new TurnConsequencesPivot(RevolutionIsDone, citiesWithDoneProduction, CurrentAdvance is null);
         }
 
         /// <summary>
@@ -574,7 +579,7 @@ namespace ErsatzCivLib.Model
         /// <param name="regimePivot">The new <see cref="RegimePivot"/>.</param>
         internal void ChangeCurrentRegime(RegimePivot regimePivot)
         {
-            _regime = regimePivot;
+            Regime = regimePivot;
             _anarchyTurnsCount = 0;
             NewRegimeEvent?.Invoke(this, new EventArgs());
         }

@@ -11,10 +11,11 @@ namespace ErsatzCivLib.Model
     /// Represents a map mades of <see cref="MapSquarePivot"/>.
     /// </summary>
     /// <seealso cref="IEnumerable{T}"/>
+    /// <seealso cref="MapSquarePivot"/>
     [Serializable]
     public class MapPivot : IEnumerable<MapSquarePivot>
     {
-        #region Constants (private)
+        #region Constants relative to map generation
 
         private const int RATIO_WIDTH_HEIGHT = 2;
         private const int MINIMAL_HEIGHT = 20;
@@ -40,10 +41,9 @@ namespace ErsatzCivLib.Model
 
         #endregion
 
+        #region Embedded properties
+
         private MapSquarePivot[,] _mapSquareList;
-
-        #region Public properties
-
         /// <summary>
         /// Single <see cref="MapSquarePivot"/> access.
         /// </summary>
@@ -61,6 +61,7 @@ namespace ErsatzCivLib.Model
                 return _mapSquareList[row, column];
             }
         }
+
         /// <summary>
         /// Width.
         /// </summary>
@@ -73,6 +74,11 @@ namespace ErsatzCivLib.Model
         /// Global temperature.
         /// </summary>
         public TemperaturePivot GlobalTemperature { get; private set; }
+
+        #endregion
+
+        #region Inferred properties
+
         /// <summary>
         /// Inferred; <see cref="Width"/> to <see cref="Height"/> ratio.
         /// </summary>
@@ -81,10 +87,6 @@ namespace ErsatzCivLib.Model
         /// Distance between a corder and the center of the map.
         /// </summary>
         public double DiagonalRadius { get { return Tools.DistanceBetweenTwoPoints(this[0, 0], this[(Height / 2) - 1, (Width / 2) - 1]); } }
-
-        #endregion
-
-        #region Private inferred properties
 
         private double ColdRatio { get { return GlobalTemperature == TemperaturePivot.Temperate ? AVG_RATIO_TEMPERATURE : (GlobalTemperature == TemperaturePivot.Cold ? MAX_RATIO_TEMPERATURE : MIN_RATIO_TEMPERATURE); } }
         private double HotRatio { get { return GlobalTemperature == TemperaturePivot.Temperate ? AVG_RATIO_TEMPERATURE : (GlobalTemperature == TemperaturePivot.Hot ? MAX_RATIO_TEMPERATURE : MIN_RATIO_TEMPERATURE); } }
@@ -329,7 +331,7 @@ namespace ErsatzCivLib.Model
             coastSquares.ForEach(ms => ms.ChangeBiome(BiomePivot.Coast));
         }
 
-        #region Public and internal methods
+        #region Internal methods
 
         /// <summary>
         /// Gets the <c>8</c> adjacent squares of a <see cref="MapSquarePivot"/>.
@@ -373,18 +375,6 @@ namespace ErsatzCivLib.Model
             {
                 return TemperaturePivot.Temperate;
             }
-        }
-
-        /// <inheritdoc />
-        public IEnumerator<MapSquarePivot> GetEnumerator()
-        {
-            return new MapSquareEnumerator(_mapSquareList);
-        }
-
-        /// <inheritdoc />
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return new MapSquareEnumerator(_mapSquareList);
         }
 
         #endregion
@@ -537,6 +527,18 @@ namespace ErsatzCivLib.Model
         }
 
         #endregion
+
+        /// <inheritdoc />
+        public IEnumerator<MapSquarePivot> GetEnumerator()
+        {
+            return new MapSquareEnumerator(_mapSquareList);
+        }
+
+        /// <inheritdoc />
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return new MapSquareEnumerator(_mapSquareList);
+        }
 
         // Enumerator for the list of squares inside the map.
         private class MapSquareEnumerator : IEnumerator<MapSquarePivot>

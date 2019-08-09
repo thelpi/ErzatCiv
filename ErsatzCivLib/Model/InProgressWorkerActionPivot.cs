@@ -11,6 +11,8 @@ namespace ErsatzCivLib.Model
     [Serializable]
     public class InProgressWorkerActionPivot
     {
+        #region Embedded properties
+
         private List<WorkerPivot> _workers;
 
         /// <summary>
@@ -22,6 +24,10 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public int TurnsCount { get; private set; }
 
+        #endregion
+
+        #region Inferred properties
+
         /// <summary>
         /// Inferred; indicates if the action has at least one worker.
         /// </summary>
@@ -30,6 +36,8 @@ namespace ErsatzCivLib.Model
         /// Inferred; indicates if the action is done.
         /// </summary>
         public bool IsDone { get { return TurnsCount >= Action.TurnCost; } }
+
+        #endregion
 
         /// <summary>
         /// Constructor.

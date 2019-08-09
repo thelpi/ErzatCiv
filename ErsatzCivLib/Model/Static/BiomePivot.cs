@@ -12,10 +12,6 @@ namespace ErsatzCivLib.Model.Static
     [Serializable]
     public class BiomePivot : IEquatable<BiomePivot>
     {
-        private List<WorkerActionPivot> _actions;
-        private List<TemperaturePivot> _temperatures;
-        private Dictionary<TemperaturePivot, BiomePivot> _underlyingBiomes;
-
         #region Embedded properties
 
         /// <summary>
@@ -69,6 +65,25 @@ namespace ErsatzCivLib.Model.Static
         /// </summary>
         internal AgePivot Age { get; private set; }
 
+        private Dictionary<TemperaturePivot, BiomePivot> _underlyingBiomes;
+        /// <summary>
+        /// Underlying biome by temperature (if <see cref="WorkerActionPivot.Clear"/> available).
+        /// </summary>
+        internal IReadOnlyDictionary<TemperaturePivot, BiomePivot> UnderlyingBiomes { get { return _underlyingBiomes; } }
+
+        private List<WorkerActionPivot> _actions;
+        /// <summary>
+        /// List of available <see cref="WorkerActionPivot"/>.
+        /// Doesn't include <see cref="WorkerActionPivot.AlwaysAvailable"/>.
+        /// </summary>
+        public IReadOnlyCollection<WorkerActionPivot> Actions { get { return _actions; } }
+
+        private List<TemperaturePivot> _temperatures;
+        /// <summary>
+        /// List of <see cref="TemperaturePivot"/> (depending on latitude) where the biome can appears.
+        /// </summary>
+        public IReadOnlyCollection<TemperaturePivot> Temperatures { get { return _temperatures; } }
+
         #endregion
 
         #region Inferred properties
@@ -77,23 +92,123 @@ namespace ErsatzCivLib.Model.Static
         /// The <see cref="Size"/> value as <c>integer</c>.
         /// </summary>
         public int SizeInt { get { return (int)Size; } }
-        /// <summary>
-        /// Underlying biome by temperature (if <see cref="WorkerActionPivot.Clear"/> available).
-        /// </summary>
-        internal IReadOnlyDictionary<TemperaturePivot, BiomePivot> UnderlyingBiomes { get { return _underlyingBiomes; } }
-        /// <summary>
-        /// List of available <see cref="WorkerActionPivot"/>.
-        /// Doesn't include <see cref="WorkerActionPivot.AlwaysAvailable"/>.
-        /// </summary>
-        public IReadOnlyCollection<WorkerActionPivot> Actions { get { return _actions; } }
-        /// <summary>
-        /// List of <see cref="TemperaturePivot"/> (depending on latitude) where the biome can appears.
-        /// </summary>
-        public IReadOnlyCollection<TemperaturePivot> Temperatures { get { return _temperatures; } }
 
         #endregion
 
         private BiomePivot() { }
+
+        /// <summary>
+        /// Computes the number of <see cref="MapSquarePivot"/> for a chunk of the current biome, in the specified context.
+        /// </summary>
+        /// <param name="totalSquaresCount">Total count of squares in the continent.</param>
+        /// <param name="chunkCoeff">Number real of squares in a <see cref="BiomeSizePivot.Small"/> chunk.</param>
+        /// <param name="humidity">Level of <see cref="HumidityPivot"/> at the current latitude.</param>
+        /// <param name="age">Age of the map.</param>
+        /// <returns>Number of squares </returns>
+        internal int ChunkSquaresCount(int totalSquaresCount, double chunkCoeff, HumidityPivot humidity, AgePivot age)
+        {
+            if (age == AgePivot.New)
+            {
+                if (Age == AgePivot.Old)
+                {
+                    chunkCoeff += 1.5;
+                }
+                else if (Age == AgePivot.New)
+                {
+                    chunkCoeff -= 1.5;
+                }
+            }
+            else if (age == AgePivot.Old)
+            {
+                if (Age == AgePivot.Old)
+                {
+                    chunkCoeff -= 1.5;
+                }
+                else if (Age == AgePivot.New)
+                {
+                    chunkCoeff += 1.5;
+                }
+            }
+
+            var realRatio = AppearanceRatio;
+            if (humidity == HumidityPivot.Dry)
+            {
+                if (Humidity == HumidityPivot.Dry)
+                {
+                    realRatio *= 2;
+                }
+                else if (Humidity == HumidityPivot.Wet)
+                {
+                    realRatio /= 2;
+                }
+            }
+            else if (humidity == HumidityPivot.Wet)
+            {
+                if (Humidity == HumidityPivot.Dry)
+                {
+                    realRatio /= 2;
+                }
+                else if (Humidity == HumidityPivot.Wet)
+                {
+                    realRatio *= 2;
+                }
+            }
+
+            return (int)Math.Round((totalSquaresCount * (realRatio * 3)) / ((int)Size * chunkCoeff));
+        }
+
+        #region IEquatable implementation
+
+        /// <summary>
+        /// Checks if this instance is equal to another one.
+        /// </summary>
+        /// <param name="other">The other instance.</param>
+        /// <returns><c>True</c> if equals; <c>False</c> otherwise.</returns>
+        public bool Equals(BiomePivot other)
+        {
+            return Name == other?.Name;
+        }
+
+        /// <summary>
+        /// Operator "==" override. Checks equality between two instances.
+        /// </summary>
+        /// <param name="r1">The first <see cref="BiomePivot"/>.</param>
+        /// <param name="r2">The second <see cref="BiomePivot"/>.</param>
+        /// <returns><c>True</c> if equals; <c>False</c> otherwise.</returns>
+        public static bool operator ==(BiomePivot r1, BiomePivot r2)
+        {
+            if (r1 is null)
+            {
+                return r2 is null;
+            }
+
+            return r1.Equals(r2) == true;
+        }
+
+        /// <summary>
+        /// Operator "!=" override. Checks non-equality between two instances.
+        /// </summary>
+        /// <param name="r1">The first <see cref="BiomePivot"/>.</param>
+        /// <param name="r2">The second <see cref="BiomePivot"/>.</param>
+        /// <returns><c>False</c> if equals; <c>True</c> otherwise.</returns>
+        public static bool operator !=(BiomePivot r1, BiomePivot r2)
+        {
+            return !(r1 == r2);
+        }
+
+        /// <inheritdoc />
+        public override bool Equals(object obj)
+        {
+            return obj is BiomePivot && Equals(obj as BiomePivot);
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            return Name.GetHashCode();
+        }
+
+        #endregion
 
         #region Static instances
 
@@ -477,7 +592,6 @@ namespace ErsatzCivLib.Model.Static
         #endregion
 
         private static List<BiomePivot> _instances = null;
-
         /// <summary>
         /// List of every instances.
         /// </summary>
@@ -503,119 +617,6 @@ namespace ErsatzCivLib.Model.Static
                 return Biomes.Where(b => !b.IsSeaType && b != Default).ToList();
             }
         }
-
-        /// <summary>
-        /// Computes the number of <see cref="MapSquarePivot"/> for a chunk of the current biome, in the specified context.
-        /// </summary>
-        /// <param name="totalSquaresCount">Total count of squares in the continent.</param>
-        /// <param name="chunkCoeff">Number real of squares in a <see cref="BiomeSizePivot.Small"/> chunk.</param>
-        /// <param name="humidity">Level of <see cref="HumidityPivot"/> at the current latitude.</param>
-        /// <param name="age">Age of the map.</param>
-        /// <returns>Number of squares </returns>
-        internal int ChunkSquaresCount(int totalSquaresCount, double chunkCoeff, HumidityPivot humidity, AgePivot age)
-        {
-            if (age == AgePivot.New)
-            {
-                if (Age == AgePivot.Old)
-                {
-                    chunkCoeff += 1.5;
-                }
-                else if (Age == AgePivot.New)
-                {
-                    chunkCoeff -= 1.5;
-                }
-            }
-            else if (age == AgePivot.Old)
-            {
-                if (Age == AgePivot.Old)
-                {
-                    chunkCoeff -= 1.5;
-                }
-                else if (Age == AgePivot.New)
-                {
-                    chunkCoeff += 1.5;
-                }
-            }
-
-            var realRatio = AppearanceRatio;
-            if (humidity == HumidityPivot.Dry)
-            {
-                if (Humidity == HumidityPivot.Dry)
-                {
-                    realRatio *= 2;
-                }
-                else if (Humidity == HumidityPivot.Wet)
-                {
-                    realRatio /= 2;
-                }
-            }
-            else if (humidity == HumidityPivot.Wet)
-            {
-                if (Humidity == HumidityPivot.Dry)
-                {
-                    realRatio /= 2;
-                }
-                else if (Humidity == HumidityPivot.Wet)
-                {
-                    realRatio *= 2;
-                }
-            }
-
-            return (int)Math.Round((totalSquaresCount * (realRatio * 3)) / ((int)Size * chunkCoeff));
-        }
-
-        #region IEquatable implementation
-
-        /// <summary>
-        /// Checks if this instance is equal to another one.
-        /// </summary>
-        /// <param name="other">The other instance.</param>
-        /// <returns><c>True</c> if equals; <c>False</c> otherwise.</returns>
-        public bool Equals(BiomePivot other)
-        {
-            return Name == other?.Name;
-        }
-
-        /// <summary>
-        /// Operator "==" override. Checks equality between two instances.
-        /// </summary>
-        /// <param name="r1">The first <see cref="BiomePivot"/>.</param>
-        /// <param name="r2">The second <see cref="BiomePivot"/>.</param>
-        /// <returns><c>True</c> if equals; <c>False</c> otherwise.</returns>
-        public static bool operator ==(BiomePivot r1, BiomePivot r2)
-        {
-            if (r1 is null)
-            {
-                return r2 is null;
-            }
-
-            return r1.Equals(r2) == true;
-        }
-
-        /// <summary>
-        /// Operator "!=" override. Checks non-equality between two instances.
-        /// </summary>
-        /// <param name="r1">The first <see cref="BiomePivot"/>.</param>
-        /// <param name="r2">The second <see cref="BiomePivot"/>.</param>
-        /// <returns><c>False</c> if equals; <c>True</c> otherwise.</returns>
-        public static bool operator !=(BiomePivot r1, BiomePivot r2)
-        {
-            return !(r1 == r2);
-        }
-
-        /// <inheritdoc />
-        public override bool Equals(object obj)
-        {
-            return obj is BiomePivot && Equals(obj as BiomePivot);
-        }
-
-        /// <inheritdoc />
-        public override int GetHashCode()
-        {
-            return Name.GetHashCode();
-        }
-
-        #endregion
 
         // sizes of biome.
         [Serializable]

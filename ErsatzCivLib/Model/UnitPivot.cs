@@ -13,10 +13,14 @@ namespace ErsatzCivLib.Model
     /// - A <c>static internal</c> method "CreateAtLocation" used to create instances, based on the default template. The method must have a single parameter, of type <see cref="MapSquarePivot"/>.
     /// - Every constructors must be <c>private</c>.
     /// </remarks>
+    /// <seealso cref="BuildablePivot"/>
     [Serializable]
     public abstract class UnitPivot : BuildablePivot
     {
+        private const double ROAD_SPEED_COST_RATIO = 0.3;
         private const int CITY_SPEED_COST = 1;
+
+        #region Embedded properties
 
         /// <summary>
         /// Location on map.
@@ -54,6 +58,8 @@ namespace ErsatzCivLib.Model
         /// Citizens cost to produce the unit.
         /// </summary>
         public int CitizenCostToProduce { get; private set; }
+
+        #endregion
 
         /// <summary>
         /// Constructor.
@@ -122,7 +128,7 @@ namespace ErsatzCivLib.Model
             {
                 RemainingMoves -=
                     (comeIntoCity ? CITY_SPEED_COST : currentMapSquare.Biome.SpeedCost)
-                    * (previousMapSquare.Road && currentMapSquare.Road ? WorkerActionPivot.ROAD_SPEED_COST_RATIO : 1);
+                    * (previousMapSquare.Road && currentMapSquare.Road ? ROAD_SPEED_COST_RATIO : 1);
             }
 
             MapSquareLocation = currentMapSquare;

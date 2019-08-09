@@ -5,7 +5,6 @@ using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using ErsatzCivLib.Model;
 using ErsatzCivLib.Model.Enums;
-using ErsatzCivLib.Model.Events;
 using ErsatzCivLib.Model.Static;
 
 namespace ErsatzCivLib
@@ -16,9 +15,9 @@ namespace ErsatzCivLib
     [Serializable]
     public class EnginePivot
     {
-        private readonly List<PlayerPivot> _iaPlayers = new List<PlayerPivot>();
+        #region Embedded properties
 
-        #region Public properties
+        private readonly List<PlayerPivot> _iaPlayers = new List<PlayerPivot>();
 
         /// <summary>
         /// Current turn.
@@ -32,6 +31,11 @@ namespace ErsatzCivLib
         /// The human player.
         /// </summary>
         public PlayerPivot HumanPlayer { get; }
+
+        #endregion
+
+        #region Inferred properties
+
         /// <summary>
         /// List of every players (human and IA).
         /// </summary>
@@ -194,7 +198,7 @@ namespace ErsatzCivLib
 
         #endregion
 
-        #region Public methods (used by the GUI)
+        #region Public methods
 
         /// <summary>
         /// Tries to create a city with the current unit.

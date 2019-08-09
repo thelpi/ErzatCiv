@@ -11,11 +11,9 @@ namespace ErsatzCivLib.Model
     [Serializable]
     public class CitizenPivot : IComparable<CitizenPivot>, IEquatable<CitizenPivot>
     {
-        /// <summary>
-        /// Food unit consumption by turn.
-        /// </summary>
-        public const int FOOD_BY_TURN = 2;
+        #region Embedded properties
 
+        // For unicity check.
         private Guid _uniqueId;
 
         /// <summary>
@@ -34,6 +32,8 @@ namespace ErsatzCivLib.Model
         /// The <see cref="CityPivot"/> which owns the citizen.
         /// </summary>
         public CityPivot City { get; private set; }
+
+        #endregion
 
         /// <summary>
         /// Constructor.

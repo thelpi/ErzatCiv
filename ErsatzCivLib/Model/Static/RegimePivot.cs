@@ -10,11 +10,7 @@ namespace ErsatzCivLib.Model.Static
     [Serializable]
     public class RegimePivot : IEquatable<RegimePivot>
     {
-        /// <summary>
-        /// Number of turns before a new <see cref="RegimePivot"/> can be fixed for each city of the civilization.
-        /// </summary>
-        /// <remarks>This value has no meaning per se, but gives the total number of turns in <see cref="Anarchy"/> if multiplied by the civilization's cities count.</remarks>
-        public const double REVOLUTION_TURNS_BY_CITY = 0.5;
+        #region Embedded properties
 
         /// <summary>
         /// Name.
@@ -49,6 +45,8 @@ namespace ErsatzCivLib.Model.Static
         /// <see cref="AdvancePivot"/> required to access the instance.
         /// </summary>
         public AdvancePivot AdvancePrerequisite { get; private set; }
+
+        #endregion
 
         private RegimePivot() { }
 
@@ -192,8 +190,9 @@ namespace ErsatzCivLib.Model.Static
             AdvancePrerequisite = AdvancePivot.Communism
         };
 
-        private static List<RegimePivot> _instances = null;
+        #endregion
 
+        private static List<RegimePivot> _instances = null;
         /// <summary>
         /// List of every <see cref="RegimePivot"/> instances, except <see cref="Anarchy"/>.
         /// </summary>
@@ -209,7 +208,5 @@ namespace ErsatzCivLib.Model.Static
                 return _instances;
             }
         }
-
-        #endregion
     }
 }

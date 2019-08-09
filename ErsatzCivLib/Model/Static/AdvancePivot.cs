@@ -12,7 +12,7 @@ namespace ErsatzCivLib.Model.Static
     [Serializable]
     public class AdvancePivot : IEquatable<AdvancePivot>
     {
-        private List<AdvancePivot> _prerequisites;
+        #region Embedded properties
 
         /// <summary>
         /// Name.
@@ -23,10 +23,14 @@ namespace ErsatzCivLib.Model.Static
         /// Its imposible to discover advances for a new era before knowning every advances of the previous era.
         /// </summary>
         public EraPivot Era { get; private set; }
+
+        private List<AdvancePivot> _prerequisites;
         /// <summary>
         /// List of <see cref="AdvancePivot"/> required to discover this one.
         /// </summary>
         public IReadOnlyCollection<AdvancePivot> Prerequisites { get { return _prerequisites; } }
+
+        #endregion
 
         private AdvancePivot() { }
 
@@ -692,8 +696,9 @@ namespace ErsatzCivLib.Model.Static
         };
         // TODO : manage future techs.
 
-        private static Dictionary<EraPivot, List<AdvancePivot>> _advancesByEra = null;
+        #endregion
 
+        private static Dictionary<EraPivot, List<AdvancePivot>> _advancesByEra = null;
         /// <summary>
         /// Dictionnary of every <see cref="AdvancePivot"/> by <see cref="EraPivot"/>.
         /// </summary>
@@ -711,7 +716,5 @@ namespace ErsatzCivLib.Model.Static
                 return _advancesByEra;
             }
         }
-
-        #endregion
     }
 }

@@ -184,8 +184,9 @@ namespace ErsatzCivLib.Model.Static
         /// </summary>
         public static readonly WonderPivot WomensSuffrage = new WonderPivot(600, AdvancePivot.Industrialization, null, "Women's Suffrage", true);
 
-        private static List<WonderPivot> _instances = null;
+        #endregion
 
+        private static List<WonderPivot> _instances = null;
         /// <summary>
         /// List of every <see cref="WonderPivot"/> instances.
         /// </summary>
@@ -200,7 +201,5 @@ namespace ErsatzCivLib.Model.Static
                 return _instances;
             }
         }
-
-        #endregion
     }
 }

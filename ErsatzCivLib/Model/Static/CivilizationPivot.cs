@@ -11,8 +11,7 @@ namespace ErsatzCivLib.Model.Static
     [Serializable]
     public class CivilizationPivot : IEquatable<CivilizationPivot>
     {
-        private List<string> _cities;
-        private List<AdvancePivot> _advances;
+        #region Embedded properties
 
         /// <summary>
         /// Name.
@@ -26,14 +25,20 @@ namespace ErsatzCivLib.Model.Static
         /// Leader name (woman).
         /// </summary>
         public string WomanLeaderName { get; private set; }
+
+        private List<string> _cities;
         /// <summary>
         /// List of city names.
         /// </summary>
         public IReadOnlyCollection<string> Cities { get { return _cities; } }
+
+        private List<AdvancePivot> _advances;
         /// <summary>
         /// List of <see cref="AdvancePivot"/> the civilization knowns at the beginning of the game.
         /// </summary>
         public IReadOnlyCollection<AdvancePivot> Advances { get { return _advances; } }
+
+        #endregion
 
         private CivilizationPivot() { }
 
@@ -314,8 +319,9 @@ namespace ErsatzCivLib.Model.Static
             _cities = new List<string> { "Zimbabwe", "Ulundi", "Hlobane" }
         };
 
-        private static List<CivilizationPivot> _instances = null;
+        #endregion
 
+        private static List<CivilizationPivot> _instances = null;
         /// <summary>
         /// List of every <see cref="CivilizationPivot"/> instances.
         /// </summary>
@@ -330,7 +336,5 @@ namespace ErsatzCivLib.Model.Static
                 return _instances;
             }
         }
-
-        #endregion
     }
 }

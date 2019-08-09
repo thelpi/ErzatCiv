@@ -9,12 +9,10 @@ namespace ErsatzCivLib.Model.Static
     [Serializable]
     public class CapitalizationPivot : BuildablePivot
     {
-        private const int PRODUCTIVITY_COST = 0;
-
         /// <summary>
         /// Constructor.
         /// </summary>
-        private CapitalizationPivot() : base(PRODUCTIVITY_COST, null, null) { }
+        private CapitalizationPivot() : base(0, null, null) { }
 
         /// <summary>
         /// Default instance.

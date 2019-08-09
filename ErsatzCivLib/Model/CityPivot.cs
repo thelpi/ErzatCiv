@@ -13,9 +13,13 @@ namespace ErsatzCivLib.Model
     [Serializable]
     public class CityPivot : IEquatable<CityPivot>
     {
+        #region Constants relative to citizens behavior
+
+        private const int FOOD_BY_CITIZEN_BY_TURN = 2;
         private const int DEFAULT_RATIO_CITIZEN_UNHAPPY = 5;
         private const int FOOD_RATIO_TO_NEXT_CITIZEN = 40;
-        private const int PRODUCTION_INFINITE = 9999;
+
+        #endregion
 
         #region Constants relative to improvements effects
 
@@ -49,12 +53,12 @@ namespace ErsatzCivLib.Model
 
         #endregion
 
-        private readonly Func<CityPivot, double> _getDistanceToCapitalRateCallback;
-        private readonly Func<RegimePivot> _getCurrentRegimeCallback;
-        private readonly Func<CityPivot, IReadOnlyCollection<MapSquarePivot>> _getAvailableMapSquaresCallback;
-
         #region Embedded properties
 
+        /// <summary>
+        /// The <see cref="PlayerPivot"/> which owns the instance.
+        /// </summary>
+        public PlayerPivot Player { get; private set; }
         /// <summary>
         /// Current production.
         /// </summary>
@@ -123,7 +127,7 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                return InCivilTrouble || _getCurrentRegimeCallback() == RegimePivot.Anarchy;
+                return InCivilTrouble || Player.Regime == RegimePivot.Anarchy;
             }
         }
         /// <summary>
@@ -151,11 +155,11 @@ namespace ErsatzCivLib.Model
                 var capitalizationValue = Production.Is<CapitalizationPivot>() ?
                     (int)Math.Ceiling(Productivity * CAPITALIZATION_PRODUCTIVITY_TO_COMMERCE_RATIO) : 0;
                 var cityCommerceValue = MapSquareLocation.CityCommerce + (
-                    MapSquareLocation.CityCommerce > 0 ? _getCurrentRegimeCallback().CommerceBonus : 0
+                    MapSquareLocation.CityCommerce > 0 ? Player.Regime.CommerceBonus : 0
                 );
                 var aroundCityCommerceValue = _citizens
                     .Where(c => !c.Type.HasValue)
-                    .Sum(c => c.MapSquare.Commerce + (c.MapSquare.Commerce > 0 ? _getCurrentRegimeCallback().CommerceBonus : 0));
+                    .Sum(c => c.MapSquare.Commerce + (c.MapSquare.Commerce > 0 ? Player.Regime.CommerceBonus : 0));
 
                 var commerceValue = cityCommerceValue + capitalizationValue + aroundCityCommerceValue;
 
@@ -173,7 +177,7 @@ namespace ErsatzCivLib.Model
 
                 var totalValue = taxValue + commerceValue;
 
-                double corruptionRate = (_getCurrentRegimeCallback().CorruptionRate * _getDistanceToCapitalRateCallback(this));
+                double corruptionRate = (Player.Regime.CorruptionRate * Player.GetDistanceToCapitalRate(this));
 
                 if (_improvements.Contains(CityImprovementPivot.Palace))
                 {
@@ -198,9 +202,9 @@ namespace ErsatzCivLib.Model
                         .Where(c => !c.Type.HasValue)
                         .Sum(c => c.MapSquare.Food);
 
-                if (InCivilTroubleOrAnarchy && foodValue > _citizens.Count * CitizenPivot.FOOD_BY_TURN)
+                if (InCivilTroubleOrAnarchy && foodValue > _citizens.Count * FOOD_BY_CITIZEN_BY_TURN)
                 {
-                    foodValue = _citizens.Count * CitizenPivot.FOOD_BY_TURN;
+                    foodValue = _citizens.Count * FOOD_BY_CITIZEN_BY_TURN;
                 }
 
                 return foodValue;
@@ -277,7 +281,7 @@ namespace ErsatzCivLib.Model
                     scienceValue = (int)Math.Floor(scienceValue * UNIVERSITY_SCIENCE_INCREASE_RATIO);
                 }
 
-                return (int)Math.Ceiling(scienceValue * _getCurrentRegimeCallback().ScienceRate);
+                return (int)Math.Ceiling(scienceValue * Player.Regime.ScienceRate);
             }
         }
         /// <summary>
@@ -350,7 +354,7 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                return (Productivity == 0 ? PRODUCTION_INFINITE :
+                return (Productivity == 0 ? 9999 :
                     (int)Math.Ceiling(RemainingProductionCost / (double)Productivity));
             }
         }
@@ -378,7 +382,7 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                return Food - (CitizenPivot.FOOD_BY_TURN * _citizens.Count);
+                return Food - (FOOD_BY_CITIZEN_BY_TURN * _citizens.Count);
             }
         }
         /// <summary>
@@ -408,25 +412,19 @@ namespace ErsatzCivLib.Model
         /// <summary>
         /// Constructor.
         /// </summary>
+        /// <param name="player">The <see cref="Player"/> value.</param>
         /// <param name="currentTurn">The <see cref="CreationTurn"/> value.</param>
         /// <param name="name">The <see cref="Name"/> value.</param>
         /// <param name="location">The <see cref="MapSquareLocation"/> value.</param>
         /// <param name="production">The <see cref="Production"/> value.</param>
-        /// <param name="getAvailableMapSquaresCallback">Callback method to computes available <see cref="MapSquarePivot"/> in the city radius.</param>
-        /// <param name="getDistanceToCapitalRateCallback">Callback method to computes the distance rate beetween the instance and the capital.</param>
-        /// <param name="getCurrentRegimeCallback">Callback method to get the current <see cref="RegimePivot"/>.</param>
-        internal CityPivot(int currentTurn, string name, MapSquarePivot location, BuildablePivot production,
-            Func<CityPivot, IReadOnlyCollection<MapSquarePivot>> getAvailableMapSquaresCallback,
-            Func<CityPivot, double> getDistanceToCapitalRateCallback, Func<RegimePivot> getCurrentRegimeCallback)
+        internal CityPivot(PlayerPivot player, int currentTurn, string name, MapSquarePivot location, BuildablePivot production)
         {
+            Player = player;
             Name = name;
             MapSquareLocation = location;
             CreationTurn = currentTurn;
             Production = production;
-
-            _getAvailableMapSquaresCallback = getAvailableMapSquaresCallback;
-            _getDistanceToCapitalRateCallback = getDistanceToCapitalRateCallback;
-            _getCurrentRegimeCallback = getCurrentRegimeCallback;
+            
             _improvements = new List<CityImprovementPivot>();
             _wonders = new List<WonderPivot>();
 
@@ -445,7 +443,7 @@ namespace ErsatzCivLib.Model
         /// <returns>The <see cref="MapSquarePivot"/> location; <c>Null</c> if no location available.</returns>
         internal MapSquarePivot BestVacantMapSquareLocation()
         {
-            return _getAvailableMapSquaresCallback(this)
+            return Player.ComputeCityAvailableMapSquares(this)
                 .Where(x => _citizens?.Any(c => c.MapSquare == x) != true)
                 .OrderByDescending(x => x.TotalValue)
                 .FirstOrDefault();
@@ -652,7 +650,7 @@ namespace ErsatzCivLib.Model
         /// </summary>
         internal void ResetCitizens()
         {
-            var availableMapSquaresCount = _getAvailableMapSquaresCallback(this).Count;
+            var availableMapSquaresCount = Player.ComputeCityAvailableMapSquares(this).Count;
 
             _citizens.Sort();
             for (int i = 0; i < _citizens.Count; i++)

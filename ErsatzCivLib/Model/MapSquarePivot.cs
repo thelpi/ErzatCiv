@@ -15,15 +15,11 @@ namespace ErsatzCivLib.Model
     [Serializable]
     public class MapSquarePivot : IEquatable<MapSquarePivot>
     {
-        /// <summary>
-        /// Event triggered when the instance is edited.
-        /// </summary>
-        [field: NonSerialized]
-        public event EventHandler<SquareChangedEventArgs> SquareChangeEvent;
-
-        private List<InProgressWorkerActionPivot> _currentActions = new List<InProgressWorkerActionPivot>();
-        private readonly Dictionary<DirectionPivot, bool> _rivers =
-            Enum.GetValues(typeof(DirectionPivot)).Cast<DirectionPivot>().ToDictionary(x => x, x => false);
+        private const int RAILROAD_PRODUCTIVITY_BONUS = 1;
+        private const int RAILROAD_COMMERCE_BONUS = 1;
+        private const int ROAD_COMMERCE_BONUS = 1;
+        private const int MINE_PRODUCTIVITY_BONUS = 1;
+        private const int IRRIGATE_FOOD_BONUS = 1;
 
         #region Embedded properties
 
@@ -68,18 +64,23 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public bool Fortress { get; private set; }
 
-        #endregion
-
-        #region Inferred properties
-
+        private List<InProgressWorkerActionPivot> _currentActions = new List<InProgressWorkerActionPivot>();
         /// <summary>
         /// List of <see cref="InProgressWorkerActionPivot"/> in progress for this instance.
         /// </summary>
         public IReadOnlyCollection<InProgressWorkerActionPivot> CurrentActions { get { return _currentActions; } }
+
+        private readonly Dictionary<DirectionPivot, bool> _rivers =
+            Enum.GetValues(typeof(DirectionPivot)).Cast<DirectionPivot>().ToDictionary(x => x, x => false);
         /// <summary>
         /// List of <see cref="DirectionPivot"/> around the instance where a river is set.
         /// </summary>
         public IReadOnlyCollection<DirectionPivot> Rivers { get { return _rivers.Where(r => r.Value).Select(r => r.Key).ToList(); } }
+
+        #endregion
+
+        #region Inferred properties
+
         /// <summary>
         /// Indicates if there's at least one river around the instance.
         /// </summary>
@@ -104,7 +105,7 @@ namespace ErsatzCivLib.Model
                     baseValue = Biome.Food;
                     if (Irrigate)
                     {
-                        baseValue += WorkerActionPivot.IRRIGATE_FOOD_BONUS;
+                        baseValue += IRRIGATE_FOOD_BONUS;
                     }
                 }
                 return baseValue;
@@ -124,11 +125,11 @@ namespace ErsatzCivLib.Model
                     baseValue = Biome.Productivity;
                     if (Mine)
                     {
-                        baseValue += WorkerActionPivot.MINE_PRODUCTIVITY_BONUS;
+                        baseValue += MINE_PRODUCTIVITY_BONUS;
                     }
                     if (RailRoad && baseValue > 0)
                     {
-                        baseValue += WorkerActionPivot.RAILROAD_PRODUCTIVITY_BONUS;
+                        baseValue += RAILROAD_PRODUCTIVITY_BONUS;
                     }
                 }
                 return baseValue;
@@ -148,11 +149,11 @@ namespace ErsatzCivLib.Model
                     baseValue = Biome.Commerce;
                     if (Road)
                     {
-                        baseValue += WorkerActionPivot.ROAD_COMMERCE_BONUS;
+                        baseValue += ROAD_COMMERCE_BONUS;
                     }
                     if (RailRoad)
                     {
-                        baseValue += WorkerActionPivot.RAILROAD_COMMERCE_BONUS;
+                        baseValue += RAILROAD_COMMERCE_BONUS;
                     }
                 }
                 return baseValue;
@@ -195,6 +196,16 @@ namespace ErsatzCivLib.Model
 
         #endregion
 
+        #region Public events
+
+        /// <summary>
+        /// Event triggered when the instance is edited.
+        /// </summary>
+        [field: NonSerialized]
+        public event EventHandler<SquareChangedEventArgs> SquareChangeEvent;
+
+        #endregion
+
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -212,6 +223,8 @@ namespace ErsatzCivLib.Model
                 UnderlyingBiome = underlyingType ?? throw new ArgumentNullException(nameof(underlyingType));
             }
         }
+
+        #region Internal methods
 
         /// <summary>
         /// Changes the <see cref="BiomePivot"/> of this instance.
@@ -411,6 +424,10 @@ namespace ErsatzCivLib.Model
             _rivers[cardinal] = isRiver ? !Biome.IsSeaType : isRiver;
         }
 
+        #endregion
+
+        #region Private methods
+
         private bool ApplyActionInternal(WorkerPivot worker, WorkerActionPivot action, bool currentApplianceValue)
         {
             if (currentApplianceValue)
@@ -427,6 +444,8 @@ namespace ErsatzCivLib.Model
 
             return actionInProgress.AddWorker(worker);
         }
+
+        #endregion
 
         #region IEquatable implementation
 

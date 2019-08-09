@@ -28,7 +28,7 @@ namespace ErsatzCiv
             }
             else if (_engine.ChangeCurrentRegime(ComboBoxRegimes.SelectedItem as RegimePivot))
             {
-                MessageBox.Show($"Your civilization is now a {_engine.HumanPlayer.GetCurrentRegime().Name} !", "ErsatzCiv");
+                MessageBox.Show($"Your civilization is now a {_engine.HumanPlayer.Regime.Name} !", "ErsatzCiv");
             }
             else
             {

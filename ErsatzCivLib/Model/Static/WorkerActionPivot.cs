@@ -5,18 +5,11 @@ namespace ErsatzCivLib.Model.Static
     /// <summary>
     /// Represents a worker action.
     /// </summary>
+    /// <seealso cref="IEquatable{T}"/>
     [Serializable]
     public class WorkerActionPivot : IEquatable<WorkerActionPivot>
     {
-        internal const double ROAD_SPEED_COST_RATIO = 0.3;
-
-        internal const int RAILROAD_PRODUCTIVITY_BONUS = 1;
-        internal const int RAILROAD_COMMERCE_BONUS = 1;
-        internal const int ROAD_COMMERCE_BONUS = 1;
-        internal const int MINE_PRODUCTIVITY_BONUS = 1;
-        internal const int IRRIGATE_FOOD_BONUS = 1;
-
-        #region Properties
+        #region Embedded properties
 
         /// <summary>
         /// Name of the action.
@@ -38,6 +31,61 @@ namespace ErsatzCivLib.Model.Static
         #endregion
 
         private WorkerActionPivot() { }
+
+        #region IEquatable implementation
+
+        /// <summary>
+        /// Checks if this instance is equal to another one.
+        /// </summary>
+        /// <param name="other">The other instance.</param>
+        /// <returns><c>True</c> if equals; <c>False</c> otherwise.</returns>
+        public bool Equals(WorkerActionPivot other)
+        {
+            return Name == other?.Name;
+        }
+
+        /// <summary>
+        /// Operator "==" override. Checks equality between two instances.
+        /// </summary>
+        /// <param name="r1">The first <see cref="WorkerActionPivot"/>.</param>
+        /// <param name="r2">The second <see cref="WorkerActionPivot"/>.</param>
+        /// <returns><c>True</c> if equals; <c>False</c> otherwise.</returns>
+        public static bool operator ==(WorkerActionPivot r1, WorkerActionPivot r2)
+        {
+            if (r1 is null)
+            {
+                return r2 is null;
+            }
+
+            return r1.Equals(r2) == true;
+        }
+
+        /// <summary>
+        /// Operator "!=" override. Checks non-equality between two instances.
+        /// </summary>
+        /// <param name="r1">The first <see cref="WorkerActionPivot"/>.</param>
+        /// <param name="r2">The second <see cref="WorkerActionPivot"/>.</param>
+        /// <returns><c>False</c> if equals; <c>True</c> otherwise.</returns>
+        public static bool operator !=(WorkerActionPivot r1, WorkerActionPivot r2)
+        {
+            return !(r1 == r2);
+        }
+
+        /// <inheritdoc />
+        public override bool Equals(object obj)
+        {
+            return obj is WorkerActionPivot && Equals(obj as WorkerActionPivot);
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            return Name.GetHashCode();
+        }
+
+        #endregion
+
+        #region Static instances
 
         /// <summary>
         /// Mines.
@@ -157,57 +205,6 @@ namespace ErsatzCivLib.Model.Static
             TurnCost = 1,
             AlwaysAvailable = true
         };
-
-        #region IEquatable implementation
-
-        /// <summary>
-        /// Checks if this instance is equal to another one.
-        /// </summary>
-        /// <param name="other">The other instance.</param>
-        /// <returns><c>True</c> if equals; <c>False</c> otherwise.</returns>
-        public bool Equals(WorkerActionPivot other)
-        {
-            return Name == other?.Name;
-        }
-
-        /// <summary>
-        /// Operator "==" override. Checks equality between two instances.
-        /// </summary>
-        /// <param name="r1">The first <see cref="WorkerActionPivot"/>.</param>
-        /// <param name="r2">The second <see cref="WorkerActionPivot"/>.</param>
-        /// <returns><c>True</c> if equals; <c>False</c> otherwise.</returns>
-        public static bool operator ==(WorkerActionPivot r1, WorkerActionPivot r2)
-        {
-            if (r1 is null)
-            {
-                return r2 is null;
-            }
-
-            return r1.Equals(r2) == true;
-        }
-
-        /// <summary>
-        /// Operator "!=" override. Checks non-equality between two instances.
-        /// </summary>
-        /// <param name="r1">The first <see cref="WorkerActionPivot"/>.</param>
-        /// <param name="r2">The second <see cref="WorkerActionPivot"/>.</param>
-        /// <returns><c>False</c> if equals; <c>True</c> otherwise.</returns>
-        public static bool operator !=(WorkerActionPivot r1, WorkerActionPivot r2)
-        {
-            return !(r1 == r2);
-        }
-
-        /// <inheritdoc />
-        public override bool Equals(object obj)
-        {
-            return obj is WorkerActionPivot && Equals(obj as WorkerActionPivot);
-        }
-
-        /// <inheritdoc />
-        public override int GetHashCode()
-        {
-            return Name.GetHashCode();
-        }
 
         #endregion
     }

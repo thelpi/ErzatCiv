@@ -12,6 +12,8 @@ namespace ErsatzCivLib.Model
     [Serializable]
     public abstract class BuildablePivot
     {
+        #region Embedded properties
+
         /// <summary>
         /// Name.
         /// </summary>
@@ -32,6 +34,8 @@ namespace ErsatzCivLib.Model
         /// <see cref="AdvancePivot"/> which makes the instance obsolete.
         /// </summary>
         public AdvancePivot AdvanceObsolescence { get; private set; }
+
+        #endregion
 
         /// <summary>
         /// Constructor.
@@ -91,7 +95,6 @@ namespace ErsatzCivLib.Model
         }
 
         private static List<BuildablePivot> _defaultUnitInstances = null;
-
         /// <summary>
         /// Gets every <c>Default</c> instances for each concrete type which inherits from <see cref="BuildablePivot"/>.
         /// </summary>
