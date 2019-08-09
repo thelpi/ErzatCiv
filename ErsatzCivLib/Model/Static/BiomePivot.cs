@@ -31,6 +31,26 @@ namespace ErsatzCivLib.Model.Static
         /// </summary>
         public int Food { get; private set; }
         /// <summary>
+        /// Bonus productivity points.
+        /// </summary>
+        public int BonusProductivity { get; private set; }
+        /// <summary>
+        /// Bonus commerce points.
+        /// </summary>
+        public int BonusCommerce { get; private set; }
+        /// <summary>
+        /// Bonus food points.
+        /// </summary>
+        public int BonusFood { get; private set; }
+        /// <summary>
+        /// Bonus appearance's rate
+        /// </summary>
+        public double BonusApperanceRate { get; private set; }
+        /// <summary>
+        /// Name of the bonus ressource.
+        /// </summary>
+        public string BonusName { get; private set; }
+        /// <summary>
         /// Defense bonus rate.
         /// </summary>
         public double DefenseBonusRate { get; private set; }
@@ -60,12 +80,10 @@ namespace ErsatzCivLib.Model.Static
         /// Biome's flatness level.
         /// </summary>
         internal AgePivot Age { get; private set; }
-
-        private Dictionary<TemperaturePivot, BiomePivot> _underlyingBiomes;
         /// <summary>
-        /// Underlying biome by temperature (if <see cref="WorkerActionPivot.Clear"/> available).
+        /// Underlying <see cref="BiomePivot"/> after clearance, if applicable.
         /// </summary>
-        internal IReadOnlyDictionary<TemperaturePivot, BiomePivot> UnderlyingBiomes { get { return _underlyingBiomes; } }
+        internal BiomePivot UnderlyingBiome { get; private set; }
 
         private List<WorkerActionPivot> _actions;
         /// <summary>
@@ -231,14 +249,18 @@ namespace ErsatzCivLib.Model.Static
                 TemperaturePivot.Hot,
                 TemperaturePivot.Temperate
             },
-            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
+            UnderlyingBiome = null,
             IsSeaType = false,
             SpeedCost = 1,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Medium,
             Humidity = HumidityPivot.Average,
-            Age = AgePivot.Old
-            // 50% productivity 1
+            Age = AgePivot.Old,
+            BonusApperanceRate = 0.5,
+            BonusCommerce = 0,
+            BonusFood = 0,
+            BonusProductivity = 1,
+            BonusName = "Resource"
         };
         /// <summary>
         /// Sea.
@@ -252,14 +274,18 @@ namespace ErsatzCivLib.Model.Static
             DefenseBonusRate = 1,
             _actions = new List<WorkerActionPivot>(),
             _temperatures = new List<TemperaturePivot>(),
-            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
+            UnderlyingBiome = null,
             IsSeaType = true,
             SpeedCost = 1,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Large,
             Humidity = HumidityPivot.Average,
-            Age = AgePivot.Average
-            //  Fish (+2 food)
+            Age = AgePivot.Average,
+            BonusApperanceRate = 0.05,
+            BonusCommerce = 0,
+            BonusFood = 2,
+            BonusProductivity = 0,
+            BonusName = "Fish"
         };
         /// <summary>
         /// Ice.
@@ -281,14 +307,18 @@ namespace ErsatzCivLib.Model.Static
             {
                 TemperaturePivot.Cold
             },
-            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
+            UnderlyingBiome = null,
             IsSeaType = false,
             SpeedCost = 2,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Large,
             Humidity = HumidityPivot.Dry,
-            Age = AgePivot.Average
-            // Seals (+2 food)
+            Age = AgePivot.Average,
+            BonusApperanceRate = 0.05,
+            BonusCommerce = 0,
+            BonusFood = 2,
+            BonusProductivity = 0,
+            BonusName = "Seals"
         };
         /// <summary>
         /// Toundra.
@@ -310,14 +340,18 @@ namespace ErsatzCivLib.Model.Static
             {
                 TemperaturePivot.Cold
             },
-            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
+            UnderlyingBiome = null,
             IsSeaType = false,
             SpeedCost = 1,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Medium,
             Humidity = HumidityPivot.Average,
-            Age = AgePivot.Old
-            // Game (+2 food)
+            Age = AgePivot.Old,
+            BonusApperanceRate = 0.05,
+            BonusCommerce = 0,
+            BonusFood = 2,
+            BonusProductivity = 0,
+            BonusName = "Game"
         };
         /// <summary>
         /// Desert.
@@ -341,14 +375,18 @@ namespace ErsatzCivLib.Model.Static
             {
                 TemperaturePivot.Hot
             },
-            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
+            UnderlyingBiome = null,
             IsSeaType = false,
             SpeedCost = 2,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Large,
             Humidity = HumidityPivot.Dry,
-            Age = AgePivot.Average
-            // Oases (+3 food)
+            Age = AgePivot.Average,
+            BonusApperanceRate = 0.05,
+            BonusCommerce = 0,
+            BonusFood = 3,
+            BonusProductivity = 0,
+            BonusName = "Oases"
         };
         /// <summary>
         /// Jungle.
@@ -371,17 +409,18 @@ namespace ErsatzCivLib.Model.Static
             {
                 TemperaturePivot.Hot
             },
-            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>
-            {
-                { TemperaturePivot.Hot, Plains }
-            },
+            UnderlyingBiome = Plains,
             IsSeaType = false,
             SpeedCost = 2,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Medium,
             Humidity = HumidityPivot.Wet,
-            Age = AgePivot.Average
-            // Gems (+4 commerce)
+            Age = AgePivot.Average,
+            BonusApperanceRate = 0.05,
+            BonusCommerce = 4,
+            BonusFood = 0,
+            BonusProductivity = 0,
+            BonusName = "Gems"
         };
         /// <summary>
         /// Mountain.
@@ -406,14 +445,18 @@ namespace ErsatzCivLib.Model.Static
                 TemperaturePivot.Hot,
                 TemperaturePivot.Temperate
             },
-            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
+            UnderlyingBiome = null,
             IsSeaType = false,
             SpeedCost = 3,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Medium,
             Humidity = HumidityPivot.Average,
-            Age = AgePivot.New
-            // Gold (+6 commerce)
+            Age = AgePivot.New,
+            BonusApperanceRate = 0.05,
+            BonusCommerce = 6,
+            BonusFood = 0,
+            BonusProductivity = 0,
+            BonusName = "Gold"
         };
         /// <summary>
         /// Hill.
@@ -439,14 +482,18 @@ namespace ErsatzCivLib.Model.Static
                 TemperaturePivot.Hot,
                 TemperaturePivot.Temperate
             },
-            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
+            UnderlyingBiome = null,
             IsSeaType = false,
             SpeedCost = 2,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Small,
             Humidity = HumidityPivot.Average,
-            Age = AgePivot.New
-            // Coal (+2 productivity)
+            Age = AgePivot.New,
+            BonusApperanceRate = 0.05,
+            BonusCommerce = 0,
+            BonusFood = 0,
+            BonusProductivity = 2,
+            BonusName = "Coal"
         };
         /// <summary>
         /// Swamp.
@@ -471,19 +518,18 @@ namespace ErsatzCivLib.Model.Static
                 TemperaturePivot.Hot,
                 TemperaturePivot.Temperate
             },
-            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>
-            {
-                { TemperaturePivot.Cold, Grassland },
-                { TemperaturePivot.Temperate, Grassland },
-                { TemperaturePivot.Hot, Grassland }
-            },
+            UnderlyingBiome = Grassland,
             IsSeaType = false,
             SpeedCost = 2,
             AppearanceRatio = 0.02,
             Size = BiomeSizePivot.Small,
             Humidity = HumidityPivot.Wet,
-            Age = AgePivot.Old
-            // Oil (+4 productivity)
+            Age = AgePivot.Old,
+            BonusApperanceRate = 0.05,
+            BonusCommerce = 0,
+            BonusFood = 0,
+            BonusProductivity = 4,
+            BonusName = "Oil"
         };
         /// <summary>
         /// Forest.
@@ -507,19 +553,18 @@ namespace ErsatzCivLib.Model.Static
                 TemperaturePivot.Cold,
                 TemperaturePivot.Temperate
             },
-            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>
-            {
-                { TemperaturePivot.Cold, Plains },
-                { TemperaturePivot.Temperate, Plains },
-                { TemperaturePivot.Hot, Plains },
-            },
+            UnderlyingBiome = Plains,
             IsSeaType = false,
             SpeedCost = 2,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Medium,
             Humidity = HumidityPivot.Wet,
-            Age = AgePivot.Average
-            // Game (+2 food)
+            Age = AgePivot.Average,
+            BonusApperanceRate = 0.05,
+            BonusCommerce = 0,
+            BonusFood = 2,
+            BonusProductivity = 0,
+            BonusName = "Game"
         };
         /// <summary>
         /// Plain.
@@ -545,14 +590,18 @@ namespace ErsatzCivLib.Model.Static
                 TemperaturePivot.Hot,
                 TemperaturePivot.Temperate
             },
-            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
+            UnderlyingBiome = null,
             IsSeaType = false,
             SpeedCost = 1,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Large,
             Humidity = HumidityPivot.Dry,
-            Age = AgePivot.Old
-            // Horses (+2 productivity)
+            Age = AgePivot.Old,
+            BonusApperanceRate = 0.05,
+            BonusCommerce = 0,
+            BonusFood = 0,
+            BonusProductivity = 2,
+            BonusName = "Horses"
         };
         /*public static readonly BiomePivot River = new BiomePivot
         {
@@ -580,8 +629,12 @@ namespace ErsatzCivLib.Model.Static
             AppearanceRatio = 0.1, // non pertinent
             Size = BiomeSizePivot.Small, // non pertinent
             Humidity = HumidityPivot.Wet,
-            Age = AgePivot.Old
-            // 50% productivity +1
+            Age = AgePivot.Old,
+            BonusApperanceRate = 0.5,
+            BonusCommerce = 0,
+            BonusFood = 0,
+            BonusProductivity = 1,
+            BonusName = "Resource"
         };*/
 
         /// <summary>

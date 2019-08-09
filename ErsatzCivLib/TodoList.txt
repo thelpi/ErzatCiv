@@ -15,3 +15,9 @@ Gestion des "Futures tech".
 Gestion des modules pour la fusée spatiale.
 
 Gestion de l'IA (gros morceau)
+
+Annuler une action en cours de plusieurs tours
+
+"Tuer" une unité
+
+Donner une destination à l'unité

@@ -142,7 +142,7 @@ namespace ErsatzCivLib.Model.Static
         /// Clears a forest, a swamp or a jungle.
         /// </summary>
         /// <remarks>
-        /// Transforms the biome of a <see cref="MapSquarePivot"/> into its <see cref="BiomePivot.UnderlyingBiomes"/>.
+        /// Transforms the biome of a <see cref="MapSquarePivot"/> into its <see cref="BiomePivot.UnderlyingBiome"/>.
         /// </remarks>
         public static readonly WorkerActionPivot Clear = new WorkerActionPivot
         {

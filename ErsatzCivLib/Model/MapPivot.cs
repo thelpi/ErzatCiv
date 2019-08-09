@@ -319,8 +319,7 @@ namespace ErsatzCivLib.Model
                     foreach (var ofType in chunkOfType)
                     {
                         var currSq = _mapSquareList[ofType.Item1, ofType.Item2];
-                        type.UnderlyingBiomes.TryGetValue(TemperatureAt(ofType.Item1), out BiomePivot underlyingBiome);
-                        currSq.ChangeBiome(type, underlyingBiome ?? BiomePivot.Default);
+                        currSq.ChangeBiome(type);
                     }
                 }
             }
@@ -411,7 +410,7 @@ namespace ErsatzCivLib.Model
                     {
                         biome = BiomePivot.Default;
                     }
-                    var newSquare = new MapSquarePivot(y, x, biome, null);
+                    var newSquare = new MapSquarePivot(y, x, biome);
                     continentSquares.Add(newSquare);
                 }
             }

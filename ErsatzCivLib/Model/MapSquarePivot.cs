@@ -36,9 +36,9 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public BiomePivot Biome { get; private set; }
         /// <summary>
-        /// Underlying type in case of clearage (forest, jungle...).
+        /// Indicates if the square has a biome bonus.
         /// </summary>
-        public BiomePivot UnderlyingBiome { get; private set; }
+        public bool HasBonus { get; private set; }
         /// <summary>
         /// Mine built y/n.
         /// </summary>
@@ -102,7 +102,7 @@ namespace ErsatzCivLib.Model
                 var baseValue = 0;
                 if (!Pollution)
                 {
-                    baseValue = Biome.Food;
+                    baseValue = Biome.Food + (HasBonus ? Biome.BonusFood : 0);
                     if (Irrigate)
                     {
                         baseValue += IRRIGATE_FOOD_BONUS;
@@ -122,7 +122,7 @@ namespace ErsatzCivLib.Model
                 var baseValue = 0;
                 if (!Pollution)
                 {
-                    baseValue = Biome.Productivity;
+                    baseValue = (Biome.Productivity + (HasBonus ? Biome.BonusProductivity : 0));
                     if (Mine)
                     {
                         baseValue += MINE_PRODUCTIVITY_BONUS;
@@ -146,7 +146,7 @@ namespace ErsatzCivLib.Model
                 var baseValue = 0;
                 if (!Pollution)
                 {
-                    baseValue = Biome.Commerce;
+                    baseValue = Biome.Commerce + (HasBonus ? Biome.BonusCommerce : 0);
                     if (Road)
                     {
                         baseValue += ROAD_COMMERCE_BONUS;
@@ -170,7 +170,8 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                return Biome.Food < 2 ? 2 : Biome.Food;
+                return Biome.Food + (HasBonus ? Biome.BonusFood : 0) < 2 ? 2 :
+                    Biome.Food + (HasBonus ? Biome.BonusFood : 0);
             }
         }
         /// <summary>
@@ -180,7 +181,8 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                return Biome.Productivity < 1 ? 1 : Biome.Productivity;
+                return Biome.Productivity + (HasBonus ? Biome.BonusProductivity : 0) < 1 ? 1 :
+                    Biome.Productivity + (HasBonus ? Biome.BonusProductivity : 0);
             }
         }
         /// <summary>
@@ -190,7 +192,8 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                return Biome.Commerce < 2 ? 2 : Biome.Commerce;
+                return Biome.Commerce + (HasBonus ? Biome.BonusCommerce : 0) < 2 ? 2 :
+                    Biome.Commerce + (HasBonus ? Biome.BonusCommerce : 0);
             }
         }
 
@@ -212,16 +215,12 @@ namespace ErsatzCivLib.Model
         /// <param name="row">The <see cref="Row"/> value.</param>
         /// <param name="column">The <see cref="Column"/> value.</param>
         /// <param name="biome">The <see cref="Biome"/> value.</param>
-        /// <param name="underlyingType">The underlying biome if <see cref="WorkerActionPivot.Clear"/> action possible.</param>
-        internal MapSquarePivot(int row, int column, BiomePivot biome, BiomePivot underlyingType = null)
+        internal MapSquarePivot(int row, int column, BiomePivot biome)
         {
             Row = row;
             Column = column;
-            Biome = biome ?? throw new ArgumentNullException(nameof(biome));
-            if (Biome.Actions.Contains(WorkerActionPivot.Clear))
-            {
-                UnderlyingBiome = underlyingType ?? throw new ArgumentNullException(nameof(underlyingType));
-            }
+            Biome = biome;
+            HasBonus = Tools.Randomizer.NextDouble() < Biome.BonusApperanceRate;
         }
 
         #region Internal methods
@@ -230,14 +229,9 @@ namespace ErsatzCivLib.Model
         /// Changes the <see cref="BiomePivot"/> of this instance.
         /// </summary>
         /// <param name="biome">The biome.</param>
-        /// <param name="underlyingType">The underlying biome if <see cref="WorkerActionPivot.Clear"/> action possible.</param>
-        internal void ChangeBiome(BiomePivot biome, BiomePivot underlyingType = null)
+        internal void ChangeBiome(BiomePivot biome)
         {
-            Biome = biome ?? throw new ArgumentNullException(nameof(biome));
-            if (Biome.Actions.Contains(WorkerActionPivot.Clear))
-            {
-                UnderlyingBiome = underlyingType ?? throw new ArgumentNullException(nameof(underlyingType));
-            }
+            Biome = biome;
         }
 
         /// <summary>
@@ -347,7 +341,7 @@ namespace ErsatzCivLib.Model
                     }
                     if (action.Action == WorkerActionPivot.Clear)
                     {
-                        ChangeBiome(UnderlyingBiome, null);
+                        ChangeBiome(Biome.UnderlyingBiome);
                         Mine = false;
                         Irrigate = false;
                     }

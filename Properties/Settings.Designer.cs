@@ -85,5 +85,14 @@ namespace ErsatzCiv.Properties {
                 return ((bool)(this["showFullMap"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("bonus\\")]
+        public string squareImageBonusSubFolder {
+            get {
+                return ((string)(this["squareImageBonusSubFolder"]));
+            }
+        }
     }
 }

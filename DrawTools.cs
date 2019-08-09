@@ -274,7 +274,10 @@ namespace ErsatzCiv
             dockPanel.Children.Add(b4);
 
             FrameworkElement squareRender;
-            string imgPath = Settings.Default.datasPath + Settings.Default.squareImageSubFolder + $"{square.Biome.Name.ToLowerInvariant()}.png";
+            string imgPath = Settings.Default.datasPath +
+                Settings.Default.squareImageSubFolder +
+                (square.HasBonus ? Settings.Default.squareImageBonusSubFolder : string.Empty)
+                + $"{square.Biome.Name.ToLowerInvariant()}.png";
             if (System.IO.File.Exists(imgPath))
             {
                 squareRender = new Border
