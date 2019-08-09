@@ -14,7 +14,7 @@ namespace ErsatzCivLib.Model.Static
     {
         private WonderPivot(int productivityCost, AdvancePivot advancePrerequisite, AdvancePivot advanceObsolescence,
             string name = null, bool hasCitizenMoodEffect = false) :
-            base(productivityCost, advancePrerequisite, advanceObsolescence, name, hasCitizenMoodEffect)
+            base(productivityCost, advancePrerequisite, advanceObsolescence, -1, name, hasCitizenMoodEffect)
         { }
 
         #region IEquatable implementation

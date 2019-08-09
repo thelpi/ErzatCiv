@@ -35,7 +35,7 @@
                                 <RowDefinition />
                             </Grid.RowDefinitions>
                             <Label Grid.Column="0" Grid.Row="00" Content="B" FontWeight="Bold" />
-                            <Label Grid.Column="1" Grid.Row="00" Content="Build a city (settler)" />
+                            <Label Grid.Column="1" Grid.Row="00" Content="Build a city (settlers)" />
                             <Label Grid.Column="0" Grid.Row="01" Content="Space" FontWeight="Bold" />
                             <Label Grid.Column="1" Grid.Row="01" Content="Current unit wait next turn" />
                             <Label Grid.Column="0" Grid.Row="02" Content="C" FontWeight="Bold" />

@@ -34,6 +34,10 @@ namespace ErsatzCivLib.Model
         /// <see cref="AdvancePivot"/> which makes the instance obsolete.
         /// </summary>
         public AdvancePivot AdvanceObsolescence { get; private set; }
+        /// <summary>
+        /// The purchse price, in gold. <c>-1</c> when the item can't be sold.
+        /// </summary>
+        public int PurchasePrice { get; private set; }
 
         #endregion
 
@@ -43,17 +47,19 @@ namespace ErsatzCivLib.Model
         /// <param name="productivityCost">The <see cref="ProductivityCost"/> value.</param>
         /// <param name="advancePrerequisite">The <see cref="AdvancePrerequisite"/> value.</param>
         /// <param name="advanceObsolescence">The <see cref="AdvanceObsolescence"/> value.</param>
+        /// <param name="purchasePrice">The <see cref="PurchasePrice"/> value.</param>
         /// <param name="name">Optionnal; the <see cref="Name"/> value.
         /// IF <c>Null</c>, the class name is used without the "Pivot" suffix.</param>
         /// <param name="hasCitizenMoodEffect">Optionnal; the <see cref="HasCitizenMoodEffect"/> value.</param>
         protected BuildablePivot(int productivityCost, AdvancePivot advancePrerequisite, AdvancePivot advanceObsolescence,
-            string name = null, bool hasCitizenMoodEffect = false)
+            int purchasePrice, string name = null, bool hasCitizenMoodEffect = false)
         {
             Name = name ?? GetType().Name.Replace("Pivot", string.Empty);
             ProductivityCost = productivityCost;
             HasCitizenMoodEffect = hasCitizenMoodEffect;
             AdvancePrerequisite = advancePrerequisite;
             AdvanceObsolescence = advanceObsolescence;
+            PurchasePrice = purchasePrice;
         }
 
         /// <inheritdoc />

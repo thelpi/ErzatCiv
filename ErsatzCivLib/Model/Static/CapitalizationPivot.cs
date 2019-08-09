@@ -12,7 +12,7 @@ namespace ErsatzCivLib.Model.Static
         /// <summary>
         /// Constructor.
         /// </summary>
-        private CapitalizationPivot() : base(0, null, null) { }
+        private CapitalizationPivot() : base(0, null, null, -1) { }
 
         /// <summary>
         /// Default instance.

@@ -20,7 +20,7 @@ namespace ErsatzCivLib.Model.Units
         #endregion
 
         private WorkerPivot(MapSquarePivot location)
-            : base(location, false, true, 0, 0, 1, 1, 10, null, null, null, 1)
+            : base(location, false, true, 0, 0, 1, 1, 10, null, null, -1, null, 1)
         { }
 
         /// <summary>

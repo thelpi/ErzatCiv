@@ -220,7 +220,7 @@ namespace ErsatzCivLib
         }
 
         /// <summary>
-        /// Checks if a city can be build at the location of the current unit, which must be a <see cref="Model.Units.SettlerPivot"/>.
+        /// Checks if a city can be build at the location of the current unit, which must be a <see cref="Model.Units.SettlersPivot"/>.
         /// </summary>
         /// <returns><c>True</c> if a city si buildable; otherwise <c>False</c>.</returns>
         public bool CanBuildCity()

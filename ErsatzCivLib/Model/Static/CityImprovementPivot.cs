@@ -18,10 +18,6 @@ namespace ErsatzCivLib.Model.Static
         /// </summary>
         public int MaintenanceCost { get; private set; }
         /// <summary>
-        /// The purchse price, in gold.
-        /// </summary>
-        public int PurchasePrice { get; private set; }
-        /// <summary>
         /// The sell value, in gold.
         /// </summary>
         public int SellValue { get; private set; }
@@ -34,10 +30,9 @@ namespace ErsatzCivLib.Model.Static
 
         private CityImprovementPivot(int productivityCost, int maintenanceCost, int purchasePrice, int sellValue, string name,
             bool hasCitizenMoodEffect, AdvancePivot advancePrerequisite, CityImprovementPivot improvementPrerequisite) :
-            base (productivityCost, advancePrerequisite, null, name, hasCitizenMoodEffect)
+            base (productivityCost, advancePrerequisite, null, purchasePrice, name, hasCitizenMoodEffect)
         {
             MaintenanceCost = maintenanceCost;
-            PurchasePrice = purchasePrice;
             SellValue = sellValue;
             ImprovementPrerequisite = improvementPrerequisite;
         }

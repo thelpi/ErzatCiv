@@ -264,7 +264,7 @@ namespace ErsatzCivLib.Model
             Regime = RegimePivot.Despotism;
             Treasure = TREASURE_START;
 
-            _units.Add(SettlerPivot.CreateAtLocation(beginLocation));
+            _units.Add(SettlersPivot.CreateAtLocation(beginLocation));
             _units.Add(WorkerPivot.CreateAtLocation(beginLocation));
 
             MapSquareDiscoveryInvokator(beginLocation, _engine.Map.GetAdjacentMapSquares(beginLocation).Values);
@@ -383,7 +383,7 @@ namespace ErsatzCivLib.Model
                 return null;
             }
 
-            var settler = CurrentUnit as SettlerPivot;
+            var settlers = CurrentUnit as SettlersPivot;
             var sq = CurrentUnit.MapSquareLocation;
 
             var city = new CityPivot(this, currentTurn, name, sq, CapitalizationPivot.Default);
@@ -398,7 +398,7 @@ namespace ErsatzCivLib.Model
             MapSquareDiscoveryInvokator(city.MapSquareLocation, _engine.GetMapSquaresAroundCity(city).Keys);
 
             _cities.Add(city);
-            _units.Remove(settler);
+            _units.Remove(settlers);
             SetUnitIndex(true, false);
 
             return city;
@@ -429,12 +429,12 @@ namespace ErsatzCivLib.Model
 
         /// <summary>
         /// Checks if a <see cref="CityPivot"/> can be built at the <see cref="CurrentUnit"/> location.
-        /// <see cref="CurrentUnit"/> must be a <see cref="SettlerPivot"/>.
+        /// <see cref="CurrentUnit"/> must be a <see cref="SettlersPivot"/>.
         /// </summary>
         /// <returns><c>True</c> if a city can be build; <c>False</c> otherwise.</returns>
         internal bool CanBuildCity()
         {
-            if (CurrentUnit?.Is<SettlerPivot>() != true)
+            if (CurrentUnit?.Is<SettlersPivot>() != true)
             {
                 return false;
             }
