@@ -466,7 +466,7 @@ namespace ErsatzCivLib.Model.Static
             Name = "Hills",
             Commerce = 0,
             Food = 1,
-            Productivity = 1,
+            Productivity = 0,
             DefenseBonusRate = 2,
             _actions = new List<WorkerActionPivot>
             {

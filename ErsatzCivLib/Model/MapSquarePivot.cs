@@ -19,6 +19,7 @@ namespace ErsatzCivLib.Model
         private const int RAILROAD_COMMERCE_BONUS = 1;
         private const int ROAD_COMMERCE_BONUS = 1;
         private const int MINE_PRODUCTIVITY_BONUS = 1;
+        private const int MINE_PRODUCTIVITY_BONUS_HILLS = 3;
         private const int IRRIGATE_FOOD_BONUS = 1;
 
         #region Embedded properties
@@ -125,7 +126,7 @@ namespace ErsatzCivLib.Model
                     baseValue = (Biome.Productivity + (HasBonus ? Biome.BonusProductivity : 0));
                     if (Mine)
                     {
-                        baseValue += MINE_PRODUCTIVITY_BONUS;
+                        baseValue += Biome == BiomePivot.Hills ? MINE_PRODUCTIVITY_BONUS_HILLS : MINE_PRODUCTIVITY_BONUS;
                     }
                     if (RailRoad && baseValue > 0)
                     {

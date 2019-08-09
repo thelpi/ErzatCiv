@@ -88,6 +88,12 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public MapSquarePivot MapSquareLocation { get; private set; }
 
+        private List<Units.SettlersPivot> _settlers = new List<Units.SettlersPivot>();
+        /// <summary>
+        /// Settlers on the map who belong to this city.
+        /// </summary>
+        public IReadOnlyCollection<Units.SettlersPivot> Settlers { get { return _settlers; } }
+
         private readonly List<CitizenPivot> _citizens;
         /// <summary>
         /// List of <see cref="CitizenPivot"/>.
@@ -192,6 +198,26 @@ namespace ErsatzCivLib.Model
             }
         }
         /// <summary>
+        /// Food consumption by turn.
+        /// </summary>
+        public int FoodConsumption
+        {
+            get
+            {
+                return (_citizens.Count + _settlers.Count) * FOOD_BY_CITIZEN_BY_TURN;
+            }
+        }
+        /// <summary>
+        /// Food consumption by turn without settlers.
+        /// </summary>
+        public int FoodConsumptionWithoutSettlers
+        {
+            get
+            {
+                return _citizens.Count * FOOD_BY_CITIZEN_BY_TURN;
+            }
+        }
+        /// <summary>
         /// Food production by turn.
         /// </summary>
         public int Food
@@ -202,9 +228,9 @@ namespace ErsatzCivLib.Model
                         .Where(c => !c.Type.HasValue)
                         .Sum(c => c.MapSquare.Food);
 
-                if (InCivilTroubleOrAnarchy && foodValue > _citizens.Count * FOOD_BY_CITIZEN_BY_TURN)
+                if (InCivilTroubleOrAnarchy && foodValue > FoodConsumptionWithoutSettlers)
                 {
-                    foodValue = _citizens.Count * FOOD_BY_CITIZEN_BY_TURN;
+                    foodValue = FoodConsumptionWithoutSettlers;
                 }
 
                 return foodValue;
@@ -382,7 +408,7 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                return Food - (FOOD_BY_CITIZEN_BY_TURN * _citizens.Count);
+                return Food - FoodConsumption;
             }
         }
         /// <summary>
@@ -461,9 +487,11 @@ namespace ErsatzCivLib.Model
         /// <summary>
         /// Recomputes everything before passing to the next turn.
         /// </summary>
-        /// <returns>A finished production, if any; otherwise <c>Null</c>.</returns>
-        internal BuildablePivot NextTurn()
+        /// <returns>A tuple of values [finished production / settler disbanded].</returns>
+        internal Tuple<BuildablePivot, Units.SettlersPivot> NextTurn()
         {
+            Units.SettlersPivot disbandedSettler = null;
+
             BuildablePivot produced = null;
             bool resetCitizensRequired = false;
             bool checkCitizensMood = false;
@@ -498,8 +526,16 @@ namespace ErsatzCivLib.Model
 
             if (FoodStorage < 0 && FoodGranaryStorage < 0)
             {
-                _citizens.RemoveAt(0);
-                resetCitizensRequired = true;
+                if (_settlers.Count > 0)
+                {
+                    disbandedSettler = _settlers[0];
+                    _settlers.RemoveAt(0);
+                }
+                else
+                {
+                    _citizens.RemoveAt(0);
+                    resetCitizensRequired = true;
+                }
                 FoodStorage = 0;
                 FoodGranaryStorage = 0;
             }
@@ -592,9 +628,13 @@ namespace ErsatzCivLib.Model
                     _improvements.Remove(CityImprovementPivot.NuclearPlant);
                     _improvements.Remove(CityImprovementPivot.HydroPlant);
                 }
+                else if (produced.Is<Units.SettlersPivot>())
+                {
+                    _settlers.Add(produced as Units.SettlersPivot);
+                }
             }
 
-            return produced;
+            return new Tuple<BuildablePivot, Units.SettlersPivot>(produced, disbandedSettler);
         }
 
         /// <summary>
@@ -697,6 +737,15 @@ namespace ErsatzCivLib.Model
         internal CitizenPivot GetAnySpecialistCitizen()
         {
             return _citizens.FirstOrDefault(c => c.Type.HasValue);
+        }
+
+        /// <summary>
+        /// Proceeds to unlink a <see cref="Units.SettlersPivot"/> from the city.
+        /// </summary>
+        /// <param name="settler">The settler.</param>
+        internal void UnlinkSettler(Units.SettlersPivot settler)
+        {
+            _settlers.Remove(settler);
         }
 
         #endregion

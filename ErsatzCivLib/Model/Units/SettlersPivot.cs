@@ -10,7 +10,7 @@ namespace ErsatzCivLib.Model.Units
     public class SettlersPivot : UnitPivot
     {
         private SettlersPivot(MapSquarePivot location) :
-            base(location, false, true, 1, 0, 1, 1, 40, null, null, 320, null, 2)
+            base(location, false, true, 1, 0, 1, 1, 40, null, null, 320, null, 1)
         { }
 
         /// <summary>

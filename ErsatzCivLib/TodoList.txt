@@ -21,3 +21,7 @@ Annuler une action en cours de plusieurs tours
 "Tuer" une unité
 
 Donner une destination à l'unité
+
+Les colons peuvent rejoindre les villes < 10
+
+Quand les colons meurents ou joignent une ville, les faire disparaitre de la liste de la ville

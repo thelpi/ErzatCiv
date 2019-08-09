@@ -383,7 +383,7 @@ namespace ErsatzCivLib.Model
                 return null;
             }
 
-            var settlers = CurrentUnit as SettlersPivot;
+            var settler = CurrentUnit as SettlersPivot;
             var sq = CurrentUnit.MapSquareLocation;
 
             var city = new CityPivot(this, currentTurn, name, sq, CapitalizationPivot.Default);
@@ -398,7 +398,8 @@ namespace ErsatzCivLib.Model
             MapSquareDiscoveryInvokator(city.MapSquareLocation, _engine.GetMapSquaresAroundCity(city).Keys);
 
             _cities.Add(city);
-            _units.Remove(settlers);
+            _cities.SingleOrDefault(c => c.Settlers.Contains(settler))?.UnlinkSettler(settler);
+            _units.Remove(settler);
             SetUnitIndex(true, false);
 
             return city;
@@ -498,7 +499,8 @@ namespace ErsatzCivLib.Model
 
             foreach (var city in _cities)
             {
-                var produced = city.NextTurn();
+                var turnInfo = city.NextTurn();
+                var produced = turnInfo.Item1;
                 if (produced != null)
                 {
                     if (produced.Is<UnitPivot>())
@@ -516,6 +518,10 @@ namespace ErsatzCivLib.Model
                         city.SetAsNewCapital(Capital);
                         Capital = city;
                     }
+                }
+                if (turnInfo.Item2 != null)
+                {
+                    _units.Remove(turnInfo.Item2);
                 }
             }
             foreach (var u in _units)
