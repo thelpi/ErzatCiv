@@ -23,17 +23,16 @@ namespace ErsatzCiv
         internal static readonly Dictionary<string, string> MAP_SQUARE_COLORS = new Dictionary<string, string>
         {
             { Biome.Grassland.Name, "#32CD32" },
-            { Biome.Sea.Name, "#1E90FF" },
-            { Biome.Ice.Name, "#FFFAF0" },
-            { Biome.Toundra.Name, "#2F4F4F" },
+            { Biome.Ocean.Name, "#1E90FF" },
+            { Biome.Arctic.Name, "#FFFAF0" },
+            { Biome.Tundra.Name, "#2F4F4F" },
             { Biome.Desert.Name, "#FF7F50" },
             { Biome.Jungle.Name, "#9ACD32" },
             { Biome.Mountain.Name, "#A52A2A" },
-            { Biome.Hill.Name, "#556B2F" },
+            { Biome.Hills.Name, "#556B2F" },
             { Biome.Swamp.Name, "#3CB371" },
             { Biome.Forest.Name, "#006400" },
-            { Biome.Plain.Name, "#EEE8AA" },
-            { Biome.Coast.Name, "#00BFFF" }
+            { Biome.Plains.Name, "#EEE8AA" }
         };
 
         internal static void CleanPreviousChildrenByTag(this Panel panel, object tagValue)
@@ -221,7 +220,7 @@ namespace ErsatzCiv
             {
                 panel.CleanPreviousChildrenByTag(square);
             }
-            else
+            else if (!Settings.Default.showFullMap)
             {
                 var blackRectangle = new Rectangle
                 {
@@ -275,7 +274,7 @@ namespace ErsatzCiv
             dockPanel.Children.Add(b4);
 
             FrameworkElement squareRender;
-            string imgPath = Settings.Default.datasPath + Settings.Default.squareImageSubFolder + $"{square.Biome.Name}.jpg";
+            string imgPath = Settings.Default.datasPath + Settings.Default.squareImageSubFolder + $"{square.Biome.Name.ToLowerInvariant()}.png";
             if (System.IO.File.Exists(imgPath))
             {
                 squareRender = new Border

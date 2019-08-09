@@ -409,7 +409,7 @@ namespace ErsatzCiv
             {
                 MiniMapCanvas.CleanPreviousChildrenByTag(square);
             }
-            else
+            else if (!Settings.Default.showFullMap)
             {
                 brush = Brushes.Black;
             }

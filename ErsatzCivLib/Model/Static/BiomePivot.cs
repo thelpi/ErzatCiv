@@ -31,17 +31,13 @@ namespace ErsatzCivLib.Model.Static
         /// </summary>
         public int Food { get; private set; }
         /// <summary>
-        /// Default defensive points.
+        /// Defense bonus rate.
         /// </summary>
-        public int Defense { get; private set; }
+        public double DefenseBonusRate { get; private set; }
         /// <summary>
         /// Indicates of the type is sea navigable (otherwise, it's ground navigable).
         /// </summary>
         public bool IsSeaType { get; private set; }
-        /// <summary>
-        /// Indicates of a city can be built on it.
-        /// </summary>
-        public bool IsCityBuildable { get; private set; }
         /// <summary>
         /// Indicates the speed cost when a unit walks through it.
         /// </summary>
@@ -218,19 +214,18 @@ namespace ErsatzCivLib.Model.Static
         public static readonly BiomePivot Grassland = new BiomePivot
         {
             Name = "Grassland",
-            Commerce = 1,
+            Commerce = 0,
             Food = 2,
-            Productivity = 1,
-            Defense = 0,
+            Productivity = 0,
+            DefenseBonusRate = 1,
             _actions = new List<WorkerActionPivot>
-                {
-                    WorkerActionPivot.Irrigate,
-                    WorkerActionPivot.Mine,
-                    WorkerActionPivot.Plant,
-                    WorkerActionPivot.RailRoad,
-                    WorkerActionPivot.Road,
-                    WorkerActionPivot.BuildFortress
-                },
+            {
+                WorkerActionPivot.Irrigate,
+                WorkerActionPivot.Plant,
+                WorkerActionPivot.RailRoad,
+                WorkerActionPivot.Road,
+                WorkerActionPivot.BuildFortress
+            },
             _temperatures = new List<TemperaturePivot>
             {
                 TemperaturePivot.Hot,
@@ -238,95 +233,91 @@ namespace ErsatzCivLib.Model.Static
             },
             _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
             IsSeaType = false,
-            IsCityBuildable = true,
             SpeedCost = 1,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Medium,
             Humidity = HumidityPivot.Average,
             Age = AgePivot.Old
+            // 50% productivity 1
         };
         /// <summary>
         /// Sea.
         /// </summary>
-        public static readonly BiomePivot Sea = new BiomePivot
+        public static readonly BiomePivot Ocean = new BiomePivot
         {
-            Name = "Sea",
+            Name = "Ocean",
             Commerce = 1,
             Food = 1,
             Productivity = 0,
-            Defense = 0,
+            DefenseBonusRate = 1,
             _actions = new List<WorkerActionPivot>(),
             _temperatures = new List<TemperaturePivot>(),
             _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
             IsSeaType = true,
-            IsCityBuildable = false,
             SpeedCost = 1,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Large,
             Humidity = HumidityPivot.Average,
             Age = AgePivot.Average
+            //  Fish (+2 food)
         };
         /// <summary>
         /// Ice.
         /// </summary>
-        public static readonly BiomePivot Ice = new BiomePivot
+        public static readonly BiomePivot Arctic = new BiomePivot
         {
-            Name = "Ice",
+            Name = "Arctic",
             Commerce = 0,
             Food = 0,
             Productivity = 0,
-            Defense = 1,
+            DefenseBonusRate = 1,
             _actions = new List<WorkerActionPivot>
-                {
-                    WorkerActionPivot.Mine,
-                    WorkerActionPivot.RailRoad,
-                    WorkerActionPivot.Road,
-                    WorkerActionPivot.BuildFortress
-                },
+            {
+                WorkerActionPivot.RailRoad,
+                WorkerActionPivot.Road,
+                WorkerActionPivot.BuildFortress
+            },
             _temperatures = new List<TemperaturePivot>
             {
                 TemperaturePivot.Cold
             },
             _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
             IsSeaType = false,
-            IsCityBuildable = false,
             SpeedCost = 2,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Large,
             Humidity = HumidityPivot.Dry,
             Age = AgePivot.Average
+            // Seals (+2 food)
         };
         /// <summary>
         /// Toundra.
         /// </summary>
-        public static readonly BiomePivot Toundra = new BiomePivot
+        public static readonly BiomePivot Tundra = new BiomePivot
         {
-            Name = "Toundra",
+            Name = "Tundra",
             Commerce = 0,
             Food = 1,
-            Productivity = 1,
-            Defense = 0,
+            Productivity = 0,
+            DefenseBonusRate = 1,
             _actions = new List<WorkerActionPivot>
-                {
-                    WorkerActionPivot.Irrigate,
-                    WorkerActionPivot.Mine,
-                    WorkerActionPivot.Plant,
-                    WorkerActionPivot.RailRoad,
-                    WorkerActionPivot.Road,
-                    WorkerActionPivot.BuildFortress
-                },
+            {
+                WorkerActionPivot.RailRoad,
+                WorkerActionPivot.Road,
+                WorkerActionPivot.BuildFortress
+            },
             _temperatures = new List<TemperaturePivot>
             {
                 TemperaturePivot.Cold
             },
             _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
             IsSeaType = false,
-            IsCityBuildable = true,
             SpeedCost = 1,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Medium,
             Humidity = HumidityPivot.Average,
             Age = AgePivot.Old
+            // Game (+2 food)
         };
         /// <summary>
         /// Desert.
@@ -337,27 +328,27 @@ namespace ErsatzCivLib.Model.Static
             Commerce = 0,
             Food = 0,
             Productivity = 1,
-            Defense = 1,
+            DefenseBonusRate = 1,
             _actions = new List<WorkerActionPivot>
-                {
-                    WorkerActionPivot.Irrigate,
-                    WorkerActionPivot.Mine,
-                    WorkerActionPivot.RailRoad,
-                    WorkerActionPivot.Road,
-                    WorkerActionPivot.BuildFortress
-                },
+            {
+                WorkerActionPivot.Irrigate,
+                WorkerActionPivot.Mine,
+                WorkerActionPivot.RailRoad,
+                WorkerActionPivot.Road,
+                WorkerActionPivot.BuildFortress
+            },
             _temperatures = new List<TemperaturePivot>
             {
                 TemperaturePivot.Hot
             },
             _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
             IsSeaType = false,
-            IsCityBuildable = true,
             SpeedCost = 2,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Large,
             Humidity = HumidityPivot.Dry,
             Age = AgePivot.Average
+            // Oases (+3 food)
         };
         /// <summary>
         /// Jungle.
@@ -368,29 +359,29 @@ namespace ErsatzCivLib.Model.Static
             Commerce = 0,
             Food = 1,
             Productivity = 0,
-            Defense = 2,
+            DefenseBonusRate = 1.5,
             _actions = new List<WorkerActionPivot>
-                {
-                    WorkerActionPivot.Clear,
-                    WorkerActionPivot.RailRoad,
-                    WorkerActionPivot.Road,
-                    WorkerActionPivot.BuildFortress
-                },
+            {
+                WorkerActionPivot.Clear,
+                WorkerActionPivot.RailRoad,
+                WorkerActionPivot.Road,
+                WorkerActionPivot.BuildFortress
+            },
             _temperatures = new List<TemperaturePivot>
             {
                 TemperaturePivot.Hot
             },
             _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>
             {
-                { TemperaturePivot.Hot, Plain }
+                { TemperaturePivot.Hot, Plains }
             },
             IsSeaType = false,
-            IsCityBuildable = false,
-            SpeedCost = 3,
+            SpeedCost = 2,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Medium,
             Humidity = HumidityPivot.Wet,
             Age = AgePivot.Average
+            // Gems (+4 commerce)
         };
         /// <summary>
         /// Mountain.
@@ -400,15 +391,15 @@ namespace ErsatzCivLib.Model.Static
             Name = "Mountain",
             Commerce = 0,
             Food = 0,
-            Productivity = 2,
-            Defense = 2,
+            Productivity = 1,
+            DefenseBonusRate = 3,
             _actions = new List<WorkerActionPivot>
-                {
-                    WorkerActionPivot.Mine,
-                    WorkerActionPivot.RailRoad,
-                    WorkerActionPivot.Road,
-                    WorkerActionPivot.BuildFortress
-                },
+            {
+                WorkerActionPivot.Mine,
+                WorkerActionPivot.RailRoad,
+                WorkerActionPivot.Road,
+                WorkerActionPivot.BuildFortress
+            },
             _temperatures = new List<TemperaturePivot>
             {
                 TemperaturePivot.Cold,
@@ -417,30 +408,31 @@ namespace ErsatzCivLib.Model.Static
             },
             _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
             IsSeaType = false,
-            IsCityBuildable = false,
             SpeedCost = 3,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Medium,
             Humidity = HumidityPivot.Average,
             Age = AgePivot.New
+            // Gold (+6 commerce)
         };
         /// <summary>
         /// Hill.
         /// </summary>
-        public static readonly BiomePivot Hill = new BiomePivot
+        public static readonly BiomePivot Hills = new BiomePivot
         {
-            Name = "Hill",
-            Commerce = 1,
+            Name = "Hills",
+            Commerce = 0,
             Food = 1,
             Productivity = 1,
-            Defense = 1,
+            DefenseBonusRate = 2,
             _actions = new List<WorkerActionPivot>
-                {
-                    WorkerActionPivot.Mine,
-                    WorkerActionPivot.RailRoad,
-                    WorkerActionPivot.Road,
-                    WorkerActionPivot.BuildFortress
-                },
+            {
+                WorkerActionPivot.Mine,
+                WorkerActionPivot.Irrigate,
+                WorkerActionPivot.RailRoad,
+                WorkerActionPivot.Road,
+                WorkerActionPivot.BuildFortress
+            },
             _temperatures = new List<TemperaturePivot>
             {
                 TemperaturePivot.Cold,
@@ -449,12 +441,12 @@ namespace ErsatzCivLib.Model.Static
             },
             _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
             IsSeaType = false,
-            IsCityBuildable = true,
             SpeedCost = 2,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Small,
             Humidity = HumidityPivot.Average,
             Age = AgePivot.New
+            // Coal (+2 productivity)
         };
         /// <summary>
         /// Swamp.
@@ -465,14 +457,14 @@ namespace ErsatzCivLib.Model.Static
             Commerce = 0,
             Food = 1,
             Productivity = 0,
-            Defense = 1,
+            DefenseBonusRate = 1.5,
             _actions = new List<WorkerActionPivot>
-                {
-                    WorkerActionPivot.RailRoad,
-                    WorkerActionPivot.Road,
-                    WorkerActionPivot.BuildFortress,
-                    WorkerActionPivot.Clear
-                },
+            {
+                WorkerActionPivot.RailRoad,
+                WorkerActionPivot.Road,
+                WorkerActionPivot.BuildFortress,
+                WorkerActionPivot.Clear
+            },
             _temperatures = new List<TemperaturePivot>
             {
                 TemperaturePivot.Cold,
@@ -481,17 +473,17 @@ namespace ErsatzCivLib.Model.Static
             },
             _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>
             {
-                { TemperaturePivot.Cold, Toundra },
+                { TemperaturePivot.Cold, Grassland },
                 { TemperaturePivot.Temperate, Grassland },
-                { TemperaturePivot.Hot, Plain }
+                { TemperaturePivot.Hot, Grassland }
             },
             IsSeaType = false,
-            IsCityBuildable = false,
             SpeedCost = 2,
             AppearanceRatio = 0.02,
             Size = BiomeSizePivot.Small,
             Humidity = HumidityPivot.Wet,
             Age = AgePivot.Old
+            // Oil (+4 productivity)
         };
         /// <summary>
         /// Forest.
@@ -499,17 +491,17 @@ namespace ErsatzCivLib.Model.Static
         public static readonly BiomePivot Forest = new BiomePivot
         {
             Name = "Forest",
-            Commerce = 1,
+            Commerce = 0,
             Food = 1,
             Productivity = 2,
-            Defense = 1,
+            DefenseBonusRate = 1.5,
             _actions = new List<WorkerActionPivot>
-                {
-                    WorkerActionPivot.Clear,
-                    WorkerActionPivot.RailRoad,
-                    WorkerActionPivot.Road,
-                    WorkerActionPivot.BuildFortress
-                },
+            {
+                WorkerActionPivot.Clear,
+                WorkerActionPivot.RailRoad,
+                WorkerActionPivot.Road,
+                WorkerActionPivot.BuildFortress
+            },
             _temperatures = new List<TemperaturePivot>
             {
                 TemperaturePivot.Cold,
@@ -517,36 +509,36 @@ namespace ErsatzCivLib.Model.Static
             },
             _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>
             {
-                { TemperaturePivot.Cold, Toundra },
-                { TemperaturePivot.Temperate, Grassland }
+                { TemperaturePivot.Cold, Plains },
+                { TemperaturePivot.Temperate, Plains },
+                { TemperaturePivot.Hot, Plains },
             },
             IsSeaType = false,
-            IsCityBuildable = true,
             SpeedCost = 2,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Medium,
             Humidity = HumidityPivot.Wet,
             Age = AgePivot.Average
+            // Game (+2 food)
         };
         /// <summary>
         /// Plain.
         /// </summary>
-        public static readonly BiomePivot Plain = new BiomePivot
+        public static readonly BiomePivot Plains = new BiomePivot
         {
-            Name = "Plain",
-            Commerce = 1,
+            Name = "Plains",
+            Commerce = 0,
             Food = 1,
             Productivity = 1,
-            Defense = 0,
+            DefenseBonusRate = 0,
             _actions = new List<WorkerActionPivot>
-                {
-                    WorkerActionPivot.Irrigate,
-                    WorkerActionPivot.Mine,
-                    WorkerActionPivot.Plant,
-                    WorkerActionPivot.RailRoad,
-                    WorkerActionPivot.Road,
-                    WorkerActionPivot.BuildFortress
-                },
+            {
+                WorkerActionPivot.Irrigate,
+                WorkerActionPivot.Plant,
+                WorkerActionPivot.RailRoad,
+                WorkerActionPivot.Road,
+                WorkerActionPivot.BuildFortress
+            },
             _temperatures = new List<TemperaturePivot>
             {
                 TemperaturePivot.Cold,
@@ -555,39 +547,47 @@ namespace ErsatzCivLib.Model.Static
             },
             _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
             IsSeaType = false,
-            IsCityBuildable = true,
             SpeedCost = 1,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Large,
             Humidity = HumidityPivot.Dry,
             Age = AgePivot.Old
+            // Horses (+2 productivity)
         };
-        /// <summary>
-        /// Coast.
-        /// </summary>
-        public static readonly BiomePivot Coast = new BiomePivot
+        /*public static readonly BiomePivot River = new BiomePivot
         {
-            Name = "Coast",
+            Name = "River",
             Commerce = 1,
-            Food = 1,
+            Food = 2,
             Productivity = 0,
-            Defense = 0,
-            _actions = new List<WorkerActionPivot>(),
-            _temperatures = new List<TemperaturePivot>(),
+            DefenseBonusRate = 1.5,
+            _actions = new List<WorkerActionPivot>
+            {
+                WorkerActionPivot.Irrigate,
+                WorkerActionPivot.RailRoad,
+                WorkerActionPivot.Road,
+                WorkerActionPivot.BuildFortress
+            },
+            _temperatures = new List<TemperaturePivot>
+            {
+                TemperaturePivot.Cold,
+                TemperaturePivot.Hot,
+                TemperaturePivot.Temperate
+            },
             _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
-            IsSeaType = true,
-            IsCityBuildable = false,
+            IsSeaType = false,
             SpeedCost = 1,
-            AppearanceRatio = 0.1,
-            Size = BiomeSizePivot.Small,
-            Humidity = HumidityPivot.Average,
-            Age = AgePivot.Average
-        };
+            AppearanceRatio = 0.1, // non pertinent
+            Size = BiomeSizePivot.Small, // non pertinent
+            Humidity = HumidityPivot.Wet,
+            Age = AgePivot.Old
+            // 50% productivity +1
+        };*/
 
         /// <summary>
         /// The biome by default when the map is built.
         /// </summary>
-        public static BiomePivot Default { get; } = Plain;
+        public static BiomePivot Default { get; } = Plains;
 
         #endregion
 

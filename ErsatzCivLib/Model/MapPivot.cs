@@ -122,7 +122,6 @@ namespace ErsatzCivLib.Model
             _mapSquareList = new MapSquarePivot[Height, Width];
 
             var continentInfos = new List<List<MapSquarePivot>>();
-            var coastSquares = new List<MapSquarePivot>();
             
             var boundaries = new List<ContinentBlueprint>();
             Action<ContinentBlueprint> SplitX = delegate (ContinentBlueprint contPick)
@@ -177,9 +176,7 @@ namespace ErsatzCivLib.Model
 
             foreach (var boundary in boundaries)
             {
-                var tmpCoastSquares = new List<MapSquarePivot>();
-                continentInfos.Add(ConvertContinentBlueprintToMapSquares(landRatio, boundary, out tmpCoastSquares));
-                coastSquares.AddRange(tmpCoastSquares);
+                continentInfos.Add(ConvertContinentBlueprintToMapSquares(landRatio, boundary));
             }
 
             // sets chunks
@@ -327,8 +324,6 @@ namespace ErsatzCivLib.Model
                     }
                 }
             }
-
-            coastSquares.ForEach(ms => ms.ChangeBiome(BiomePivot.Coast));
         }
 
         #region Internal methods
@@ -381,10 +376,8 @@ namespace ErsatzCivLib.Model
 
         #region Private methods
 
-        private List<MapSquarePivot> ConvertContinentBlueprintToMapSquares(double landRatio, ContinentBlueprint contBound, out List<MapSquarePivot> costSquares)
+        private List<MapSquarePivot> ConvertContinentBlueprintToMapSquares(double landRatio, ContinentBlueprint contBound)
         {
-            costSquares = new List<MapSquarePivot>();
-
             var continentWidth = (int)Math.Floor(contBound.Width * landRatio);
             var continentHeight = (int)Math.Floor(contBound.Height * landRatio);
             var maxStartChunkX = (int)Math.Floor((1 - landRatio) * contBound.Width);
@@ -413,23 +406,13 @@ namespace ErsatzCivLib.Model
             {
                 for (var y = contBound.StartY; y <= contBound.LastY; y++)
                 {
-                    var biome = BiomePivot.Sea;
-                    bool isCoast = false;
+                    var biome = BiomePivot.Ocean;
                     if (IsGroundFunc(x, y))
                     {
                         biome = BiomePivot.Default;
                     }
-                    else if (IsGroundFunc(x + 1, y) || IsGroundFunc(x - 1, y) || IsGroundFunc(x, y + 1) || IsGroundFunc(x, y - 1)
-                        || IsGroundFunc(x - 1, y - 1) || IsGroundFunc(x + 1, y + 1) || IsGroundFunc(x - 1, y + 1) || IsGroundFunc(x + 1, y - 1))
-                    {
-                        isCoast = true;
-                    }
                     var newSquare = new MapSquarePivot(y, x, biome, null);
                     continentSquares.Add(newSquare);
-                    if (isCoast)
-                    {
-                        costSquares.Add(newSquare);
-                    }
                 }
             }
 

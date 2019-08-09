@@ -441,9 +441,9 @@ namespace ErsatzCivLib.Model
 
             var sq = CurrentUnit.MapSquareLocation;
 
-            return sq?.Biome?.IsCityBuildable == true
+            return !sq.Biome.IsSeaType
                 && !_engine.IsCity(sq)
-                && sq.Pollution != true;
+                && !sq.Pollution;
         }
 
         /// <summary>
@@ -667,7 +667,7 @@ namespace ErsatzCivLib.Model
             // Already built for the current city.
             buildableDefaultInstances.RemoveAll(b => city.Improvements.Contains(b));
 
-            // Removes global wonder already built.
+            // Removes wonders already built globally.
             buildableDefaultInstances.RemoveAll(b => b.Is<WonderPivot>() && _engine.GetEveryWonders().Contains(b as WonderPivot));
 
             // Another improvement is required in the first place.
@@ -675,6 +675,12 @@ namespace ErsatzCivLib.Model
                 b.Is<CityImprovementPivot>()
                 && (b as CityImprovementPivot).ImprovementPrerequisite != null
                 && !city.Improvements.Contains((b as CityImprovementPivot).ImprovementPrerequisite));
+
+            // Obsolete units.
+            buildableDefaultInstances.RemoveAll(b =>
+                b.Is<UnitPivot>()
+                && b.AdvanceObsolescence != null
+                && _advances.Contains(b.AdvanceObsolescence));
 
             #region Special rules
 
