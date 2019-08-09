@@ -1,0 +1,17 @@
+﻿Les casernes sont obsolètes après "Combustion" et "Gunpowder".
+
+L'impossibilité d'irriguer sans eau (avant "Electricity") n'existe pas.
+
+Les rivières sont des carrés propres, et pas entre carrés.
+
+"Fusion Power" réduit le risque d'accident nucléraire (non géré pour l'instant).
+
+Gestion des "Futures tech".
+
+"Industrialization" déclenche la pollution.
+
+"Medicine" soigne la peste.
+
+Gestion des modules pour la fusée spatiale.
+
+Gestion de l'IA (gros morceau)

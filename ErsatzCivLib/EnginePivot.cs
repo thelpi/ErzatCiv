@@ -63,11 +63,12 @@ namespace ErsatzCivLib
         /// <param name="age">Map age.</param>
         /// <param name="humidity">Map humidity.</param>
         /// <param name="playerCivilization">Human player civilization.</param>
+        /// <param name="playerGender">The <see cref="PlayerPivot.Gender"/> value.</param>
         /// <param name="iaPlayersCount">Number of IA civilizations.</param>
         /// <exception cref="ArgumentNullException"><paramref name="playerCivilization"/> is <c>Null</c>.</exception>
         /// <exception cref="ArgumentException"><paramref name="iaPlayersCount"/> invalid.</exception>
         public EnginePivot(SizePivot mapSize, LandShapePivot mapShape, LandCoveragePivot landCoverage, TemperaturePivot temperature,
-            AgePivot age, HumidityPivot humidity, CivilizationPivot playerCivilization, int iaPlayersCount)
+            AgePivot age, HumidityPivot humidity, CivilizationPivot playerCivilization, bool playerGender, int iaPlayersCount)
         {
             if (playerCivilization == null)
             {
@@ -83,7 +84,7 @@ namespace ErsatzCivLib
 
             List<MapSquarePivot> excludedSpots = new List<MapSquarePivot>();
 
-            HumanPlayer = new PlayerPivot(this, playerCivilization, false, GetRandomLocation(excludedSpots));
+            HumanPlayer = new PlayerPivot(this, playerCivilization, false, GetRandomLocation(excludedSpots), playerGender);
             for (int i = 0; i < iaPlayersCount; i++)
             {
                 CivilizationPivot iaCiv = null;
@@ -92,7 +93,7 @@ namespace ErsatzCivLib
                     iaCiv = CivilizationPivot.Instances.ElementAt(Tools.Randomizer.Next(0, CivilizationPivot.Instances.Count));
                 }
                 while (HumanPlayer.Civilization == iaCiv || _iaPlayers.Any(ia => ia.Civilization == iaCiv));
-                _iaPlayers.Add(new PlayerPivot(this, iaCiv, true, GetRandomLocation(excludedSpots)));
+                _iaPlayers.Add(new PlayerPivot(this, iaCiv, true, GetRandomLocation(excludedSpots), Tools.Randomizer.Next(0, 2) == 0));
             }
 
             CurrentTurn = 0;

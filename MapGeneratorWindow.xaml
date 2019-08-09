@@ -3,10 +3,55 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:ErsatzCiv" SizeToContent="WidthAndHeight"
+        SizeToContent="WidthAndHeight"
         mc:Ignorable="d" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize"
         Title="Map generator">
-    <Grid>
+    <DockPanel>
+        <StackPanel Height="35" Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Right">
+            <Button VerticalAlignment="Stretch" Content="Validate" Name="ConfirmButton" Click="ConfirmButton_Click" Width="75" Height="25" ToolTip="Generate a map with these parameters." />
+            <Button Margin="5, 0, 0, 0" VerticalAlignment="Stretch" Content="Cancel" Name="CancelButton" Click="CancelButton_Click" Width="75" Height="25" ToolTip="Back to the start screen." />
+        </StackPanel>
+        <Grid Name="GridForm" DockPanel.Dock="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="150" />
+                <ColumnDefinition Width="175" />
+                <ColumnDefinition Width="150" />
+                <ColumnDefinition Width="175" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50" />
+                <RowDefinition Height="50" />
+                <RowDefinition Height="50" />
+                <RowDefinition Height="50" />
+                <RowDefinition Height="50" />
+                <RowDefinition Height="50" />
+                <RowDefinition Height="50" />
+            </Grid.RowDefinitions>
+            <Label VerticalAlignment="Center" HorizontalAlignment="Center" Content="Map parameters" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" />
+            <Label VerticalAlignment="Center" HorizontalAlignment="Center" Content="Civilizations parameters" Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" />
+            <Label VerticalAlignment="Center" HorizontalAlignment="Right" Content="World size :" Grid.Row="1" Grid.Column="0" />
+            <Label VerticalAlignment="Center" HorizontalAlignment="Right" Content="World shape :" Grid.Row="2" Grid.Column="0" />
+            <Label VerticalAlignment="Center" HorizontalAlignment="Right" Content="Groud ratio :" Grid.Row="3" Grid.Column="0" />
+            <Label VerticalAlignment="Center" HorizontalAlignment="Right" Content="Temperature :" Grid.Row="4" Grid.Column="0" />
+            <Label VerticalAlignment="Center" HorizontalAlignment="Right" Content="Age :" Grid.Row="5" Grid.Column="0" />
+            <Label VerticalAlignment="Center" HorizontalAlignment="Right" Content="Humidity :" Grid.Row="6" Grid.Column="0" />
+            <Label VerticalAlignment="Center" HorizontalAlignment="Right" Content="Civilization (player) :" Grid.Row="2" Grid.Column="2" />
+            <Label VerticalAlignment="Center" HorizontalAlignment="Right" Content="Gender :" Grid.Row="3" Grid.Column="2" Grid.RowSpan="2" />
+            <Label VerticalAlignment="Center" HorizontalAlignment="Right" Content="Opponents (ia) :" Grid.Row="5" Grid.Column="2" />
+            <ComboBox VerticalAlignment="Center" HorizontalAlignment="Left" Height="25" Width="150" Grid.Column="1" Grid.Row="1" Name="ComboBoxSize" VerticalContentAlignment="Center" SelectionChanged="ComboBoxSize_SelectionChanged" />
+            <ComboBox VerticalAlignment="Center" HorizontalAlignment="Left" Height="25" Width="150" Grid.Column="1" Grid.Row="2" Name="ComboBoxLandShape" VerticalContentAlignment="Center" />
+            <ComboBox VerticalAlignment="Center" HorizontalAlignment="Left" Height="25" Width="150" Grid.Column="1" Grid.Row="3" Name="ComboBoxLandCoverage" VerticalContentAlignment="Center" />
+            <ComboBox VerticalAlignment="Center" HorizontalAlignment="Left" Height="25" Width="150" Grid.Column="1" Grid.Row="4" Name="ComboBoxTemperature" VerticalContentAlignment="Center" />
+            <ComboBox VerticalAlignment="Center" HorizontalAlignment="Left" Height="25" Width="150" Grid.Column="1" Grid.Row="5" Name="ComboBoxAge" VerticalContentAlignment="Center" />
+            <ComboBox VerticalAlignment="Center" HorizontalAlignment="Left" Height="25" Width="150" Grid.Column="1" Grid.Row="6" Name="ComboBoxHumidity" VerticalContentAlignment="Center" />
+            <ComboBox VerticalAlignment="Center" HorizontalAlignment="Left" Height="25" Width="150" Grid.Column="3" Grid.Row="2" Name="ComboBoxCivilization" VerticalContentAlignment="Center" DisplayMemberPath="Name" />
+            <RadioButton Margin="0, 0, 0, 5" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="150" Grid.Column="3" Grid.Row="3" Name="RadioGenderMan" GroupName="GenderGroup" Content="Man" />
+            <RadioButton Margin="0, 5, 0, 0" VerticalAlignment="top" HorizontalAlignment="Left" Width="150" Grid.Column="3" Grid.Row="4" Name="RadioGenderWoman" GroupName="GenderGroup" Content="Woman" />
+            <ComboBox VerticalAlignment="Center" HorizontalAlignment="Left" Height="25" Width="150" Grid.Column="3" Grid.Row="5" Name="ComboBoxIaPlayersCount" VerticalContentAlignment="Center" />
+        </Grid>
+        <ProgressBar DockPanel.Dock="Top" HorizontalAlignment="Center" VerticalAlignment="Center" Name="ProgressBarLoading" Width="200" Height="25" IsIndeterminate="True" Visibility="Collapsed" />
+    </DockPanel>
+    <!--<Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
@@ -26,30 +71,13 @@
                 <RowDefinition Height="50" />
                 <RowDefinition Height="50" />
                 <RowDefinition Height="50" />
+                <RowDefinition Height="50" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="150" />
                 <ColumnDefinition Width="175" />
             </Grid.ColumnDefinitions>
-            <Label VerticalAlignment="Center" HorizontalAlignment="Center" Content="Map parameters" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" />
-            <Label VerticalAlignment="Center" HorizontalAlignment="Right" Content="World size :" Grid.Row="1" Grid.Column="0" />
-            <Label VerticalAlignment="Center" HorizontalAlignment="Right" Content="World shape :" Grid.Row="2" Grid.Column="0" />
-            <Label VerticalAlignment="Center" HorizontalAlignment="Right" Content="Groud ratio :" Grid.Row="3" Grid.Column="0" />
-            <Label VerticalAlignment="Center" HorizontalAlignment="Right" Content="Temperature :" Grid.Row="4" Grid.Column="0" />
-            <Label VerticalAlignment="Center" HorizontalAlignment="Right" Content="Age :" Grid.Row="5" Grid.Column="0" />
-            <Label VerticalAlignment="Center" HorizontalAlignment="Right" Content="Humidity :" Grid.Row="6" Grid.Column="0" />
-            <Label VerticalAlignment="Center" HorizontalAlignment="Right" Content="Civilization (player) :" Grid.Row="7" Grid.Column="0" />
-            <Label VerticalAlignment="Center" HorizontalAlignment="Right" Content="Opponents (ia) :" Grid.Row="8" Grid.Column="0" />
-            <ComboBox VerticalAlignment="Center" HorizontalAlignment="Left" Height="25" Width="150" Grid.Column="1" Grid.Row="1" Name="ComboBoxSize" VerticalContentAlignment="Center" SelectionChanged="ComboBoxSize_SelectionChanged" />
-            <ComboBox VerticalAlignment="Center" HorizontalAlignment="Left" Height="25" Width="150" Grid.Column="1" Grid.Row="2" Name="ComboBoxLandShape" VerticalContentAlignment="Center" />
-            <ComboBox VerticalAlignment="Center" HorizontalAlignment="Left" Height="25" Width="150" Grid.Column="1" Grid.Row="3" Name="ComboBoxLandCoverage" VerticalContentAlignment="Center" />
-            <ComboBox VerticalAlignment="Center" HorizontalAlignment="Left" Height="25" Width="150" Grid.Column="1" Grid.Row="4" Name="ComboBoxTemperature" VerticalContentAlignment="Center" />
-            <ComboBox VerticalAlignment="Center" HorizontalAlignment="Left" Height="25" Width="150" Grid.Column="1" Grid.Row="5" Name="ComboBoxAge" VerticalContentAlignment="Center" />
-            <ComboBox VerticalAlignment="Center" HorizontalAlignment="Left" Height="25" Width="150" Grid.Column="1" Grid.Row="6" Name="ComboBoxHumidity" VerticalContentAlignment="Center" />
-            <ComboBox VerticalAlignment="Center" HorizontalAlignment="Left" Height="25" Width="150" Grid.Column="1" Grid.Row="7" Name="ComboBoxCivilization" VerticalContentAlignment="Center" DisplayMemberPath="Name" />
-            <ComboBox VerticalAlignment="Center" HorizontalAlignment="Left" Height="25" Width="150" Grid.Column="1" Grid.Row="8" Name="ComboBoxIaPlayersCount" VerticalContentAlignment="Center" />
-            <Button VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="9" Grid.Column="0" Content="Validate" Name="ConfirmButton" Click="ConfirmButton_Click" Width="75" Height="25" />
-            <Button VerticalAlignment="Center" HorizontalAlignment="Center" Grid.Row="9" Grid.Column="1" Content="Cancel" Name="CancelButton" Click="CancelButton_Click" Width="75" Height="25" />
+            
         </Grid>
-    </Grid>
+    </Grid>-->
 </Window>

@@ -57,6 +57,8 @@ namespace ErsatzCiv
 
             GridForm.Visibility = Visibility.Collapsed;
             ProgressBarLoading.Visibility = Visibility.Visible;
+            CancelButton.IsEnabled = false;
+            ConfirmButton.IsEnabled = false;
 
             var bgw = new BackgroundWorker
             {
@@ -74,6 +76,7 @@ namespace ErsatzCiv
                 ComboBoxAge.SelectedItem,
                 ComboBoxHumidity.SelectedItem,
                 ComboBoxCivilization.SelectedItem,
+                RadioGenderMan.IsChecked == true,
                 ComboBoxIaPlayersCount.SelectedItem
             });
         }
@@ -85,7 +88,7 @@ namespace ErsatzCiv
             e.Result = new EnginePivot((SizePivot)parameters[0], (LandShapePivot)parameters[1],
                 (LandCoveragePivot)parameters[2], (TemperaturePivot)parameters[3],
                 (AgePivot)parameters[4], (HumidityPivot)parameters[5],
-                (CivilizationPivot)parameters[6], (int)parameters[7]);
+                (CivilizationPivot)parameters[6], (bool)parameters[7], (int)parameters[8]);
         }
 
         private void EndOfMapGeneration(object sender, RunWorkerCompletedEventArgs e)
@@ -108,6 +111,8 @@ namespace ErsatzCiv
         {
             ProgressBarLoading.Visibility = Visibility.Collapsed;
             GridForm.Visibility = Visibility.Visible;
+            CancelButton.IsEnabled = true;
+            ConfirmButton.IsEnabled = true;
         }
 
         private void ComboBoxSize_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)

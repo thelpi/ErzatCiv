@@ -79,6 +79,10 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public CivilizationPivot Civilization { get; private set; }
         /// <summary>
+        /// Indicates the player gender. <c>True</c> for man, <c>False</c> for woman.
+        /// </summary>
+        public bool Gender { get; private set; }
+        /// <summary>
         /// IA player yes/no.
         /// </summary>
         public bool IsIA { get; private set; }
@@ -247,10 +251,12 @@ namespace ErsatzCivLib.Model
         /// <param name="civilization">The <see cref="Civilization"/> value.</param>
         /// <param name="isIa">The <see cref="IsIA"/> value.</param>
         /// <param name="beginLocation">Units position at the beginning.</param>
-        internal PlayerPivot(EnginePivot owner, CivilizationPivot civilization, bool isIa, MapSquarePivot beginLocation)
+        /// <param name="gender">The <see cref="Gender"/> value.</param>
+        internal PlayerPivot(EnginePivot owner, CivilizationPivot civilization, bool isIa, MapSquarePivot beginLocation, bool gender)
         {
             _engine = owner;
 
+            Gender = gender;
             Civilization = civilization;
             IsIA = isIa;
             _advances.AddRange(civilization.Advances);
@@ -614,6 +620,7 @@ namespace ErsatzCivLib.Model
                 return false;
             }
             
+            // TODO : this is bad because in real game rivers are not between squares but sqaures itself.
             if (actionPivot == WorkerActionPivot.Road
                 && !_advances.Contains(AdvancePivot.BridgeBuilding)
                 && sq.HasRiver)

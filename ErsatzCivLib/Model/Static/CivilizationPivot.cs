@@ -162,7 +162,8 @@ namespace ErsatzCivLib.Model.Static
             ManLeaderName = "Abraham Lincoln",
             WomanLeaderName = "Eleanor Roosevelt",
             _advances = new List<AdvancePivot> { AdvancePivot.Wheel },
-            _cities = new List<string> { "Washington", "New York", "Los Angeles" }
+            _cities = new List<string> { "Washington", "New York", "Boston", "Philadelphia", "Atlanta", "Chicago", "Buffalo", "St. Louis",
+                "Detroit", "New Orleans", "Baltimore", "Denver", "Cincinnati", "Dallas", "Los Angeles", "Las Vegas" }
         };
         /// <summary>
         /// Constant; the Aztec civilization.
@@ -173,7 +174,8 @@ namespace ErsatzCivLib.Model.Static
             ManLeaderName = "Montezuma",
             WomanLeaderName = "Cihuacóatl",
             _advances = new List<AdvancePivot> { AdvancePivot.Masonry },
-            _cities = new List<string> { "Tenochtitlan" }
+            _cities = new List<string> { "Tenochtitlan", "Chiauhtia", "Chapultapec", "Coatepec", "Ayontzinco", "Itzapalapa", "Itzapam",
+                "Mitxcoac", "Tucubaya", "Tecamac", "Tepezinco", "Ticoman", "Tlaxcala", "Xaltocan", "Xicalango", "Zumpanco" }
         };
         /// <summary>
         /// Constant; the Babylonian civilization.
@@ -184,7 +186,8 @@ namespace ErsatzCivLib.Model.Static
             ManLeaderName = "Hammurabi",
             WomanLeaderName = "Sabitum",
             _advances = new List<AdvancePivot> { AdvancePivot.Pottery },
-            _cities = new List<string> { "Babylon" }
+            _cities = new List<string> { "Babylon", "Sumer", "Uruk", "Ninevah", "Ashur", "Ellipi", "Akkad", "Eridu", "Kish", "Nippur",
+                "Shuruppak", "Zariqum", "Izibia", "Nimrud", "Arbela", "Zamua" }
         };
         /// <summary>
         /// Constant; the Chinese civilization.
@@ -193,9 +196,10 @@ namespace ErsatzCivLib.Model.Static
         {
             Name = "Chinese",
             ManLeaderName = "Mao Tse Tung",
-            WomanLeaderName = "{undefined}",
+            WomanLeaderName = "Wu Zetian",
             _advances = new List<AdvancePivot> { AdvancePivot.Alphabet },
-            _cities = new List<string> { "Beijing" }
+            _cities = new List<string> { "Peking", "Shanghai", "Canton", "Nanking", "Tsingtao", "Hangchow", "Tientsin", "Tatung", "Macao",
+                "Anyang", "Shantung", "Chinan", "Kaifeng", "Ningpo", "Paoting", "Yangchow" }
         };
         /// <summary>
         /// Constant; the Egyptian civilization.
@@ -206,7 +210,8 @@ namespace ErsatzCivLib.Model.Static
             ManLeaderName = "Ramesses",
             WomanLeaderName = "Cleopatra",
             _advances = new List<AdvancePivot> { AdvancePivot.Masonry },
-            _cities = new List<string> { "Thebes" }
+            _cities = new List<string> { "Thebes", "Memphis", "Oryx", "Heliopolis", "Gaza", "Alexandria", "Byblos", "Cairo", "Coptos",
+                "Edfu", "Pithom", "Busirus", "Athribus", "Mendes", "Tanis", "Abydos" }
         };
         /// <summary>
         /// Constant; the English civilization.
@@ -217,7 +222,8 @@ namespace ErsatzCivLib.Model.Static
             ManLeaderName = "Elizabeth I",
             WomanLeaderName = "Winston Churchill",
             _advances = new List<AdvancePivot> { AdvancePivot.Alphabet },
-            _cities = new List<string> { "London" }
+            _cities = new List<string> { "London", "Coventry", "Birmingham", "Dover", "Nottingham", "York", "Liverpool", "Brighton",
+                "Oxford", "Reading", "Exeter", "Cambridge", "Hastings", "Canterbury", "Banbury", "Newcastle" }
         };
         /// <summary>
         /// Constant; the French civilization.
@@ -228,7 +234,8 @@ namespace ErsatzCivLib.Model.Static
             ManLeaderName = "Napoleon",
             WomanLeaderName = "Joan of Arc",
             _advances = new List<AdvancePivot> { AdvancePivot.Pottery },
-            _cities = new List<string> { "Paris", "Lyon", "Marseille", "Bordeaux", "Lille", "Nice", "Nantes" }
+            _cities = new List<string> { "Paris", "Orleans", "Lyons", "Tours", "Chartres", "Bordeaux", "Rouen", "Avignon", "Marseille",
+                "Grenoble", "Dijon", "Amiens", "Cherbourg", "Poitiers", "Toulouse", "Bayonne" }
         };
         /// <summary>
         /// Constant; the German civilization.
@@ -237,9 +244,10 @@ namespace ErsatzCivLib.Model.Static
         {
             Name = "German",
             ManLeaderName = "Frederick the Great",
-            WomanLeaderName = "{undefined}",
+            WomanLeaderName = "Angela Merkel",
             _advances = new List<AdvancePivot> { AdvancePivot.Masonry },
-            _cities = new List<string> { "Berlin" }
+            _cities = new List<string> { "Berlin", "Leipzig", "Hamburg", "Bremen", "Frankfurt", "Bonn", "Nuremberg", "Cologne", "Hannover",
+                "Munich", "Stuttgart", "Heidelberg", "Salzburg", "Konigsberg", "Dortmond", "Brandenburg" }
         };
         /// <summary>
         /// Constant; the Greek civilization.
@@ -248,9 +256,10 @@ namespace ErsatzCivLib.Model.Static
         {
             Name = "Greek",
             ManLeaderName = "Alexander",
-            WomanLeaderName = "{undefined}",
+            WomanLeaderName = "Berenice II of Egypt",
             _advances = new List<AdvancePivot> { AdvancePivot.Wheel },
-            _cities = new List<string> { "Athens" }
+            _cities = new List<string> { "Athens", "Sparta", "Corinth", "Delphi", "Eretria", "Pharsalos", "Argos", "Mycenae", "Herakleia",
+                "Antioch", "Ephesos", "Rhodes", "Knossos", "Troy", "Pergamon", "Miletos" }
         };
         /// <summary>
         /// Constant; the Indian civilization.
@@ -259,9 +268,10 @@ namespace ErsatzCivLib.Model.Static
         {
             Name = "Indian",
             ManLeaderName = "Mohandas Gandhi",
-            WomanLeaderName = "{undefined}",
+            WomanLeaderName = "Razia Sultana",
             _advances = new List<AdvancePivot> { AdvancePivot.CeremonialBurial },
-            _cities = new List<string> { "Delhi" }
+            _cities = new List<string> { "Delhi", "Bombay", "Madras", "Bangalore", "Calcutta", "Lahore", "Karachi", "Kolhapur", "Jaipur",
+                "Hyderbad", "Bengal", "Chittagong", "Punjab", "Dacca", "Indus", "Ganges" }
         };
         /// <summary>
         /// Constant; the Japanese civilization.
@@ -270,9 +280,10 @@ namespace ErsatzCivLib.Model.Static
         {
             Name = "Japanese",
             ManLeaderName = "Tokugawa",
-            WomanLeaderName = "{undefined}",
+            WomanLeaderName = "Kōgyoku",
             _advances = new List<AdvancePivot> { AdvancePivot.Masonry },
-            _cities = new List<string> { "Tokyo" }
+            _cities = new List<string> { "Tokyo", "Kyoto", "Osaka", "Nagoya", "Yokohama", "Kobe", "Fukuoka", "Sendai", "Kanazawa",
+                "Sapporo", "Matsuyama", "Akita", "Hiroshima", "Nagasaki", "Nara", "Kamakura" }
         };
         /// <summary>
         /// Constant; the Mongolian civilization.
@@ -281,9 +292,10 @@ namespace ErsatzCivLib.Model.Static
         {
             Name = "Mongolian",
             ManLeaderName = "Genghis Khan",
-            WomanLeaderName = "{undefined}",
+            WomanLeaderName = "Mandukhai",
             _advances = new List<AdvancePivot> { AdvancePivot.HorsebackRiding },
-            _cities = new List<string> { "Samarkand" }
+            _cities = new List<string> { "Samarkand", "Bokhara", "Nishapur", "Karakorum", "Kashgar", "Tabriz", "Aleppo", "Kabul", "Ormuz",
+                "Basra", "Khanbaryk", "Khorasan", "Shangtu", "Kazan", "Qyinsay", "Kerman"  }
         };
         /// <summary>
         /// Constant; the Roman civilization.
@@ -292,9 +304,10 @@ namespace ErsatzCivLib.Model.Static
         {
             Name = "Roman",
             ManLeaderName = "Julius Caesar",
-            WomanLeaderName = "Octavia",
+            WomanLeaderName = "Galla Placidia",
             _advances = new List<AdvancePivot> { AdvancePivot.BronzeWorking },
-            _cities = new List<string> { "Rome" }
+            _cities = new List<string> { "Rome", "Caesarea", "Carthage", "Nicopolis", "Byzantium", "Brundisium", "Syracuse", "Antioch",
+                "Palmyra", "Cyrene", "Gordion", "Tyrus", "Jerusalem", "Seleucia", "Ravenna", "Artaxata" }
         };
         /// <summary>
         /// Constant; the Russian civilization.
@@ -305,7 +318,8 @@ namespace ErsatzCivLib.Model.Static
             ManLeaderName = "Stalin",
             WomanLeaderName = "Catherine the Great",
             _advances = new List<AdvancePivot> { AdvancePivot.BronzeWorking },
-            _cities = new List<string> { "Moscow" }
+            _cities = new List<string> { "Moscow", "Leningrad", "Kiev", "Minsk", "Smolensk", "Odessa", "Sevastopol", "Tiblisi",
+                "Sverdlovsk", "Yakutsk", "Vladivostok", "Novograd", "Krasnoyarsk", "Riga", "Rostov", "Atrakhan" }
         };
         /// <summary>
         /// Constant; the Zulu civilization.
@@ -316,7 +330,8 @@ namespace ErsatzCivLib.Model.Static
             ManLeaderName = "Shaka",
             WomanLeaderName = "Nandi",
             _advances = new List<AdvancePivot> { AdvancePivot.CeremonialBurial },
-            _cities = new List<string> { "Zimbabwe", "Ulundi", "Hlobane" }
+            _cities = new List<string> { "Zimbabwe", "Ulundi", "Bapedi", "Hlobane", "Isandhlwala", "Intombe", "Mpondo", "Ngome",
+                "Swazi", "Tugela", "Umtata", "Umfolozi", "Ibabanago", "Isipezi", "Amatikulu", "Zunquin" }
         };
 
         #endregion
