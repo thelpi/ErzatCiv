@@ -33,7 +33,7 @@ namespace ErsatzCivLibTests
             var types = GetBuildableConcreteTypes();
             foreach (var type in types)
             {
-                var method = type.GetMethod(CreateMethodName, BindingFlags.NonPublic | BindingFlags.Static, null, new[] { typeof(MapSquarePivot) }, null);
+                var method = type.GetMethod(CreateMethodName, BindingFlags.NonPublic | BindingFlags.Static, null, new[] { typeof(CityPivot) }, null);
                 Assert.IsNotNull(method);
                 Assert.IsTrue(method.IsAssembly);
                 Assert.AreEqual(type, method.ReturnType);

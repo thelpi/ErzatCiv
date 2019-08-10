@@ -472,7 +472,7 @@ namespace ErsatzCivLib
                 throw new ArgumentException("The city is not manage by the human player !", nameof(city));
             }
 
-            var invokedInstance = buildableDefaultInstance.CreateOrGetInstance(city.MapSquareLocation);
+            var invokedInstance = buildableDefaultInstance.CreateOrGetInstance(city);
             if (invokedInstance == null)
             {
                 throw new InvalidOperationException($"Failure to create an instance of the specified production type !");

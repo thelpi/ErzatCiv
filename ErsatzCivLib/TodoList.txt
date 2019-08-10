@@ -30,11 +30,6 @@ Quand les colons meurents ou joignent une ville, les faire disparaitre de la lis
 
 Aqueduc empêche "Fire and plague"
 
-batiments à faire :
-https://civilization.fandom.com/wiki/Barracks_(Civ1)
-https://civilization.fandom.com/wiki/City_Walls_(Civ1)
-https://civilization.fandom.com/wiki/SDI_Defense_(Civ1)
-
 Power plant : risque d'accident nucléaire
 
 Gestion de la corruption un peu random
@@ -42,3 +37,12 @@ Gestion de la corruption un peu random
 Mysticism : ajoute +1 au bonheur avec temple
 
 Confusion taxes / Luxuries / Trade / Commerce / Treasure
+
+Humeur des citoyens : impact des unités à l'extérieur
+Quand c'est fait, faire : https://civilization.fandom.com/wiki/Women%27s_Suffrage_(Civ1)
+
+Militaire / politique, faire :
+https://civilization.fandom.com/wiki/Barracks_(Civ1)
+https://civilization.fandom.com/wiki/City_Walls_(Civ1)
+https://civilization.fandom.com/wiki/SDI_Defense_(Civ1)
+https://civilization.fandom.com/wiki/United_Nations_(Civ1)

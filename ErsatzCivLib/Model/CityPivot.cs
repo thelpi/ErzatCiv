@@ -47,6 +47,12 @@ namespace ErsatzCivLib.Model
 
         #endregion
 
+        #region Constants relative to wonders effects
+
+        private const double SETI_PROGRAM_SCIENCE_INCREASE_RATIO = 1.5;
+
+        #endregion
+
         #region Constants relative to real population computing
 
         private const double MAX_CITIZEN_COUNT = 40;
@@ -308,6 +314,11 @@ namespace ErsatzCivLib.Model
                 if (_improvements.Contains(CityImprovementPivot.University))
                 {
                     scienceValue = (int)Math.Floor(scienceValue * UNIVERSITY_SCIENCE_INCREASE_RATIO);
+                }
+
+                if (Player.Wonders.Contains(WonderPivot.SetiProgram))
+                {
+                    scienceValue = (int)Math.Floor(scienceValue * SETI_PROGRAM_SCIENCE_INCREASE_RATIO);
                 }
 
                 return (int)Math.Ceiling(scienceValue * Player.Regime.ScienceRate);

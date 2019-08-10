@@ -264,8 +264,10 @@ namespace ErsatzCivLib.Model
             Regime = RegimePivot.Despotism;
             Treasure = TREASURE_START;
 
-            _units.Add(SettlerPivot.CreateAtLocation(beginLocation));
-            _units.Add(SettlerPivot.CreateAtLocation(beginLocation));
+            _units.Add(SettlerPivot.CreateAtLocation(null));
+            _units.Add(SettlerPivot.CreateAtLocation(null));
+            _units[0].ForceLocation(beginLocation);
+            _units[1].ForceLocation(beginLocation);
 
             MapSquareDiscoveryInvokator(beginLocation, _engine.Map.GetAdjacentMapSquares(beginLocation).Values);
 
@@ -713,6 +715,12 @@ namespace ErsatzCivLib.Model
                 && !_engine.Map.GetAdjacentMapSquares(city.MapSquareLocation).Values.Any(msq => msq.Biome.IsSeaType))
             {
                 buildableDefaultInstances.Remove(CityImprovementPivot.HydroPlant);
+            }
+
+            // Allows nuclear weapons globally.
+            if (!_engine.GetEveryWonders().Any(w => w == WonderPivot.ManhattanProject))
+            {
+                buildableDefaultInstances.Remove(NuclearPivot.Default);
             }
 
             #endregion

@@ -19,8 +19,8 @@ namespace ErsatzCivLib.Model.Units
 
         #endregion
 
-        private SettlerPivot(MapSquarePivot location) :
-            base(location, false, true, 1, 0, 1, 1, 40, null, null, 320, null, 1)
+        private SettlerPivot(CityPivot city) :
+            base(city, false, true, 1, 0, 1, 1, 40, null, null, 320, null, 1)
         { }
 
         /// <summary>
@@ -28,7 +28,7 @@ namespace ErsatzCivLib.Model.Units
         /// </summary>
         internal override void Release()
         {
-            RemainingMoves = BusyOnAction ? 0 : Speed;
+            RemainingMoves = BusyOnAction ? 0 : ComputeRealSpeed();
         }
 
         /// <summary>
@@ -48,11 +48,11 @@ namespace ErsatzCivLib.Model.Units
         /// <summary>
         /// Static constructior.
         /// </summary>
-        /// <param name="location">Builder location.</param>
+        /// <param name="city">The <see cref="UnitPivot.City"/> value.</param>
         /// <returns>An instance of <see cref="SettlerPivot"/>.</returns>
-        internal static SettlerPivot CreateAtLocation(MapSquarePivot location)
+        internal static SettlerPivot CreateAtLocation(CityPivot city)
         {
-            return new SettlerPivot(location);
+            return new SettlerPivot(city);
         }
     }
 }

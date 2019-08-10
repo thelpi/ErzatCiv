@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using ErsatzCivLib.Model.Enums;
 using ErsatzCivLib.Model.Static;
 
@@ -10,7 +11,7 @@ namespace ErsatzCivLib.Model
     /// <remarks>
     /// Each concrete implementation must implement :
     /// - A <c>static internal readonly</c> field "Default" used as a template.
-    /// - A <c>static internal</c> method "CreateAtLocation" used to create instances, based on the default template. The method must have a single parameter, of type <see cref="MapSquarePivot"/>.
+    /// - A <c>static internal</c> method "CreateAtLocation" used to create instances, based on the default template. The method must have a single parameter, of type <see cref="CityPivot"/>.
     /// - Every constructors must be <c>private</c>.
     /// </remarks>
     /// <seealso cref="BuildablePivot"/>
@@ -19,9 +20,14 @@ namespace ErsatzCivLib.Model
     {
         private const double ROAD_SPEED_COST_RATIO = 0.3;
         private const int CITY_SPEED_COST = 1;
+        private const int MAGELLAN_WONDER_INCREASE_SPEED = 1;
 
         #region Embedded properties
 
+        /// <summary>
+        /// The <see cref="CityPivot"/> which owns this instance.
+        /// </summary>
+        public CityPivot City { get; private set; }
         /// <summary>
         /// Location on map.
         /// </summary>
@@ -64,7 +70,7 @@ namespace ErsatzCivLib.Model
         /// <summary>
         /// Constructor.
         /// </summary>
-        /// <param name="location">The <see cref="MapSquareLocation"/> value.</param>
+        /// <param name="city">The <see cref="City"/> value.</param>
         /// <param name="seaNavigate">The <see cref="SeaNavigate"/> value.</param>
         /// <param name="groundNavigate">The <see cref="GroundNavigate"/> value.</param>
         /// <param name="defensePoints">The <see cref="DefensePoints"/> value.</param>
@@ -77,19 +83,20 @@ namespace ErsatzCivLib.Model
         /// <param name="purchasePrice">The <see cref="BuildablePivot.PurchasePrice"/> value.</param>
         /// <param name="name">The <see cref="BuildablePivot.Name"/> value.</param>
         /// <param name="citizenCostToProduce">The <see cref="CitizenCostToProduce"/> value.</param>
-        protected UnitPivot(MapSquarePivot location, bool seaNavigate, bool groundNavigate, int defensePoints, int offensePoints,
+        protected UnitPivot(CityPivot city, bool seaNavigate, bool groundNavigate, int defensePoints, int offensePoints,
             int lifePoints, int speed, int productivityCost, AdvancePivot advancePrerequisite, AdvancePivot advanceObsolescence,
             int purchasePrice, string name = null, int citizenCostToProduce = 0) :
             base(productivityCost, advancePrerequisite, advanceObsolescence, purchasePrice, name)
         {
-            MapSquareLocation = location;
+            City = city;
+            MapSquareLocation = city?.MapSquareLocation;
             SeaNavigate = seaNavigate;
             GroundNavigate = groundNavigate;
             DefensePoints = defensePoints;
             OffensePoints = offensePoints;
             CurrentLifePoints = lifePoints;
             Speed = speed;
-            RemainingMoves = Speed;
+            RemainingMoves = ComputeRealSpeed();
             CitizenCostToProduce = citizenCostToProduce;
         }
 
@@ -147,7 +154,37 @@ namespace ErsatzCivLib.Model
         /// </summary>
         internal virtual void Release()
         {
-            RemainingMoves = Speed;
+            RemainingMoves = ComputeRealSpeed();
+        }
+
+        /// <summary>
+        /// Forces an initial position for units without city.
+        /// </summary>
+        /// <param name="location">The <see cref="MapSquareLocation"/> value.</param>
+        internal void ForceLocation(MapSquarePivot location)
+        {
+            if (City == null && MapSquareLocation == null)
+            {
+                MapSquareLocation = location;
+            }
+        }
+
+        /// <summary>
+        /// Computes the real <see cref="Speed"/>.
+        /// </summary>
+        /// <returns>The speed.</returns>
+        protected int ComputeRealSpeed()
+        {
+            var bonus = 0;
+            if (SeaNavigate
+                && !GroundNavigate
+                && City != null
+                && City.Player.Wonders.Contains(WonderPivot.MagellanExpedition))
+            {
+                bonus += MAGELLAN_WONDER_INCREASE_SPEED;
+            }
+
+            return Speed + bonus;
         }
     }
 }

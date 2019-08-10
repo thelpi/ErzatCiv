@@ -70,6 +70,7 @@
     <Compile Include="Model\Static\BiomePivot.cs" />
     <Compile Include="Model\PlayerPivot.cs" />
     <Compile Include="Model\TurnConsequencesPivot.cs" />
+    <Compile Include="Model\Units\NuclearPivot.cs" />
     <Compile Include="Model\Units\SettlerPivot.cs" />
     <Compile Include="Model\UnitPivot.cs" />
     <Compile Include="Model\Static\WonderPivot.cs" />
