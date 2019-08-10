@@ -121,27 +121,9 @@ namespace ErsatzCivLib
             return ms;
         }
 
-        private void ChangeCitizenToSpecialist(CitizenPivot citizenSource, CitizenTypePivot citizenType)
-        {
-            citizenSource.ToSpecialist(citizenType);
-            citizenSource.City.CheckCitizensMood();
-        }
-
         private bool OccupiedByCity(MapSquarePivot mapSquare, CityPivot exceptCity = null)
         {
             return GetEveryCities().Any(c => (exceptCity == null || exceptCity != c) && c.Citizens.Any(cc => cc.MapSquare == mapSquare));
-        }
-
-        private bool ChangeCitizenToDefaultAtTheBestSpotInternal(CitizenPivot citizenSource)
-        {
-            var mapSquare = citizenSource.City.BestVacantMapSquareLocation();
-            if (mapSquare != null)
-            {
-                citizenSource.ToCitizen(mapSquare);
-                citizenSource.City.CheckCitizensMood();
-                return true;
-            }
-            return false;
         }
 
         #endregion
@@ -383,12 +365,7 @@ namespace ErsatzCivLib
                 throw new ArgumentException("The specified square can't be used by the citizen !");
             }
 
-            var citizenSource = city.GetAnySpecialistCitizen();
-            if (citizenSource != null)
-            {
-                citizenSource.ToCitizen(mapSquare);
-                citizenSource.City.CheckCitizensMood();
-            }
+            city.ChangeAnyCitizenToDefault(mapSquare);
         }
 
         /// <summary>
@@ -521,25 +498,7 @@ namespace ErsatzCivLib
                 throw new ArgumentException("The city is not manage by the human player !", nameof(citizenSource));
             }
 
-            if (!citizenSource.Type.HasValue)
-            {
-                ChangeCitizenToSpecialist(citizenSource, CitizenTypePivot.Entertainer);
-            }
-            else
-            {
-                switch (citizenSource.Type.Value)
-                {
-                    case CitizenTypePivot.Entertainer:
-                        ChangeCitizenToSpecialist(citizenSource, CitizenTypePivot.Scientist);
-                        break;
-                    case CitizenTypePivot.Scientist:
-                        ChangeCitizenToSpecialist(citizenSource, CitizenTypePivot.TaxCollector);
-                        break;
-                    case CitizenTypePivot.TaxCollector:
-                        ChangeCitizenToDefaultAtTheBestSpotInternal(citizenSource);
-                        break;
-                }
-            }
+            citizenSource.City.SwitchCitizenType(citizenSource);
         }
 
         /// <summary>

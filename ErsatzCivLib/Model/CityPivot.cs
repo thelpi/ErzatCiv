@@ -497,6 +497,24 @@ namespace ErsatzCivLib.Model
             }
         }
 
+        private void ChangeCitizenToSpecialist(CitizenPivot citizenSource, CitizenTypePivot citizenType)
+        {
+            citizenSource.ToSpecialist(citizenType);
+            CheckCitizensMood();
+        }
+
+        private bool ChangeCitizenToDefaultAtTheBestSpotInternal(CitizenPivot citizenSource)
+        {
+            var mapSquare = BestVacantMapSquareLocation();
+            if (mapSquare != null)
+            {
+                citizenSource.ToCitizen(mapSquare);
+                CheckCitizensMood();
+                return true;
+            }
+            return false;
+        }
+
         #endregion
 
         #region Internal methods
@@ -789,6 +807,48 @@ namespace ErsatzCivLib.Model
             {
                 _improvements.Add(cityImprovement);
                 RemovePreviousPlant(cityImprovement);
+            }
+        }
+
+        /// <summary>
+        /// Changes any citizen to default.
+        /// </summary>
+        /// <param name="mapSquare">The location.</param>
+        internal void ChangeAnyCitizenToDefault(MapSquarePivot mapSquare)
+        {
+            var citizenSource = GetAnySpecialistCitizen();
+            if (citizenSource != null)
+            {
+                citizenSource.ToCitizen(mapSquare);
+                citizenSource.City.CheckCitizensMood();
+            }
+        }
+
+        /// <summary>
+        /// Changes the <see cref="CitizenTypePivot"/> of the specified <see cref="CitizenPivot"/>;
+        /// using a static sequence of type [Regular -> Entertainer -> Scientist -> TaxCollector -> Regular].
+        /// </summary>
+        /// <param name="citizenSource">The citizen.</param>
+        internal void SwitchCitizenType(CitizenPivot citizenSource)
+        {
+            if (!citizenSource.Type.HasValue)
+            {
+                ChangeCitizenToSpecialist(citizenSource, CitizenTypePivot.Entertainer);
+            }
+            else
+            {
+                switch (citizenSource.Type.Value)
+                {
+                    case CitizenTypePivot.Entertainer:
+                        ChangeCitizenToSpecialist(citizenSource, CitizenTypePivot.Scientist);
+                        break;
+                    case CitizenTypePivot.Scientist:
+                        ChangeCitizenToSpecialist(citizenSource, CitizenTypePivot.TaxCollector);
+                        break;
+                    case CitizenTypePivot.TaxCollector:
+                        ChangeCitizenToDefaultAtTheBestSpotInternal(citizenSource);
+                        break;
+                }
             }
         }
 
