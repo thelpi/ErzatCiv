@@ -41,6 +41,9 @@ namespace ErsatzCivLib.Model
         private const double COURTHOUSE_CORRUPTION_INCREASE_RATE = 0.5;
         private const int AQUEDUC_MAX_POPULATION_WITHOUT = 10;
         private const double CAPITALIZATION_PRODUCTIVITY_TO_COMMERCE_RATIO = 0.1;
+        private const int TEMPLE_HAPPINESS_EFFECT = 1;
+        private const int COLOSSEUM_HAPPINESS_EFFECT = 3;
+        private const int CATHEDRAL_HAPPINESS_EFFECT = 4;
 
         #endregion
 
@@ -650,9 +653,9 @@ namespace ErsatzCivLib.Model
 
             // Entertaining effects.
             var entertainers = _citizens.Where(c => c.Type == CitizenTypePivot.Entertainer).Count();
-            var templeEffect = _improvements.Contains(CityImprovementPivot.Temple) ? 1 : 0;
-            var colosseumEffect = _improvements.Contains(CityImprovementPivot.Colosseum) ? 3 : 0;
-            var cathedralEffet = _improvements.Contains(CityImprovementPivot.Cathedral) ? 4 : 0;
+            var templeEffect = _improvements.Contains(CityImprovementPivot.Temple) ? TEMPLE_HAPPINESS_EFFECT : 0;
+            var colosseumEffect = _improvements.Contains(CityImprovementPivot.Colosseum) ? COLOSSEUM_HAPPINESS_EFFECT : 0;
+            var cathedralEffet = _improvements.Contains(CityImprovementPivot.Cathedral) ? CATHEDRAL_HAPPINESS_EFFECT : 0;
             for (int i = 0; i < (entertainers + templeEffect + colosseumEffect + cathedralEffet); i++)
             {
                 if (unhappyFaces > 0)
@@ -726,7 +729,7 @@ namespace ErsatzCivLib.Model
             {
                 oldCapital._improvements.Remove(CityImprovementPivot.Palace);
             }
-            _improvements.Remove(CityImprovementPivot.Courthouse);
+            //_improvements.Remove(CityImprovementPivot.Courthouse);
             _improvements.Add(CityImprovementPivot.Palace);
         }
 

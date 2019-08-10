@@ -691,10 +691,10 @@ namespace ErsatzCivLib.Model
             #region Special rules
 
             // No aqueduc required if a river is close to the city.
-            if (city.MapSquareLocation.HasRiver)
+            /*if (city.MapSquareLocation.HasRiver)
             {
                 buildableDefaultInstances.RemoveAll(b => CityImprovementPivot.Aqueduc == b);
-            }
+            }*/
 
             // Courthouse not required for capital.
             if (city == Capital)

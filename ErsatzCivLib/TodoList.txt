@@ -4,7 +4,7 @@ L'impossibilité d'irriguer sans eau (avant "Electricity") n'existe pas.
 
 Les rivières sont des carrés propres, et pas entre carrés.
 
-"Fusion Power" réduit le risque d'accident nucléraire (non géré pour l'instant).
+"Fusion Power" réduit le risque d'accident nucléraire
 
 Gestion des "Futures tech".
 
@@ -27,3 +27,18 @@ Donner une destination à l'unité
 Les colons peuvent rejoindre les villes < 10
 
 Quand les colons meurents ou joignent une ville, les faire disparaitre de la liste de la ville
+
+Aqueduc empêche "Fire and plague"
+
+batiments à faire :
+https://civilization.fandom.com/wiki/Barracks_(Civ1)
+https://civilization.fandom.com/wiki/City_Walls_(Civ1)
+https://civilization.fandom.com/wiki/SDI_Defense_(Civ1)
+
+Power plant : risque d'accident nucléaire
+
+Gestion de la corruption un peu random
+
+Mysticism : ajoute +1 au bonheur avec temple
+
+Confusion taxes / Luxuries / Trade / Commerce / Treasure
