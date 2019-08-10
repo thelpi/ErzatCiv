@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using ErsatzCivLib.Model.SpaceShipParts;
 using ErsatzCivLib.Model.Static;
 
 namespace ErsatzCivLib.Model
@@ -85,19 +86,32 @@ namespace ErsatzCivLib.Model
         /// <returns>The instance location; might be <c>Null</c> if non-pertinent.</returns>
         internal BuildablePivot CreateOrGetInstance(CityPivot city)
         {
-            if (!Is<UnitPivot>())
+            if (!Is<UnitPivot>() && !Is<SpaceShipPivot>())
             {
                 return this;
+            }
+
+            if (Is<ComponentPivot>())
+            {
+                return ComponentPivot.Create();
+            }
+            else if (Is<ModulePivot>())
+            {
+                return ModulePivot.Create();
+            }
+            else if (Is<StructuralPivot>())
+            {
+                return StructuralPivot.Create();
             }
 
             var method = GetType().GetMethod(
                 "CreateAtLocation",
                 BindingFlags.Static | BindingFlags.NonPublic,
                 null,
-                new[] { typeof(CityPivot) },
+                new[] { typeof(CityPivot), typeof(MapSquarePivot) },
                 null);
 
-            return (UnitPivot)method?.Invoke(null, new[] { city });
+            return (UnitPivot)method?.Invoke(null, new object[] { city, city.MapSquareLocation });
         }
 
         private static List<BuildablePivot> _defaultUnitInstances = null;
@@ -120,6 +134,9 @@ namespace ErsatzCivLib.Model
                     _defaultUnitInstances.Add(CapitalizationPivot.Default);
                     _defaultUnitInstances.AddRange(CityImprovementPivot.Instances);
                     _defaultUnitInstances.AddRange(WonderPivot.Instances);
+                    _defaultUnitInstances.Add(StructuralPivot.Default);
+                    _defaultUnitInstances.Add(ModulePivot.Default);
+                    _defaultUnitInstances.Add(ComponentPivot.Default);
                 }
 
                 return _defaultUnitInstances;

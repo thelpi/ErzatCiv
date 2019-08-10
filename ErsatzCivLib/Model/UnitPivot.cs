@@ -11,7 +11,8 @@ namespace ErsatzCivLib.Model
     /// <remarks>
     /// Each concrete implementation must implement :
     /// - A <c>static internal readonly</c> field "Default" used as a template.
-    /// - A <c>static internal</c> method "CreateAtLocation" used to create instances, based on the default template. The method must have a single parameter, of type <see cref="CityPivot"/>.
+    /// - A <c>static internal</c> method "CreateAtLocation" used to create instances, based on the default template.
+    /// The method must have two parameters, of type <see cref="CityPivot"/> and <see cref="MapSquarePivot"/> respectively.
     /// - Every constructors must be <c>private</c>.
     /// </remarks>
     /// <seealso cref="BuildablePivot"/>
@@ -83,13 +84,14 @@ namespace ErsatzCivLib.Model
         /// <param name="purchasePrice">The <see cref="BuildablePivot.PurchasePrice"/> value.</param>
         /// <param name="name">The <see cref="BuildablePivot.Name"/> value.</param>
         /// <param name="citizenCostToProduce">The <see cref="CitizenCostToProduce"/> value.</param>
+        /// <param name="location">The <see cref="MapSquareLocation"/> value, if <paramref name="city"/> is <c>Null</c>.</param>
         protected UnitPivot(CityPivot city, bool seaNavigate, bool groundNavigate, int defensePoints, int offensePoints,
             int lifePoints, int speed, int productivityCost, AdvancePivot advancePrerequisite, AdvancePivot advanceObsolescence,
-            int purchasePrice, string name = null, int citizenCostToProduce = 0) :
+            int purchasePrice, string name = null, int citizenCostToProduce = 0, MapSquarePivot location = null) :
             base(productivityCost, advancePrerequisite, advanceObsolescence, purchasePrice, name)
         {
             City = city;
-            MapSquareLocation = city?.MapSquareLocation;
+            MapSquareLocation = city?.MapSquareLocation ?? location;
             SeaNavigate = seaNavigate;
             GroundNavigate = groundNavigate;
             DefensePoints = defensePoints;
@@ -155,18 +157,6 @@ namespace ErsatzCivLib.Model
         internal virtual void Release()
         {
             RemainingMoves = ComputeRealSpeed();
-        }
-
-        /// <summary>
-        /// Forces an initial position for units without city.
-        /// </summary>
-        /// <param name="location">The <see cref="MapSquareLocation"/> value.</param>
-        internal void ForceLocation(MapSquarePivot location)
-        {
-            if (City == null && MapSquareLocation == null)
-            {
-                MapSquareLocation = location;
-            }
         }
 
         /// <summary>

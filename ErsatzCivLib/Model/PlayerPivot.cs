@@ -264,10 +264,8 @@ namespace ErsatzCivLib.Model
             Regime = RegimePivot.Despotism;
             Treasure = TREASURE_START;
 
-            _units.Add(SettlerPivot.CreateAtLocation(null));
-            _units.Add(SettlerPivot.CreateAtLocation(null));
-            _units[0].ForceLocation(beginLocation);
-            _units[1].ForceLocation(beginLocation);
+            _units.Add(SettlerPivot.CreateAtLocation(null, beginLocation));
+            _units.Add(SettlerPivot.CreateAtLocation(null, beginLocation));
 
             MapSquareDiscoveryInvokator(beginLocation, _engine.Map.GetAdjacentMapSquares(beginLocation).Values);
 
@@ -528,6 +526,13 @@ namespace ErsatzCivLib.Model
                             contCity.ForceCityImprovement(CityImprovementPivot.HydroPlant);
                         }
                     }
+                    else if (WonderPivot.ApolloProgram == produced)
+                    {
+                        foreach (var cityToShow in _engine.Players.SelectMany(p => p.Cities))
+                        {
+                            MapSquareDiscoveryInvokator(cityToShow.MapSquareLocation, new List<MapSquarePivot>());
+                        }
+                    }
                 }
                 if (turnInfo.Item2 != null)
                 {
@@ -686,6 +691,9 @@ namespace ErsatzCivLib.Model
             // Removes wonders already built globally.
             buildableDefaultInstances.RemoveAll(b => b.Is<WonderPivot>() && _engine.GetEveryWonders().Contains(b as WonderPivot));
 
+            // Removes wonders in progress in another city.
+            buildableDefaultInstances.RemoveAll(b => b.Is<WonderPivot>() && _cities.Select(c => c.Production).Contains(b as WonderPivot));
+
             // Another improvement is required in the first place.
             buildableDefaultInstances.RemoveAll(b =>
                 b.Is<CityImprovementPivot>()
@@ -726,9 +734,15 @@ namespace ErsatzCivLib.Model
             }
 
             // Allows nuclear weapons globally.
-            if (!_engine.GetEveryWonders().Any(w => w == WonderPivot.ManhattanProject))
+            if (!_engine.GetEveryWonders().Contains(WonderPivot.ManhattanProject))
             {
                 buildableDefaultInstances.Remove(NuclearPivot.Default);
+            }
+
+            // Allows spaceship items.
+            if (!Wonders.Contains(WonderPivot.ApolloProgram))
+            {
+                buildableDefaultInstances.RemoveAll(b => b.Is<SpaceShipPivot>());
             }
 
             #endregion
