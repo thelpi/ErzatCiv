@@ -145,16 +145,26 @@ namespace ErsatzCivLib.Model
         #endregion
 
         /// <summary>
-        /// Constructor.
+        /// Constructor (for new citizen).
         /// </summary>
         /// <param name="city">The <see cref="City"/> value.</param>
         /// <param name="mapSquare">The <see cref="MapSquare"/> value.</param>
-        /// <param name="forceCitizen">Optionnal; the <see cref="Citizen"/> value.</param>
-        internal CityAreaMapSquarePivot(CityPivot city, MapSquarePivot mapSquare, CitizenPivot forceCitizen = null)
+        internal CityAreaMapSquarePivot(CityPivot city, MapSquarePivot mapSquare)
         {
             City = city;
             MapSquare = mapSquare;
-            Citizen = forceCitizen ?? (city.MapSquareLocation == MapSquare ? null : new CitizenPivot(mapSquare, city));
+            Citizen = city.MapSquareLocation == MapSquare ? null : new CitizenPivot(mapSquare, city);
+        }
+
+        /// <summary>
+        /// Constructor (for existing citizen).
+        /// </summary>
+        /// <param name="citizen">The <see cref="Citizen"/> value.</param>
+        internal CityAreaMapSquarePivot(CitizenPivot citizen)
+        {
+            City = citizen.City;
+            MapSquare = citizen.MapSquare;
+            Citizen = citizen;
         }
     }
 }

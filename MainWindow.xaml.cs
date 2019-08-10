@@ -460,7 +460,7 @@ namespace ErsatzCiv
                 HorizontalAlignment = stuckOnLeft ? HorizontalAlignment.Left :
                     (stuckOnRight ? HorizontalAlignment.Right : HorizontalAlignment.Center),
                 VerticalAlignment = VerticalAlignment.Bottom,
-                Text = $"{city.Name} - {city.Citizens.Count}",
+                Text = $"{city.Name} - {city.CitizensCount}",
                 TextAlignment = TextAlignment.Center,
                 Background = Brushes.White
             };

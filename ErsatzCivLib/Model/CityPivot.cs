@@ -23,18 +23,11 @@ namespace ErsatzCivLib.Model
 
         #region Constants relative to improvements effects
 
-        private const double MARKETPLACE_COMMERCE_INCREASE_RATIO = 1.5;
-        private const double BANK_COMMERCE_INCREASE_RATIO = 1.5;
         private const double LIBRARY_SCIENCE_INCREASE_RATIO = 1.5;
         private const double UNIVERSITY_SCIENCE_INCREASE_RATIO = 1.5;
-        private const double FACTORY_PRODUCTIVITY_INCREASE_RATIO = 1.5;
-        private const double MFGPLANT_PRODUCTIVITY_INCREASE_RATIO = 2;
-        private const double HYDROPLANT_PRODUCTIVITY_INCREASE_RATIO = 1.5;
-        private const double NUCLEARPLANT_PRODUCTIVITY_INCREASE_RATIO = 1.5;
         private const double HYDROPLANT_POLLUTION_INCREASE_RATIO = 0.5;
         private const double NUCLEARPLANT_POLLUTION_INCREASE_RATIO = 0.5;
         private const double RECYCLINGCENTER_POLLUTION_INCREASE_RATIO = 1 / (double)3;
-        private const double POWERPLANT_PRODUCTIVITY_INCREASE_RATIO = 1.5;
         private const double GRANARY_FOOD_INCREASE_RATIO = 0.5;
         private const double MASSTRANSIT_POLLUTION_INCREASE_RATIO = 0;
         private const double PALACE_CORRUPTION_INCREASE_RATE = 0.5;
@@ -105,11 +98,11 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public IReadOnlyCollection<Units.SettlerPivot> Settlers { get { return _settlers; } }
 
-        private readonly List<CitizenPivot> _citizens;
+        private readonly List<CitizenPivot> _specialistCitizens;
         /// <summary>
-        /// List of <see cref="CitizenPivot"/>.
+        /// List of specialists <see cref="CitizenPivot"/>.
         /// </summary>
-        public IReadOnlyCollection<CitizenPivot> Citizens { get { return _citizens; } }
+        public IReadOnlyCollection<CitizenPivot> SpecialistCitizens { get { return _specialistCitizens; } }
 
         private readonly List<CityImprovementPivot> _improvements;
         /// <summary>
@@ -123,10 +116,46 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public IReadOnlyCollection<WonderPivot> Wonders { get { return _wonders; } }
 
+        private readonly List<CityAreaMapSquarePivot> _areaMapSquares;
+        /// <summary>
+        /// List of <see cref="CityAreaMapSquarePivot"/>; includes city center.
+        /// </summary>
+        public IReadOnlyCollection<CityAreaMapSquarePivot> AreaMapSquares { get { return _areaMapSquares; } }
+
         #endregion
 
         #region Inferred properties
 
+        /// <summary>
+        /// List of <see cref="CityAreaMapSquarePivot"/> without the city center.
+        /// </summary>
+        public IReadOnlyCollection<CityAreaMapSquarePivot> AreaWithoutCityMapSquares
+        {
+            get
+            {
+                return AreaMapSquares.Where(ams => !ams.IsCityCenter).ToList();
+            }
+        }
+        /// <summary>
+        /// Number of citizens.
+        /// </summary>
+        public int CitizensCount
+        {
+            get
+            {
+                return Citizens.Count;
+            }
+        }
+        /// <summary>
+        /// List of every <see cref="CitizenPivot"/> (specialist or not).
+        /// </summary>
+        public IReadOnlyCollection<CitizenPivot> Citizens
+        {
+            get
+            {
+                return AreaWithoutCityMapSquares.Select(ams => ams.Citizen).Concat(_specialistCitizens).OrderBy(c => c).ToList();
+            }
+        }
         /// <summary>
         /// Indicates if the city is in civil trouble (too much citizens in <see cref="MoodPivot.Unhappy"/> mood).
         /// </summary>
@@ -134,7 +163,8 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                return _citizens.Count(c => c.Mood == MoodPivot.Unhappy) > _citizens.Count(c => c.Mood == MoodPivot.Happy);
+                return AreaWithoutCityMapSquares.Count(ams => ams.Citizen.Mood == MoodPivot.Unhappy) >
+                    AreaWithoutCityMapSquares.Count(ams => ams.Citizen.Mood == MoodPivot.Happy);
             }
         }
         /// <summary>
@@ -154,7 +184,7 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                return (int)Math.Round((MIN_CC_POP / Math.Exp(POP_GROWTH_RATIO)) * Math.Exp(POP_GROWTH_RATIO * _citizens.Count));
+                return (int)Math.Round((MIN_CC_POP / Math.Exp(POP_GROWTH_RATIO)) * Math.Exp(POP_GROWTH_RATIO * CitizensCount));
             }
         }
         /// <summary>
@@ -169,30 +199,14 @@ namespace ErsatzCivLib.Model
                     return 0;
                 }
 
+                var baseValue = AreaMapSquares.Sum(ams => ams.Commerce);
+
+                var taxValue = Citizens.Count(c => c.Type == CitizenTypePivot.TaxCollector || !c.Type.HasValue);
+
                 var capitalizationValue = Production.Is<CapitalizationPivot>() ?
                     (int)Math.Ceiling(Productivity * CAPITALIZATION_PRODUCTIVITY_TO_COMMERCE_RATIO) : 0;
-                var cityCommerceValue = MapSquareLocation.CityCommerce + (
-                    MapSquareLocation.CityCommerce > 0 ? Player.Regime.CommerceBonus : 0
-                );
-                var aroundCityCommerceValue = _citizens
-                    .Where(c => !c.Type.HasValue)
-                    .Sum(c => c.MapSquare.Commerce + (c.MapSquare.Commerce > 0 ? Player.Regime.CommerceBonus : 0));
 
-                var commerceValue = cityCommerceValue + capitalizationValue + aroundCityCommerceValue;
-
-                if (_improvements.Contains(CityImprovementPivot.Marketplace))
-                {
-                    commerceValue = (int)Math.Floor(MARKETPLACE_COMMERCE_INCREASE_RATIO * commerceValue);
-                }
-
-                if (_improvements.Contains(CityImprovementPivot.Bank))
-                {
-                    commerceValue = (int)Math.Floor(BANK_COMMERCE_INCREASE_RATIO * commerceValue);
-                }
-
-                var taxValue = _citizens.Count(c => c.Type == CitizenTypePivot.TaxCollector || !c.Type.HasValue);
-
-                var totalValue = taxValue + commerceValue;
+                var totalValue = taxValue + baseValue + capitalizationValue;
 
                 double corruptionRate = (Player.Regime.CorruptionRate * Player.GetDistanceToCapitalRate(this));
 
@@ -215,7 +229,7 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                return (_citizens.Count + _settlers.Count) * FOOD_BY_CITIZEN_BY_TURN;
+                return (CitizensCount + _settlers.Count) * FOOD_BY_CITIZEN_BY_TURN;
             }
         }
         /// <summary>
@@ -225,7 +239,7 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                return _citizens.Count * FOOD_BY_CITIZEN_BY_TURN;
+                return CitizensCount * FOOD_BY_CITIZEN_BY_TURN;
             }
         }
         /// <summary>
@@ -235,9 +249,7 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                var foodValue = MapSquareLocation.CityFood + _citizens
-                        .Where(c => !c.Type.HasValue)
-                        .Sum(c => c.MapSquare.Food);
+                var foodValue = AreaMapSquares.Sum(ams => ams.Food);
 
                 if (InCivilTroubleOrAnarchy && foodValue > FoodConsumptionWithoutSettlers)
                 {
@@ -259,39 +271,7 @@ namespace ErsatzCivLib.Model
                     return 0;
                 }
 
-                var baseValue = MapSquareLocation.CityProductivity + _citizens
-                    .Where(c => !c.Type.HasValue)
-                    .Sum(c => c.MapSquare.Productivity);
-
-                bool hasProdImprovement = false;
-                if (_improvements.Contains(CityImprovementPivot.MfgPlant))
-                {
-                    baseValue = (int)Math.Floor(MFGPLANT_PRODUCTIVITY_INCREASE_RATIO * baseValue);
-                    hasProdImprovement = true;
-                }
-                else if (_improvements.Contains(CityImprovementPivot.Factory))
-                {
-                    baseValue = (int)Math.Floor(FACTORY_PRODUCTIVITY_INCREASE_RATIO * baseValue);
-                    hasProdImprovement = true;
-                }
-
-                if (hasProdImprovement)
-                {
-                    if (_improvements.Contains(CityImprovementPivot.HydroPlant))
-                    {
-                        baseValue = (int)Math.Floor(HYDROPLANT_PRODUCTIVITY_INCREASE_RATIO * baseValue);
-                    }
-                    else if (_improvements.Contains(CityImprovementPivot.NuclearPlant))
-                    {
-                        baseValue = (int)Math.Floor(NUCLEARPLANT_PRODUCTIVITY_INCREASE_RATIO * baseValue);
-                    }
-                    else if (_improvements.Contains(CityImprovementPivot.PowerPlant))
-                    {
-                        baseValue = (int)Math.Floor(POWERPLANT_PRODUCTIVITY_INCREASE_RATIO * baseValue);
-                    }
-                }
-
-                return baseValue;
+                return AreaMapSquares.Sum(ams => ams.Productivity);
             }
         }
         /// <summary>
@@ -306,7 +286,7 @@ namespace ErsatzCivLib.Model
                     return 0;
                 }
                 
-                var scienceValue = _citizens.Count(c => c.Type == CitizenTypePivot.Scientist || !c.Type.HasValue);
+                var scienceValue = Citizens.Count(c => c.Type == CitizenTypePivot.Scientist || !c.Type.HasValue);
 
                 if (_improvements.Contains(CityImprovementPivot.Library))
                 {
@@ -407,7 +387,7 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                var baseValue = FOOD_RATIO_TO_NEXT_CITIZEN * _citizens.Count;
+                var baseValue = FOOD_RATIO_TO_NEXT_CITIZEN * CitizensCount;
 
                 if (_improvements.Contains(CityImprovementPivot.Granary))
                 {
@@ -470,10 +450,12 @@ namespace ErsatzCivLib.Model
             _improvements = new List<CityImprovementPivot>();
             _wonders = new List<WonderPivot>();
 
-            _citizens = new List<CitizenPivot>
+            _specialistCitizens = new List<CitizenPivot>();
+            _areaMapSquares = new List<CityAreaMapSquarePivot>
             {
-                new CitizenPivot(BestVacantMapSquareLocation(), this)
+                new CityAreaMapSquarePivot(this, MapSquareLocation)
             };
+            _areaMapSquares.Add(new CityAreaMapSquarePivot(this, BestVacantMapSquareLocation()));
         }
 
         #region Private methods
@@ -499,8 +481,13 @@ namespace ErsatzCivLib.Model
 
         private void ChangeCitizenToSpecialist(CitizenPivot citizenSource, CitizenTypePivot citizenType)
         {
+            bool wasSpecialistAlready = _specialistCitizens.Contains(citizenSource);
             citizenSource.ToSpecialist(citizenType);
-            CheckCitizensMood();
+            if (!wasSpecialistAlready)
+            {
+                _areaMapSquares.Remove(_areaMapSquares.SingleOrDefault(ams => ams.Citizen == citizenSource));
+                _specialistCitizens.Add(citizenSource);
+            }
         }
 
         private bool ChangeCitizenToDefaultAtTheBestSpotInternal(CitizenPivot citizenSource)
@@ -509,10 +496,34 @@ namespace ErsatzCivLib.Model
             if (mapSquare != null)
             {
                 citizenSource.ToCitizen(mapSquare);
+
+                if (_specialistCitizens.Contains(citizenSource))
+                {
+                    _specialistCitizens.Remove(citizenSource);
+                    _areaMapSquares.Add(new CityAreaMapSquarePivot(citizenSource));
+                }
+                else
+                {
+                    _areaMapSquares.Remove(_areaMapSquares.SingleOrDefault(ams => ams.Citizen == citizenSource));
+                    _areaMapSquares.Add(new CityAreaMapSquarePivot(citizenSource));
+                }
+
                 CheckCitizensMood();
                 return true;
             }
             return false;
+        }
+
+        private void RemoveAnyCitizen()
+        {
+            if (_specialistCitizens.Count > 0)
+            {
+                _specialistCitizens.RemoveAt(0);
+            }
+            else
+            {
+                _areaMapSquares.Remove(AreaWithoutCityMapSquares.First());
+            }
         }
 
         #endregion
@@ -527,7 +538,7 @@ namespace ErsatzCivLib.Model
         internal MapSquarePivot BestVacantMapSquareLocation()
         {
             return Player.ComputeCityAvailableMapSquares(this)
-                .Where(x => _citizens?.Any(c => c.MapSquare == x) != true)
+                .Where(x => !AreaWithoutCityMapSquares.Any(ams => ams.MapSquare == x))
                 .OrderByDescending(x => x.TotalValue)
                 .FirstOrDefault();
         }
@@ -590,7 +601,7 @@ namespace ErsatzCivLib.Model
                 }
                 else
                 {
-                    _citizens.RemoveAt(0);
+                    RemoveAnyCitizen();
                     resetCitizensRequired = true;
                 }
                 FoodStorage = 0;
@@ -598,10 +609,10 @@ namespace ErsatzCivLib.Model
             }
             else if (FoodStorage >= NextCitizenFoodRequirement)
             {
-                if (_citizens.Count < AQUEDUC_MAX_POPULATION_WITHOUT || _improvements.Contains(CityImprovementPivot.Aqueduc))
+                if (CitizensCount < AQUEDUC_MAX_POPULATION_WITHOUT || _improvements.Contains(CityImprovementPivot.Aqueduc))
                 {
                     FoodStorage = 0; // Note : excess is not keeped.
-                    _citizens.Add(new CitizenPivot(null, this));
+                    _areaMapSquares.Add(new CityAreaMapSquarePivot(this, BestVacantMapSquareLocation()));
                     resetCitizensRequired = true;
                 }
                 else
@@ -619,9 +630,12 @@ namespace ErsatzCivLib.Model
                 {
                     produce = false;
                     var citizensCost = ((UnitPivot)Production).CitizenCostToProduce;
-                    if (citizensCost < _citizens.Count)
+                    if (citizensCost < CitizensCount)
                     {
-                        _citizens.RemoveRange(0, citizensCost);
+                        for (int i = 0; i < citizensCost; i++)
+                        {
+                            RemoveAnyCitizen();
+                        }
                         produce = true;
                     }
                 }
@@ -686,15 +700,14 @@ namespace ErsatzCivLib.Model
         internal void CheckCitizensMood()
         {
             // Default behavior.
-            var specialistFaces = _citizens.Where(c => c.Type.HasValue).Count();
-            var nonSpecialistFaces = _citizens.Count - specialistFaces;
+            var nonSpecialistFaces = CitizensCount - _specialistCitizens.Count;
             var unhappyFaces = nonSpecialistFaces / DEFAULT_RATIO_CITIZEN_UNHAPPY;
             var happyFaces = 0;
 
             // happiness effects.
             var happinessEffects = new List<int>
             {
-                _citizens.Where(c => c.Type == CitizenTypePivot.Entertainer).Count(),
+                _specialistCitizens.Where(c => c.Type == CitizenTypePivot.Entertainer).Count(),
                 _improvements.Contains(CityImprovementPivot.Temple) ? TEMPLE_HAPPINESS_EFFECT : 0,
                 _improvements.Contains(CityImprovementPivot.Colosseum) ? COLOSSEUM_HAPPINESS_EFFECT : 0,
                 _improvements.Contains(CityImprovementPivot.Cathedral) ? CATHEDRAL_HAPPINESS_EFFECT : 0,
@@ -714,7 +727,8 @@ namespace ErsatzCivLib.Model
                 }
             }
 
-            foreach (var citizen in _citizens.Where(ci => !ci.Type.HasValue))
+            var citizensToCheck = AreaWithoutCityMapSquares.Select(ams => ams.Citizen);
+            foreach (var citizen in citizensToCheck)
             {
                 if (happyFaces > 0)
                 {
@@ -731,7 +745,6 @@ namespace ErsatzCivLib.Model
                     citizen.Mood = MoodPivot.Content;
                 }
             }
-            _citizens.Sort();
         }
 
         /// <summary>
@@ -741,25 +754,36 @@ namespace ErsatzCivLib.Model
         {
             var availableMapSquaresCount = Player.ComputeCityAvailableMapSquares(this).Count;
 
-            _citizens.Sort();
-            for (int i = 0; i < _citizens.Count; i++)
+            var citizensToReset = Citizens.ToList(); // Fix the list !
+            int i = 0;
+            foreach (var citizen in citizensToReset)
             {
                 if (i > availableMapSquaresCount)
                 {
-                    if (!_citizens[i].Type.HasValue)
+                    // From this point, only specialists
+                    if (!citizen.Type.HasValue)
                     {
-                        _citizens[i].ToSpecialist(CitizenTypePivot.Entertainer);
+                        ChangeCitizenToSpecialist(citizen, CitizenTypePivot.Entertainer);
                     }
                 }
                 else
                 {
                     var newBestSpot = BestVacantMapSquareLocation();
-                    if (_citizens[i].MapSquare == null
-                        || _citizens[i].MapSquare.TotalValue < newBestSpot.TotalValue)
+                    if (_specialistCitizens.Contains(citizen))
                     {
-                        _citizens[i].ToCitizen(newBestSpot);
+                        citizen.ToCitizen(newBestSpot);
+                        _specialistCitizens.Remove(citizen);
+                        _areaMapSquares.Add(new CityAreaMapSquarePivot(citizen));
+                    }
+                    else if (citizen.MapSquare.TotalValue < newBestSpot.TotalValue)
+                    {
+                        // Removes the citizen from the area, changes its spot then re-add it.
+                        _areaMapSquares.Remove(_areaMapSquares.SingleOrDefault(ams => ams.Citizen == citizen));
+                        citizen.ToCitizen(newBestSpot);
+                        _areaMapSquares.Add(new CityAreaMapSquarePivot(citizen));
                     }
                 }
+                i++;
             }
 
             CheckCitizensMood();
@@ -777,15 +801,6 @@ namespace ErsatzCivLib.Model
             }
             //_improvements.Remove(CityImprovementPivot.Courthouse);
             _improvements.Add(CityImprovementPivot.Palace);
-        }
-
-        /// <summary>
-        /// Gets a random specialist citizen, if any.
-        /// </summary>
-        /// <returns>The citizen; or <c>Null</c>.</returns>
-        internal CitizenPivot GetAnySpecialistCitizen()
-        {
-            return _citizens.FirstOrDefault(c => c.Type.HasValue);
         }
 
         /// <summary>
@@ -816,11 +831,13 @@ namespace ErsatzCivLib.Model
         /// <param name="mapSquare">The location.</param>
         internal void ChangeAnyCitizenToDefault(MapSquarePivot mapSquare)
         {
-            var citizenSource = GetAnySpecialistCitizen();
+            var citizenSource = _specialistCitizens.FirstOrDefault();
             if (citizenSource != null)
             {
                 citizenSource.ToCitizen(mapSquare);
-                citizenSource.City.CheckCitizensMood();
+                _specialistCitizens.Remove(citizenSource);
+                _areaMapSquares.Add(new CityAreaMapSquarePivot(citizenSource));
+                CheckCitizensMood();
             }
         }
 
@@ -834,6 +851,7 @@ namespace ErsatzCivLib.Model
             if (!citizenSource.Type.HasValue)
             {
                 ChangeCitizenToSpecialist(citizenSource, CitizenTypePivot.Entertainer);
+                CheckCitizensMood();
             }
             else
             {
@@ -841,9 +859,11 @@ namespace ErsatzCivLib.Model
                 {
                     case CitizenTypePivot.Entertainer:
                         ChangeCitizenToSpecialist(citizenSource, CitizenTypePivot.Scientist);
+                        CheckCitizensMood();
                         break;
                     case CitizenTypePivot.Scientist:
                         ChangeCitizenToSpecialist(citizenSource, CitizenTypePivot.TaxCollector);
+                        CheckCitizensMood();
                         break;
                     case CitizenTypePivot.TaxCollector:
                         ChangeCitizenToDefaultAtTheBestSpotInternal(citizenSource);
