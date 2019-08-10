@@ -169,7 +169,7 @@ namespace ErsatzCivLib.Model
             if (SeaNavigate
                 && !GroundNavigate
                 && City != null
-                && City.Player.Wonders.Contains(WonderPivot.MagellanExpedition))
+                && City.Player.WonderIsActive(WonderPivot.MagellanExpedition))
             {
                 bonus += MAGELLAN_WONDER_INCREASE_SPEED;
             }

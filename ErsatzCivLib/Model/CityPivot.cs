@@ -318,7 +318,7 @@ namespace ErsatzCivLib.Model
                     scienceValue = (int)Math.Floor(scienceValue * UNIVERSITY_SCIENCE_INCREASE_RATIO);
                 }
 
-                if (Player.Wonders.Contains(WonderPivot.SetiProgram))
+                if (Player.WonderIsActive(WonderPivot.SetiProgram))
                 {
                     scienceValue = (int)Math.Floor(scienceValue * SETI_PROGRAM_SCIENCE_INCREASE_RATIO);
                 }
@@ -680,8 +680,8 @@ namespace ErsatzCivLib.Model
                 _improvements.Contains(CityImprovementPivot.Temple) ? TEMPLE_HAPPINESS_EFFECT : 0,
                 _improvements.Contains(CityImprovementPivot.Colosseum) ? COLOSSEUM_HAPPINESS_EFFECT : 0,
                 _improvements.Contains(CityImprovementPivot.Cathedral) ? CATHEDRAL_HAPPINESS_EFFECT : 0,
-                Player.HasWonderOnContinent(WonderPivot.JsBachsCathedral, MapSquareLocation) ? JSBACHS_WONDER_HAPPINESS_EFFECT : 0,
-                Player.Wonders.Contains(WonderPivot.CureForCancer) ? CUREFORCANCER_WONDER_HAPPINESS_EFFECT : 0
+                Player.WonderIsActive(WonderPivot.JsBachsCathedral, MapSquareLocation) ? JSBACHS_WONDER_HAPPINESS_EFFECT : 0,
+                Player.WonderIsActive(WonderPivot.CureForCancer) ? CUREFORCANCER_WONDER_HAPPINESS_EFFECT : 0
             };
 
             for (int i = 0; i < happinessEffects.Sum(); i++)

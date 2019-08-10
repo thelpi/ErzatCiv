@@ -764,7 +764,7 @@ namespace ErsatzCivLib.Model
             }
 
             // Allows spaceship items.
-            if (!Wonders.Contains(WonderPivot.ApolloProgram))
+            if (!WonderIsActive(WonderPivot.ApolloProgram))
             {
                 buildableDefaultInstances.RemoveAll(b => b.Is<SpaceShipPivot>());
             }
@@ -777,14 +777,27 @@ namespace ErsatzCivLib.Model
         }
 
         /// <summary>
-        /// Checks if the player has the specified <see cref="WonderPivot"/> on the same continent as specified <see cref="MapSquarePivot"/>.
+        /// Checks if a <see cref="WonderPivot"/> is built and not obsolete; can also check the continent.
         /// </summary>
-        /// <param name="wonder">The wonder.</param>
-        /// <param name="location">The location.</param>
-        /// <returns><c>True</c> if wonder built on the continent; <c>False</c> otherwise.</returns>
-        internal bool HasWonderOnContinent(WonderPivot wonder, MapSquarePivot location)
+        /// <param name="wonder">The wonder to check.</param>
+        /// <param name="location">Optionnal; the location to check (continent must be the same).</param>
+        /// <returns><c>True</c> if active; <c>False</c> if obsolete.</returns>
+        internal bool WonderIsActive(WonderPivot wonder, MapSquarePivot location = null)
         {
-            return Cities.Any(c => c.Wonders.Contains(wonder) && c.MapSquareLocation.ContinentIndex == location.ContinentIndex);
+            var wonderCity = Cities.SingleOrDefault(c => c.Wonders.Contains(wonder));
+            if (wonderCity == null)
+            {
+                return false;
+            }
+            if (wonder.AdvanceObsolescence != null && _advances.Contains(wonder.AdvanceObsolescence))
+            {
+                return false;
+            }
+            if (location != null && location.ContinentIndex != wonderCity.MapSquareLocation.ContinentIndex)
+            {
+                return false;
+            }
+            return true;
         }
 
         #endregion
