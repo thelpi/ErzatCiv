@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\Events\DarwinVoyageEventArgs.cs" />
     <Compile Include="Model\Events\DiscoverNewSquareEventArgs.cs" />
     <Compile Include="Model\Events\NextUnitEventArgs.cs" />
     <Compile Include="Model\Events\SquareChangedEventArgs.cs" />

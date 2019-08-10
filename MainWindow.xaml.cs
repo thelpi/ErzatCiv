@@ -46,6 +46,11 @@ namespace ErsatzCiv
 
         #region Events
 
+        private void OnDarwinVoyage(object sender, DarwinVoyageEventArgs evt)
+        {
+            new WindowAdvancePick(_engine).ShowDialog();
+        }
+
         private void OnTriggerUpdateMapSquares(object sender, DiscoverNewSquareEventArgs evt)
         {
             if (evt?.MapSquares != null)
@@ -481,6 +486,7 @@ namespace ErsatzCiv
                 msq.SquareChangeEvent += OnTriggerUpdateMapSquare;
             }
             _engine.HumanPlayer.DiscoverNewSquareEvent += OnTriggerUpdateMapSquares;
+            _engine.HumanPlayer.DarwinVoyageEvent += OnDarwinVoyage;
         }
 
         private void RefreshDynamicView()

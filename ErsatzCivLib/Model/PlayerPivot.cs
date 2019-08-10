@@ -241,6 +241,11 @@ namespace ErsatzCivLib.Model
         /// </summary>
         [field: NonSerialized]
         public event EventHandler<DiscoverNewSquareEventArgs> DiscoverNewSquareEvent;
+        /// <summary>
+        /// Triggered when <see cref="WonderPivot.DarwinVoyage"/> is built.
+        /// </summary>
+        [field: NonSerialized]
+        public event EventHandler<DarwinVoyageEventArgs> DarwinVoyageEvent;
 
         #endregion
 
@@ -533,6 +538,25 @@ namespace ErsatzCivLib.Model
                             MapSquareDiscoveryInvokator(cityToShow.MapSquareLocation, new List<MapSquarePivot>());
                         }
                     }
+                    else if (WonderPivot.DarwinVoyage == produced)
+                    {
+                        bool oneAdvanceWasReady = true;
+                        if (CurrentAdvance != null)
+                        {
+                            CheckScienceAtNextTurn(0);
+                            oneAdvanceWasReady = false;
+                        }
+                        DarwinVoyageEvent?.Invoke(this, new DarwinVoyageEventArgs());
+                        while (CurrentAdvance == null) { }
+                        CheckScienceAtNextTurn(0);
+                        DarwinVoyageEvent?.Invoke(this, new DarwinVoyageEventArgs());
+                        if (!oneAdvanceWasReady)
+                        {
+                            while (CurrentAdvance == null) { }
+                            CheckScienceAtNextTurn(0);
+                            DarwinVoyageEvent?.Invoke(this, new DarwinVoyageEventArgs());
+                        }
+                    }
                 }
                 if (turnInfo.Item2 != null)
                 {
@@ -544,7 +568,7 @@ namespace ErsatzCivLib.Model
                 u.Release();
             }
 
-            CheckScienceAtNextTurn();
+            CheckScienceAtNextTurn(SCIENCE_COST);
             CheckTreasureAtNextTurn();
 
             SetUnitIndex(false, true);
@@ -767,12 +791,12 @@ namespace ErsatzCivLib.Model
 
         #region Private methods
 
-        private void CheckScienceAtNextTurn()
+        private void CheckScienceAtNextTurn(int scienceCost)
         {
             if (CurrentAdvance != null)
             {
                 ScienceStack += ScienceByTurn;
-                if (ScienceStack >= SCIENCE_COST)
+                if (ScienceStack >= scienceCost)
                 {
                     _advances.Add(CurrentAdvance);
                     ScienceStack = 0;
