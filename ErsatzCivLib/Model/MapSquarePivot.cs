@@ -15,8 +15,7 @@ namespace ErsatzCivLib.Model
     [Serializable]
     public class MapSquarePivot : IEquatable<MapSquarePivot>
     {
-        private const int RAILROAD_PRODUCTIVITY_BONUS = 1;
-        private const int RAILROAD_COMMERCE_BONUS = 1;
+        private const double RAILROAD_BONUS_RATE = 1.5;
         private const int ROAD_COMMERCE_BONUS = 1;
         private const int MINE_PRODUCTIVITY_BONUS = 1;
         private const int MINE_PRODUCTIVITY_BONUS_HILLS = 3;
@@ -65,11 +64,11 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public bool Fortress { get; private set; }
 
-        private List<InProgressWorkerActionPivot> _currentActions = new List<InProgressWorkerActionPivot>();
+        private List<InProgressMapSquareImprovementPivot> _currentActions = new List<InProgressMapSquareImprovementPivot>();
         /// <summary>
-        /// List of <see cref="InProgressWorkerActionPivot"/> in progress for this instance.
+        /// List of <see cref="InProgressMapSquareImprovementPivot"/> in progress for this instance.
         /// </summary>
-        public IReadOnlyCollection<InProgressWorkerActionPivot> CurrentActions { get { return _currentActions; } }
+        public IReadOnlyCollection<InProgressMapSquareImprovementPivot> CurrentActions { get { return _currentActions; } }
 
         private readonly Dictionary<DirectionPivot, bool> _rivers =
             Enum.GetValues(typeof(DirectionPivot)).Cast<DirectionPivot>().ToDictionary(x => x, x => false);
@@ -95,7 +94,7 @@ namespace ErsatzCivLib.Model
         /// <summary>
         /// Food value of this instance.
         /// </summary>
-        /// <remarks>Pollution and worker actions included.</remarks>
+        /// <remarks>Pollution and settler actions included.</remarks>
         public int Food
         {
             get
@@ -108,6 +107,10 @@ namespace ErsatzCivLib.Model
                     {
                         baseValue += IRRIGATE_FOOD_BONUS;
                     }
+                    if (RailRoad && baseValue > 0)
+                    {
+                        baseValue = (int)Math.Floor(baseValue * RAILROAD_BONUS_RATE);
+                    }
                 }
                 return baseValue;
             }
@@ -115,7 +118,7 @@ namespace ErsatzCivLib.Model
         /// <summary>
         /// Productivity value of this instance.
         /// </summary>
-        /// <remarks>Pollution and worker actions included.</remarks>
+        /// <remarks>Pollution and settler actions included.</remarks>
         public int Productivity
         {
             get
@@ -130,7 +133,7 @@ namespace ErsatzCivLib.Model
                     }
                     if (RailRoad && baseValue > 0)
                     {
-                        baseValue += RAILROAD_PRODUCTIVITY_BONUS;
+                        baseValue = (int)Math.Floor(baseValue * RAILROAD_BONUS_RATE);
                     }
                 }
                 return baseValue;
@@ -139,7 +142,7 @@ namespace ErsatzCivLib.Model
         /// <summary>
         /// Commerce value of this instance.
         /// </summary>
-        /// <remarks>Pollution and worker actions included.</remarks>
+        /// <remarks>Pollution and settler actions included.</remarks>
         public int Commerce
         {
             get
@@ -148,13 +151,14 @@ namespace ErsatzCivLib.Model
                 if (!Pollution)
                 {
                     baseValue = Biome.Commerce + (HasBonus ? Biome.BonusCommerce : 0);
-                    if (Road)
+                    if (Road && (Biome == BiomePivot.Grassland || Biome == BiomePivot.Plains || Biome == BiomePivot.Desert))
                     {
                         baseValue += ROAD_COMMERCE_BONUS;
                     }
                     if (RailRoad)
                     {
-                        baseValue += RAILROAD_COMMERCE_BONUS;
+                        // TODO : not applicable if democracy or republic.
+                        baseValue = (int)Math.Floor(baseValue * RAILROAD_BONUS_RATE);
                     }
                 }
                 return baseValue;
@@ -233,6 +237,7 @@ namespace ErsatzCivLib.Model
         internal void ChangeBiome(BiomePivot biome)
         {
             Biome = biome;
+            HasBonus = Tools.Randomizer.NextDouble() < Biome.BonusApperanceRate;
         }
 
         /// <summary>
@@ -247,68 +252,68 @@ namespace ErsatzCivLib.Model
         }
 
         /// <summary>
-        /// Tries to apply a <see cref="WorkerActionPivot"/> on the current instance.
+        /// Tries to apply a <see cref="MapSquareImprovementPivot"/> on the current instance.
         /// </summary>
-        /// <param name="worker">The worker</param>
+        /// <param name="settler">The settler.</param>
         /// <param name="action">The action to apply.</param>
         /// <returns>
-        /// <c>True</c> if the worker actually starts the action; <c>False</c> otherwise.
+        /// <c>True</c> if the settler actually starts the action; <c>False</c> otherwise.
         /// </returns>
-        internal bool ApplyAction(WorkerPivot worker, WorkerActionPivot action)
+        internal bool ApplyAction(SettlerPivot settler, MapSquareImprovementPivot action)
         {
             if (!action.AlwaysAvailable && !Biome.Actions.Contains(action))
             {
                 return false;
             }
 
-            if (action == WorkerActionPivot.Irrigate)
+            if (action == MapSquareImprovementPivot.Irrigate)
             {
-                return ApplyActionInternal(worker, action, Irrigate);
+                return ApplyActionInternal(settler, action, Irrigate);
             }
 
-            if (action == WorkerActionPivot.Mine)
+            if (action == MapSquareImprovementPivot.Mine)
             {
-                return ApplyActionInternal(worker, action, Mine);
+                return ApplyActionInternal(settler, action, Mine);
             }
 
-            if (action == WorkerActionPivot.Road)
+            if (action == MapSquareImprovementPivot.Road)
             {
-                return ApplyActionInternal(worker, action, Road);
+                return ApplyActionInternal(settler, action, Road);
             }
 
-            if (action == WorkerActionPivot.DestroyImprovement)
+            if (action == MapSquareImprovementPivot.DestroyImprovement)
             {
-                return ApplyActionInternal(worker, action, !Irrigate && !Mine && !Fortress);
+                return ApplyActionInternal(settler, action, !Irrigate && !Mine && !Fortress);
             }
 
-            if (action == WorkerActionPivot.DestroyRoad)
+            if (action == MapSquareImprovementPivot.DestroyRoad)
             {
-                return ApplyActionInternal(worker, action, !Road && !RailRoad);
+                return ApplyActionInternal(settler, action, !Road && !RailRoad);
             }
 
-            if (action == WorkerActionPivot.BuildFortress)
+            if (action == MapSquareImprovementPivot.BuildFortress)
             {
-                return ApplyActionInternal(worker, action, Fortress);
+                return ApplyActionInternal(settler, action, Fortress);
             }
 
-            if (action == WorkerActionPivot.Clear)
+            if (action == MapSquareImprovementPivot.Clear)
             {
-                return ApplyActionInternal(worker, action, false);
+                return ApplyActionInternal(settler, action, false);
             }
 
-            if (action == WorkerActionPivot.ClearPollution)
+            if (action == MapSquareImprovementPivot.ClearPollution)
             {
-                return ApplyActionInternal(worker, action, Pollution);
+                return ApplyActionInternal(settler, action, Pollution);
             }
 
-            if (action == WorkerActionPivot.Plant)
+            if (action == MapSquareImprovementPivot.Plant)
             {
-                return ApplyActionInternal(worker, action, false);
+                return ApplyActionInternal(settler, action, false);
             }
 
-            if (action == WorkerActionPivot.RailRoad)
+            if (action == MapSquareImprovementPivot.RailRoad)
             {
-                return ApplyActionInternal(worker, action, RailRoad);
+                return ApplyActionInternal(settler, action, RailRoad);
             }
 
             return false;
@@ -321,10 +326,10 @@ namespace ErsatzCivLib.Model
         /// </summary>
         internal void UpdateActionsProgress()
         {
-            var removableActions = new List<InProgressWorkerActionPivot>();
+            var removableActions = new List<InProgressMapSquareImprovementPivot>();
             foreach (var action in _currentActions)
             {
-                if (!action.HasWorkers)
+                if (!action.HasSettlers)
                 {
                     removableActions.Add(action);
                 }
@@ -336,21 +341,21 @@ namespace ErsatzCivLib.Model
                 if (action.IsDone)
                 {
                     removableActions.Add(action);
-                    if (action.Action == WorkerActionPivot.BuildFortress)
+                    if (action.Action == MapSquareImprovementPivot.BuildFortress)
                     {
                         Fortress = true;
                     }
-                    if (action.Action == WorkerActionPivot.Clear)
+                    if (action.Action == MapSquareImprovementPivot.Clear)
                     {
-                        ChangeBiome(Biome.UnderlyingBiome);
+                        ChangeBiome(Biome.UnderlyingBiome(BiomePivot.Biomes));
                         Mine = false;
                         Irrigate = false;
                     }
-                    if (action.Action == WorkerActionPivot.ClearPollution)
+                    if (action.Action == MapSquareImprovementPivot.ClearPollution)
                     {
                         Pollution = false;
                     }
-                    if (action.Action == WorkerActionPivot.DestroyImprovement)
+                    if (action.Action == MapSquareImprovementPivot.DestroyImprovement)
                     {
                         if (Fortress)
                         {
@@ -363,7 +368,7 @@ namespace ErsatzCivLib.Model
                             Irrigate = false;
                         }
                     }
-                    if (action.Action == WorkerActionPivot.DestroyRoad)
+                    if (action.Action == MapSquareImprovementPivot.DestroyRoad)
                     {
                         if (RailRoad)
                         {
@@ -374,27 +379,27 @@ namespace ErsatzCivLib.Model
                             Road = false;
                         }
                     }
-                    if (action.Action == WorkerActionPivot.Irrigate)
+                    if (action.Action == MapSquareImprovementPivot.Irrigate)
                     {
                         Mine = false;
                         Irrigate = true;
                     }
-                    if (action.Action == WorkerActionPivot.Mine)
+                    if (action.Action == MapSquareImprovementPivot.Mine)
                     {
                         Mine = true;
                         Irrigate = false;
                     }
-                    if (action.Action == WorkerActionPivot.Plant)
+                    if (action.Action == MapSquareImprovementPivot.Plant)
                     {
                         Biome = BiomePivot.Forest;
                         Mine = false;
                         Irrigate = false;
                     }
-                    if (action.Action == WorkerActionPivot.RailRoad)
+                    if (action.Action == MapSquareImprovementPivot.RailRoad)
                     {
                         RailRoad = true;
                     }
-                    if (action.Action == WorkerActionPivot.Road)
+                    if (action.Action == MapSquareImprovementPivot.Road)
                     {
                         Road = true;
                     }
@@ -405,7 +410,7 @@ namespace ErsatzCivLib.Model
             foreach (var action in removableActions.Distinct())
             {
                 _currentActions.Remove(action);
-                action.RemoveWorkers();
+                action.RemoveSettlers();
             }
         }
 
@@ -423,7 +428,7 @@ namespace ErsatzCivLib.Model
 
         #region Private methods
 
-        private bool ApplyActionInternal(WorkerPivot worker, WorkerActionPivot action, bool currentApplianceValue)
+        private bool ApplyActionInternal(SettlerPivot settler, MapSquareImprovementPivot action, bool currentApplianceValue)
         {
             if (currentApplianceValue)
             {
@@ -433,11 +438,11 @@ namespace ErsatzCivLib.Model
             var actionInProgress = CurrentActions.SingleOrDefault(a => a.Action == action);
             if (actionInProgress == null)
             {
-                actionInProgress = new InProgressWorkerActionPivot(action);
+                actionInProgress = new InProgressMapSquareImprovementPivot(action);
                 _currentActions.Add(actionInProgress);
             }
 
-            return actionInProgress.AddWorker(worker);
+            return actionInProgress.AddSettler(settler);
         }
 
         #endregion

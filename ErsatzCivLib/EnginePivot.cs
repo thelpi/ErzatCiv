@@ -220,7 +220,7 @@ namespace ErsatzCivLib
         }
 
         /// <summary>
-        /// Checks if a city can be build at the location of the current unit, which must be a <see cref="Model.Units.SettlersPivot"/>.
+        /// Checks if a city can be build at the location of the current unit, which must be a <see cref="Model.Units.SettlerPivot"/>.
         /// </summary>
         /// <returns><c>True</c> if a city si buildable; otherwise <c>False</c>.</returns>
         public bool CanBuildCity()
@@ -262,19 +262,19 @@ namespace ErsatzCivLib
         }
 
         /// <summary>
-        /// Tries to trigger a <see cref="WorkerActionPivot"/> for the current unit; the unit must be a <see cref="Model.Units.WorkerPivot"/>.
+        /// Tries to trigger a <see cref="MapSquareImprovementPivot"/> for the current unit; the unit must be a <see cref="Model.Units.SettlerPivot"/>.
         /// </summary>
-        /// <param name="actionPivot">The worker's action.</param>
+        /// <param name="actionPivot">The settler's action.</param>
         /// <returns><c>True</c> if success; <c>False</c> otherwise.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="actionPivot"/> is <c>Null</c>.</exception>
-        public bool WorkerAction(WorkerActionPivot actionPivot)
+        public bool SettlerAction(MapSquareImprovementPivot actionPivot)
         {
             if (actionPivot == null)
             {
                 throw new ArgumentNullException(nameof(actionPivot));
             }
 
-            return HumanPlayer.WorkerAction(actionPivot);
+            return HumanPlayer.SettlerAction(actionPivot);
         }
 
         /// <summary>

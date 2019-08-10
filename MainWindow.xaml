@@ -35,7 +35,7 @@
                                 <RowDefinition />
                             </Grid.RowDefinitions>
                             <Label Grid.Column="0" Grid.Row="00" Content="B" FontWeight="Bold" />
-                            <Label Grid.Column="1" Grid.Row="00" Content="Build a city (settlers)" />
+                            <Label Grid.Column="1" Grid.Row="00" Content="Build a city (settler)" />
                             <Label Grid.Column="0" Grid.Row="01" Content="Space" FontWeight="Bold" />
                             <Label Grid.Column="1" Grid.Row="01" Content="Current unit wait next turn" />
                             <Label Grid.Column="0" Grid.Row="02" Content="C" FontWeight="Bold" />
@@ -45,23 +45,23 @@
                             <Label Grid.Column="0" Grid.Row="04" Content="1-9 (n. pad)" FontWeight="Bold" />
                             <Label Grid.Column="1" Grid.Row="04" Content="Move unit in 8 directions" />
                             <Label Grid.Column="0" Grid.Row="05" Content="Shift + M" FontWeight="Bold" />
-                            <Label Grid.Column="1" Grid.Row="05" Content="Build a mine (worker)" />
+                            <Label Grid.Column="1" Grid.Row="05" Content="Build a mine (settler)" />
                             <Label Grid.Column="0" Grid.Row="06" Content="Shift + I" FontWeight="Bold" />
-                            <Label Grid.Column="1" Grid.Row="06" Content="Build irrigation (worker)" />
+                            <Label Grid.Column="1" Grid.Row="06" Content="Build irrigation (settler)" />
                             <Label Grid.Column="0" Grid.Row="07" Content="Shift + R" FontWeight="Bold" />
-                            <Label Grid.Column="1" Grid.Row="07" Content="Build rail/road (worker)" />
+                            <Label Grid.Column="1" Grid.Row="07" Content="Build rail/road (settler)" />
                             <Label Grid.Column="0" Grid.Row="08" Content="Shift + C" FontWeight="Bold" />
-                            <Label Grid.Column="1" Grid.Row="08" Content="Clear swamp/jungle/forest (worker)" />
+                            <Label Grid.Column="1" Grid.Row="08" Content="Clear swamp/jungle/forest (settler)" />
                             <Label Grid.Column="0" Grid.Row="09" Content="Shift + D" FontWeight="Bold" />
-                            <Label Grid.Column="1" Grid.Row="09" Content="Destroy improvements (worker)" />
+                            <Label Grid.Column="1" Grid.Row="09" Content="Destroy improvements (settler)" />
                             <Label Grid.Column="0" Grid.Row="10" Content="Shift + F" FontWeight="Bold" />
-                            <Label Grid.Column="1" Grid.Row="10" Content="Build fortress (worker)" />
+                            <Label Grid.Column="1" Grid.Row="10" Content="Build fortress (settler)" />
                             <Label Grid.Column="0" Grid.Row="11" Content="Shift + P" FontWeight="Bold" />
-                            <Label Grid.Column="1" Grid.Row="11" Content="Plant forest (worker)" />
+                            <Label Grid.Column="1" Grid.Row="11" Content="Plant forest (settler)" />
                             <Label Grid.Column="0" Grid.Row="12" Content="Shift + A" FontWeight="Bold" />
-                            <Label Grid.Column="1" Grid.Row="12" Content="Clear pollution (worker)" />
+                            <Label Grid.Column="1" Grid.Row="12" Content="Clear pollution (settler)" />
                             <Label Grid.Column="0" Grid.Row="13" Content="Shift + X" FontWeight="Bold" />
-                            <Label Grid.Column="1" Grid.Row="13" Content="Destroy rail/road (worker)" />
+                            <Label Grid.Column="1" Grid.Row="13" Content="Destroy rail/road (settler)" />
                         </Grid>
                     </ScrollViewer>
                 </GroupBox>

@@ -111,37 +111,37 @@ namespace ErsatzCiv
             }
             _freezeActions = true;
 
-            // Worker actions.
+            // Settler actions.
             if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
             {
                 switch (e.Key)
                 {
                     case Key.M:
-                        _engine.WorkerAction(WorkerActionPivot.Mine);
+                        _engine.SettlerAction(MapSquareImprovementPivot.Mine);
                         break;
                     case Key.I:
-                        _engine.WorkerAction(WorkerActionPivot.Irrigate);
+                        _engine.SettlerAction(MapSquareImprovementPivot.Irrigate);
                         break;
                     case Key.R:
-                        _engine.WorkerAction(WorkerActionPivot.RailRoad);
+                        _engine.SettlerAction(MapSquareImprovementPivot.RailRoad);
                         break;
                     case Key.C:
-                        _engine.WorkerAction(WorkerActionPivot.Clear);
+                        _engine.SettlerAction(MapSquareImprovementPivot.Clear);
                         break;
                     case Key.D:
-                        _engine.WorkerAction(WorkerActionPivot.DestroyImprovement);
+                        _engine.SettlerAction(MapSquareImprovementPivot.DestroyImprovement);
                         break;
                     case Key.F:
-                        _engine.WorkerAction(WorkerActionPivot.BuildFortress);
+                        _engine.SettlerAction(MapSquareImprovementPivot.BuildFortress);
                         break;
                     case Key.P:
-                        _engine.WorkerAction(WorkerActionPivot.Plant);
+                        _engine.SettlerAction(MapSquareImprovementPivot.Plant);
                         break;
                     case Key.A:
-                        _engine.WorkerAction(WorkerActionPivot.ClearPollution);
+                        _engine.SettlerAction(MapSquareImprovementPivot.ClearPollution);
                         break;
                     case Key.X:
-                        _engine.WorkerAction(WorkerActionPivot.DestroyRoad);
+                        _engine.SettlerAction(MapSquareImprovementPivot.DestroyRoad);
                         break;
                 }
                 // Ensures a refresh of the blinking current unit.

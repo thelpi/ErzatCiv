@@ -29,9 +29,9 @@ namespace ErsatzCivLib.Model.Static
         /// </summary>
         public int CommerceBonus { get; private set; }
         /// <summary>
-        /// Worker's efficiency rate.
+        /// Settler's efficiency rate.
         /// </summary>
-        public double WorkerEffiencyRate { get; private set; }
+        public double SettlerEffiencyRate { get; private set; }
         /// <summary>
         /// Impact on mood for each military unit in garrison in a city.
         /// </summary>
@@ -115,7 +115,7 @@ namespace ErsatzCivLib.Model.Static
             GarrisonMoodRate = 1,
             CommerceBonus = 0,
             CorruptionRate = 0.5,
-            WorkerEffiencyRate = 0.5,
+            SettlerEffiencyRate = 0.5,
             ScienceRate = 0.5,
             AdvancePrerequisite = null
         };
@@ -129,7 +129,7 @@ namespace ErsatzCivLib.Model.Static
             GarrisonMoodRate = 0.5,
             CommerceBonus = 0,
             CorruptionRate = 0.25,
-            WorkerEffiencyRate = 1,
+            SettlerEffiencyRate = 1,
             ScienceRate = 0.75,
             AdvancePrerequisite = AdvancePivot.Monarchy
         };
@@ -143,7 +143,7 @@ namespace ErsatzCivLib.Model.Static
             GarrisonMoodRate = 1 / (double)3,
             CommerceBonus = 0,
             CorruptionRate = 0.25,
-            WorkerEffiencyRate = 1,
+            SettlerEffiencyRate = 1,
             ScienceRate = 1,
             AdvancePrerequisite = AdvancePivot.Republic
         };
@@ -157,7 +157,7 @@ namespace ErsatzCivLib.Model.Static
             GarrisonMoodRate = 0,
             CommerceBonus = 0,
             CorruptionRate = 1,
-            WorkerEffiencyRate = 0.5,
+            SettlerEffiencyRate = 0.5,
             ScienceRate = 0,
             AdvancePrerequisite = null
         };
@@ -171,7 +171,7 @@ namespace ErsatzCivLib.Model.Static
             GarrisonMoodRate = 1 / (double)5,
             CommerceBonus = 1,
             CorruptionRate = 0,
-            WorkerEffiencyRate = 1.5,
+            SettlerEffiencyRate = 1.5,
             ScienceRate = 1.5,
             AdvancePrerequisite = AdvancePivot.Democracy
         };
@@ -185,7 +185,7 @@ namespace ErsatzCivLib.Model.Static
             GarrisonMoodRate = 0.5,
             CommerceBonus = 0,
             CorruptionRate = 0.25,
-            WorkerEffiencyRate = 1,
+            SettlerEffiencyRate = 1,
             ScienceRate = 1,
             AdvancePrerequisite = AdvancePivot.Communism
         };

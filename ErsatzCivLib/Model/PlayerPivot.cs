@@ -264,8 +264,8 @@ namespace ErsatzCivLib.Model
             Regime = RegimePivot.Despotism;
             Treasure = TREASURE_START;
 
-            _units.Add(SettlersPivot.CreateAtLocation(beginLocation));
-            _units.Add(WorkerPivot.CreateAtLocation(beginLocation));
+            _units.Add(SettlerPivot.CreateAtLocation(beginLocation));
+            _units.Add(SettlerPivot.CreateAtLocation(beginLocation));
 
             MapSquareDiscoveryInvokator(beginLocation, _engine.Map.GetAdjacentMapSquares(beginLocation).Values);
 
@@ -383,7 +383,7 @@ namespace ErsatzCivLib.Model
                 return null;
             }
 
-            var settler = CurrentUnit as SettlersPivot;
+            var settler = CurrentUnit as SettlerPivot;
             var sq = CurrentUnit.MapSquareLocation;
 
             var city = new CityPivot(this, currentTurn, name, sq, CapitalizationPivot.Default);
@@ -430,12 +430,12 @@ namespace ErsatzCivLib.Model
 
         /// <summary>
         /// Checks if a <see cref="CityPivot"/> can be built at the <see cref="CurrentUnit"/> location.
-        /// <see cref="CurrentUnit"/> must be a <see cref="SettlersPivot"/>.
+        /// <see cref="CurrentUnit"/> must be a <see cref="SettlerPivot"/>.
         /// </summary>
         /// <returns><c>True</c> if a city can be build; <c>False</c> otherwise.</returns>
         internal bool CanBuildCity()
         {
-            if (CurrentUnit?.Is<SettlersPivot>() != true)
+            if (CurrentUnit?.Is<SettlerPivot>() != true)
             {
                 return false;
             }
@@ -597,28 +597,28 @@ namespace ErsatzCivLib.Model
         }
 
         /// <summary>
-        /// Tries to trigger a <see cref="WorkerActionPivot"/> for the <see cref="CurrentUnit"/>.
-        /// <see cref="CurrentUnit"/> must be a worker.
+        /// Tries to trigger a <see cref="MapSquareImprovementPivot"/> for the <see cref="CurrentUnit"/>.
+        /// <see cref="CurrentUnit"/> must be a settler.
         /// </summary>
-        /// <param name="actionPivot">The <see cref="WorkerActionPivot"/>.</param>
+        /// <param name="actionPivot">The <see cref="MapSquareImprovementPivot"/>.</param>
         /// <returns><c>True</c> if success; <c>False</c> otherwise.</returns>
-        internal bool WorkerAction(WorkerActionPivot actionPivot)
+        internal bool SettlerAction(MapSquareImprovementPivot actionPivot)
         {
-            if (CurrentUnit == null || !CurrentUnit.Is<WorkerPivot>())
+            if (CurrentUnit == null || !CurrentUnit.Is<SettlerPivot>())
             {
                 return false;
             }
 
-            var worker = CurrentUnit as WorkerPivot;
-            var sq = worker.MapSquareLocation;
+            var settler = CurrentUnit as SettlerPivot;
+            var sq = settler.MapSquareLocation;
             if (sq == null || _engine.IsCity(sq))
             {
                 return false;
             }
 
-            if (actionPivot == WorkerActionPivot.RailRoad && !sq.Road)
+            if (actionPivot == MapSquareImprovementPivot.RailRoad && !sq.Road)
             {
-                actionPivot = WorkerActionPivot.Road;
+                actionPivot = MapSquareImprovementPivot.Road;
             }
 
             if (actionPivot.AdvancePrerequisite != null && !_advances.Contains(actionPivot.AdvancePrerequisite))
@@ -627,14 +627,14 @@ namespace ErsatzCivLib.Model
             }
             
             // TODO : this is bad because in real game rivers are not between squares but sqaures itself.
-            if (actionPivot == WorkerActionPivot.Road
+            if (actionPivot == MapSquareImprovementPivot.Road
                 && !_advances.Contains(AdvancePivot.BridgeBuilding)
                 && sq.HasRiver)
             {
                 return false;
             }
             
-            if (actionPivot == WorkerActionPivot.Irrigate
+            if (actionPivot == MapSquareImprovementPivot.Irrigate
                 && !_advances.Contains(AdvancePivot.Electricity)
                 && !sq.HasRiver
                 && !_engine.Map.GetAdjacentMapSquares(sq).Values.Any(asq => asq.Irrigate))
@@ -642,10 +642,10 @@ namespace ErsatzCivLib.Model
                 return false;
             }
 
-            var result = sq.ApplyAction(worker, actionPivot);
+            var result = sq.ApplyAction(settler, actionPivot);
             if (result)
             {
-                worker.ForceNoMove();
+                settler.ForceNoMove();
                 SetUnitIndex(false, false);
             }
             return result;

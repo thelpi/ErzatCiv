@@ -6,19 +6,19 @@ using ErsatzCivLib.Model.Units;
 namespace ErsatzCivLib.Model
 {
     /// <summary>
-    /// Represents a <see cref="WorkerActionPivot"/> in progress.
+    /// Represents a <see cref="MapSquareImprovementPivot"/> in progress.
     /// </summary>
     [Serializable]
-    public class InProgressWorkerActionPivot
+    public class InProgressMapSquareImprovementPivot
     {
         #region Embedded properties
 
-        private List<WorkerPivot> _workers;
+        private List<SettlerPivot> _settlers;
 
         /// <summary>
-        /// Related <see cref="WorkerActionPivot"/>.
+        /// Related <see cref="MapSquareImprovementPivot"/>.
         /// </summary>
-        public WorkerActionPivot Action { get; private set; }
+        public MapSquareImprovementPivot Action { get; private set; }
         /// <summary>
         /// Number of turns already spent.
         /// </summary>
@@ -29,9 +29,9 @@ namespace ErsatzCivLib.Model
         #region Inferred properties
 
         /// <summary>
-        /// Inferred; indicates if the action has at least one worker.
+        /// Inferred; indicates if the action has at least one settler.
         /// </summary>
-        public bool HasWorkers { get { return _workers.Count > 0; } }
+        public bool HasSettlers { get { return _settlers.Count > 0; } }
         /// <summary>
         /// Inferred; indicates if the action is done.
         /// </summary>
@@ -42,38 +42,38 @@ namespace ErsatzCivLib.Model
         /// <summary>
         /// Constructor.
         /// </summary>
-        /// <remarks>The task has no worker by default.</remarks>
+        /// <remarks>The task has no settler by default.</remarks>
         /// <param name="action">The action to start.</param>
-        internal InProgressWorkerActionPivot(WorkerActionPivot action)
+        internal InProgressMapSquareImprovementPivot(MapSquareImprovementPivot action)
         {
             Action = action ?? throw new ArgumentNullException(nameof(action));
-            _workers = new List<WorkerPivot>();
+            _settlers = new List<SettlerPivot>();
             TurnsCount = 0;
         }
 
         /// <summary>
-        /// Adds a worker to the action.
+        /// Adds a settler to the action.
         /// </summary>
-        /// <param name="worker">The worker.</param>
+        /// <param name="settler">The settler.</param>
         /// <returns><c>True</c> if success; <c>False</c> otherwise.</returns>
-        internal bool AddWorker(WorkerPivot worker)
+        internal bool AddSettler(SettlerPivot settler)
         {
-            bool canWork = !worker.BusyOnAction;
+            bool canWork = !settler.BusyOnAction;
             if (canWork)
             {
-                _workers.Add(worker);
-                worker.SetAction(this);
+                _settlers.Add(settler);
+                settler.SetAction(this);
             }
             return canWork;
         }
 
         /// <summary>
-        /// Removes every workers from the current action.
+        /// Removes every settlers from the current action.
         /// </summary>
-        internal void RemoveWorkers()
+        internal void RemoveSettlers()
         {
-            _workers.ForEach(w => w.SetAction(null));
-            _workers.Clear();
+            _settlers.ForEach(w => w.SetAction(null));
+            _settlers.Clear();
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace ErsatzCivLib.Model
         /// </summary>
         internal void ForwardProgression()
         {
-            TurnsCount += _workers.Count;
+            TurnsCount += _settlers.Count;
         }
     }
 }

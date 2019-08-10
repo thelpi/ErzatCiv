@@ -83,14 +83,14 @@ namespace ErsatzCivLib.Model.Static
         /// <summary>
         /// Underlying <see cref="BiomePivot"/> after clearance, if applicable.
         /// </summary>
-        internal BiomePivot UnderlyingBiome { get; private set; }
+        internal Func<IEnumerable<BiomePivot>, BiomePivot> UnderlyingBiome { get; private set; }
 
-        private List<WorkerActionPivot> _actions;
+        private List<MapSquareImprovementPivot> _actions;
         /// <summary>
-        /// List of available <see cref="WorkerActionPivot"/>.
-        /// Doesn't include <see cref="WorkerActionPivot.AlwaysAvailable"/>.
+        /// List of available <see cref="MapSquareImprovementPivot"/>.
+        /// Doesn't include <see cref="MapSquareImprovementPivot.AlwaysAvailable"/>.
         /// </summary>
-        public IReadOnlyCollection<WorkerActionPivot> Actions { get { return _actions; } }
+        public IReadOnlyCollection<MapSquareImprovementPivot> Actions { get { return _actions; } }
 
         private List<TemperaturePivot> _temperatures;
         /// <summary>
@@ -236,13 +236,13 @@ namespace ErsatzCivLib.Model.Static
             Food = 2,
             Productivity = 0,
             DefenseBonusRate = 1,
-            _actions = new List<WorkerActionPivot>
+            _actions = new List<MapSquareImprovementPivot>
             {
-                WorkerActionPivot.Irrigate,
-                WorkerActionPivot.Plant,
-                WorkerActionPivot.RailRoad,
-                WorkerActionPivot.Road,
-                WorkerActionPivot.BuildFortress
+                MapSquareImprovementPivot.Irrigate,
+                MapSquareImprovementPivot.Plant,
+                MapSquareImprovementPivot.RailRoad,
+                MapSquareImprovementPivot.Road,
+                MapSquareImprovementPivot.BuildFortress
             },
             _temperatures = new List<TemperaturePivot>
             {
@@ -272,7 +272,7 @@ namespace ErsatzCivLib.Model.Static
             Food = 1,
             Productivity = 0,
             DefenseBonusRate = 1,
-            _actions = new List<WorkerActionPivot>(),
+            _actions = new List<MapSquareImprovementPivot>(),
             _temperatures = new List<TemperaturePivot>(),
             UnderlyingBiome = null,
             IsSeaType = true,
@@ -297,11 +297,11 @@ namespace ErsatzCivLib.Model.Static
             Food = 0,
             Productivity = 0,
             DefenseBonusRate = 1,
-            _actions = new List<WorkerActionPivot>
+            _actions = new List<MapSquareImprovementPivot>
             {
-                WorkerActionPivot.RailRoad,
-                WorkerActionPivot.Road,
-                WorkerActionPivot.BuildFortress
+                MapSquareImprovementPivot.RailRoad,
+                MapSquareImprovementPivot.Road,
+                MapSquareImprovementPivot.BuildFortress
             },
             _temperatures = new List<TemperaturePivot>
             {
@@ -330,11 +330,11 @@ namespace ErsatzCivLib.Model.Static
             Food = 1,
             Productivity = 0,
             DefenseBonusRate = 1,
-            _actions = new List<WorkerActionPivot>
+            _actions = new List<MapSquareImprovementPivot>
             {
-                WorkerActionPivot.RailRoad,
-                WorkerActionPivot.Road,
-                WorkerActionPivot.BuildFortress
+                MapSquareImprovementPivot.RailRoad,
+                MapSquareImprovementPivot.Road,
+                MapSquareImprovementPivot.BuildFortress
             },
             _temperatures = new List<TemperaturePivot>
             {
@@ -363,13 +363,13 @@ namespace ErsatzCivLib.Model.Static
             Food = 0,
             Productivity = 1,
             DefenseBonusRate = 1,
-            _actions = new List<WorkerActionPivot>
+            _actions = new List<MapSquareImprovementPivot>
             {
-                WorkerActionPivot.Irrigate,
-                WorkerActionPivot.Mine,
-                WorkerActionPivot.RailRoad,
-                WorkerActionPivot.Road,
-                WorkerActionPivot.BuildFortress
+                MapSquareImprovementPivot.Irrigate,
+                MapSquareImprovementPivot.Mine,
+                MapSquareImprovementPivot.RailRoad,
+                MapSquareImprovementPivot.Road,
+                MapSquareImprovementPivot.BuildFortress
             },
             _temperatures = new List<TemperaturePivot>
             {
@@ -398,18 +398,18 @@ namespace ErsatzCivLib.Model.Static
             Food = 1,
             Productivity = 0,
             DefenseBonusRate = 1.5,
-            _actions = new List<WorkerActionPivot>
+            _actions = new List<MapSquareImprovementPivot>
             {
-                WorkerActionPivot.Clear,
-                WorkerActionPivot.RailRoad,
-                WorkerActionPivot.Road,
-                WorkerActionPivot.BuildFortress
+                MapSquareImprovementPivot.Clear,
+                MapSquareImprovementPivot.RailRoad,
+                MapSquareImprovementPivot.Road,
+                MapSquareImprovementPivot.BuildFortress
             },
             _temperatures = new List<TemperaturePivot>
             {
                 TemperaturePivot.Hot
             },
-            UnderlyingBiome = Plains,
+            UnderlyingBiome = delegate(IEnumerable<BiomePivot> biomes) { return biomes?.SingleOrDefault(b => b == Plains); },
             IsSeaType = false,
             SpeedCost = 2,
             AppearanceRatio = 0.1,
@@ -432,12 +432,12 @@ namespace ErsatzCivLib.Model.Static
             Food = 0,
             Productivity = 1,
             DefenseBonusRate = 3,
-            _actions = new List<WorkerActionPivot>
+            _actions = new List<MapSquareImprovementPivot>
             {
-                WorkerActionPivot.Mine,
-                WorkerActionPivot.RailRoad,
-                WorkerActionPivot.Road,
-                WorkerActionPivot.BuildFortress
+                MapSquareImprovementPivot.Mine,
+                MapSquareImprovementPivot.RailRoad,
+                MapSquareImprovementPivot.Road,
+                MapSquareImprovementPivot.BuildFortress
             },
             _temperatures = new List<TemperaturePivot>
             {
@@ -468,13 +468,13 @@ namespace ErsatzCivLib.Model.Static
             Food = 1,
             Productivity = 0,
             DefenseBonusRate = 2,
-            _actions = new List<WorkerActionPivot>
+            _actions = new List<MapSquareImprovementPivot>
             {
-                WorkerActionPivot.Mine,
-                WorkerActionPivot.Irrigate,
-                WorkerActionPivot.RailRoad,
-                WorkerActionPivot.Road,
-                WorkerActionPivot.BuildFortress
+                MapSquareImprovementPivot.Mine,
+                MapSquareImprovementPivot.Irrigate,
+                MapSquareImprovementPivot.RailRoad,
+                MapSquareImprovementPivot.Road,
+                MapSquareImprovementPivot.BuildFortress
             },
             _temperatures = new List<TemperaturePivot>
             {
@@ -505,12 +505,12 @@ namespace ErsatzCivLib.Model.Static
             Food = 1,
             Productivity = 0,
             DefenseBonusRate = 1.5,
-            _actions = new List<WorkerActionPivot>
+            _actions = new List<MapSquareImprovementPivot>
             {
-                WorkerActionPivot.RailRoad,
-                WorkerActionPivot.Road,
-                WorkerActionPivot.BuildFortress,
-                WorkerActionPivot.Clear
+                MapSquareImprovementPivot.RailRoad,
+                MapSquareImprovementPivot.Road,
+                MapSquareImprovementPivot.BuildFortress,
+                MapSquareImprovementPivot.Clear
             },
             _temperatures = new List<TemperaturePivot>
             {
@@ -518,7 +518,7 @@ namespace ErsatzCivLib.Model.Static
                 TemperaturePivot.Hot,
                 TemperaturePivot.Temperate
             },
-            UnderlyingBiome = Grassland,
+            UnderlyingBiome = delegate (IEnumerable<BiomePivot> biomes) { return biomes?.SingleOrDefault(b => b == Grassland); },
             IsSeaType = false,
             SpeedCost = 2,
             AppearanceRatio = 0.02,
@@ -541,19 +541,19 @@ namespace ErsatzCivLib.Model.Static
             Food = 1,
             Productivity = 2,
             DefenseBonusRate = 1.5,
-            _actions = new List<WorkerActionPivot>
+            _actions = new List<MapSquareImprovementPivot>
             {
-                WorkerActionPivot.Clear,
-                WorkerActionPivot.RailRoad,
-                WorkerActionPivot.Road,
-                WorkerActionPivot.BuildFortress
+                MapSquareImprovementPivot.Clear,
+                MapSquareImprovementPivot.RailRoad,
+                MapSquareImprovementPivot.Road,
+                MapSquareImprovementPivot.BuildFortress
             },
             _temperatures = new List<TemperaturePivot>
             {
                 TemperaturePivot.Cold,
                 TemperaturePivot.Temperate
             },
-            UnderlyingBiome = Plains,
+            UnderlyingBiome = delegate (IEnumerable<BiomePivot> biomes) { return biomes?.SingleOrDefault(b => b == Plains); },
             IsSeaType = false,
             SpeedCost = 2,
             AppearanceRatio = 0.1,
@@ -576,13 +576,13 @@ namespace ErsatzCivLib.Model.Static
             Food = 1,
             Productivity = 1,
             DefenseBonusRate = 0,
-            _actions = new List<WorkerActionPivot>
+            _actions = new List<MapSquareImprovementPivot>
             {
-                WorkerActionPivot.Irrigate,
-                WorkerActionPivot.Plant,
-                WorkerActionPivot.RailRoad,
-                WorkerActionPivot.Road,
-                WorkerActionPivot.BuildFortress
+                MapSquareImprovementPivot.Irrigate,
+                MapSquareImprovementPivot.Plant,
+                MapSquareImprovementPivot.RailRoad,
+                MapSquareImprovementPivot.Road,
+                MapSquareImprovementPivot.BuildFortress
             },
             _temperatures = new List<TemperaturePivot>
             {
@@ -610,12 +610,12 @@ namespace ErsatzCivLib.Model.Static
             Food = 2,
             Productivity = 0,
             DefenseBonusRate = 1.5,
-            _actions = new List<WorkerActionPivot>
+            _actions = new List<MapSquareImprovementPivot>
             {
-                WorkerActionPivot.Irrigate,
-                WorkerActionPivot.RailRoad,
-                WorkerActionPivot.Road,
-                WorkerActionPivot.BuildFortress
+                MapSquareImprovementPivot.Irrigate,
+                MapSquareImprovementPivot.RailRoad,
+                MapSquareImprovementPivot.Road,
+                MapSquareImprovementPivot.BuildFortress
             },
             _temperatures = new List<TemperaturePivot>
             {

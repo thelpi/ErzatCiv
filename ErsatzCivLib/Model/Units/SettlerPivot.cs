@@ -3,24 +3,24 @@
 namespace ErsatzCivLib.Model.Units
 {
     /// <summary>
-    /// Represents a worker.
+    /// Represents a unit of settlers.
     /// </summary>
     /// <seealso cref="UnitPivot"/>
     [Serializable]
-    public class WorkerPivot : UnitPivot
+    public class SettlerPivot : UnitPivot
     {
         #region Embedded properties
 
-        private InProgressWorkerActionPivot _currentAction = null;
+        private InProgressMapSquareImprovementPivot _currentAction = null;
         /// <summary>
-        /// Indicates if the worker is busy.
+        /// Indicates if the settler is busy.
         /// </summary>
         internal bool BusyOnAction { get { return _currentAction != null; } }
 
         #endregion
 
-        private WorkerPivot(MapSquarePivot location)
-            : base(location, false, true, 0, 0, 1, 1, 10, null, null, -1, null, 1)
+        private SettlerPivot(MapSquarePivot location) :
+            base(location, false, true, 1, 0, 1, 1, 40, null, null, 320, null, 1)
         { }
 
         /// <summary>
@@ -32,10 +32,10 @@ namespace ErsatzCivLib.Model.Units
         }
 
         /// <summary>
-        /// Sets a <see cref="InProgressWorkerActionPivot"/> to the instance.
+        /// Sets a <see cref="InProgressMapSquareImprovementPivot"/> to the instance.
         /// </summary>
         /// <param name="action">The action to set.</param>
-        internal void SetAction(InProgressWorkerActionPivot action)
+        internal void SetAction(InProgressMapSquareImprovementPivot action)
         {
             _currentAction = action;
         }
@@ -43,16 +43,16 @@ namespace ErsatzCivLib.Model.Units
         /// <summary>
         /// Default instance.
         /// </summary>
-        internal static readonly WorkerPivot Default = new WorkerPivot(null);
+        internal static readonly SettlerPivot Default = new SettlerPivot(null);
 
         /// <summary>
         /// Static constructior.
         /// </summary>
         /// <param name="location">Builder location.</param>
-        /// <returns>An instance of <see cref="WorkerPivot"/>.</returns>
-        internal static WorkerPivot CreateAtLocation(MapSquarePivot location)
+        /// <returns>An instance of <see cref="SettlerPivot"/>.</returns>
+        internal static SettlerPivot CreateAtLocation(MapSquarePivot location)
         {
-            return new WorkerPivot(location);
+            return new SettlerPivot(location);
         }
     }
 }

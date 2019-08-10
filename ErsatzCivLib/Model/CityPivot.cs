@@ -88,11 +88,11 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public MapSquarePivot MapSquareLocation { get; private set; }
 
-        private List<Units.SettlersPivot> _settlers = new List<Units.SettlersPivot>();
+        private List<Units.SettlerPivot> _settlers = new List<Units.SettlerPivot>();
         /// <summary>
         /// Settlers on the map who belong to this city.
         /// </summary>
-        public IReadOnlyCollection<Units.SettlersPivot> Settlers { get { return _settlers; } }
+        public IReadOnlyCollection<Units.SettlerPivot> Settlers { get { return _settlers; } }
 
         private readonly List<CitizenPivot> _citizens;
         /// <summary>
@@ -488,9 +488,9 @@ namespace ErsatzCivLib.Model
         /// Recomputes everything before passing to the next turn.
         /// </summary>
         /// <returns>A tuple of values [finished production / settler disbanded].</returns>
-        internal Tuple<BuildablePivot, Units.SettlersPivot> NextTurn()
+        internal Tuple<BuildablePivot, Units.SettlerPivot> NextTurn()
         {
-            Units.SettlersPivot disbandedSettler = null;
+            Units.SettlerPivot disbandedSettler = null;
 
             BuildablePivot produced = null;
             bool resetCitizensRequired = false;
@@ -628,13 +628,13 @@ namespace ErsatzCivLib.Model
                     _improvements.Remove(CityImprovementPivot.NuclearPlant);
                     _improvements.Remove(CityImprovementPivot.HydroPlant);
                 }
-                else if (produced.Is<Units.SettlersPivot>())
+                else if (produced.Is<Units.SettlerPivot>())
                 {
-                    _settlers.Add(produced as Units.SettlersPivot);
+                    _settlers.Add(produced as Units.SettlerPivot);
                 }
             }
 
-            return new Tuple<BuildablePivot, Units.SettlersPivot>(produced, disbandedSettler);
+            return new Tuple<BuildablePivot, Units.SettlerPivot>(produced, disbandedSettler);
         }
 
         /// <summary>
@@ -740,10 +740,10 @@ namespace ErsatzCivLib.Model
         }
 
         /// <summary>
-        /// Proceeds to unlink a <see cref="Units.SettlersPivot"/> from the city.
+        /// Proceeds to unlink a <see cref="Units.SettlerPivot"/> from the city.
         /// </summary>
         /// <param name="settler">The settler.</param>
-        internal void UnlinkSettler(Units.SettlersPivot settler)
+        internal void UnlinkSettler(Units.SettlerPivot settler)
         {
             _settlers.Remove(settler);
         }

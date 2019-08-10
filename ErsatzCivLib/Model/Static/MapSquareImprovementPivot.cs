@@ -3,11 +3,11 @@
 namespace ErsatzCivLib.Model.Static
 {
     /// <summary>
-    /// Represents a worker action.
+    /// Represents a settler action.
     /// </summary>
     /// <seealso cref="IEquatable{T}"/>
     [Serializable]
-    public class WorkerActionPivot : IEquatable<WorkerActionPivot>
+    public class MapSquareImprovementPivot : IEquatable<MapSquareImprovementPivot>
     {
         #region Embedded properties
 
@@ -20,7 +20,7 @@ namespace ErsatzCivLib.Model.Static
         /// </summary>
         public int TurnCost { get; private set; }
         /// <summary>
-        /// Indicates if the action is always available for a worker.
+        /// Indicates if the action is always available for a settler.
         /// </summary>
         public bool AlwaysAvailable { get; private set; }
         /// <summary>
@@ -30,7 +30,7 @@ namespace ErsatzCivLib.Model.Static
 
         #endregion
 
-        private WorkerActionPivot() { }
+        private MapSquareImprovementPivot() { }
 
         #region IEquatable implementation
 
@@ -39,7 +39,7 @@ namespace ErsatzCivLib.Model.Static
         /// </summary>
         /// <param name="other">The other instance.</param>
         /// <returns><c>True</c> if equals; <c>False</c> otherwise.</returns>
-        public bool Equals(WorkerActionPivot other)
+        public bool Equals(MapSquareImprovementPivot other)
         {
             return Name == other?.Name;
         }
@@ -47,10 +47,10 @@ namespace ErsatzCivLib.Model.Static
         /// <summary>
         /// Operator "==" override. Checks equality between two instances.
         /// </summary>
-        /// <param name="r1">The first <see cref="WorkerActionPivot"/>.</param>
-        /// <param name="r2">The second <see cref="WorkerActionPivot"/>.</param>
+        /// <param name="r1">The first <see cref="MapSquareImprovementPivot"/>.</param>
+        /// <param name="r2">The second <see cref="MapSquareImprovementPivot"/>.</param>
         /// <returns><c>True</c> if equals; <c>False</c> otherwise.</returns>
-        public static bool operator ==(WorkerActionPivot r1, WorkerActionPivot r2)
+        public static bool operator ==(MapSquareImprovementPivot r1, MapSquareImprovementPivot r2)
         {
             if (r1 is null)
             {
@@ -63,10 +63,10 @@ namespace ErsatzCivLib.Model.Static
         /// <summary>
         /// Operator "!=" override. Checks non-equality between two instances.
         /// </summary>
-        /// <param name="r1">The first <see cref="WorkerActionPivot"/>.</param>
-        /// <param name="r2">The second <see cref="WorkerActionPivot"/>.</param>
+        /// <param name="r1">The first <see cref="MapSquareImprovementPivot"/>.</param>
+        /// <param name="r2">The second <see cref="MapSquareImprovementPivot"/>.</param>
         /// <returns><c>False</c> if equals; <c>True</c> otherwise.</returns>
-        public static bool operator !=(WorkerActionPivot r1, WorkerActionPivot r2)
+        public static bool operator !=(MapSquareImprovementPivot r1, MapSquareImprovementPivot r2)
         {
             return !(r1 == r2);
         }
@@ -74,7 +74,7 @@ namespace ErsatzCivLib.Model.Static
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            return obj is WorkerActionPivot && Equals(obj as WorkerActionPivot);
+            return obj is MapSquareImprovementPivot && Equals(obj as MapSquareImprovementPivot);
         }
 
         /// <inheritdoc />
@@ -94,7 +94,7 @@ namespace ErsatzCivLib.Model.Static
         /// Doubles the productivity value (or makes it 1 if 0).
         /// Not cumulable with <see cref="Irrigate"/>.
         /// </remarks>
-        public static readonly WorkerActionPivot Mine = new WorkerActionPivot
+        public static readonly MapSquareImprovementPivot Mine = new MapSquareImprovementPivot
         {
             Name = "Mine",
             TurnCost = 2,
@@ -107,7 +107,7 @@ namespace ErsatzCivLib.Model.Static
         /// Doubles the food value (or makes it 1 if 0).
         /// Not cumulable with <see cref="Mine"/>.
         /// </remarks>
-        public static readonly WorkerActionPivot Irrigate = new WorkerActionPivot
+        public static readonly MapSquareImprovementPivot Irrigate = new MapSquareImprovementPivot
         {
             Name = "Irrigate",
             TurnCost = 2,
@@ -119,7 +119,7 @@ namespace ErsatzCivLib.Model.Static
         /// <remarks>
         /// Increase the unit speed (x3), and the commerce by one unit.
         /// </remarks>
-        public static readonly WorkerActionPivot Road = new WorkerActionPivot
+        public static readonly MapSquareImprovementPivot Road = new MapSquareImprovementPivot
         {
             Name = "Road",
             TurnCost = 1,
@@ -131,7 +131,7 @@ namespace ErsatzCivLib.Model.Static
         /// <remarks>
         /// Increase the unit speed (no cost), and the commerce and productivity by one unit.
         /// </remarks>
-        public static readonly WorkerActionPivot RailRoad = new WorkerActionPivot
+        public static readonly MapSquareImprovementPivot RailRoad = new MapSquareImprovementPivot
         {
             Name = "RailRoad",
             TurnCost = 2,
@@ -144,7 +144,7 @@ namespace ErsatzCivLib.Model.Static
         /// <remarks>
         /// Transforms the biome of a <see cref="MapSquarePivot"/> into its <see cref="BiomePivot.UnderlyingBiome"/>.
         /// </remarks>
-        public static readonly WorkerActionPivot Clear = new WorkerActionPivot
+        public static readonly MapSquareImprovementPivot Clear = new MapSquareImprovementPivot
         {
             Name = "Clear",
             TurnCost = 2,
@@ -156,7 +156,7 @@ namespace ErsatzCivLib.Model.Static
         /// <remarks>
         /// Changes the <see cref="BiomePivot"/> when applied on a <see cref="MapSquarePivot"/>.
         /// </remarks>
-        public static readonly WorkerActionPivot Plant = new WorkerActionPivot
+        public static readonly MapSquareImprovementPivot Plant = new MapSquareImprovementPivot
         {
             Name = "Plant forest",
             TurnCost = 3,
@@ -166,7 +166,7 @@ namespace ErsatzCivLib.Model.Static
         /// <summary>
         /// Clears pollution.
         /// </summary>
-        public static readonly WorkerActionPivot ClearPollution = new WorkerActionPivot
+        public static readonly MapSquareImprovementPivot ClearPollution = new MapSquareImprovementPivot
         {
             Name = "Clear pollution",
             TurnCost = 3,
@@ -176,7 +176,7 @@ namespace ErsatzCivLib.Model.Static
         /// Builds a fortress.
         /// </summary>
         /// <remarks>Fortress triple the defensive value of a map square.</remarks>
-        public static readonly WorkerActionPivot BuildFortress = new WorkerActionPivot
+        public static readonly MapSquareImprovementPivot BuildFortress = new MapSquareImprovementPivot
         {
             Name = "Build fortress",
             TurnCost = 3,
@@ -189,7 +189,7 @@ namespace ErsatzCivLib.Model.Static
         /// <remarks>
         /// Removes the railroad if applicable, then the road.
         /// </remarks>
-        public static readonly WorkerActionPivot DestroyRoad = new WorkerActionPivot
+        public static readonly MapSquareImprovementPivot DestroyRoad = new MapSquareImprovementPivot
         {
             Name = "Destroy road",
             TurnCost = 1,
@@ -199,7 +199,7 @@ namespace ErsatzCivLib.Model.Static
         /// Destroys irrigation system, mine and fortress.
         /// </summary>
         /// <remarks>Fortress comes first.</remarks>
-        public static readonly WorkerActionPivot DestroyImprovement = new WorkerActionPivot
+        public static readonly MapSquareImprovementPivot DestroyImprovement = new MapSquareImprovementPivot
         {
             Name = "Destroy improvement",
             TurnCost = 1,

@@ -19,7 +19,7 @@ namespace ErsatzCiv
     {
         internal const double CITY_DISPLAY_RATIO = 0.8;
         internal const string CITY_RENDER_PATH = "city.png";
-        internal const string UNIT_RENDER_PATH = "unit_{0}.png";
+        internal const string UNIT_RENDER_PATH = "units\\{0}.png";
         internal static readonly Dictionary<string, string> MAP_SQUARE_COLORS = new Dictionary<string, string>
         {
             { Biome.Grassland.Name, "#32CD32" },
