@@ -520,6 +520,14 @@ namespace ErsatzCivLib.Model
                         city.SetAsNewCapital(Capital);
                         Capital = city;
                     }
+                    else if (WonderPivot.HooverDam == produced)
+                    {
+                        foreach (var contCity in Cities.Where(c =>
+                            c.MapSquareLocation.ContinentIndex == city.MapSquareLocation.ContinentIndex))
+                        {
+                            contCity.ForceCityImprovement(CityImprovementPivot.HydroPlant);
+                        }
+                    }
                 }
                 if (turnInfo.Item2 != null)
                 {
@@ -728,6 +736,17 @@ namespace ErsatzCivLib.Model
             indexOfDefault = buildableDefaultInstances.FindIndex(b =>
                 b.GetType() == city.Production.GetType() && b.Name == city.Production.Name);
             return buildableDefaultInstances;
+        }
+
+        /// <summary>
+        /// Checks if the player has the specified <see cref="WonderPivot"/> on the same continent as specified <see cref="MapSquarePivot"/>.
+        /// </summary>
+        /// <param name="wonder">The wonder.</param>
+        /// <param name="location">The location.</param>
+        /// <returns><c>True</c> if wonder built on the continent; <c>False</c> otherwise.</returns>
+        internal bool HasWonderOnContinent(WonderPivot wonder, MapSquarePivot location)
+        {
+            return Cities.Any(c => c.Wonders.Contains(wonder) && c.MapSquareLocation.ContinentIndex == location.ContinentIndex);
         }
 
         #endregion

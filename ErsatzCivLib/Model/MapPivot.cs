@@ -174,9 +174,11 @@ namespace ErsatzCivLib.Model
                 }
             }
 
+            var cIndex = 0;
             foreach (var boundary in boundaries)
             {
-                continentInfos.Add(ConvertContinentBlueprintToMapSquares(landRatio, boundary));
+                continentInfos.Add(ConvertContinentBlueprintToMapSquares(landRatio, boundary, cIndex));
+                cIndex++;
             }
 
             // sets chunks
@@ -375,7 +377,7 @@ namespace ErsatzCivLib.Model
 
         #region Private methods
 
-        private List<MapSquarePivot> ConvertContinentBlueprintToMapSquares(double landRatio, ContinentBlueprint contBound)
+        private List<MapSquarePivot> ConvertContinentBlueprintToMapSquares(double landRatio, ContinentBlueprint contBound, int continentIndex)
         {
             var continentWidth = (int)Math.Floor(contBound.Width * landRatio);
             var continentHeight = (int)Math.Floor(contBound.Height * landRatio);
@@ -410,7 +412,7 @@ namespace ErsatzCivLib.Model
                     {
                         biome = BiomePivot.Default;
                     }
-                    var newSquare = new MapSquarePivot(y, x, biome);
+                    var newSquare = new MapSquarePivot(y, x, biome, continentIndex);
                     continentSquares.Add(newSquare);
                 }
             }

@@ -50,6 +50,8 @@ namespace ErsatzCivLib.Model
         #region Constants relative to wonders effects
 
         private const double SETI_PROGRAM_SCIENCE_INCREASE_RATIO = 1.5;
+        private const int JSBACHS_WONDER_HAPPINESS_EFFECT = 2;
+        private const int CUREFORCANCER_WONDER_HAPPINESS_EFFECT = 1;
 
         #endregion
 
@@ -474,6 +476,29 @@ namespace ErsatzCivLib.Model
             };
         }
 
+        #region Private methods
+
+        private void RemovePreviousPlant(BuildablePivot produced)
+        {
+            if (CityImprovementPivot.HydroPlant == produced)
+            {
+                _improvements.Remove(CityImprovementPivot.NuclearPlant);
+                _improvements.Remove(CityImprovementPivot.PowerPlant);
+            }
+            else if (CityImprovementPivot.NuclearPlant == produced)
+            {
+                _improvements.Remove(CityImprovementPivot.PowerPlant);
+                _improvements.Remove(CityImprovementPivot.HydroPlant);
+            }
+            else if (CityImprovementPivot.PowerPlant == produced)
+            {
+                _improvements.Remove(CityImprovementPivot.NuclearPlant);
+                _improvements.Remove(CityImprovementPivot.HydroPlant);
+            }
+        }
+
+        #endregion
+
         #region Internal methods
 
         /// <summary>
@@ -627,22 +652,8 @@ namespace ErsatzCivLib.Model
 
             if (produced != null)
             {
-                if (CityImprovementPivot.HydroPlant == produced)
-                {
-                    _improvements.Remove(CityImprovementPivot.NuclearPlant);
-                    _improvements.Remove(CityImprovementPivot.PowerPlant);
-                }
-                else if (CityImprovementPivot.NuclearPlant == produced)
-                {
-                    _improvements.Remove(CityImprovementPivot.PowerPlant);
-                    _improvements.Remove(CityImprovementPivot.HydroPlant);
-                }
-                else if (CityImprovementPivot.PowerPlant == produced)
-                {
-                    _improvements.Remove(CityImprovementPivot.NuclearPlant);
-                    _improvements.Remove(CityImprovementPivot.HydroPlant);
-                }
-                else if (produced.Is<Units.SettlerPivot>())
+                RemovePreviousPlant(produced);
+                if (produced.Is<Units.SettlerPivot>())
                 {
                     _settlers.Add(produced as Units.SettlerPivot);
                 }
@@ -662,12 +673,18 @@ namespace ErsatzCivLib.Model
             var unhappyFaces = nonSpecialistFaces / DEFAULT_RATIO_CITIZEN_UNHAPPY;
             var happyFaces = 0;
 
-            // Entertaining effects.
-            var entertainers = _citizens.Where(c => c.Type == CitizenTypePivot.Entertainer).Count();
-            var templeEffect = _improvements.Contains(CityImprovementPivot.Temple) ? TEMPLE_HAPPINESS_EFFECT : 0;
-            var colosseumEffect = _improvements.Contains(CityImprovementPivot.Colosseum) ? COLOSSEUM_HAPPINESS_EFFECT : 0;
-            var cathedralEffet = _improvements.Contains(CityImprovementPivot.Cathedral) ? CATHEDRAL_HAPPINESS_EFFECT : 0;
-            for (int i = 0; i < (entertainers + templeEffect + colosseumEffect + cathedralEffet); i++)
+            // happiness effects.
+            var happinessEffects = new List<int>
+            {
+                _citizens.Where(c => c.Type == CitizenTypePivot.Entertainer).Count(),
+                _improvements.Contains(CityImprovementPivot.Temple) ? TEMPLE_HAPPINESS_EFFECT : 0,
+                _improvements.Contains(CityImprovementPivot.Colosseum) ? COLOSSEUM_HAPPINESS_EFFECT : 0,
+                _improvements.Contains(CityImprovementPivot.Cathedral) ? CATHEDRAL_HAPPINESS_EFFECT : 0,
+                Player.HasWonderOnContinent(WonderPivot.JsBachsCathedral, MapSquareLocation) ? JSBACHS_WONDER_HAPPINESS_EFFECT : 0,
+                Player.Wonders.Contains(WonderPivot.CureForCancer) ? CUREFORCANCER_WONDER_HAPPINESS_EFFECT : 0
+            };
+
+            for (int i = 0; i < happinessEffects.Sum(); i++)
             {
                 if (unhappyFaces > 0)
                 {
@@ -760,6 +777,19 @@ namespace ErsatzCivLib.Model
         internal void UnlinkSettler(Units.SettlerPivot settler)
         {
             _settlers.Remove(settler);
+        }
+
+        /// <summary>
+        /// Forces the addition of a specified <see cref="CityImprovementPivot"/> to the city.
+        /// </summary>
+        /// <param name="cityImprovement">The city improvement.</param>
+        internal void ForceCityImprovement(CityImprovementPivot cityImprovement)
+        {
+            if (!Improvements.Contains(cityImprovement))
+            {
+                _improvements.Add(cityImprovement);
+                RemovePreviousPlant(cityImprovement);
+            }
         }
 
         #endregion

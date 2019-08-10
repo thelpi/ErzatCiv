@@ -24,6 +24,10 @@ namespace ErsatzCivLib.Model
         #region Embedded properties
 
         /// <summary>
+        /// Continent index.
+        /// </summary>
+        public int ContinentIndex { get; private set; }
+        /// <summary>
         /// Row on the map.
         /// </summary>
         public int Row { get; private set; }
@@ -220,12 +224,14 @@ namespace ErsatzCivLib.Model
         /// <param name="row">The <see cref="Row"/> value.</param>
         /// <param name="column">The <see cref="Column"/> value.</param>
         /// <param name="biome">The <see cref="Biome"/> value.</param>
-        internal MapSquarePivot(int row, int column, BiomePivot biome)
+        /// <param name="continentIndex">The <see cref="ContinentIndex"/> value.</param>
+        internal MapSquarePivot(int row, int column, BiomePivot biome, int continentIndex)
         {
             Row = row;
             Column = column;
             Biome = biome;
             HasBonus = Tools.Randomizer.NextDouble() < Biome.BonusApperanceRate;
+            ContinentIndex = continentIndex;
         }
 
         #region Internal methods
