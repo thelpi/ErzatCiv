@@ -191,7 +191,12 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                var turnsLeft = ((_cities.Count * REVOLUTION_TURNS_BY_CITY) + 1) - _anarchyTurnsCount;
+                var anarchyTurns = ((_cities.Count * REVOLUTION_TURNS_BY_CITY) + 1);
+                if (WonderIsActive(WonderPivot.Pyramids))
+                {
+                    anarchyTurns = 1;
+                }
+                var turnsLeft = anarchyTurns - _anarchyTurnsCount;
                 return (int)Math.Ceiling(turnsLeft < 0 ? 0 : turnsLeft);
             }
         }
@@ -314,7 +319,7 @@ namespace ErsatzCivLib.Model
         {
             return RegimePivot
                     .Instances
-                    .Where(r => r.AdvancePrerequisite is null || _advances.Contains(r.AdvancePrerequisite))
+                    .Where(r => r.AdvancePrerequisite is null || _advances.Contains(r.AdvancePrerequisite) || WonderIsActive(WonderPivot.Pyramids))
                     .ToList();
         }
 
@@ -723,7 +728,7 @@ namespace ErsatzCivLib.Model
             buildableDefaultInstances.RemoveAll(b => b.Is<WonderPivot>() && _engine.GetEveryWonders().Contains(b as WonderPivot));
 
             // Removes wonders in progress in another city.
-            buildableDefaultInstances.RemoveAll(b => b.Is<WonderPivot>() && _cities.Select(c => c.Production).Contains(b as WonderPivot));
+            buildableDefaultInstances.RemoveAll(b => b.Is<WonderPivot>() && _cities.Where(c => c != city).Select(c => c.Production).Contains(b as WonderPivot));
 
             // Another improvement is required in the first place.
             buildableDefaultInstances.RemoveAll(b =>
