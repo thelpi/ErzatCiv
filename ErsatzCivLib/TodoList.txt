@@ -34,8 +34,6 @@ Power plant : risque d'accident nucléaire
 
 Gestion de la corruption un peu random
 
-Mysticism : ajoute +1 au bonheur avec temple
-
 Confusion taxes / Luxuries / Trade / Commerce / Treasure
 
 Humeur des citoyens : impact des unités à l'extérieur
@@ -49,5 +47,3 @@ https://civilization.fandom.com/wiki/United_Nations_(Civ1)
 https://civilization.fandom.com/wiki/Great_Wall_(Civ1)
 
 2 villes peuvent finir une merveille au même moment ?
-
-https://civilization.fandom.com/wiki/Great_Library_(Civ1)

@@ -42,8 +42,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Model\CityAreaMapSquarePivot.cs" />
-    <Compile Include="Model\Events\DarwinVoyageEventArgs.cs" />
     <Compile Include="Model\Events\DiscoverNewSquareEventArgs.cs" />
+    <Compile Include="Model\Events\ForcedAdvanceEventArgs.cs" />
     <Compile Include="Model\Events\NextUnitEventArgs.cs" />
     <Compile Include="Model\Events\SquareChangedEventArgs.cs" />
     <Compile Include="Model\Enums\AgePivot.cs" />

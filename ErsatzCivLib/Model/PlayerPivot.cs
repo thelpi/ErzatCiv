@@ -20,7 +20,7 @@ namespace ErsatzCivLib.Model
         private const int SCIENCE_COST = 100;
 
         #region Embedded properties
-
+        
         private int _anarchyTurnsCount;
         private readonly EnginePivot _engine;
 
@@ -247,10 +247,10 @@ namespace ErsatzCivLib.Model
         [field: NonSerialized]
         public event EventHandler<DiscoverNewSquareEventArgs> DiscoverNewSquareEvent;
         /// <summary>
-        /// Triggered when <see cref="WonderPivot.DarwinVoyage"/> is built.
+        /// Triggered when <see cref="WonderPivot.GreatLibrary"/> finds an advance or when <see cref="WonderPivot.DarwinVoyage"/> is built.
         /// </summary>
         [field: NonSerialized]
-        public event EventHandler<DarwinVoyageEventArgs> DarwinVoyageEvent;
+        public event EventHandler<ForcedAdvanceEventArgs> ForcedAdvanceEvent;
 
         #endregion
 
@@ -558,15 +558,15 @@ namespace ErsatzCivLib.Model
                             CheckScienceAtNextTurn(0);
                             oneAdvanceWasReady = false;
                         }
-                        DarwinVoyageEvent?.Invoke(this, new DarwinVoyageEventArgs());
+                        ForcedAdvanceEvent?.Invoke(this, new ForcedAdvanceEventArgs(_advances.Last(), true));
                         while (CurrentAdvance == null) { }
                         CheckScienceAtNextTurn(0);
-                        DarwinVoyageEvent?.Invoke(this, new DarwinVoyageEventArgs());
+                        ForcedAdvanceEvent?.Invoke(this, new ForcedAdvanceEventArgs(_advances.Last(), true));
                         if (!oneAdvanceWasReady)
                         {
                             while (CurrentAdvance == null) { }
                             CheckScienceAtNextTurn(0);
-                            DarwinVoyageEvent?.Invoke(this, new DarwinVoyageEventArgs());
+                            ForcedAdvanceEvent?.Invoke(this, new ForcedAdvanceEventArgs(_advances.Last(), true));
                         }
                     }
                 }
@@ -587,7 +587,32 @@ namespace ErsatzCivLib.Model
 
             _anarchyTurnsCount++;
 
-            return new TurnConsequencesPivot(RevolutionIsDone, citiesWithDoneProduction, CurrentAdvance is null);
+            if (WonderIsActive(WonderPivot.GreatLibrary))
+            {
+                var advancesMoreThanOne =
+                    _engine.Players
+                        .Where(p => p != this)
+                        .SelectMany(p => p.Advances)
+                        .GroupBy(a => a)
+                        .Where(a => a.Count() > 1)
+                        .Select(a => a.Key)
+                        .Where(a => !_advances.Contains(a))
+                        .ToList();
+                foreach (var a in advancesMoreThanOne)
+                {
+                    _advances.Add(a);
+                    bool inProgress = false;
+                    if (CurrentAdvance == a)
+                    {
+                        ScienceStack = 0;
+                        CurrentAdvance = null;
+                        inProgress = true;
+                    }
+                    ForcedAdvanceEvent?.Invoke(this, new ForcedAdvanceEventArgs(a, inProgress));
+                }
+            }
+
+            return new TurnConsequencesPivot(RevolutionIsDone, citiesWithDoneProduction, CurrentAdvance is null ? _advances.Last() : null);
         }
 
         /// <summary>

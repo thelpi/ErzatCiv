@@ -10,7 +10,7 @@ namespace ErsatzCivLib.Model.Units
     public class NuclearPivot : UnitPivot
     {
         private NuclearPivot(CityPivot city, MapSquarePivot location) :
-            base(city, true, true, 0, 99, 1, 16, 160, AdvancePivot.Rocketry, null, 3200, null, 0, location)
+            base(city, true, true, 0, 99, 16, 160, AdvancePivot.Rocketry, null, 3200, null, 0, location)
         { }
 
         /// <summary>

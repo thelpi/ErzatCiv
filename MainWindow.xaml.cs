@@ -46,11 +46,6 @@ namespace ErsatzCiv
 
         #region Events
 
-        private void OnDarwinVoyage(object sender, DarwinVoyageEventArgs evt)
-        {
-            new WindowAdvancePick(_engine).ShowDialog();
-        }
-
         private void OnTriggerUpdateMapSquares(object sender, DiscoverNewSquareEventArgs evt)
         {
             if (evt?.MapSquares != null)
@@ -486,7 +481,10 @@ namespace ErsatzCiv
                 msq.SquareChangeEvent += OnTriggerUpdateMapSquare;
             }
             _engine.HumanPlayer.DiscoverNewSquareEvent += OnTriggerUpdateMapSquares;
-            _engine.HumanPlayer.DarwinVoyageEvent += OnDarwinVoyage;
+            _engine.HumanPlayer.ForcedAdvanceEvent += delegate(object sender, ForcedAdvanceEventArgs e)
+            {
+                ShowNewAdvanceDiscovered(e.Advance, e.WasInProgressAdvance);
+            };
         }
 
         private void RefreshDynamicView()
@@ -595,11 +593,20 @@ namespace ErsatzCiv
                     }
                 }
             }
-            if (turnConsequences.EndOfAdvance)
+            if (turnConsequences.EndOfAdvance != null)
+            {
+                ShowNewAdvanceDiscovered(turnConsequences.EndOfAdvance, true);
+            }
+            RefreshDynamicView();
+        }
+
+        private void ShowNewAdvanceDiscovered(AdvancePivot advance, bool getNewOne)
+        {
+            MessageBox.Show($"New scientific advance : {advance.Name} !", "ErsatzCiv");
+            if (getNewOne)
             {
                 new WindowAdvancePick(_engine).ShowDialog();
             }
-            RefreshDynamicView();
         }
 
         #endregion

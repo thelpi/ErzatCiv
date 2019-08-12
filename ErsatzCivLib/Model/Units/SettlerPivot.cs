@@ -20,7 +20,7 @@ namespace ErsatzCivLib.Model.Units
         #endregion
 
         private SettlerPivot(CityPivot city, MapSquarePivot location) :
-            base(city, false, true, 1, 0, 1, 1, 40, null, null, 320, null, 1, location)
+            base(city, false, true, 1, 0, 1, 40, null, null, 320, null, 1, location)
         { }
 
         /// <summary>

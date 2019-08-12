@@ -35,10 +35,6 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public MapSquarePivot MapSquareLocation { get; private set; }
         /// <summary>
-        /// Current life points.
-        /// </summary>
-        public int CurrentLifePoints { get; private set; }
-        /// <summary>
         /// Can navigate on sea y/n.
         /// </summary>
         public bool SeaNavigate { get; private set; }
@@ -77,7 +73,6 @@ namespace ErsatzCivLib.Model
         /// <param name="groundNavigate">The <see cref="GroundNavigate"/> value.</param>
         /// <param name="defensePoints">The <see cref="DefensePoints"/> value.</param>
         /// <param name="offensePoints">The <see cref="OffensePoints"/> value.</param>
-        /// <param name="lifePoints">The intial <see cref="CurrentLifePoints"/> value.</param>
         /// <param name="speed">The <see cref="Speed"/> value.</param>
         /// <param name="productivityCost">The <see cref="BuildablePivot.ProductivityCost"/> value.</param>
         /// <param name="advancePrerequisite">The <see cref="BuildablePivot.AdvancePrerequisite"/> value.</param>
@@ -87,7 +82,7 @@ namespace ErsatzCivLib.Model
         /// <param name="citizenCostToProduce">The <see cref="CitizenCostToProduce"/> value.</param>
         /// <param name="location">The <see cref="MapSquareLocation"/> value, if <paramref name="city"/> is <c>Null</c>.</param>
         protected UnitPivot(CityPivot city, bool seaNavigate, bool groundNavigate, int defensePoints, int offensePoints,
-            int lifePoints, int speed, int productivityCost, AdvancePivot advancePrerequisite, AdvancePivot advanceObsolescence,
+            int speed, int productivityCost, AdvancePivot advancePrerequisite, AdvancePivot advanceObsolescence,
             int purchasePrice, string name = null, int citizenCostToProduce = 0, MapSquarePivot location = null) :
             base(productivityCost, advancePrerequisite, advanceObsolescence, purchasePrice, name)
         {
@@ -97,7 +92,6 @@ namespace ErsatzCivLib.Model
             GroundNavigate = groundNavigate;
             DefensePoints = defensePoints;
             OffensePoints = offensePoints;
-            CurrentLifePoints = lifePoints;
             Speed = speed;
             RemainingMoves = ComputeRealSpeed();
             CitizenCostToProduce = citizenCostToProduce;

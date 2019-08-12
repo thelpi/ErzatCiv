@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ErsatzCivLib.Model.Static;
 
 namespace ErsatzCivLib.Model
 {
@@ -22,7 +23,7 @@ namespace ErsatzCivLib.Model
         /// <summary>
         /// Indicates the discovery of a <see cref="Static.AdvancePivot"/> is completed.
         /// </summary>
-        public bool EndOfAdvance { get; private set; }
+        public AdvancePivot EndOfAdvance { get; private set; }
 
         #endregion
 
@@ -32,7 +33,7 @@ namespace ErsatzCivLib.Model
         /// <param name="endOfRevolution">The <see cref="EndOfRevolution"/> value.</param>
         /// <param name="endOfProduction">The <see cref="EndOfProduction"/> value.</param>
         /// <param name="endOfAdvance">The <see cref="EndOfAdvance"/> value.</param>
-        internal TurnConsequencesPivot(bool endOfRevolution, Dictionary<CityPivot, BuildablePivot> endOfProduction, bool endOfAdvance)
+        internal TurnConsequencesPivot(bool endOfRevolution, Dictionary<CityPivot, BuildablePivot> endOfProduction, AdvancePivot endOfAdvance)
         {
             EndOfRevolution = endOfRevolution;
             EndOfProduction = endOfProduction;
