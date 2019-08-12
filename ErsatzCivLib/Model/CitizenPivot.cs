@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using ErsatzCivLib.Model.Enums;
 
 namespace ErsatzCivLib.Model
@@ -17,10 +18,6 @@ namespace ErsatzCivLib.Model
         private Guid _uniqueId;
 
         /// <summary>
-        /// Working <see cref="MapSquarePivot"/> for regular citizen. <c>Null</c> for specialist.
-        /// </summary>
-        public MapSquarePivot MapSquare { get; private set; }
-        /// <summary>
         /// Citizen mood.
         /// </summary>
         public MoodPivot Mood { get; internal set; }
@@ -36,39 +33,33 @@ namespace ErsatzCivLib.Model
         #endregion
 
         /// <summary>
-        /// Constructor.
-        /// By default the citizen is <see cref="MoodPivot.Content"/> and regular if <paramref name="mapSquare"/> is specified;
-        /// otherwise it's an <see cref="CitizenTypePivot.Entertainer"/>.
+        /// Constructor; by default the citizen mood is <see cref="MoodPivot.Content"/>.
         /// </summary>
-        /// <param name="mapSquare">The <see cref="MapSquare"/> value.</param>
         /// <param name="city">The <see cref="City"/> value.</param>
-        internal CitizenPivot(MapSquarePivot mapSquare, CityPivot city)
+        /// <param name="type">Optionnal; the <see cref="Type"/> value.</param>
+        internal CitizenPivot(CityPivot city, CitizenTypePivot? type = null)
         {
             _uniqueId = Guid.NewGuid();
-            MapSquare = mapSquare;
             Mood = MoodPivot.Content;
-            Type = mapSquare == null ? CitizenTypePivot.Entertainer : (CitizenTypePivot?)null;
+            Type = type;
             City = city;
         }
 
         /// <summary>
-        /// Transforms a citizen into a specialist.
+        /// Transforms a regular into a specialist.
         /// </summary>
-        /// <param name="citizenType">Type of specialist.</param>
-        internal void ToSpecialist(CitizenTypePivot citizenType)
+        /// <param name="type">The <see cref="Type"/> value.</param>
+        internal void ToSpecialist(CitizenTypePivot type)
         {
             Mood = MoodPivot.Content;
-            Type = citizenType;
-            MapSquare = null;
+            Type = type;
         }
 
         /// <summary>
-        /// Transforms a specialist into a citizen.
+        /// Transforms a specialist into a regular.
         /// </summary>
-        /// <param name="mapSquare">Working map square.</param>
-        internal void ToCitizen(MapSquarePivot mapSquare)
+        internal void ToCitizen()
         {
-            MapSquare = mapSquare ?? throw new ArgumentNullException("Argument is null !", nameof(mapSquare));
             Mood = MoodPivot.Content;
             Type = null;
         }
@@ -85,7 +76,10 @@ namespace ErsatzCivLib.Model
                 (other.Type.HasValue ? ((int)Type.Value).CompareTo((int)other.Type.Value) : 1) :
                 (other.Type.HasValue ? -1 : 0);
             var compareMood = ((int)Mood).CompareTo((int)other.Mood);
-            var compareMapS = (MapSquare?.TotalValue).GetValueOrDefault(0).CompareTo((other.MapSquare?.TotalValue).GetValueOrDefault(0));
+
+            var citizenAreaValueMe = (City.AreaMapSquares.SingleOrDefault(ams => ams.Citizen == this)?.MapSquare?.TotalValue).GetValueOrDefault(0);
+            var citizenAreaValueOther = (other.City.AreaMapSquares.SingleOrDefault(ams => ams.Citizen == other)?.MapSquare?.TotalValue).GetValueOrDefault(0);
+            var compareMapS = citizenAreaValueMe.CompareTo(citizenAreaValueOther);
 
             return compareType == 0 ? (compareMood == 0 ? compareMapS : compareMood) : compareType;
         }

@@ -153,17 +153,18 @@ namespace ErsatzCivLib.Model
         {
             City = city;
             MapSquare = mapSquare;
-            Citizen = city.MapSquareLocation == MapSquare ? null : new CitizenPivot(mapSquare, city);
+            Citizen = city.MapSquareLocation == MapSquare ? null : new CitizenPivot(city);
         }
 
         /// <summary>
         /// Constructor (for existing citizen).
         /// </summary>
+        /// <param name="mapSquare">The <see cref="MapSquare"/> value.</param>
         /// <param name="citizen">The <see cref="Citizen"/> value.</param>
-        internal CityAreaMapSquarePivot(CitizenPivot citizen)
+        internal CityAreaMapSquarePivot(MapSquarePivot mapSquare, CitizenPivot citizen)
         {
             City = citizen.City;
-            MapSquare = citizen.MapSquare;
+            MapSquare = mapSquare;
             Citizen = citizen;
         }
     }

@@ -123,7 +123,7 @@ namespace ErsatzCivLib
 
         private bool OccupiedByCity(MapSquarePivot mapSquare, CityPivot exceptCity = null)
         {
-            return GetEveryCities().Any(c => (exceptCity == null || exceptCity != c) && c.Citizens.Any(cc => cc.MapSquare == mapSquare));
+            return GetEveryCities().Any(c => (exceptCity == null || exceptCity != c) && c.AreaMapSquares.Any(ams => ams.MapSquare == mapSquare));
         }
 
         #endregion
@@ -390,7 +390,7 @@ namespace ErsatzCivLib
                     if (msq != null)
                     {
                         result.Add(msq, new Tuple<CitizenPivot, bool>(
-                            city.Citizens.SingleOrDefault(c => c.MapSquare == msq), OccupiedByCity(msq, city)));
+                            city.AreaWithoutCityMapSquares.SingleOrDefault(ams => ams.MapSquare == msq)?.Citizen, OccupiedByCity(msq, city)));
                     }
                 }
             }

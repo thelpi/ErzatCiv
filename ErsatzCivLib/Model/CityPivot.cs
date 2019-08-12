@@ -495,17 +495,17 @@ namespace ErsatzCivLib.Model
             var mapSquare = BestVacantMapSquareLocation();
             if (mapSquare != null)
             {
-                citizenSource.ToCitizen(mapSquare);
+                citizenSource.ToCitizen();
 
                 if (_specialistCitizens.Contains(citizenSource))
                 {
                     _specialistCitizens.Remove(citizenSource);
-                    _areaMapSquares.Add(new CityAreaMapSquarePivot(citizenSource));
+                    _areaMapSquares.Add(new CityAreaMapSquarePivot(mapSquare, citizenSource));
                 }
                 else
                 {
                     _areaMapSquares.Remove(_areaMapSquares.SingleOrDefault(ams => ams.Citizen == citizenSource));
-                    _areaMapSquares.Add(new CityAreaMapSquarePivot(citizenSource));
+                    _areaMapSquares.Add(new CityAreaMapSquarePivot(mapSquare, citizenSource));
                 }
 
                 CheckCitizensMood();
@@ -771,16 +771,20 @@ namespace ErsatzCivLib.Model
                     var newBestSpot = BestVacantMapSquareLocation();
                     if (_specialistCitizens.Contains(citizen))
                     {
-                        citizen.ToCitizen(newBestSpot);
+                        citizen.ToCitizen();
                         _specialistCitizens.Remove(citizen);
-                        _areaMapSquares.Add(new CityAreaMapSquarePivot(citizen));
+                        _areaMapSquares.Add(new CityAreaMapSquarePivot(newBestSpot, citizen));
                     }
-                    else if (citizen.MapSquare.TotalValue < newBestSpot.TotalValue)
+                    else
                     {
-                        // Removes the citizen from the area, changes its spot then re-add it.
-                        _areaMapSquares.Remove(_areaMapSquares.SingleOrDefault(ams => ams.Citizen == citizen));
-                        citizen.ToCitizen(newBestSpot);
-                        _areaMapSquares.Add(new CityAreaMapSquarePivot(citizen));
+                        var citizenArea = _areaMapSquares.Single(ams => ams.Citizen == citizen);
+                        if (citizenArea.MapSquare.TotalValue < newBestSpot.TotalValue)
+                        {
+                            // Removes the citizen from the area, changes its spot then re-add it.
+                            _areaMapSquares.Remove(citizenArea);
+                            citizen.ToCitizen();
+                            _areaMapSquares.Add(new CityAreaMapSquarePivot(newBestSpot, citizen));
+                        }
                     }
                 }
                 i++;
@@ -834,9 +838,9 @@ namespace ErsatzCivLib.Model
             var citizenSource = _specialistCitizens.FirstOrDefault();
             if (citizenSource != null)
             {
-                citizenSource.ToCitizen(mapSquare);
+                citizenSource.ToCitizen();
                 _specialistCitizens.Remove(citizenSource);
-                _areaMapSquares.Add(new CityAreaMapSquarePivot(citizenSource));
+                _areaMapSquares.Add(new CityAreaMapSquarePivot(mapSquare, citizenSource));
                 CheckCitizensMood();
             }
         }
