@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using ErsatzCivLib.Model.Enums;
 using ErsatzCivLib.Model.Static;
 
@@ -21,8 +20,6 @@ namespace ErsatzCivLib.Model
     {
         private const double ROAD_SPEED_COST_RATIO = 0.3;
         private const int CITY_SPEED_COST = 1;
-        private const int MAGELLAN_WONDER_INCREASE_SPEED = 1;
-        private const int LIGHTHOUSE_WONDER_INCREASE_SPEED = 1;
 
         #region Embedded properties
 
@@ -34,14 +31,6 @@ namespace ErsatzCivLib.Model
         /// Location on map.
         /// </summary>
         public MapSquarePivot MapSquareLocation { get; private set; }
-        /// <summary>
-        /// Can navigate on sea y/n.
-        /// </summary>
-        public bool SeaNavigate { get; private set; }
-        /// <summary>
-        /// Can navigate on ground y/n.
-        /// </summary>
-        public bool GroundNavigate { get; private set; }
         /// <summary>
         /// Defensive points.
         /// </summary>
@@ -69,8 +58,6 @@ namespace ErsatzCivLib.Model
         /// Constructor.
         /// </summary>
         /// <param name="city">The <see cref="City"/> value.</param>
-        /// <param name="seaNavigate">The <see cref="SeaNavigate"/> value.</param>
-        /// <param name="groundNavigate">The <see cref="GroundNavigate"/> value.</param>
         /// <param name="defensePoints">The <see cref="DefensePoints"/> value.</param>
         /// <param name="offensePoints">The <see cref="OffensePoints"/> value.</param>
         /// <param name="speed">The <see cref="Speed"/> value.</param>
@@ -81,15 +68,13 @@ namespace ErsatzCivLib.Model
         /// <param name="name">The <see cref="BuildablePivot.Name"/> value.</param>
         /// <param name="citizenCostToProduce">The <see cref="CitizenCostToProduce"/> value.</param>
         /// <param name="location">The <see cref="MapSquareLocation"/> value, if <paramref name="city"/> is <c>Null</c>.</param>
-        protected UnitPivot(CityPivot city, bool seaNavigate, bool groundNavigate, int defensePoints, int offensePoints,
-            int speed, int productivityCost, AdvancePivot advancePrerequisite, AdvancePivot advanceObsolescence,
-            int purchasePrice, string name = null, int citizenCostToProduce = 0, MapSquarePivot location = null) :
+        protected UnitPivot(CityPivot city, int defensePoints, int offensePoints, int speed, int productivityCost,
+            AdvancePivot advancePrerequisite, AdvancePivot advanceObsolescence, int purchasePrice, string name = null,
+            int citizenCostToProduce = 0, MapSquarePivot location = null) :
             base(productivityCost, advancePrerequisite, advanceObsolescence, purchasePrice, name)
         {
             City = city;
             MapSquareLocation = city?.MapSquareLocation ?? location;
-            SeaNavigate = seaNavigate;
-            GroundNavigate = groundNavigate;
             DefensePoints = defensePoints;
             OffensePoints = offensePoints;
             Speed = speed;
@@ -123,8 +108,8 @@ namespace ErsatzCivLib.Model
                 return false;
             }
 
-            if ((currentMapSquare.Biome.IsSeaType && !SeaNavigate && !comeIntoCity)
-                || (!currentMapSquare.Biome.IsSeaType && !GroundNavigate && !comeIntoCity))
+            if ((currentMapSquare.Biome.IsSeaType && !Is<SeaUnitPivot>() && !comeIntoCity)
+                || (!currentMapSquare.Biome.IsSeaType && !Is<LandUnitPivot>() && !comeIntoCity))
             {
                 return false;
             }
@@ -155,30 +140,12 @@ namespace ErsatzCivLib.Model
         }
 
         /// <summary>
-        /// Computes the real <see cref="Speed"/>.
+        /// Overriden; computes the real <see cref="Speed"/>.
         /// </summary>
         /// <returns>The speed.</returns>
-        protected int ComputeRealSpeed()
+        protected virtual int ComputeRealSpeed()
         {
-            var bonus = 0;
-
-            if (SeaNavigate
-                && !GroundNavigate
-                && City != null
-                && City.Player.WonderIsActive(WonderPivot.MagellanExpedition))
-            {
-                bonus += MAGELLAN_WONDER_INCREASE_SPEED;
-            }
-
-            if (SeaNavigate
-                && !GroundNavigate
-                && City != null
-                && City.Player.WonderIsActive(WonderPivot.Lighthouse))
-            {
-                bonus += LIGHTHOUSE_WONDER_INCREASE_SPEED;
-            }
-
-            return Speed + bonus;
+            return Speed;
         }
     }
 }

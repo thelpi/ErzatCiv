@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\AirUnitPivot.cs" />
     <Compile Include="Model\CityAreaMapSquarePivot.cs" />
     <Compile Include="Model\Events\DiscoverNewSquareEventArgs.cs" />
     <Compile Include="Model\Events\ForcedAdvanceEventArgs.cs" />
@@ -52,6 +53,8 @@
     <Compile Include="Model\Enums\LandShapePivot.cs" />
     <Compile Include="Model\Enums\SizePivot.cs" />
     <Compile Include="Model\Enums\TemperaturePivot.cs" />
+    <Compile Include="Model\LandUnitPivot.cs" />
+    <Compile Include="Model\SeaUnitPivot.cs" />
     <Compile Include="Model\SpaceShipParts\ComponentPivot.cs" />
     <Compile Include="Model\SpaceShipParts\ModulePivot.cs" />
     <Compile Include="Model\SpaceShipParts\StructuralPivot.cs" />
@@ -76,15 +79,42 @@
     <Compile Include="Model\Static\BiomePivot.cs" />
     <Compile Include="Model\PlayerPivot.cs" />
     <Compile Include="Model\TurnConsequencesPivot.cs" />
-    <Compile Include="Model\Units\NuclearPivot.cs" />
-    <Compile Include="Model\Units\SettlerPivot.cs" />
+    <Compile Include="Model\Units\Air\BomberPivot.cs" />
+    <Compile Include="Model\Units\Air\FighterPivot.cs" />
+    <Compile Include="Model\Units\Land\ArmorPivot.cs" />
+    <Compile Include="Model\Units\Land\ArtilleryPivot.cs" />
+    <Compile Include="Model\Units\Land\CannonPivot.cs" />
+    <Compile Include="Model\Units\Land\CaravanPivot.cs" />
+    <Compile Include="Model\Units\Land\CatapultPivot.cs" />
+    <Compile Include="Model\Units\Land\CavalryPivot.cs" />
+    <Compile Include="Model\Units\Land\ChariotPivot.cs" />
+    <Compile Include="Model\Units\Land\DiplomatPivot.cs" />
+    <Compile Include="Model\Units\Land\KnightPivot.cs" />
+    <Compile Include="Model\Units\Land\LegionPivot.cs" />
+    <Compile Include="Model\Units\Land\MechInfPivot.cs" />
+    <Compile Include="Model\Units\Land\MilitiaPivot.cs" />
+    <Compile Include="Model\Units\Land\MusketeerPivot.cs" />
+    <Compile Include="Model\Units\Air\NuclearPivot.cs" />
+    <Compile Include="Model\Units\Land\PhalanxPivot.cs" />
+    <Compile Include="Model\Units\Land\RiflemenPivot.cs" />
+    <Compile Include="Model\Units\Land\SettlerPivot.cs" />
     <Compile Include="Model\UnitPivot.cs" />
     <Compile Include="Model\Static\WonderPivot.cs" />
+    <Compile Include="Model\Units\Sea\BattleshipPivot.cs" />
+    <Compile Include="Model\Units\Sea\CarrierPivot.cs" />
+    <Compile Include="Model\Units\Sea\CruiserPivot.cs" />
+    <Compile Include="Model\Units\Sea\FrigatePivot.cs" />
+    <Compile Include="Model\Units\Sea\IroncladPivot.cs" />
+    <Compile Include="Model\Units\Sea\SailPivot.cs" />
+    <Compile Include="Model\Units\Sea\SubmarinePivot.cs" />
+    <Compile Include="Model\Units\Sea\TransportPivot.cs" />
+    <Compile Include="Model\Units\Sea\TriremePivot.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tools.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="TodoList.txt" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

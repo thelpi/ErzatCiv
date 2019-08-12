@@ -1,16 +1,16 @@
 ﻿using System;
 using ErsatzCivLib.Model.Static;
 
-namespace ErsatzCivLib.Model.Units
+namespace ErsatzCivLib.Model.Units.Air
 {
     /// <summary>
     /// Represents a nuclear strike unit.
     /// </summary>
     [Serializable]
-    public class NuclearPivot : UnitPivot
+    public class NuclearPivot : AirUnitPivot
     {
         private NuclearPivot(CityPivot city, MapSquarePivot location) :
-            base(city, true, true, 0, 99, 16, 160, AdvancePivot.Rocketry, null, 3200, null, 0, location)
+            base(city, 0, 99, 16, 160, AdvancePivot.Rocketry, null, 3200, null, location)
         { }
 
         /// <summary>

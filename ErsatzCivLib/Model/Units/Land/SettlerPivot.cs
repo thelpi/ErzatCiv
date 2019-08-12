@@ -1,13 +1,13 @@
 ﻿using System;
 
-namespace ErsatzCivLib.Model.Units
+namespace ErsatzCivLib.Model.Units.Land
 {
     /// <summary>
     /// Represents a unit of settlers.
     /// </summary>
     /// <seealso cref="UnitPivot"/>
     [Serializable]
-    public class SettlerPivot : UnitPivot
+    public class SettlerPivot : LandUnitPivot
     {
         #region Embedded properties
 
@@ -20,7 +20,7 @@ namespace ErsatzCivLib.Model.Units
         #endregion
 
         private SettlerPivot(CityPivot city, MapSquarePivot location) :
-            base(city, false, true, 1, 0, 1, 40, null, null, 320, null, 1, location)
+            base(city, 1, 0, 1, 40, null, null, 320, null, 1, location)
         { }
 
         /// <summary>

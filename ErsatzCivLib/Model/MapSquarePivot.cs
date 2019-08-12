@@ -4,7 +4,7 @@ using System.Linq;
 using ErsatzCivLib.Model.Enums;
 using ErsatzCivLib.Model.Events;
 using ErsatzCivLib.Model.Static;
-using ErsatzCivLib.Model.Units;
+using ErsatzCivLib.Model.Units.Land;
 
 namespace ErsatzCivLib.Model
 {

@@ -4,7 +4,8 @@ using System.Linq;
 using ErsatzCivLib.Model.Enums;
 using ErsatzCivLib.Model.Events;
 using ErsatzCivLib.Model.Static;
-using ErsatzCivLib.Model.Units;
+using ErsatzCivLib.Model.Units.Air;
+using ErsatzCivLib.Model.Units.Land;
 
 namespace ErsatzCivLib.Model
 {
@@ -433,6 +434,16 @@ namespace ErsatzCivLib.Model
         }
 
         /// <summary>
+        /// Checks of a <see cref="CityPivot"/> is near the coast.
+        /// </summary>
+        /// <param name="city">The city to check.</param>
+        /// <returns><c>True</c> if near the coast; <c>False otherwise.</c></returns>
+        internal bool GetCityIsCoast(CityPivot city)
+        {
+            return _engine.GetCityIsCoast(city);
+        }
+
+        /// <summary>
         /// Computes a rate which represents hte distance between a city and the capital.
         /// <c>0</c> is the closest (the capital itself) and <c>1</c> the furthest (distance between the corner of the map and the center; beyond that distance the value stays <c>1</c>).
         /// </summary>
@@ -766,6 +777,12 @@ namespace ErsatzCivLib.Model
                 b.Is<UnitPivot>()
                 && b.AdvanceObsolescence != null
                 && _advances.Contains(b.AdvanceObsolescence));
+
+            // Impossible to build sea units if not close to the sea.
+            if (!city.IsOnCoast)
+            {
+                buildableDefaultInstances.RemoveAll(b => b.Is<SeaUnitPivot>());
+            }
 
             #region Special rules
 

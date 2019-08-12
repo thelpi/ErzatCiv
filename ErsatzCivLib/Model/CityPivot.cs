@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ErsatzCivLib.Model.Enums;
 using ErsatzCivLib.Model.Static;
+using ErsatzCivLib.Model.Units.Land;
 
 namespace ErsatzCivLib.Model
 {
@@ -98,11 +99,11 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public MapSquarePivot MapSquareLocation { get; private set; }
 
-        private List<Units.SettlerPivot> _settlers = new List<Units.SettlerPivot>();
+        private List<SettlerPivot> _settlers = new List<SettlerPivot>();
         /// <summary>
         /// Settlers on the map who belong to this city.
         /// </summary>
-        public IReadOnlyCollection<Units.SettlerPivot> Settlers { get { return _settlers; } }
+        public IReadOnlyCollection<SettlerPivot> Settlers { get { return _settlers; } }
 
         private readonly List<CitizenPivot> _specialistCitizens;
         /// <summary>
@@ -132,6 +133,21 @@ namespace ErsatzCivLib.Model
 
         #region Inferred properties
 
+        private bool? _isOnCoast = null;
+        /// <summary>
+        /// Indicates if the city is near the coast.
+        /// </summary>
+        public bool IsOnCoast
+        {
+            get
+            {
+                if (!_isOnCoast.HasValue)
+                {
+                    _isOnCoast = Player.GetCityIsCoast(this);
+                }
+                return _isOnCoast.Value;
+            }
+        }
         /// <summary>
         /// List of <see cref="CityAreaMapSquarePivot"/> without the city center.
         /// </summary>
@@ -588,9 +604,9 @@ namespace ErsatzCivLib.Model
         /// Recomputes everything before passing to the next turn.
         /// </summary>
         /// <returns>A tuple of values [finished production / settler disbanded].</returns>
-        internal Tuple<BuildablePivot, Units.SettlerPivot> NextTurn()
+        internal Tuple<BuildablePivot, SettlerPivot> NextTurn()
         {
-            Units.SettlerPivot disbandedSettler = null;
+            SettlerPivot disbandedSettler = null;
 
             BuildablePivot produced = null;
             bool resetCitizensRequired = false;
@@ -717,13 +733,13 @@ namespace ErsatzCivLib.Model
             if (produced != null)
             {
                 RemovePreviousPlant(produced);
-                if (produced.Is<Units.SettlerPivot>())
+                if (produced.Is<SettlerPivot>())
                 {
-                    _settlers.Add(produced as Units.SettlerPivot);
+                    _settlers.Add(produced as SettlerPivot);
                 }
             }
 
-            return new Tuple<BuildablePivot, Units.SettlerPivot>(produced, disbandedSettler);
+            return new Tuple<BuildablePivot, SettlerPivot>(produced, disbandedSettler);
         }
 
         /// <summary>
@@ -845,10 +861,10 @@ namespace ErsatzCivLib.Model
         }
 
         /// <summary>
-        /// Proceeds to unlink a <see cref="Units.SettlerPivot"/> from the city.
+        /// Proceeds to unlink a <see cref="SettlerPivot"/> from the city.
         /// </summary>
         /// <param name="settler">The settler.</param>
-        internal void UnlinkSettler(Units.SettlerPivot settler)
+        internal void UnlinkSettler(SettlerPivot settler)
         {
             _settlers.Remove(settler);
         }

@@ -171,6 +171,31 @@ namespace ErsatzCivLib
         }
 
         /// <summary>
+        /// Checks of a <see cref="CityPivot"/> is near the coast.
+        /// </summary>
+        /// <param name="city">The city to check.</param>
+        /// <returns><c>True</c> if near the coast; <c>False otherwise.</c></returns>
+        internal bool GetCityIsCoast(CityPivot city)
+        {
+            var sq = city.MapSquareLocation;
+
+            var citySquares = new List<MapSquarePivot>();
+            for (var i = sq.Row - 1; i <= sq.Row + 1; i++)
+            {
+                for (var j = sq.Column - 1; j <= sq.Column + 1; j++)
+                {
+                    var mapSquare = Map[i, j];
+                    if (mapSquare != null && mapSquare.Biome.IsSeaType)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Gets a list of every built <see cref="WonderPivot"/>.
         /// </summary>
         /// <returns>List of <see cref="WonderPivot"/>.</returns>
@@ -202,7 +227,7 @@ namespace ErsatzCivLib
         }
 
         /// <summary>
-        /// Checks if a city can be build at the location of the current unit, which must be a <see cref="Model.Units.SettlerPivot"/>.
+        /// Checks if a city can be build at the location of the current unit, which must be a <see cref="Model.Units.Land.SettlerPivot"/>.
         /// </summary>
         /// <returns><c>True</c> if a city si buildable; otherwise <c>False</c>.</returns>
         public bool CanBuildCity()
@@ -244,7 +269,7 @@ namespace ErsatzCivLib
         }
 
         /// <summary>
-        /// Tries to trigger a <see cref="MapSquareImprovementPivot"/> for the current unit; the unit must be a <see cref="Model.Units.SettlerPivot"/>.
+        /// Tries to trigger a <see cref="MapSquareImprovementPivot"/> for the current unit; the unit must be a <see cref="Model.Units.Land.SettlerPivot"/>.
         /// </summary>
         /// <param name="actionPivot">The settler's action.</param>
         /// <returns><c>True</c> if success; <c>False</c> otherwise.</returns>

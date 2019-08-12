@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using ErsatzCivLib.Model.Static;
-using ErsatzCivLib.Model.Units;
+using ErsatzCivLib.Model.Units.Land;
 
 namespace ErsatzCivLib.Model
 {

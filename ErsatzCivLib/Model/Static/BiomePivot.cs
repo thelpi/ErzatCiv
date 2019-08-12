@@ -55,10 +55,6 @@ namespace ErsatzCivLib.Model.Static
         /// </summary>
         public double DefenseBonusRate { get; private set; }
         /// <summary>
-        /// Indicates of the type is sea navigable (otherwise, it's ground navigable).
-        /// </summary>
-        public bool IsSeaType { get; private set; }
-        /// <summary>
         /// Indicates the speed cost when a unit walks through it.
         /// </summary>
         public int SpeedCost { get; private set; }
@@ -106,6 +102,10 @@ namespace ErsatzCivLib.Model.Static
         /// The <see cref="Size"/> value as <c>integer</c>.
         /// </summary>
         public int SizeInt { get { return (int)Size; } }
+        /// <summary>
+        /// Indicates of the type is sea navigable (otherwise, it's ground navigable).
+        /// </summary>
+        public bool IsSeaType { get { return this == Ocean; } }
 
         #endregion
 
@@ -250,7 +250,6 @@ namespace ErsatzCivLib.Model.Static
                 TemperaturePivot.Temperate
             },
             UnderlyingBiome = null,
-            IsSeaType = false,
             SpeedCost = 1,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Medium,
@@ -275,7 +274,6 @@ namespace ErsatzCivLib.Model.Static
             _actions = new List<MapSquareImprovementPivot>(),
             _temperatures = new List<TemperaturePivot>(),
             UnderlyingBiome = null,
-            IsSeaType = true,
             SpeedCost = 1,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Large,
@@ -308,7 +306,6 @@ namespace ErsatzCivLib.Model.Static
                 TemperaturePivot.Cold
             },
             UnderlyingBiome = null,
-            IsSeaType = false,
             SpeedCost = 2,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Large,
@@ -341,7 +338,6 @@ namespace ErsatzCivLib.Model.Static
                 TemperaturePivot.Cold
             },
             UnderlyingBiome = null,
-            IsSeaType = false,
             SpeedCost = 1,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Medium,
@@ -376,7 +372,6 @@ namespace ErsatzCivLib.Model.Static
                 TemperaturePivot.Hot
             },
             UnderlyingBiome = null,
-            IsSeaType = false,
             SpeedCost = 2,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Large,
@@ -410,7 +405,6 @@ namespace ErsatzCivLib.Model.Static
                 TemperaturePivot.Hot
             },
             UnderlyingBiome = delegate(IEnumerable<BiomePivot> biomes) { return biomes?.SingleOrDefault(b => b == Plains); },
-            IsSeaType = false,
             SpeedCost = 2,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Medium,
@@ -446,7 +440,6 @@ namespace ErsatzCivLib.Model.Static
                 TemperaturePivot.Temperate
             },
             UnderlyingBiome = null,
-            IsSeaType = false,
             SpeedCost = 3,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Medium,
@@ -483,7 +476,6 @@ namespace ErsatzCivLib.Model.Static
                 TemperaturePivot.Temperate
             },
             UnderlyingBiome = null,
-            IsSeaType = false,
             SpeedCost = 2,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Small,
@@ -519,7 +511,6 @@ namespace ErsatzCivLib.Model.Static
                 TemperaturePivot.Temperate
             },
             UnderlyingBiome = delegate (IEnumerable<BiomePivot> biomes) { return biomes?.SingleOrDefault(b => b == Grassland); },
-            IsSeaType = false,
             SpeedCost = 2,
             AppearanceRatio = 0.02,
             Size = BiomeSizePivot.Small,
@@ -554,7 +545,6 @@ namespace ErsatzCivLib.Model.Static
                 TemperaturePivot.Temperate
             },
             UnderlyingBiome = delegate (IEnumerable<BiomePivot> biomes) { return biomes?.SingleOrDefault(b => b == Plains); },
-            IsSeaType = false,
             SpeedCost = 2,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Medium,
@@ -591,7 +581,6 @@ namespace ErsatzCivLib.Model.Static
                 TemperaturePivot.Temperate
             },
             UnderlyingBiome = null,
-            IsSeaType = false,
             SpeedCost = 1,
             AppearanceRatio = 0.1,
             Size = BiomeSizePivot.Large,
