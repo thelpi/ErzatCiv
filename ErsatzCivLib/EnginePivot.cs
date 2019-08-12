@@ -343,7 +343,7 @@ namespace ErsatzCivLib
         /// <exception cref="ArgumentNullException"><paramref name="mapSquare"/> is <c>Null</c>.</exception>
         /// <exception cref="ArgumentException">The city is not manage by the human player !</exception>
         /// <exception cref="ArgumentException">The specified square can't be used by the citizen !</exception>
-        public void ChangeAnyCitizenToDefault(CityPivot city, MapSquarePivot mapSquare)
+        public void ChangeAnySpecialistToRegular(CityPivot city, MapSquarePivot mapSquare)
         {
             if (city == null)
             {
@@ -365,7 +365,7 @@ namespace ErsatzCivLib
                 throw new ArgumentException("The specified square can't be used by the citizen !");
             }
 
-            city.ChangeAnyCitizenToDefault(mapSquare);
+            city.ChangeAnySpecialistToRegular(mapSquare);
         }
 
         /// <summary>

@@ -236,7 +236,7 @@ namespace ErsatzCiv
 
         private void FocusOnUnit(object sender, NextUnitEventArgs eventArgs)
         {
-            if (!eventArgs.MoreUnit && !Settings.Default.waitEndTurn)
+            if (!eventArgs.MoreUnit && _engine.HumanPlayer.Units.Any() && !Settings.Default.waitEndTurn)
             {
                 MoveToNextTurnAndActAccordingly();
             }

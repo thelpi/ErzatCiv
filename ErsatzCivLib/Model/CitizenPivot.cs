@@ -58,7 +58,7 @@ namespace ErsatzCivLib.Model
         /// <summary>
         /// Transforms a specialist into a regular.
         /// </summary>
-        internal void ToCitizen()
+        internal void ToRegular()
         {
             Mood = MoodPivot.Content;
             Type = null;

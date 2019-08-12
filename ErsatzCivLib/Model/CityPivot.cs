@@ -492,25 +492,12 @@ namespace ErsatzCivLib.Model
             }
         }
 
-        private bool ChangeCitizenToDefaultAtTheBestSpotInternal(CitizenPivot citizenSource)
+        private bool ChangeCitizenToRegularAtTheBestVacantMapSquare(CitizenPivot citizenSource)
         {
             var mapSquare = BestVacantMapSquareLocation();
             if (mapSquare != null)
             {
-                citizenSource.ToCitizen();
-
-                if (_specialistCitizens.Contains(citizenSource))
-                {
-                    _specialistCitizens.Remove(citizenSource);
-                    _areaMapSquares.Add(new CityAreaMapSquarePivot(mapSquare, citizenSource));
-                }
-                else
-                {
-                    _areaMapSquares.Remove(_areaMapSquares.SingleOrDefault(ams => ams.Citizen == citizenSource));
-                    _areaMapSquares.Add(new CityAreaMapSquarePivot(mapSquare, citizenSource));
-                }
-
-                CheckCitizensMood();
+                AddRegularCitizen(citizenSource, mapSquare);
                 return true;
             }
             return false;
@@ -525,6 +512,26 @@ namespace ErsatzCivLib.Model
             else
             {
                 _areaMapSquares.Remove(AreaWithoutCityMapSquares.First());
+            }
+        }
+
+        private void AddRegularCitizen(CitizenPivot citizenSource, MapSquarePivot location, bool delayMoodCheck = false)
+        {
+            var alreadyInArea = _areaMapSquares.SingleOrDefault(ams => ams.Citizen == citizenSource);
+            if (alreadyInArea != null)
+            {
+                _areaMapSquares.Remove(alreadyInArea);
+            }
+            else
+            {
+                _specialistCitizens.Remove(citizenSource);
+            }
+            citizenSource.ToRegular();
+            _areaMapSquares.Add(new CityAreaMapSquarePivot(this, location));
+
+            if (!delayMoodCheck)
+            {
+                CheckCitizensMood();
             }
         }
 
@@ -770,24 +777,7 @@ namespace ErsatzCivLib.Model
                 }
                 else
                 {
-                    var newBestSpot = BestVacantMapSquareLocation();
-                    if (_specialistCitizens.Contains(citizen))
-                    {
-                        citizen.ToCitizen();
-                        _specialistCitizens.Remove(citizen);
-                        _areaMapSquares.Add(new CityAreaMapSquarePivot(newBestSpot, citizen));
-                    }
-                    else
-                    {
-                        var citizenArea = _areaMapSquares.Single(ams => ams.Citizen == citizen);
-                        if (citizenArea.MapSquare.TotalValue < newBestSpot.TotalValue || !availableMapSquares.Contains(citizenArea.MapSquare))
-                        {
-                            // Removes the citizen from the area, changes its spot then re-add it.
-                            _areaMapSquares.Remove(citizenArea);
-                            citizen.ToCitizen();
-                            _areaMapSquares.Add(new CityAreaMapSquarePivot(newBestSpot, citizen));
-                        }
-                    }
+                    AddRegularCitizen(citizen, BestVacantMapSquareLocation(), true);
                 }
                 i++;
             }
@@ -832,18 +822,15 @@ namespace ErsatzCivLib.Model
         }
 
         /// <summary>
-        /// Changes any citizen to default.
+        /// Takes any specialist citizen of the city and makes it a regular citizen.
         /// </summary>
         /// <param name="mapSquare">The location.</param>
-        internal void ChangeAnyCitizenToDefault(MapSquarePivot mapSquare)
+        internal void ChangeAnySpecialistToRegular(MapSquarePivot mapSquare)
         {
             var citizenSource = _specialistCitizens.FirstOrDefault();
             if (citizenSource != null)
             {
-                citizenSource.ToCitizen();
-                _specialistCitizens.Remove(citizenSource);
-                _areaMapSquares.Add(new CityAreaMapSquarePivot(mapSquare, citizenSource));
-                CheckCitizensMood();
+                AddRegularCitizen(citizenSource, mapSquare);
             }
         }
 
@@ -872,7 +859,7 @@ namespace ErsatzCivLib.Model
                         CheckCitizensMood();
                         break;
                     case CitizenTypePivot.TaxCollector:
-                        ChangeCitizenToDefaultAtTheBestSpotInternal(citizenSource);
+                        ChangeCitizenToRegularAtTheBestVacantMapSquare(citizenSource);
                         break;
                 }
             }
