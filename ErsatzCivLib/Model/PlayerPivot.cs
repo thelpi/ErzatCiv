@@ -391,13 +391,20 @@ namespace ErsatzCivLib.Model
             var settler = CurrentUnit as SettlerPivot;
             var sq = CurrentUnit.MapSquareLocation;
 
+            // The city is built on a "CityAreaMapSquarePivot" of another city
+            var cityToReset = _cities.SingleOrDefault(c => c.AreaWithoutCityMapSquares.Any(ams => ams.MapSquare == sq));
+
             var city = new CityPivot(this, currentTurn, name, sq, CapitalizationPivot.Default);
-            sq.ApplyCityActions(city);
 
             if (Capital is null)
             {
                 city.SetAsNewCapital(Capital);
                 Capital = city;
+            }
+
+            if (cityToReset != null)
+            {
+                cityToReset.ResetCitizens();
             }
 
             MapSquareDiscoveryInvokator(city.MapSquareLocation, _engine.GetMapSquaresAroundCity(city).Keys);

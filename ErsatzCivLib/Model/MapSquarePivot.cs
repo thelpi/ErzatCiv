@@ -249,8 +249,7 @@ namespace ErsatzCivLib.Model
         /// <summary>
         /// Applies default actions of the instance when a <see cref="CitizenPivot"/> is built on it.
         /// </summary>
-        /// <param name="city">The city.</param>
-        internal void ApplyCityActions(CityPivot city)
+        internal void ApplyCityActions()
         {
             Road = true;
             RailRoad = true;

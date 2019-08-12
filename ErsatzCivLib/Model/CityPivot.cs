@@ -456,6 +456,8 @@ namespace ErsatzCivLib.Model
                 new CityAreaMapSquarePivot(this, MapSquareLocation)
             };
             _areaMapSquares.Add(new CityAreaMapSquarePivot(this, BestVacantMapSquareLocation()));
+
+            location.ApplyCityActions();
         }
 
         #region Private methods
@@ -752,13 +754,13 @@ namespace ErsatzCivLib.Model
         /// </summary>
         internal void ResetCitizens()
         {
-            var availableMapSquaresCount = Player.ComputeCityAvailableMapSquares(this).Count;
+            var availableMapSquares = Player.ComputeCityAvailableMapSquares(this);
 
             var citizensToReset = Citizens.ToList(); // Fix the list !
             int i = 0;
             foreach (var citizen in citizensToReset)
             {
-                if (i > availableMapSquaresCount)
+                if (i > availableMapSquares.Count)
                 {
                     // From this point, only specialists
                     if (!citizen.Type.HasValue)
@@ -778,7 +780,7 @@ namespace ErsatzCivLib.Model
                     else
                     {
                         var citizenArea = _areaMapSquares.Single(ams => ams.Citizen == citizen);
-                        if (citizenArea.MapSquare.TotalValue < newBestSpot.TotalValue)
+                        if (citizenArea.MapSquare.TotalValue < newBestSpot.TotalValue || !availableMapSquares.Contains(citizenArea.MapSquare))
                         {
                             // Removes the citizen from the area, changes its spot then re-add it.
                             _areaMapSquares.Remove(citizenArea);
