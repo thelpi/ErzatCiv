@@ -25,9 +25,9 @@ namespace ErsatzCivLib.Model
         /// <param name="purchasePrice">The <see cref="BuildablePivot.PurchasePrice"/> value.</param>
         /// <param name="name">The <see cref="BuildablePivot.Name"/> value.</param>
         /// <param name="location">The <see cref="UnitPivot.MapSquareLocation"/> value, if <paramref name="city"/> is <c>Null</c>.</param>
-        protected SeaUnitPivot(CityPivot city, int defensePoints, int offensePoints, int speed, int productivityCost,
+        protected SeaUnitPivot(CityPivot city, int offensePoints, int defensePoints, int speed, int productivityCost,
             AdvancePivot advancePrerequisite, AdvancePivot advanceObsolescence, int purchasePrice, string name, MapSquarePivot location) :
-            base(city, defensePoints, offensePoints, speed, productivityCost,
+            base(city, offensePoints, defensePoints, speed, productivityCost,
                 advancePrerequisite, advanceObsolescence, purchasePrice, name, 0, location)
         { }
 

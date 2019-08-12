@@ -1,12 +1,33 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ErsatzCivLib.Model.Static;
 
 namespace ErsatzCivLib.Model.Units.Land
 {
-    class CannonPivot
+    /// <summary>
+    /// Represents a unit of cannon.
+    /// </summary>
+    /// <seealso cref="LandUnitPivot"/>
+    [Serializable]
+    public class CannonPivot : LandUnitPivot
     {
+        private CannonPivot(CityPivot city, MapSquarePivot location) :
+            base(city, 8, 1, 1, 40, AdvancePivot.Metallurgy, AdvancePivot.Robotics, 320, null, 0, location)
+        { }
+
+        /// <summary>
+        /// Default instance.
+        /// </summary>
+        internal static readonly CannonPivot Default = new CannonPivot(null, null);
+
+        /// <summary>
+        /// Static constructior.
+        /// </summary>
+        /// <param name="city">The <see cref="UnitPivot.City"/> value.</param>
+        /// <param name="location">The <see cref="UnitPivot.MapSquareLocation"/> value if <paramref name="city"/> is <c>Null</c>.</param>
+        /// <returns>An instance of <see cref="CannonPivot"/>.</returns>
+        internal static CannonPivot CreateAtLocation(CityPivot city, MapSquarePivot location)
+        {
+            return new CannonPivot(city, location);
+        }
     }
 }
