@@ -18,6 +18,7 @@ namespace ErsatzCivLib.Model
         private const int FOOD_BY_CITIZEN_BY_TURN = 2;
         private const int DEFAULT_RATIO_CITIZEN_UNHAPPY = 5;
         private const int FOOD_RATIO_TO_NEXT_CITIZEN = 40;
+        private const double MYSTICISM_ADVANCE_HAPPINESS_RATE = 2;
 
         #endregion
 
@@ -43,8 +44,13 @@ namespace ErsatzCivLib.Model
         #region Constants relative to wonders effects
 
         private const double SETI_PROGRAM_SCIENCE_INCREASE_RATIO = 1.5;
+        private const double COPERNICUS_OBSERVATORY_SCIENCE_INCREASE_RATIO = 2;
         private const int JSBACHS_WONDER_HAPPINESS_EFFECT = 2;
         private const int CUREFORCANCER_WONDER_HAPPINESS_EFFECT = 1;
+        private const int HANGING_GARDENS_WONDER_HAPPINESS_EFFECT = 1;
+        private const double ISAAC_NEWTON_COLLEGE_SCIENCE_INCREASE_RATE = 2 / (double)3;
+        private const double MICHELANGELO_CHAPEL_HAPPINESS_EFFECT = 1.5;
+        private const double ORACLE_WONDER_HAPPINESS_RATE = 2;
 
         #endregion
 
@@ -285,20 +291,37 @@ namespace ErsatzCivLib.Model
                 {
                     return 0;
                 }
-                
+
+                bool hasSetiProgram = Player.WonderIsActive(WonderPivot.SetiProgram);
+
                 var scienceValue = Citizens.Count(c => c.Type == CitizenTypePivot.Scientist || !c.Type.HasValue);
 
                 if (_improvements.Contains(CityImprovementPivot.Library))
                 {
-                    scienceValue = (int)Math.Floor(scienceValue * LIBRARY_SCIENCE_INCREASE_RATIO);
+                    var scienceCoeff = LIBRARY_SCIENCE_INCREASE_RATIO;
+                    if (Player.WonderIsActive(WonderPivot.IsaacNewtonCollege) && !hasSetiProgram)
+                    {
+                        scienceCoeff += ISAAC_NEWTON_COLLEGE_SCIENCE_INCREASE_RATE * scienceCoeff;
+                    }
+                    scienceValue = (int)Math.Floor(scienceValue * scienceCoeff);
                 }
 
                 if (_improvements.Contains(CityImprovementPivot.University))
                 {
-                    scienceValue = (int)Math.Floor(scienceValue * UNIVERSITY_SCIENCE_INCREASE_RATIO);
+                    var scienceCoeff = UNIVERSITY_SCIENCE_INCREASE_RATIO;
+                    if (Player.WonderIsActive(WonderPivot.IsaacNewtonCollege) && !hasSetiProgram)
+                    {
+                        scienceCoeff += ISAAC_NEWTON_COLLEGE_SCIENCE_INCREASE_RATE * scienceCoeff;
+                    }
+                    scienceValue = (int)Math.Floor(scienceValue * scienceCoeff);
                 }
 
-                if (Player.WonderIsActive(WonderPivot.SetiProgram))
+                if (Player.WonderIsActive(WonderPivot.CopernicusObservatory) && _wonders.Contains(WonderPivot.CopernicusObservatory))
+                {
+                    scienceValue = (int)Math.Floor(scienceValue * COPERNICUS_OBSERVATORY_SCIENCE_INCREASE_RATIO);
+                }
+
+                if (hasSetiProgram)
                 {
                     scienceValue = (int)Math.Floor(scienceValue * SETI_PROGRAM_SCIENCE_INCREASE_RATIO);
                 }
@@ -713,15 +736,37 @@ namespace ErsatzCivLib.Model
             var unhappyFaces = nonSpecialistFaces / DEFAULT_RATIO_CITIZEN_UNHAPPY;
             var happyFaces = 0;
 
+            if (Player.WonderIsActive(WonderPivot.ShakespeareTheatre) && _wonders.Contains(WonderPivot.ShakespeareTheatre))
+            {
+                unhappyFaces = 0;
+            }
+
+            double cathedralEffect = _improvements.Contains(CityImprovementPivot.Cathedral) ? CATHEDRAL_HAPPINESS_EFFECT : 0;
+            if (Player.WonderIsActive(WonderPivot.MichelangeloChapel))
+            {
+                cathedralEffect *= MICHELANGELO_CHAPEL_HAPPINESS_EFFECT;
+            }
+
+            double templeEffect = _improvements.Contains(CityImprovementPivot.Temple) ? TEMPLE_HAPPINESS_EFFECT : 0;
+            if (Player.Advances.Contains(AdvancePivot.Mysticism))
+            {
+                templeEffect *= MYSTICISM_ADVANCE_HAPPINESS_RATE;
+            }
+            if (Player.WonderIsActive(WonderPivot.Oracle))
+            {
+                templeEffect *= ORACLE_WONDER_HAPPINESS_RATE;
+            }
+
             // happiness effects.
             var happinessEffects = new List<int>
             {
                 _specialistCitizens.Where(c => c.Type == CitizenTypePivot.Entertainer).Count(),
-                _improvements.Contains(CityImprovementPivot.Temple) ? TEMPLE_HAPPINESS_EFFECT : 0,
+                (int)Math.Floor(templeEffect),
                 _improvements.Contains(CityImprovementPivot.Colosseum) ? COLOSSEUM_HAPPINESS_EFFECT : 0,
-                _improvements.Contains(CityImprovementPivot.Cathedral) ? CATHEDRAL_HAPPINESS_EFFECT : 0,
+                (int)Math.Floor(cathedralEffect),
                 Player.WonderIsActive(WonderPivot.JsBachsCathedral, MapSquareLocation) ? JSBACHS_WONDER_HAPPINESS_EFFECT : 0,
-                Player.WonderIsActive(WonderPivot.CureForCancer) ? CUREFORCANCER_WONDER_HAPPINESS_EFFECT : 0
+                Player.WonderIsActive(WonderPivot.CureForCancer) ? CUREFORCANCER_WONDER_HAPPINESS_EFFECT : 0,
+                Player.WonderIsActive(WonderPivot.HangingGardens) ? HANGING_GARDENS_WONDER_HAPPINESS_EFFECT : 0
             };
 
             for (int i = 0; i < happinessEffects.Sum(); i++)

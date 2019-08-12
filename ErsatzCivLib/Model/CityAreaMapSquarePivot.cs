@@ -128,6 +128,11 @@ namespace ErsatzCivLib.Model
                     baseValue = (int)Math.Floor(BANK_COMMERCE_INCREASE_RATIO * baseValue);
                 }
 
+                if (baseValue > 0 && City.Player.WonderIsActive(WonderPivot.Colossus))
+                {
+                    baseValue++;
+                }
+
                 return baseValue;
             }
         }

@@ -22,6 +22,7 @@ namespace ErsatzCivLib.Model
         private const double ROAD_SPEED_COST_RATIO = 0.3;
         private const int CITY_SPEED_COST = 1;
         private const int MAGELLAN_WONDER_INCREASE_SPEED = 1;
+        private const int LIGHTHOUSE_WONDER_INCREASE_SPEED = 1;
 
         #region Embedded properties
 
@@ -166,12 +167,21 @@ namespace ErsatzCivLib.Model
         protected int ComputeRealSpeed()
         {
             var bonus = 0;
+
             if (SeaNavigate
                 && !GroundNavigate
                 && City != null
                 && City.Player.WonderIsActive(WonderPivot.MagellanExpedition))
             {
                 bonus += MAGELLAN_WONDER_INCREASE_SPEED;
+            }
+
+            if (SeaNavigate
+                && !GroundNavigate
+                && City != null
+                && City.Player.WonderIsActive(WonderPivot.Lighthouse))
+            {
+                bonus += LIGHTHOUSE_WONDER_INCREASE_SPEED;
             }
 
             return Speed + bonus;
