@@ -5,7 +5,7 @@ namespace ErsatzCivLib.Model.Units.Land
     /// <summary>
     /// Represents a unit of settlers.
     /// </summary>
-    /// <seealso cref="UnitPivot"/>
+    /// <seealso cref="LandUnitPivot"/>
     [Serializable]
     public class SettlerPivot : LandUnitPivot
     {

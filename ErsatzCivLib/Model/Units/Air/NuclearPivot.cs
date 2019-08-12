@@ -6,6 +6,7 @@ namespace ErsatzCivLib.Model.Units.Air
     /// <summary>
     /// Represents a nuclear strike unit.
     /// </summary>
+    /// <seealso cref="AirUnitPivot"/>
     [Serializable]
     public class NuclearPivot : AirUnitPivot
     {
