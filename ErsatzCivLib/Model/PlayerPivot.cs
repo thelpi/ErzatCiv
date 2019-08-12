@@ -400,7 +400,7 @@ namespace ErsatzCivLib.Model
             // The city is built on a "CityAreaMapSquarePivot" of another city
             var cityToReset = _cities.SingleOrDefault(c => c.AreaWithoutCityMapSquares.Any(ams => ams.MapSquare == sq));
 
-            var city = new CityPivot(this, currentTurn, name, sq, CapitalizationPivot.Default);
+            var city = new CityPivot(this, currentTurn, name, sq, null);
 
             if (Capital is null)
             {
@@ -536,7 +536,7 @@ namespace ErsatzCivLib.Model
                         _units.Add(produced as UnitPivot);
                         SetUnitIndex(false, false);
                     }
-                    else if (!produced.Is<CapitalizationPivot>())
+                    else
                     {
                         citiesWithDoneProduction.Add(city, produced);
                     }
@@ -824,9 +824,13 @@ namespace ErsatzCivLib.Model
             }
 
             #endregion
+            
+            if (city.Production != null)
+            {
+                indexOfDefault = buildableDefaultInstances.FindIndex(b =>
+                    b.GetType() == city.Production.GetType() && b.Name == city.Production.Name);
+            }
 
-            indexOfDefault = buildableDefaultInstances.FindIndex(b =>
-                b.GetType() == city.Production.GetType() && b.Name == city.Production.Name);
             return buildableDefaultInstances;
         }
 

@@ -35,7 +35,6 @@ namespace ErsatzCivLib.Model
         private const double PALACE_CORRUPTION_INCREASE_RATE = 0.5;
         private const double COURTHOUSE_CORRUPTION_INCREASE_RATE = 0.5;
         private const int AQUEDUC_MAX_POPULATION_WITHOUT = 10;
-        private const double CAPITALIZATION_PRODUCTIVITY_TO_COMMERCE_RATIO = 0.1;
         private const int TEMPLE_HAPPINESS_EFFECT = 1;
         private const int COLOSSEUM_HAPPINESS_EFFECT = 3;
         private const int CATHEDRAL_HAPPINESS_EFFECT = 4;
@@ -225,10 +224,7 @@ namespace ErsatzCivLib.Model
 
                 var taxValue = Citizens.Count(c => c.Type == CitizenTypePivot.TaxCollector || !c.Type.HasValue);
 
-                var capitalizationValue = Production.Is<CapitalizationPivot>() ?
-                    (int)Math.Ceiling(Productivity * CAPITALIZATION_PRODUCTIVITY_TO_COMMERCE_RATIO) : 0;
-
-                var totalValue = taxValue + baseValue + capitalizationValue;
+                var totalValue = taxValue + baseValue;
 
                 double corruptionRate = (Player.Regime.CorruptionRate * Player.GetDistanceToCapitalRate(this));
 
@@ -405,7 +401,7 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                return Production.ProductivityCost - ProductivityStorage;
+                return Production == null ? 0 : Production.ProductivityCost - ProductivityStorage;
             }
         }
         /// <summary>
@@ -670,7 +666,7 @@ namespace ErsatzCivLib.Model
             }
 
             ProductivityStorage += Productivity;
-            if (ProductivityStorage >= Production.ProductivityCost)
+            if (Production != null && ProductivityStorage >= Production.ProductivityCost)
             {
                 bool produce = true;
                 ProductivityStorage = Production.ProductivityCost;
@@ -691,7 +687,7 @@ namespace ErsatzCivLib.Model
                 {
                     ProductivityStorage = 0;
                     produced = Production;
-                    Production = CapitalizationPivot.Default;
+                    Production = null;
                     if (produced.Is<CityImprovementPivot>())
                     {
                         _improvements.Add((CityImprovementPivot)produced);

@@ -90,7 +90,7 @@ namespace ErsatzCiv
             });
             PanelNextProduction.Children.Add(new Label
             {
-                Content = $"Finish : {_city.Production.ProductivityCost}"
+                Content = $"Finish : {(_city.Production?.ProductivityCost).GetValueOrDefault(0)}"
             });
             PanelNextProduction.Children.Add(new Label
             {
@@ -251,6 +251,15 @@ namespace ErsatzCiv
             {
                 _engine.ChangeAnySpecialistToRegular(_city, squareSource);
                 RefreshDisplay();
+            }
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (ComboBoxProduction.SelectedIndex < 0)
+            {
+                e.Cancel = true;
+                MessageBox.Show("Please select an item to produce !", "ErsatzCiv");
             }
         }
     }

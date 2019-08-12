@@ -130,8 +130,7 @@ namespace ErsatzCivLib.Model
                         .Where(t => t.IsSubclassOf(typeof(UnitPivot)) && !t.IsAbstract)
                         .Select(t => (BuildablePivot)t.GetField("Default", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null))
                         .ToList();
-
-                    _defaultUnitInstances.Add(CapitalizationPivot.Default);
+                    
                     _defaultUnitInstances.AddRange(CityImprovementPivot.Instances);
                     _defaultUnitInstances.AddRange(WonderPivot.Instances);
                     _defaultUnitInstances.Add(StructuralPivot.Default);

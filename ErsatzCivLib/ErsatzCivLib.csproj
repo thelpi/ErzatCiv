@@ -59,7 +59,6 @@
     <Compile Include="Model\SpaceShipParts\ModulePivot.cs" />
     <Compile Include="Model\SpaceShipParts\StructuralPivot.cs" />
     <Compile Include="Model\SpaceShipPivot.cs" />
-    <Compile Include="Model\Static\CapitalizationPivot.cs" />
     <Compile Include="Model\CitizenPivot.cs" />
     <Compile Include="Model\Enums\CitizenTypePivot.cs" />
     <Compile Include="Model\Static\CityImprovementPivot.cs" />
