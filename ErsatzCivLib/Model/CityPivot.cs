@@ -209,9 +209,9 @@ namespace ErsatzCivLib.Model
             }
         }
         /// <summary>
-        /// Treasure by turn.
+        /// Commerce by turn.
         /// </summary>
-        public int Treasure
+        public int Commerce
         {
             get
             {
@@ -221,10 +221,6 @@ namespace ErsatzCivLib.Model
                 }
 
                 var baseValue = AreaMapSquares.Sum(ams => ams.Commerce);
-
-                var taxValue = Citizens.Count(c => c.Type == CitizenTypePivot.TaxCollector || !c.Type.HasValue);
-
-                var totalValue = taxValue + baseValue;
 
                 double corruptionRate = (Player.Regime.CorruptionRate * Player.GetDistanceToCapitalRate(this));
 
@@ -237,7 +233,7 @@ namespace ErsatzCivLib.Model
                     corruptionRate *= COURTHOUSE_CORRUPTION_INCREASE_RATE;
                 }
 
-                return (int)Math.Round(totalValue * corruptionRate);
+                return (int)Math.Round(baseValue * corruptionRate);
             }
         }
         /// <summary>
@@ -299,14 +295,9 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                if (InCivilTroubleOrAnarchy)
-                {
-                    return 0;
-                }
-
                 bool hasSetiProgram = Player.WonderIsActive(WonderPivot.SetiProgram);
 
-                var scienceValue = Citizens.Count(c => c.Type == CitizenTypePivot.Scientist || !c.Type.HasValue);
+                var scienceValue = (Commerce * Player.ScienceRate) + Citizens.Count(c => c.Type == CitizenTypePivot.Scientist);
 
                 if (_improvements.Contains(CityImprovementPivot.Library))
                 {
@@ -315,7 +306,7 @@ namespace ErsatzCivLib.Model
                     {
                         scienceCoeff += ISAAC_NEWTON_COLLEGE_SCIENCE_INCREASE_RATE * scienceCoeff;
                     }
-                    scienceValue = (int)Math.Floor(scienceValue * scienceCoeff);
+                    scienceValue *= scienceCoeff;
                 }
 
                 if (_improvements.Contains(CityImprovementPivot.University))
@@ -325,20 +316,40 @@ namespace ErsatzCivLib.Model
                     {
                         scienceCoeff += ISAAC_NEWTON_COLLEGE_SCIENCE_INCREASE_RATE * scienceCoeff;
                     }
-                    scienceValue = (int)Math.Floor(scienceValue * scienceCoeff);
+                    scienceValue *= scienceCoeff;
                 }
 
                 if (Player.WonderIsActive(WonderPivot.CopernicusObservatory) && _wonders.Contains(WonderPivot.CopernicusObservatory))
                 {
-                    scienceValue = (int)Math.Floor(scienceValue * COPERNICUS_OBSERVATORY_SCIENCE_INCREASE_RATIO);
+                    scienceValue *= COPERNICUS_OBSERVATORY_SCIENCE_INCREASE_RATIO;
                 }
 
                 if (hasSetiProgram)
                 {
-                    scienceValue = (int)Math.Floor(scienceValue * SETI_PROGRAM_SCIENCE_INCREASE_RATIO);
+                    scienceValue *= SETI_PROGRAM_SCIENCE_INCREASE_RATIO;
                 }
 
-                return (int)Math.Ceiling(scienceValue * Player.Regime.ScienceRate);
+                return (int)Math.Floor(scienceValue * Player.Regime.ScienceRate);
+            }
+        }
+        /// <summary>
+        /// Luxury production by turn.
+        /// </summary>
+        public int Luxury
+        {
+            get
+            {
+                return (int)Math.Floor((Commerce * Player.LuxuryRate) + Citizens.Count(c => c.Type == CitizenTypePivot.Entertainer));
+            }
+        }
+        /// <summary>
+        /// Treasure production by turn.
+        /// </summary>
+        public int Treasure
+        {
+            get
+            {
+                return (int)Math.Floor((Commerce * Player.TaxRate) + Citizens.Count(c => c.Type == CitizenTypePivot.TaxCollector));
             }
         }
         /// <summary>

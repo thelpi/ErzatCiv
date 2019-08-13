@@ -12,7 +12,7 @@ namespace ErsatzCivLib.Model
     {
         private const int CITY_FOOD_MIN = 2;
         private const int CITY_PRODUCTIVITY_MIN = 1;
-        private const int CITY_COMMERCE_MIN = 2;
+        private const int CITY_COMMERCE_MIN = 1;
 
         private const double MARKETPLACE_COMMERCE_INCREASE_RATIO = 1.5;
         private const double BANK_COMMERCE_INCREASE_RATIO = 1.5;
