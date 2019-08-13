@@ -103,20 +103,17 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                var baseValue = 0;
-                if (!Pollution)
+                var baseValue = Biome.Food + (HasBonus ? Biome.BonusFood : 0);
+                if (Irrigate)
                 {
-                    baseValue = Biome.Food + (HasBonus ? Biome.BonusFood : 0);
-                    if (Irrigate)
-                    {
-                        baseValue += IRRIGATE_FOOD_BONUS;
-                    }
-                    if (RailRoad && baseValue > 0)
-                    {
-                        baseValue = (int)Math.Floor(baseValue * RAILROAD_BONUS_RATE);
-                    }
+                    baseValue += IRRIGATE_FOOD_BONUS;
                 }
-                return baseValue;
+                if (RailRoad && baseValue > 0)
+                {
+                    baseValue = (int)Math.Floor(baseValue * RAILROAD_BONUS_RATE);
+                }
+
+                return baseValue / (Pollution ? 2 : 1);
             }
         }
         /// <summary>
@@ -127,20 +124,17 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                var baseValue = 0;
-                if (!Pollution)
+                var baseValue = (Biome.Productivity + (HasBonus ? Biome.BonusProductivity : 0));
+                if (Mine)
                 {
-                    baseValue = (Biome.Productivity + (HasBonus ? Biome.BonusProductivity : 0));
-                    if (Mine)
-                    {
-                        baseValue += Biome == BiomePivot.Hills ? MINE_PRODUCTIVITY_BONUS_HILLS : MINE_PRODUCTIVITY_BONUS;
-                    }
-                    if (RailRoad && baseValue > 0)
-                    {
-                        baseValue = (int)Math.Floor(baseValue * RAILROAD_BONUS_RATE);
-                    }
+                    baseValue += Biome == BiomePivot.Hills ? MINE_PRODUCTIVITY_BONUS_HILLS : MINE_PRODUCTIVITY_BONUS;
                 }
-                return baseValue;
+                if (RailRoad && baseValue > 0)
+                {
+                    baseValue = (int)Math.Floor(baseValue * RAILROAD_BONUS_RATE);
+                }
+
+                return baseValue / (Pollution ? 2 : 1);
             }
         }
         /// <summary>
@@ -151,21 +145,18 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                var baseValue = 0;
-                if (!Pollution)
+                var baseValue = Biome.Commerce + (HasBonus ? Biome.BonusCommerce : 0);
+                if (Road && (Biome == BiomePivot.Grassland || Biome == BiomePivot.Plains || Biome == BiomePivot.Desert))
                 {
-                    baseValue = Biome.Commerce + (HasBonus ? Biome.BonusCommerce : 0);
-                    if (Road && (Biome == BiomePivot.Grassland || Biome == BiomePivot.Plains || Biome == BiomePivot.Desert))
-                    {
-                        baseValue += ROAD_COMMERCE_BONUS;
-                    }
-                    if (RailRoad)
-                    {
-                        // TODO : not applicable if democracy or republic.
-                        baseValue = (int)Math.Floor(baseValue * RAILROAD_BONUS_RATE);
-                    }
+                    baseValue += ROAD_COMMERCE_BONUS;
                 }
-                return baseValue;
+                if (RailRoad)
+                {
+                    // TODO : not applicable if democracy or republic.
+                    baseValue = (int)Math.Floor(baseValue * RAILROAD_BONUS_RATE);
+                }
+
+                return baseValue / (Pollution ? 2 : 1);
             }
         }
         /// <summary>
