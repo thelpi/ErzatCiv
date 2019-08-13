@@ -18,9 +18,9 @@ namespace ErsatzCivLib.Model
         private Guid _uniqueId;
 
         /// <summary>
-        /// Citizen mood.
+        /// Citizen happiness.
         /// </summary>
-        public MoodPivot Mood { get; internal set; }
+        public HappinessPivot Happiness { get; internal set; }
         /// <summary>
         /// Type of citizen. <c>Null</c> for regular.
         /// </summary>
@@ -33,14 +33,14 @@ namespace ErsatzCivLib.Model
         #endregion
 
         /// <summary>
-        /// Constructor; by default the citizen mood is <see cref="MoodPivot.Content"/>.
+        /// Constructor; by default the citizen happiness is <see cref="HappinessPivot.Content"/>.
         /// </summary>
         /// <param name="city">The <see cref="City"/> value.</param>
         /// <param name="type">Optionnal; the <see cref="Type"/> value.</param>
         internal CitizenPivot(CityPivot city, CitizenTypePivot? type = null)
         {
             _uniqueId = Guid.NewGuid();
-            Mood = MoodPivot.Content;
+            Happiness = HappinessPivot.Content;
             Type = type;
             City = city;
         }
@@ -51,7 +51,7 @@ namespace ErsatzCivLib.Model
         /// <param name="type">The <see cref="Type"/> value.</param>
         internal void ToSpecialist(CitizenTypePivot type)
         {
-            Mood = MoodPivot.Content;
+            Happiness = HappinessPivot.Content;
             Type = type;
         }
 
@@ -60,7 +60,7 @@ namespace ErsatzCivLib.Model
         /// </summary>
         internal void ToRegular()
         {
-            Mood = MoodPivot.Content;
+            Happiness = HappinessPivot.Content;
             Type = null;
         }
 
@@ -75,19 +75,19 @@ namespace ErsatzCivLib.Model
             var compareType = Type.HasValue ?
                 (other.Type.HasValue ? ((int)Type.Value).CompareTo((int)other.Type.Value) : 1) :
                 (other.Type.HasValue ? -1 : 0);
-            var compareMood = ((int)Mood).CompareTo((int)other.Mood);
+            var compareHappiness = ((int)Happiness).CompareTo((int)other.Happiness);
 
             var citizenAreaValueMe = (City.AreaMapSquares.SingleOrDefault(ams => ams.Citizen == this)?.MapSquare?.TotalValue).GetValueOrDefault(0);
             var citizenAreaValueOther = (other.City.AreaMapSquares.SingleOrDefault(ams => ams.Citizen == other)?.MapSquare?.TotalValue).GetValueOrDefault(0);
             var compareMapS = citizenAreaValueMe.CompareTo(citizenAreaValueOther);
 
-            return compareType == 0 ? (compareMood == 0 ? compareMapS : compareMood) : compareType;
+            return compareType == 0 ? (compareHappiness == 0 ? compareMapS : compareHappiness) : compareType;
         }
 
         /// <inheritdoc />
         public override string ToString()
         {
-            return (!Type.HasValue ? Mood.ToString() : Type.ToString());
+            return (!Type.HasValue ? Happiness.ToString() : Type.ToString());
         }
 
         #region IEquatable implementation

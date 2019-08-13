@@ -3,10 +3,10 @@
 namespace ErsatzCivLib.Model.Enums
 {
     /// <summary>
-    /// Mood of the citizens.
+    /// Happiness of the citizens.
     /// </summary>
     [Serializable]
-    public enum MoodPivot
+    public enum HappinessPivot
     {
         /// <summary>
         /// Happy.

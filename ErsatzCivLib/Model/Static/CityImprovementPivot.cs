@@ -29,8 +29,8 @@ namespace ErsatzCivLib.Model.Static
         #endregion
 
         private CityImprovementPivot(int productivityCost, int maintenanceCost, int purchasePrice, int sellValue, string name,
-            bool hasCitizenMoodEffect, AdvancePivot advancePrerequisite, CityImprovementPivot improvementPrerequisite) :
-            base (productivityCost, advancePrerequisite, null, purchasePrice, name, hasCitizenMoodEffect)
+            bool hasCitizenHappinessEffect, AdvancePivot advancePrerequisite, CityImprovementPivot improvementPrerequisite) :
+            base (productivityCost, advancePrerequisite, null, purchasePrice, name, hasCitizenHappinessEffect)
         {
             MaintenanceCost = maintenanceCost;
             SellValue = sellValue;

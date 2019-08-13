@@ -71,7 +71,7 @@
     <Compile Include="Model\Enums\DirectionPivot.cs" />
     <Compile Include="EnginePivot.cs" />
     <Compile Include="Model\MapPivot.cs" />
-    <Compile Include="Model\Enums\MoodPivot.cs" />
+    <Compile Include="Model\Enums\HappinessPivot.cs" />
     <Compile Include="Model\Static\RegimePivot.cs" />
     <Compile Include="Model\Static\MapSquareImprovementPivot.cs" />
     <Compile Include="Model\MapSquarePivot.cs" />

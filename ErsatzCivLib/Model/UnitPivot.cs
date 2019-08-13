@@ -54,6 +54,15 @@ namespace ErsatzCivLib.Model
 
         #endregion
 
+        #region Inferred properties
+
+        /// <summary>
+        /// Indicates if the unit is a military one.
+        /// </summary>
+        public bool IsMilitary { get { return OffensePoints > 0; } }
+
+        #endregion
+
         /// <summary>
         /// Constructor.
         /// </summary>

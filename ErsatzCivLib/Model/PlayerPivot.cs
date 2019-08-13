@@ -286,7 +286,11 @@ namespace ErsatzCivLib.Model
             Gender = gender;
             Civilization = civilization;
             IsIA = isIa;
-            _advances.AddRange(civilization.Advances);
+
+            foreach (var advance in civilization.Advances)
+            {
+                AddAdvance(advance);
+            }
 
             Regime = RegimePivot.Despotism;
             Treasure = TREASURE_START;
@@ -641,7 +645,7 @@ namespace ErsatzCivLib.Model
                         .ToList();
                 foreach (var a in advancesMoreThanOne)
                 {
-                    _advances.Add(a);
+                    AddAdvance(a);
                     bool inProgress = false;
                     if (CurrentAdvance == a)
                     {
@@ -710,6 +714,7 @@ namespace ErsatzCivLib.Model
         {
             Regime = regimePivot;
             _anarchyTurnsCount = 0;
+            CheckEveryCitiesHappiness();
             NewRegimeEvent?.Invoke(this, new EventArgs());
         }
 
@@ -892,6 +897,23 @@ namespace ErsatzCivLib.Model
 
         #region Private methods
 
+        private void CheckEveryCitiesHappiness()
+        {
+            foreach (var city in _cities)
+            {
+                city.CheckCitizensHappiness();
+            }
+        }
+
+        private void AddAdvance(AdvancePivot advance)
+        {
+            _advances.Add(advance);
+            if (advance == AdvancePivot.Mysticism)
+            {
+                CheckEveryCitiesHappiness();
+            }
+        }
+
         private void CheckScienceAtNextTurn(int scienceCost)
         {
             if (CurrentAdvance != null)
@@ -899,7 +921,7 @@ namespace ErsatzCivLib.Model
                 ScienceStack += ScienceByTurn;
                 if (ScienceStack >= scienceCost)
                 {
-                    _advances.Add(CurrentAdvance);
+                    AddAdvance(CurrentAdvance);
                     ScienceStack = 0;
                     CurrentAdvance = null;
                     NewAdvanceEvent?.Invoke(this, new EventArgs());

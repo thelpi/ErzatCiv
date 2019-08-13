@@ -24,9 +24,9 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public int ProductivityCost { get; private set; }
         /// <summary>
-        /// Indicates if the item, when built, has impact on citizens mood.
+        /// Indicates if the item, when built, has impact on citizens happiness.
         /// </summary>
-        public bool HasCitizenMoodEffect { get; private set; }
+        public bool HasCitizenHappinessEffect { get; private set; }
         /// <summary>
         /// <see cref="AdvancePivot"/> required to access the instance.
         /// </summary>
@@ -51,13 +51,13 @@ namespace ErsatzCivLib.Model
         /// <param name="purchasePrice">The <see cref="PurchasePrice"/> value.</param>
         /// <param name="name">Optionnal; the <see cref="Name"/> value.
         /// IF <c>Null</c>, the class name is used without the "Pivot" suffix.</param>
-        /// <param name="hasCitizenMoodEffect">Optionnal; the <see cref="HasCitizenMoodEffect"/> value.</param>
+        /// <param name="hasCitizenHappinessEffect">Optionnal; the <see cref="HasCitizenHappinessEffect"/> value.</param>
         protected BuildablePivot(int productivityCost, AdvancePivot advancePrerequisite, AdvancePivot advanceObsolescence,
-            int purchasePrice, string name = null, bool hasCitizenMoodEffect = false)
+            int purchasePrice, string name = null, bool hasCitizenHappinessEffect = false)
         {
             Name = name ?? GetType().Name.Replace("Pivot", string.Empty);
             ProductivityCost = productivityCost;
-            HasCitizenMoodEffect = hasCitizenMoodEffect;
+            HasCitizenHappinessEffect = hasCitizenHappinessEffect;
             AdvancePrerequisite = advancePrerequisite;
             AdvanceObsolescence = advanceObsolescence;
             PurchasePrice = purchasePrice;

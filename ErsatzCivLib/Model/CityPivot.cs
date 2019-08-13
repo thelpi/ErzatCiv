@@ -14,13 +14,39 @@ namespace ErsatzCivLib.Model
     [Serializable]
     public class CityPivot : IEquatable<CityPivot>
     {
+        #region Happiness constants
+
+        // Number of luxuries required for one happy citizen.
+        private const int LUXURY_TO_HAPPY_CITIZEN_RATE = 2;
+        // Multiplication rate of mysticism on temple's effect.
+        private const int MYSTICISM_ADVANCE_HAPPINESS_RATE = 2;
+        // Number of citizens content before becoming unhappy.
+        private const int CONTENT_CITIZENS_COUNT = 5;
+        // Rate of unhappy citizens preserved.
+        private const int SHAKESPEARE_THEATRE_HAPPINESS_RATE = 0;
+        // Temple effect on citizens (count unhappy to cnotent).
+        private const int TEMPLE_HAPPINESS_EFFECT = 1;
+        // Colosseum effect on citizens (count unhappy to cnotent).
+        private const int COLOSSEUM_HAPPINESS_EFFECT = 3;
+        // Cathedral effect on citizens (count unhappy to cnotent).
+        private const int CATHEDRAL_HAPPINESS_EFFECT = 4;
+        // Cathedral effect boost by wonder Michelangelo's chapel.
+        private const double MICHELANGELO_CHAPEL_HAPPINESS_EFFECT = 1.5;
+        // Number of unhappy citizens transforms to content by wonder JS Bachs cathedral.
+        private const int JSBACHS_WONDER_HAPPINESS_EFFECT = 2;
+        // Number of citizens happy with wonder Hanging gardens.
+        private const int CUREFORCANCER_WONDER_HAPPINESS_EFFECT = 1;
+        // Number of citizens happy with wonder Hanging gardens.
+        private const int HANGING_GARDENS_WONDER_HAPPINESS_EFFECT = 1;
+        // Temple effect boost by wonder Oracle.
+        private const int ORACLE_WONDER_HAPPINESS_RATE = 2;
+
+        #endregion
+
         #region Constants relative to citizens behavior
 
-        private const double LUXURY_TO_HAPPY_CITIZEN_RATE = 0.5;
         private const int FOOD_BY_CITIZEN_BY_TURN = 2;
-        private const int CONTENT_CITIZENS_COUNT = 5;
-        private const int FOOD_RATIO_TO_NEXT_CITIZEN = 40;
-        private const double MYSTICISM_ADVANCE_HAPPINESS_RATE = 2;
+        private const int FOOD_RATIO_TO_NEXT_CITIZEN = 20;
 
         #endregion
 
@@ -36,9 +62,6 @@ namespace ErsatzCivLib.Model
         private const double PALACE_CORRUPTION_INCREASE_RATE = 0.5;
         private const double COURTHOUSE_CORRUPTION_INCREASE_RATE = 0.5;
         private const int AQUEDUC_MAX_POPULATION_WITHOUT = 10;
-        private const int TEMPLE_HAPPINESS_EFFECT = 1;
-        private const int COLOSSEUM_HAPPINESS_EFFECT = 3;
-        private const int CATHEDRAL_HAPPINESS_EFFECT = 4;
 
         #endregion
 
@@ -46,12 +69,7 @@ namespace ErsatzCivLib.Model
 
         private const double SETI_PROGRAM_SCIENCE_INCREASE_RATIO = 1.5;
         private const double COPERNICUS_OBSERVATORY_SCIENCE_INCREASE_RATIO = 2;
-        private const int JSBACHS_WONDER_HAPPINESS_EFFECT = 2;
-        private const int CUREFORCANCER_WONDER_HAPPINESS_EFFECT = 1;
-        private const int HANGING_GARDENS_WONDER_HAPPINESS_EFFECT = 1;
         private const double ISAAC_NEWTON_COLLEGE_SCIENCE_INCREASE_RATE = 2 / (double)3;
-        private const double MICHELANGELO_CHAPEL_HAPPINESS_EFFECT = 1.5;
-        private const double ORACLE_WONDER_HAPPINESS_RATE = 2;
 
         #endregion
 
@@ -98,6 +116,12 @@ namespace ErsatzCivLib.Model
         /// Location on the map.
         /// </summary>
         public MapSquarePivot MapSquareLocation { get; private set; }
+
+        private List<UnitPivot> _garrison = new List<UnitPivot>();
+        /// <summary>
+        /// List of units in garrison.
+        /// </summary>
+        public IReadOnlyCollection<UnitPivot> Garrison { get { return _garrison; } }
 
         private List<SettlerPivot> _settlers = new List<SettlerPivot>();
         /// <summary>
@@ -179,14 +203,14 @@ namespace ErsatzCivLib.Model
             }
         }
         /// <summary>
-        /// Indicates if the city is in civil trouble (too much citizens in <see cref="MoodPivot.Unhappy"/> mood).
+        /// Indicates if the city is in civil trouble (too much citizens in <see cref="HappinessPivot.Unhappy"/> happiness).
         /// </summary>
         public bool InCivilTrouble
         {
             get
             {
-                return AreaWithoutCityMapSquares.Count(ams => ams.Citizen.Mood == MoodPivot.Unhappy) >
-                    AreaWithoutCityMapSquares.Count(ams => ams.Citizen.Mood == MoodPivot.Happy);
+                return AreaWithoutCityMapSquares.Count(ams => ams.Citizen.Happiness == HappinessPivot.Unhappy) >
+                    AreaWithoutCityMapSquares.Count(ams => ams.Citizen.Happiness == HappinessPivot.Happy);
             }
         }
         /// <summary>
@@ -244,7 +268,7 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                return (CitizensCount + _settlers.Count) * FOOD_BY_CITIZEN_BY_TURN;
+                return (CitizensCount * FOOD_BY_CITIZEN_BY_TURN) + (_settlers.Count * Player.Regime.SettlerFoodConsumption);
             }
         }
         /// <summary>
@@ -264,14 +288,7 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                var foodValue = AreaMapSquares.Sum(ams => ams.Food);
-
-                if (InCivilTroubleOrAnarchy && foodValue > FoodConsumptionWithoutSettlers)
-                {
-                    foodValue = FoodConsumptionWithoutSettlers;
-                }
-
-                return foodValue;
+                return AreaMapSquares.Sum(ams => Player.Regime.ProductionMalus && ams.Food > 2 ? (ams.Food - 1) : ams.Food);
             }
         }
         /// <summary>
@@ -281,12 +298,12 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                if (InCivilTroubleOrAnarchy)
+                if (InCivilTrouble)
                 {
                     return 0;
                 }
 
-                return AreaMapSquares.Sum(ams => ams.Productivity);
+                return AreaMapSquares.Sum(ams => Player.Regime.ProductionMalus && ams.Food > 2 ? (ams.Productivity - 1) : ams.Productivity);
             }
         }
         /// <summary>
@@ -330,7 +347,7 @@ namespace ErsatzCivLib.Model
                     scienceValue *= SETI_PROGRAM_SCIENCE_INCREASE_RATIO;
                 }
 
-                return (int)Math.Floor(scienceValue * Player.Regime.ScienceRate);
+                return (int)Math.Floor(scienceValue);
             }
         }
         /// <summary>
@@ -562,7 +579,7 @@ namespace ErsatzCivLib.Model
             }
         }
 
-        private void AddRegularCitizen(CitizenPivot citizenSource, MapSquarePivot location, bool delayMoodCheck = false)
+        private void AddRegularCitizen(CitizenPivot citizenSource, MapSquarePivot location, bool delayHappinessCheck = false)
         {
             var alreadyInArea = _areaMapSquares.SingleOrDefault(ams => ams.Citizen == citizenSource);
             if (alreadyInArea != null)
@@ -576,15 +593,25 @@ namespace ErsatzCivLib.Model
             citizenSource.ToRegular();
             _areaMapSquares.Add(new CityAreaMapSquarePivot(this, location));
 
-            if (!delayMoodCheck)
+            if (!delayHappinessCheck)
             {
-                CheckCitizensMood();
+                CheckCitizensHappiness();
             }
         }
 
         #endregion
 
         #region Internal methods
+
+        /// <summary>
+        /// Adds as specified <see cref="UnitPivot"/> in garrison, then check the citizen happiness.
+        /// </summary>
+        /// <param name="unit">The unit to add.</param>
+        internal void AddInGarrison(UnitPivot unit)
+        {
+            _garrison.Add(unit);
+            CheckCitizensHappiness();
+        }
 
         /// <summary>
         /// Tries to get the most productive [productivity / commerce / food] vacant location on the city radius;
@@ -618,7 +645,7 @@ namespace ErsatzCivLib.Model
 
             BuildablePivot produced = null;
             bool resetCitizensRequired = false;
-            bool checkCitizensMood = false;
+            bool checkCitizensHappiness = false;
 
             if (ExtraFoodByTurn > 0)
             {
@@ -722,9 +749,9 @@ namespace ErsatzCivLib.Model
                     {
                         _wonders.Add((WonderPivot)produced);
                     }
-                    if (produced.HasCitizenMoodEffect)
+                    if (produced.HasCitizenHappinessEffect)
                     {
-                        checkCitizensMood = true;
+                        checkCitizensHappiness = true;
                     }
                 }
             }
@@ -733,9 +760,9 @@ namespace ErsatzCivLib.Model
             {
                 ResetCitizens();
             }
-            else if (checkCitizensMood)
+            else if (checkCitizensHappiness)
             {
-                CheckCitizensMood();
+                CheckCitizensHappiness();
             }
 
             if (produced != null)
@@ -751,27 +778,30 @@ namespace ErsatzCivLib.Model
         }
 
         /// <summary>
-        /// Recomputes the mood of every citizens.
+        /// Recomputes the happiness of every citizens.
         /// </summary>
-        internal void CheckCitizensMood()
+        internal void CheckCitizensHappiness()
         {
-            // Default behavior.
             var nonSpecialistFaces = CitizensCount - _specialistCitizens.Count;
             var unhappyFaces = nonSpecialistFaces - CONTENT_CITIZENS_COUNT;
-            var happyFaces = 0;
 
             if (Player.WonderIsActive(WonderPivot.ShakespeareTheatre) && _wonders.Contains(WonderPivot.ShakespeareTheatre))
             {
-                unhappyFaces = 0;
+                unhappyFaces *= SHAKESPEARE_THEATRE_HAPPINESS_RATE;
             }
 
-            double cathedralEffect = _improvements.Contains(CityImprovementPivot.Cathedral) ? CATHEDRAL_HAPPINESS_EFFECT : 0;
+            if (Player.WonderIsActive(WonderPivot.JsBachsCathedral, MapSquareLocation))
+            {
+                unhappyFaces -= JSBACHS_WONDER_HAPPINESS_EFFECT;
+            }
+
+            var cathedralEffect = _improvements.Contains(CityImprovementPivot.Cathedral) ? CATHEDRAL_HAPPINESS_EFFECT : 0;
             if (Player.WonderIsActive(WonderPivot.MichelangeloChapel))
             {
-                cathedralEffect *= MICHELANGELO_CHAPEL_HAPPINESS_EFFECT;
+                cathedralEffect = (int)(cathedralEffect * MICHELANGELO_CHAPEL_HAPPINESS_EFFECT);
             }
 
-            double templeEffect = _improvements.Contains(CityImprovementPivot.Temple) ? TEMPLE_HAPPINESS_EFFECT : 0;
+            var templeEffect = _improvements.Contains(CityImprovementPivot.Temple) ? TEMPLE_HAPPINESS_EFFECT : 0;
             if (Player.Advances.Contains(AdvancePivot.Mysticism))
             {
                 templeEffect *= MYSTICISM_ADVANCE_HAPPINESS_RATE;
@@ -781,28 +811,46 @@ namespace ErsatzCivLib.Model
                 templeEffect *= ORACLE_WONDER_HAPPINESS_RATE;
             }
 
-            // happiness effects.
+            // transforms unhappy in content.
+            var contentEffects = new List<int>
+            {
+                templeEffect,
+                cathedralEffect,
+                _improvements.Contains(CityImprovementPivot.Colosseum) ? COLOSSEUM_HAPPINESS_EFFECT : 0,
+                _garrison.Where(u => u.IsMilitary).Take(Player.Regime.MartialLawUnitCount).Count()
+            };
+
+            // transforms content into happy.
             var happinessEffects = new List<int>
             {
-                (int)Math.Floor(Luxury * LUXURY_TO_HAPPY_CITIZEN_RATE),
-                (int)Math.Floor(templeEffect),
-                _improvements.Contains(CityImprovementPivot.Colosseum) ? COLOSSEUM_HAPPINESS_EFFECT : 0,
-                (int)Math.Floor(cathedralEffect),
-                Player.WonderIsActive(WonderPivot.JsBachsCathedral, MapSquareLocation) ? JSBACHS_WONDER_HAPPINESS_EFFECT : 0,
+                Luxury * LUXURY_TO_HAPPY_CITIZEN_RATE,
                 Player.WonderIsActive(WonderPivot.CureForCancer) ? CUREFORCANCER_WONDER_HAPPINESS_EFFECT : 0,
                 Player.WonderIsActive(WonderPivot.HangingGardens) ? HANGING_GARDENS_WONDER_HAPPINESS_EFFECT : 0
             };
 
-            for (int i = 0; i < happinessEffects.Sum(); i++)
+            var happyFaces = happinessEffects.Sum();
+            if (happyFaces < nonSpecialistFaces)
             {
-                if (unhappyFaces > 0)
+                // Not full happy : count of content OR unhappy.
+                var remaniningFaces = nonSpecialistFaces - happyFaces;
+
+                // Count of unhappy after content effects.
+                unhappyFaces -= contentEffects.Sum();
+                if (unhappyFaces < 0)
                 {
-                    unhappyFaces--;
+                    // Overflow of content effect.
+                    unhappyFaces = 0;
                 }
-                else if (happyFaces < nonSpecialistFaces)
+                else if (unhappyFaces > remaniningFaces)
                 {
-                    happyFaces++;
+                    // Just in case...
+                    unhappyFaces = remaniningFaces;
                 }
+            }
+            else
+            {
+                // Full happy (0 unhappy, 0 content).
+                unhappyFaces = 0;
             }
 
             var citizensToCheck = AreaWithoutCityMapSquares.Select(ams => ams.Citizen);
@@ -810,17 +858,17 @@ namespace ErsatzCivLib.Model
             {
                 if (happyFaces > 0)
                 {
-                    citizen.Mood = MoodPivot.Happy;
+                    citizen.Happiness = HappinessPivot.Happy;
                     happyFaces--;
                 }
                 else if (unhappyFaces > 0)
                 {
-                    citizen.Mood = MoodPivot.Unhappy;
+                    citizen.Happiness = HappinessPivot.Unhappy;
                     unhappyFaces--;
                 }
                 else
                 {
-                    citizen.Mood = MoodPivot.Content;
+                    citizen.Happiness = HappinessPivot.Content;
                 }
             }
         }
@@ -851,7 +899,7 @@ namespace ErsatzCivLib.Model
                 i++;
             }
 
-            CheckCitizensMood();
+            CheckCitizensHappiness();
         }
 
         /// <summary>
@@ -913,7 +961,7 @@ namespace ErsatzCivLib.Model
             if (!citizenSource.Type.HasValue)
             {
                 ChangeCitizenToSpecialist(citizenSource, CitizenTypePivot.Entertainer);
-                CheckCitizensMood();
+                CheckCitizensHappiness();
             }
             else
             {
@@ -921,11 +969,11 @@ namespace ErsatzCivLib.Model
                 {
                     case CitizenTypePivot.Entertainer:
                         ChangeCitizenToSpecialist(citizenSource, CitizenTypePivot.Scientist);
-                        CheckCitizensMood();
+                        CheckCitizensHappiness();
                         break;
                     case CitizenTypePivot.Scientist:
                         ChangeCitizenToSpecialist(citizenSource, CitizenTypePivot.TaxCollector);
-                        CheckCitizensMood();
+                        CheckCitizensHappiness();
                         break;
                     case CitizenTypePivot.TaxCollector:
                         ChangeCitizenToRegularAtTheBestVacantMapSquare(citizenSource);

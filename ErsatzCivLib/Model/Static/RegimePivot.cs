@@ -21,30 +21,49 @@ namespace ErsatzCivLib.Model.Static
         /// </summary>
         public double CorruptionRate { get; private set; }
         /// <summary>
+        /// Flat corruption rate (as if every cities were at the same distance from the <see cref="CityImprovementPivot.Palace"/>).
+        /// </summary>
+        public bool FlatCorruptionRate { get; private set; }
+        /// <summary>
         /// Gold cost, as each turn, for miltary units.
         /// </summary>
         public int UnitCost { get; private set; }
         /// <summary>
-        /// Commerce bonus, on each <see cref="MapSquarePivot"/> of the city area, including the city itself.
+        /// Commerce bonus, on each <see cref="MapSquarePivot"/> of the city area, including the city itself (if already one).
         /// </summary>
         public int CommerceBonus { get; private set; }
         /// <summary>
-        /// Settler's efficiency rate.
+        /// If <c>True</c>, applies a -1 on production [food / productivity / commerce] when greater than 2.
         /// </summary>
-        public double SettlerEffiencyRate { get; private set; }
+        public bool ProductionMalus { get; private set; }
         /// <summary>
-        /// Impact on mood for each military unit in garrison in a city.
+        /// Number of military units with citizen happiness effect.
         /// </summary>
-        /// <example>A <c>0.5</c> value means that 2 units make 1 <see cref="CitizenPivot"/> from unhappy to content.</example>
-        public double GarrisonMoodRate { get; private set; }
-        /// <summary>
-        /// Science discovery speed rate.
-        /// </summary>
-        public double ScienceRate { get; private set; }
+        public int MartialLawUnitCount { get; private set; }
         /// <summary>
         /// <see cref="AdvancePivot"/> required to access the instance.
         /// </summary>
         public AdvancePivot AdvancePrerequisite { get; private set; }
+        /// <summary>
+        /// Food consumption by turn for <see cref="Units.Land.SettlerPivot"/>.
+        /// </summary>
+        public int SettlerFoodConsumption { get; private set; }
+        /// <summary>
+        /// Indicates if the war can be declared; otherwise, peace traty must be accepted.
+        /// </summary>
+        public bool CanDeclareWar { get; private set; }
+        /// <summary>
+        /// Number of unhappy citizens for each military unit outside the city.
+        /// </summary>
+        public int MilitaryUnhappiness { get; private set; }
+        /// <summary>
+        /// Number of turn with trouble inside a city before becoming an anarchy.
+        /// </summary>
+        public int CityTroubleTurnsBeforeAnarchy { get; private set; }
+        /// <summary>
+        /// Indicates if <see cref="CityImprovementPivot"/> have a maintenance cost.
+        /// </summary>
+        public bool MaintenanceCost { get; private set; }
 
         #endregion
 
@@ -111,13 +130,18 @@ namespace ErsatzCivLib.Model.Static
         public static readonly RegimePivot Despotism = new RegimePivot
         {
             Name = "Despotism",
-            UnitCost = 0,
-            GarrisonMoodRate = 1,
+            UnitCost = 1,
+            MartialLawUnitCount = 3,
             CommerceBonus = 0,
-            CorruptionRate = 0.5,
-            SettlerEffiencyRate = 0.5,
-            ScienceRate = 0.5,
-            AdvancePrerequisite = null
+            CorruptionRate = 0.5, // TODO : get the real value.
+            AdvancePrerequisite = null,
+            CanDeclareWar = true,
+            SettlerFoodConsumption = 1,
+            FlatCorruptionRate = false,
+            MilitaryUnhappiness = 0,
+            CityTroubleTurnsBeforeAnarchy = 9999,
+            ProductionMalus = true,
+            MaintenanceCost = true
         };
         /// <summary>
         /// Monarchy regime.
@@ -125,13 +149,18 @@ namespace ErsatzCivLib.Model.Static
         public static readonly RegimePivot Monarchy = new RegimePivot
         {
             Name = "Monarchy",
-            UnitCost = 0,
-            GarrisonMoodRate = 0.5,
+            UnitCost = 1,
+            MartialLawUnitCount = 3,
             CommerceBonus = 0,
-            CorruptionRate = 0.25,
-            SettlerEffiencyRate = 1,
-            ScienceRate = 0.75,
-            AdvancePrerequisite = AdvancePivot.Monarchy
+            CorruptionRate = 0.10, // TODO : get the real value.
+            AdvancePrerequisite = AdvancePivot.Monarchy,
+            CanDeclareWar = true,
+            SettlerFoodConsumption = 2,
+            FlatCorruptionRate = false,
+            MilitaryUnhappiness = 0,
+            CityTroubleTurnsBeforeAnarchy = 9999,
+            ProductionMalus = false,
+            MaintenanceCost = true
         };
         /// <summary>
         /// Republic regime.
@@ -140,12 +169,17 @@ namespace ErsatzCivLib.Model.Static
         {
             Name = "Republic",
             UnitCost = 1,
-            GarrisonMoodRate = 1 / (double)3,
-            CommerceBonus = 0,
-            CorruptionRate = 0.25,
-            SettlerEffiencyRate = 1,
-            ScienceRate = 1,
-            AdvancePrerequisite = AdvancePivot.Republic
+            MartialLawUnitCount = 0,
+            CommerceBonus = 1,
+            CorruptionRate = 0.10, // TODO : get the real value.
+            AdvancePrerequisite = AdvancePivot.Republic,
+            CanDeclareWar = false,
+            SettlerFoodConsumption = 2,
+            FlatCorruptionRate = false,
+            MilitaryUnhappiness = 1,
+            CityTroubleTurnsBeforeAnarchy = 9999,
+            ProductionMalus = false,
+            MaintenanceCost = true
         };
         /// <summary>
         /// Anarchy regime.
@@ -153,13 +187,18 @@ namespace ErsatzCivLib.Model.Static
         public static readonly RegimePivot Anarchy = new RegimePivot
         {
             Name = "Anarchy",
-            UnitCost = 0,
-            GarrisonMoodRate = 0,
+            UnitCost = 1,
+            MartialLawUnitCount = 3,
             CommerceBonus = 0,
             CorruptionRate = 1,
-            SettlerEffiencyRate = 0.5,
-            ScienceRate = 0,
-            AdvancePrerequisite = null
+            AdvancePrerequisite = null,
+            CanDeclareWar = true,
+            SettlerFoodConsumption = 1,
+            FlatCorruptionRate = false,
+            MilitaryUnhappiness = 0,
+            CityTroubleTurnsBeforeAnarchy = 9999,
+            ProductionMalus = true,
+            MaintenanceCost = false
         };
         /// <summary>
         /// Democraty regime.
@@ -168,12 +207,17 @@ namespace ErsatzCivLib.Model.Static
         {
             Name = "Democraty",
             UnitCost = 1,
-            GarrisonMoodRate = 1 / (double)5,
+            MartialLawUnitCount = 0,
             CommerceBonus = 1,
             CorruptionRate = 0,
-            SettlerEffiencyRate = 1.5,
-            ScienceRate = 1.5,
-            AdvancePrerequisite = AdvancePivot.Democracy
+            AdvancePrerequisite = AdvancePivot.Democracy,
+            CanDeclareWar = false,
+            SettlerFoodConsumption = 2,
+            FlatCorruptionRate = false,
+            MilitaryUnhappiness = 2,
+            CityTroubleTurnsBeforeAnarchy = 2,
+            ProductionMalus = false,
+            MaintenanceCost = true
         };
         /// <summary>
         /// Communism regime.
@@ -181,13 +225,18 @@ namespace ErsatzCivLib.Model.Static
         public static readonly RegimePivot Communism = new RegimePivot
         {
             Name = "Communism",
-            UnitCost = 0,
-            GarrisonMoodRate = 0.5,
+            UnitCost = 1,
+            MartialLawUnitCount = 3,
             CommerceBonus = 0,
-            CorruptionRate = 0.25,
-            SettlerEffiencyRate = 1,
-            ScienceRate = 1,
-            AdvancePrerequisite = AdvancePivot.Communism
+            CorruptionRate = 0.1, // TODO : get the real value.
+            AdvancePrerequisite = AdvancePivot.Communism,
+            CanDeclareWar = true,
+            SettlerFoodConsumption = 2,
+            FlatCorruptionRate = true,
+            MilitaryUnhappiness = 0,
+            CityTroubleTurnsBeforeAnarchy = 9999,
+            ProductionMalus = false,
+            MaintenanceCost = true
         };
 
         #endregion
