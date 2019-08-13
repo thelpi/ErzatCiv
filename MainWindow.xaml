@@ -80,6 +80,18 @@
                                     <Button Height="25" Width="25" ToolTip="Change scientific advance" Name="ButtonChangeAdvance" Click="ButtonChangeAdvance_Click" />
                                     <Label Margin="5, 0, 0, 0" Height="25"  Name="LabelCurrentAdvance" />
                                 </StackPanel>
+                                <StackPanel Orientation="Vertical">
+                                    <StackPanel Margin="0, 2, 0, 0" Orientation="Horizontal">
+                                        <Label Content="Science rate :" Width="100" HorizontalContentAlignment="Right" />
+                                        <Slider Width="200" Name="SliderScienceRate" Maximum="1" Minimum="0" TickPlacement="BottomRight" TickFrequency="0.1" IsSnapToTickEnabled="True" ValueChanged="SliderScienceRate_ValueChanged" IsMoveToPointEnabled="True" />
+                                        <Label Name="LabelScienceRate" />
+                                    </StackPanel>
+                                    <StackPanel Margin="0, 2, 0, 0" Orientation="Horizontal">
+                                        <Label Content="Luxury rate :" Width="100" HorizontalContentAlignment="Right" />
+                                        <Slider Width="200" Name="SliderLuxuryRate" Maximum="1" Minimum="0" TickPlacement="BottomRight" TickFrequency="0.1" IsSnapToTickEnabled="True" ValueChanged="SliderLuxuryRate_ValueChanged" IsMoveToPointEnabled="True" />
+                                        <Label Name="LabelLuxuryRate" />
+                                    </StackPanel>
+                                </StackPanel>
                             </StackPanel>
                         </GroupBox>
                         <GroupBox Padding="5" Margin="0, 5, 0, 0" Header="Configuration">

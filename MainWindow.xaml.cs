@@ -42,6 +42,10 @@ namespace ErsatzCiv
 
             DrawFullMapAndMiniMap();
             RefreshDynamicView();
+
+            SliderScienceRate.Value = _engine.HumanPlayer.ScienceRate;
+            SliderLuxuryRate.Value = _engine.HumanPlayer.LuxuryRate;
+            RefreshRateLabels();
         }
 
         #region Events
@@ -350,6 +354,28 @@ namespace ErsatzCiv
             }
         }
 
+        private void SliderScienceRate_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (SliderScienceRate.Value + _engine.HumanPlayer.LuxuryRate > 1)
+            {
+                SliderLuxuryRate.Value = (10 - (int)Math.Round(SliderScienceRate.Value * 10)) / (double)10;
+            }
+
+            _engine.ChangeRates(SliderLuxuryRate.Value, SliderScienceRate.Value);
+            RefreshRateLabels();
+        }
+
+        private void SliderLuxuryRate_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (SliderLuxuryRate.Value + _engine.HumanPlayer.ScienceRate > 1)
+            {
+                SliderScienceRate.Value = (10 - (int)Math.Round(SliderLuxuryRate.Value * 10)) / (double)10;
+            }
+
+            _engine.ChangeRates(SliderLuxuryRate.Value, SliderScienceRate.Value);
+            RefreshRateLabels();
+        }
+
         #endregion
 
         #region Draw methods
@@ -607,6 +633,12 @@ namespace ErsatzCiv
             {
                 new WindowAdvancePick(_engine).ShowDialog();
             }
+        }
+
+        private void RefreshRateLabels()
+        {
+            LabelScienceRate.Content = $"{(int)Math.Floor(_engine.HumanPlayer.ScienceRate * 100)} %";
+            LabelLuxuryRate.Content = $"{(int)Math.Floor(_engine.HumanPlayer.LuxuryRate * 100)} %";
         }
 
         #endregion

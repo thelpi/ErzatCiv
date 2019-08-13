@@ -209,6 +209,34 @@ namespace ErsatzCivLib
         #region Public methods
 
         /// <summary>
+        /// Changes the <see cref="PlayerPivot.LuxuryRate"/> and <see cref="PlayerPivot.ScienceRate"/> values.
+        /// </summary>
+        /// <param name="luxuryRate">The <see cref="PlayerPivot.LuxuryRate"/> value.</param>
+        /// <param name="scienceRate">The <see cref="PlayerPivot.ScienceRate"/> value.</param>
+        /// <exception cref="ArgumentException">The <paramref name="luxuryRate"/> value is greater than 1 or below 0 !</exception>
+        /// <exception cref="ArgumentException">The <paramref name="scienceRate"/> value is greater than 1 or below 0 !</exception>
+        /// <exception cref="InvalidOperationException">The sum of arguments is greater than 1 !</exception>
+        public void ChangeRates(double luxuryRate, double scienceRate)
+        {
+            if (luxuryRate > 1 || luxuryRate < 0)
+            {
+                throw new ArgumentException("", nameof(luxuryRate));
+            }
+
+            if (scienceRate > 1 || scienceRate < 0)
+            {
+                throw new ArgumentException("The value is greater than 1 or below 0 !", nameof(scienceRate));
+            }
+
+            if (scienceRate + luxuryRate > 1)
+            {
+                throw new InvalidOperationException("The sum of arguments is greater than 1 !");
+            }
+
+            HumanPlayer.ChangeRates(luxuryRate, scienceRate);
+        }
+
+        /// <summary>
         /// Tries to create a city with the current unit.
         /// </summary>
         /// <param name="name">The city name.</param>

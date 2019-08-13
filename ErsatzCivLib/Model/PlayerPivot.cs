@@ -19,9 +19,11 @@ namespace ErsatzCivLib.Model
         private const double REVOLUTION_TURNS_BY_CITY = 0.5;
         private const int TREASURE_START = 100;
         private const int SCIENCE_COST = 100;
+        private const double DEFAULT_LUXURY_RATE = 0;
+        private const double DEFAULT_SCIENCE_RATE = 0.5;
 
         #region Embedded properties
-        
+
         private int _anarchyTurnsCount;
         private readonly EnginePivot _engine;
 
@@ -103,6 +105,16 @@ namespace ErsatzCivLib.Model
         /// Current capital.
         /// </summary>
         public CityPivot Capital { get; private set; }
+        /// <summary>
+        /// Science rate; between <c>0</c> and <c>1</c>.
+        /// </summary>
+        /// <remarks>This value plus <see cref="LuxuryRate"/> can't exceed <c>1</c>.</remarks>
+        public double ScienceRate { get; private set; }
+        /// <summary>
+        /// Luxury rate; between <c>0</c> and <c>1</c>.
+        /// </summary>
+        /// <remarks>This value plus <see cref="ScienceRate"/> can't exceed <c>1</c>.</remarks>
+        public double LuxuryRate { get; private set; }
 
         private readonly List<MapSquarePivot> _knownMapSquares = new List<MapSquarePivot>();
         /// <summary>
@@ -132,6 +144,10 @@ namespace ErsatzCivLib.Model
 
         #region Inferred properties
 
+        /// <summary>
+        /// Tax rate; between <c>0</c> and <c>1</c>.
+        /// </summary>
+        public double TaxRate { get { return 1 - (ScienceRate + LuxuryRate); } }
         /// <summary>
         /// List of every <see cref="WonderPivot"/> for this player / civilization.
         /// </summary>
@@ -275,6 +291,9 @@ namespace ErsatzCivLib.Model
             Regime = RegimePivot.Despotism;
             Treasure = TREASURE_START;
 
+            ScienceRate = DEFAULT_SCIENCE_RATE;
+            LuxuryRate = DEFAULT_LUXURY_RATE;
+
             _units.Add(SettlerPivot.CreateAtLocation(null, beginLocation));
             _units.Add(SettlerPivot.CreateAtLocation(null, beginLocation));
 
@@ -327,6 +346,17 @@ namespace ErsatzCivLib.Model
         #endregion
 
         #region Internal methods
+
+        /// <summary>
+        /// Changes the <see cref="LuxuryRate"/> and <see cref="ScienceRate"/> values.
+        /// </summary>
+        /// <param name="luxuryRate">The <see cref="LuxuryRate"/> value.</param>
+        /// <param name="scienceRate">The <see cref="ScienceRate"/> value.</param>
+        internal void ChangeRates(double luxuryRate, double scienceRate)
+        {
+            LuxuryRate = luxuryRate;
+            ScienceRate = scienceRate;
+        }
 
         /// <summary>
         /// Triggrs a revolution; sets <see cref="Regime"/> to <see cref="RegimePivot.Anarchy"/> for a while.
