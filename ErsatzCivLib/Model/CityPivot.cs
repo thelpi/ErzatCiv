@@ -16,8 +16,9 @@ namespace ErsatzCivLib.Model
     {
         #region Constants relative to citizens behavior
 
+        private const double LUXURY_TO_HAPPY_CITIZEN_RATE = 0.5;
         private const int FOOD_BY_CITIZEN_BY_TURN = 2;
-        private const int DEFAULT_RATIO_CITIZEN_UNHAPPY = 5;
+        private const int CONTENT_CITIZENS_COUNT = 5;
         private const int FOOD_RATIO_TO_NEXT_CITIZEN = 40;
         private const double MYSTICISM_ADVANCE_HAPPINESS_RATE = 2;
 
@@ -233,7 +234,7 @@ namespace ErsatzCivLib.Model
                     corruptionRate *= COURTHOUSE_CORRUPTION_INCREASE_RATE;
                 }
 
-                return (int)Math.Round(baseValue * corruptionRate);
+                return (int)Math.Round(baseValue * (1 - corruptionRate));
             }
         }
         /// <summary>
@@ -756,7 +757,7 @@ namespace ErsatzCivLib.Model
         {
             // Default behavior.
             var nonSpecialistFaces = CitizensCount - _specialistCitizens.Count;
-            var unhappyFaces = nonSpecialistFaces / DEFAULT_RATIO_CITIZEN_UNHAPPY;
+            var unhappyFaces = nonSpecialistFaces - CONTENT_CITIZENS_COUNT;
             var happyFaces = 0;
 
             if (Player.WonderIsActive(WonderPivot.ShakespeareTheatre) && _wonders.Contains(WonderPivot.ShakespeareTheatre))
@@ -783,7 +784,7 @@ namespace ErsatzCivLib.Model
             // happiness effects.
             var happinessEffects = new List<int>
             {
-                _specialistCitizens.Where(c => c.Type == CitizenTypePivot.Entertainer).Count(),
+                (int)Math.Floor(Luxury * LUXURY_TO_HAPPY_CITIZEN_RATE),
                 (int)Math.Floor(templeEffect),
                 _improvements.Contains(CityImprovementPivot.Colosseum) ? COLOSSEUM_HAPPINESS_EFFECT : 0,
                 (int)Math.Floor(cathedralEffect),

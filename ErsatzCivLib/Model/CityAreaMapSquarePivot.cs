@@ -116,7 +116,7 @@ namespace ErsatzCivLib.Model
                 var baseValue = IsCityCenter && MapSquare.Commerce < CITY_COMMERCE_MIN ?
                     CITY_COMMERCE_MIN : MapSquare.Commerce;
 
-                baseValue = baseValue > 0 ? City.Player.Regime.CommerceBonus : 0;
+                baseValue += baseValue > 0 ? City.Player.Regime.CommerceBonus : 0;
 
                 if (City.Improvements.Contains(CityImprovementPivot.Marketplace))
                 {
