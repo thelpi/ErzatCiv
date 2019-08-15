@@ -592,7 +592,10 @@ namespace ErsatzCivLib.Model.Static
             BonusProductivity = 2,
             BonusName = "Horses"
         };
-        /*public static readonly BiomePivot River = new BiomePivot
+        /// <summary>
+        /// River.
+        /// </summary>
+        public static readonly BiomePivot River = new BiomePivot
         {
             Name = "River",
             Commerce = 1,
@@ -612,11 +615,10 @@ namespace ErsatzCivLib.Model.Static
                 TemperaturePivot.Hot,
                 TemperaturePivot.Temperate
             },
-            _underlyingBiomes = new Dictionary<TemperaturePivot, BiomePivot>(),
-            IsSeaType = false,
+            UnderlyingBiome = null,
             SpeedCost = 1,
-            AppearanceRatio = 0.1, // non pertinent
-            Size = BiomeSizePivot.Small, // non pertinent
+            AppearanceRatio = 0.05, // Not used in the same way than other biomes.
+            Size = BiomeSizePivot.Small, // Irrelevant.
             Humidity = HumidityPivot.Wet,
             Age = AgePivot.Old,
             BonusApperanceRate = 0.5,
@@ -624,7 +626,7 @@ namespace ErsatzCivLib.Model.Static
             BonusFood = 0,
             BonusProductivity = 1,
             BonusName = "Resource"
-        };*/
+        };
 
         /// <summary>
         /// The biome by default when the map is built.

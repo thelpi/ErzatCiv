@@ -32,7 +32,8 @@ namespace ErsatzCiv
             { Biome.Hills.Name, "#556B2F" },
             { Biome.Swamp.Name, "#3CB371" },
             { Biome.Forest.Name, "#006400" },
-            { Biome.Plains.Name, "#EEE8AA" }
+            { Biome.Plains.Name, "#EEE8AA" },
+            { Biome.River.Name, "#1E90FF" },
         };
 
         internal static void CleanPreviousChildrenByTag(this Panel panel, object tagValue)
@@ -236,43 +237,6 @@ namespace ErsatzCiv
                 return;
             }
 
-            var dockPanel = new DockPanel { LastChildFill = true };
-            var b1 = new Border { BorderThickness = new Thickness(0.5), BorderBrush = Brushes.DarkGray };
-            var b2 = new Border { BorderThickness = new Thickness(0.5), BorderBrush = Brushes.DarkGray };
-            var b3 = new Border { BorderThickness = new Thickness(0.5), BorderBrush = Brushes.DarkGray };
-            var b4 = new Border { BorderThickness = new Thickness(0.5), BorderBrush = Brushes.DarkGray };
-
-            if (square.Rivers.Contains(DirectionPivot.Top))
-            {
-                b1.BorderBrush = Brushes.Blue;
-                b1.BorderThickness = new Thickness(1);
-            }
-            if (square.Rivers.Contains(DirectionPivot.Right))
-            {
-                b2.BorderBrush = Brushes.Blue;
-                b2.BorderThickness = new Thickness(1);
-            }
-            if (square.Rivers.Contains(DirectionPivot.Bottom))
-            {
-                b3.BorderBrush = Brushes.Blue;
-                b3.BorderThickness = new Thickness(1);
-            }
-            if (square.Rivers.Contains(DirectionPivot.Left))
-            {
-                b4.BorderBrush = Brushes.Blue;
-                b4.BorderThickness = new Thickness(1);
-            }
-
-            b1.SetValue(DockPanel.DockProperty, Dock.Top);
-            b2.SetValue(DockPanel.DockProperty, Dock.Right);
-            b3.SetValue(DockPanel.DockProperty, Dock.Bottom);
-            b4.SetValue(DockPanel.DockProperty, Dock.Left);
-
-            dockPanel.Children.Add(b1);
-            dockPanel.Children.Add(b2);
-            dockPanel.Children.Add(b3);
-            dockPanel.Children.Add(b4);
-
             FrameworkElement squareRender;
             string imgPath = Settings.Default.datasPath +
                 Settings.Default.squareImageSubFolder +
@@ -303,12 +267,11 @@ namespace ErsatzCiv
                 };
             }
 
-            dockPanel.Children.Add(squareRender);
 
-            dockPanel.SetValue(Grid.RowProperty, square.Row - (gridPositionOffset == null ? 0 : gridPositionOffset.Item1));
-            dockPanel.SetValue(Grid.ColumnProperty, square.Column - (gridPositionOffset == null ? 0 : gridPositionOffset.Item2));
-            dockPanel.Tag = square;
-            panel.Children.Add(dockPanel);
+            squareRender.SetValue(Grid.RowProperty, square.Row - (gridPositionOffset == null ? 0 : gridPositionOffset.Item1));
+            squareRender.SetValue(Grid.ColumnProperty, square.Column - (gridPositionOffset == null ? 0 : gridPositionOffset.Item2));
+            squareRender.Tag = square;
+            panel.Children.Add(squareRender);
 
             panel.DrawSquareImprovements(square, defaultDim, gridPositionOffset);
 

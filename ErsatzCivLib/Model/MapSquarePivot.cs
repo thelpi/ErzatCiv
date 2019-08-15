@@ -74,27 +74,10 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public IReadOnlyCollection<InProgressMapSquareImprovementPivot> CurrentActions { get { return _currentActions; } }
 
-        private readonly Dictionary<DirectionPivot, bool> _rivers =
-            Enum.GetValues(typeof(DirectionPivot)).Cast<DirectionPivot>().ToDictionary(x => x, x => false);
-        /// <summary>
-        /// List of <see cref="DirectionPivot"/> around the instance where a river is set.
-        /// </summary>
-        public IReadOnlyCollection<DirectionPivot> Rivers { get { return _rivers.Where(r => r.Value).Select(r => r.Key).ToList(); } }
-
         #endregion
 
         #region Inferred properties
 
-        /// <summary>
-        /// Indicates if there's at least one river around the instance.
-        /// </summary>
-        public bool HasRiver
-        {
-            get
-            {
-                return _rivers.Any(r => r.Value);
-            }
-        }
         /// <summary>
         /// Food value of this instance.
         /// </summary>
@@ -170,8 +153,7 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                return Biome.Food + (HasBonus ? Biome.BonusFood : 0) < 2 ? 2 :
-                    Biome.Food + (HasBonus ? Biome.BonusFood : 0);
+                return Food < 2 ? 2 : Food;
             }
         }
         /// <summary>
@@ -181,8 +163,7 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                return Biome.Productivity + (HasBonus ? Biome.BonusProductivity : 0) < 1 ? 1 :
-                    Biome.Productivity + (HasBonus ? Biome.BonusProductivity : 0);
+                return Productivity < 1 ? 1 : Productivity;
             }
         }
         /// <summary>
@@ -192,8 +173,7 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                return Biome.Commerce + (HasBonus ? Biome.BonusCommerce : 0) < 2 ? 2 :
-                    Biome.Commerce + (HasBonus ? Biome.BonusCommerce : 0);
+                return Commerce < 1 ? 1 : Commerce;
             }
         }
 
@@ -408,16 +388,6 @@ namespace ErsatzCivLib.Model
                 _currentActions.Remove(action);
                 action.RemoveSettlers();
             }
-        }
-
-        /// <summary>
-        /// Sets a river at a specified cardinal around the instance.
-        /// </summary>
-        /// <param name="cardinal">The <see cref="DirectionPivot"/>.</param>
-        /// <param name="isRiver"><c>True</c> to set a river; <c>False</c> otherwise.</param>
-        internal void SetRiver(DirectionPivot cardinal, bool isRiver)
-        {
-            _rivers[cardinal] = isRiver ? !Biome.IsSeaType : isRiver;
         }
 
         #endregion

@@ -748,17 +748,16 @@ namespace ErsatzCivLib.Model
                 return false;
             }
             
-            // TODO : this is bad because in real game rivers are not between squares but sqaures itself.
             if (actionPivot == MapSquareImprovementPivot.Road
                 && !_advances.Contains(AdvancePivot.BridgeBuilding)
-                && sq.HasRiver)
+                && sq.Biome == BiomePivot.River)
             {
                 return false;
             }
             
             if (actionPivot == MapSquareImprovementPivot.Irrigate
-                && !sq.HasRiver
-                && !_engine.Map.GetAdjacentMapSquares(sq).Values.Any(asq => asq.Irrigate || asq.Biome.IsSeaType))
+                && sq.Biome != BiomePivot.River
+                && !_engine.Map.GetAdjacentMapSquares(sq).Values.Any(asq => asq.Irrigate || asq.Biome.IsSeaType || asq.Biome == BiomePivot.River))
             {
                 return false;
             }
@@ -839,8 +838,8 @@ namespace ErsatzCivLib.Model
             }
 
             // No hydroplant if no water.
-            if (!city.MapSquareLocation.HasRiver
-                && !_engine.Map.GetAdjacentMapSquares(city.MapSquareLocation).Values.Any(msq => msq.Biome.IsSeaType))
+            if (city.MapSquareLocation.Biome != BiomePivot.River
+                && !_engine.Map.GetAdjacentMapSquares(city.MapSquareLocation).Values.Any(msq => msq.Biome.IsSeaType || msq.Biome == BiomePivot.River))
             {
                 buildableDefaultInstances.Remove(CityImprovementPivot.HydroPlant);
             }

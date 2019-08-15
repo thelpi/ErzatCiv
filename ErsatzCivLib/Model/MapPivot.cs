@@ -184,17 +184,6 @@ namespace ErsatzCivLib.Model
             // sets chunks
             var chunksByType = BiomePivot.NonSeaAndNonDefaultBiomes.ToDictionary(b => b, b => new List<List<Tuple<int, int>>>());
 
-            // List of every rivers (on every continents).
-            var riversPoints = new List<List<Tuple<int, int>>>();
-
-            // Delegate to check if a specified point is already a river point.
-            var ExistRiver = new Func<Tuple<int, int>, bool>(delegate (Tuple<int, int> coordinates)
-            {
-                return riversPoints.Any(riverPts =>
-                    riverPts.Any(rivPt =>
-                        rivPt.Item1 == coordinates.Item1 && rivPt.Item2 == coordinates.Item2));
-            });
-
             foreach (var fullLand in continentInfos)
             {
                 fullLand.ForEach(msloc => _mapSquareList[msloc.Row, msloc.Column] = msloc);
@@ -218,99 +207,6 @@ namespace ErsatzCivLib.Model
                         chunksCountByType[chunkType],
                         chunkType.SizeInt * CHUNK_SIZE_RATIO,
                         topY, leftX, bottomY, rightX, ratioHeightWidth, chunkType.Temperatures));
-                }
-
-                for (var iRiver = 0; iRiver < riversChunksCount; iRiver++)
-                {
-                    // Note : a river shouldn't start on coast.
-                    var riverPoint = new Tuple<int, int>(
-                        Tools.Randomizer.Next(topY + 1, bottomY + 1),
-                        Tools.Randomizer.Next(leftX + 1, rightX + 1)
-                    );
-
-                    // No river source at a point where a river already exists.
-                    if (ExistRiver(riverPoint))
-                    {
-                        continue;
-                    }
-
-                    var currentRiver = new List<Tuple<int, int>> { riverPoint };
-
-                    // A river can go randomly in 3 directions, but can't go back and forth.
-                    var forbiddenCardinal = (DirectionPivot)Tools.Randomizer.Next(0, 4);
-
-                    // The process stops when the sea (or another river) is reached.
-                    var reachOtherRiver = false;
-                    var outOfContinentBounds = false;
-                    while (!reachOtherRiver && !outOfContinentBounds)
-                    {
-                        // Find the next point (going back to a previous point is forbidden).
-                        Tuple<int, int> tmpRiverPoint = null;
-                        do
-                        {
-                            // Randomize a cardinal (until not forbidden).
-                            DirectionPivot nextCardinal;
-                            do
-                            {
-                                nextCardinal = (DirectionPivot)Tools.Randomizer.Next(0, 4);
-                            }
-                            while (nextCardinal == forbiddenCardinal);
-
-                            switch (nextCardinal)
-                            {
-                                case DirectionPivot.Bottom:
-                                    tmpRiverPoint = new Tuple<int, int>(riverPoint.Item1 + 1, riverPoint.Item2);
-                                    break;
-                                case DirectionPivot.Top:
-                                    tmpRiverPoint = new Tuple<int, int>(riverPoint.Item1 - 1, riverPoint.Item2);
-                                    break;
-                                case DirectionPivot.Right:
-                                    tmpRiverPoint = new Tuple<int, int>(riverPoint.Item1, riverPoint.Item2 + 1);
-                                    break;
-                                case DirectionPivot.Left:
-                                    tmpRiverPoint = new Tuple<int, int>(riverPoint.Item1, riverPoint.Item2 - 1);
-                                    break;
-                            }
-                        }
-                        while (currentRiver.Any(cr => cr.Item1 == tmpRiverPoint.Item1 && cr.Item2 == tmpRiverPoint.Item2));
-
-                        // Do NOT remove this line and use "tmpRiverPoint" directly.
-                        riverPoint = tmpRiverPoint;
-
-                        reachOtherRiver = ExistRiver(riverPoint);
-                        outOfContinentBounds = !continentLand.Any(msq => msq.Row == riverPoint.Item1 && msq.Column == riverPoint.Item2);
-
-                        currentRiver.Add(riverPoint);
-                    }
-
-                    riversPoints.Add(currentRiver);
-                }
-            }
-
-            // We don't care about one-point rivers.
-            riversPoints.RemoveAll(r => r.Count < 2);
-
-            foreach (var riverPoints in riversPoints)
-            {
-                // Starts at the second point (the first is "inert" as it gives no indication on direction)
-                for (int i = 1; i < riverPoints.Count; i++)
-                {
-                    SetMapSquareRiversAroundPoint(riverPoints, i);
-                }
-            }
-
-            var cornerDirs = new[] { DirectionPivot.TopLeft, DirectionPivot.BottomLeft, DirectionPivot.TopRight, DirectionPivot.BottomRight };
-
-            // Check rivers on corners of the square.
-            foreach (var msq in this.Where(msq => !msq.Biome.IsSeaType))
-            {
-                var sidesMsq = GetAdjacentMapSquares(msq);
-                foreach (var dir in cornerDirs)
-                {
-                    if (DirectionHasRiver(sidesMsq, dir))
-                    {
-                        msq.SetRiver(dir, true);
-                    }
                 }
             }
 
@@ -465,49 +361,6 @@ namespace ErsatzCivLib.Model
             }
 
             return chunksList;
-        }
-
-        private void SetMapSquareRiversAroundPoint(List<Tuple<int, int>> riverPoints, int i)
-        {
-            // "MapSquarePivot" around the current point.
-            var topRightSquare = this[riverPoints[i].Item1 - 1, riverPoints[i].Item2];
-            var topLeftSquare = this[riverPoints[i].Item1 - 1, riverPoints[i].Item2 - 1];
-            var bottomRightSquare = this[riverPoints[i].Item1, riverPoints[i].Item2];
-            var bottomLeftSquare = this[riverPoints[i].Item1, riverPoints[i].Item2 - 1];
-
-            var deltaRow = riverPoints[i].Item1 - riverPoints[i - 1].Item1;
-            var deltaCol = riverPoints[i].Item2 - riverPoints[i - 1].Item2;
-
-            if (deltaRow > 0)
-            {
-                topRightSquare?.SetRiver(DirectionPivot.Left, true);
-                topLeftSquare?.SetRiver(DirectionPivot.Right, true);
-            }
-            else if (deltaRow < 0)
-            {
-                bottomRightSquare?.SetRiver(DirectionPivot.Left, true);
-                bottomLeftSquare?.SetRiver(DirectionPivot.Right, true);
-            }
-
-            if (deltaCol < 0)
-            {
-                topRightSquare?.SetRiver(DirectionPivot.Bottom, true);
-                bottomRightSquare?.SetRiver(DirectionPivot.Top, true);
-            }
-            else if (deltaCol > 0)
-            {
-                topLeftSquare?.SetRiver(DirectionPivot.Bottom, true);
-                bottomLeftSquare?.SetRiver(DirectionPivot.Top, true);
-            }
-        }
-
-        private bool DirectionHasRiver(IReadOnlyDictionary<DirectionPivot, MapSquarePivot> sidesMsq, DirectionPivot corner)
-        {
-            var d1 = corner.Opposite().Close().Item1;
-            var d2 = corner.Opposite().Close().Item2;
-            return (sidesMsq.ContainsKey(corner) && sidesMsq[corner].Rivers.Any(r => r == d1 || r == d2))
-                || (sidesMsq.ContainsKey(d1.Opposite()) && sidesMsq[d1.Opposite()].Rivers.Any(r => r == d1))
-                || (sidesMsq.ContainsKey(d2.Opposite()) && sidesMsq[d2.Opposite()].Rivers.Any(r => r == d2));
         }
 
         #endregion
