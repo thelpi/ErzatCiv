@@ -47,6 +47,8 @@ namespace ErsatzCivLib.Model
 
         private const int FOOD_BY_CITIZEN_BY_TURN = 2;
         private const int FOOD_RATIO_TO_NEXT_CITIZEN = 20;
+        // Increase on [tax / luxury / science] for one specialist.
+        private const int SPECIALIST_EFFECT_RATE = 2;
 
         #endregion
 
@@ -62,6 +64,8 @@ namespace ErsatzCivLib.Model
         private const double PALACE_CORRUPTION_INCREASE_RATE = 0.5;
         private const double COURTHOUSE_CORRUPTION_INCREASE_RATE = 0.5;
         private const int AQUEDUC_MAX_POPULATION_WITHOUT = 10;
+        private const double MARKETPLACE_COMMERCE_INCREASE_RATIO = 1.5;
+        private const double BANK_COMMERCE_INCREASE_RATIO = 1.5;
 
         #endregion
 
@@ -315,7 +319,7 @@ namespace ErsatzCivLib.Model
             {
                 bool hasSetiProgram = Player.WonderIsActive(WonderPivot.SetiProgram);
 
-                var scienceValue = (Commerce * Player.ScienceRate) + Citizens.Count(c => c.Type == CitizenTypePivot.Scientist);
+                var scienceValue = (Commerce * Player.ScienceRate) + (Citizens.Count(c => c.Type == CitizenTypePivot.Scientist) * SPECIALIST_EFFECT_RATE);
 
                 if (_improvements.Contains(CityImprovementPivot.Library))
                 {
@@ -357,17 +361,41 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                return (int)Math.Floor((Commerce * Player.LuxuryRate) + Citizens.Count(c => c.Type == CitizenTypePivot.Entertainer));
+                var baseValue = (Commerce * Player.LuxuryRate) + (Citizens.Count(c => c.Type == CitizenTypePivot.Entertainer) * SPECIALIST_EFFECT_RATE);
+
+                if (Improvements.Contains(CityImprovementPivot.Marketplace))
+                {
+                    baseValue *= MARKETPLACE_COMMERCE_INCREASE_RATIO;
+                }
+
+                if (Improvements.Contains(CityImprovementPivot.Bank))
+                {
+                    baseValue *= BANK_COMMERCE_INCREASE_RATIO;
+                }
+
+                return (int)Math.Floor(baseValue);
             }
         }
         /// <summary>
-        /// Treasure production by turn.
+        /// Tax production by turn.
         /// </summary>
-        public int Treasure
+        public int Tax
         {
             get
             {
-                return (int)Math.Floor((Commerce * Player.TaxRate) + Citizens.Count(c => c.Type == CitizenTypePivot.TaxCollector));
+                var baseValue = (Commerce * Player.TaxRate) + (Citizens.Count(c => c.Type == CitizenTypePivot.TaxCollector) * SPECIALIST_EFFECT_RATE);
+
+                if (Improvements.Contains(CityImprovementPivot.Marketplace))
+                {
+                    baseValue *= MARKETPLACE_COMMERCE_INCREASE_RATIO;
+                }
+
+                if (Improvements.Contains(CityImprovementPivot.Bank))
+                {
+                    baseValue *= BANK_COMMERCE_INCREASE_RATIO;
+                }
+
+                return (int)Math.Round(baseValue);
             }
         }
         /// <summary>

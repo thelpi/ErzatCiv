@@ -14,8 +14,6 @@ namespace ErsatzCivLib.Model
         private const int CITY_PRODUCTIVITY_MIN = 1;
         private const int CITY_COMMERCE_MIN = 1;
 
-        private const double MARKETPLACE_COMMERCE_INCREASE_RATIO = 1.5;
-        private const double BANK_COMMERCE_INCREASE_RATIO = 1.5;
         private const double FACTORY_PRODUCTIVITY_INCREASE_RATIO = 1.5;
         private const double MFGPLANT_PRODUCTIVITY_INCREASE_RATIO = 2;
         private const double HYDROPLANT_PRODUCTIVITY_INCREASE_RATIO = 1.5;
@@ -117,16 +115,6 @@ namespace ErsatzCivLib.Model
                     CITY_COMMERCE_MIN : MapSquare.Commerce;
 
                 baseValue += baseValue > 0 ? City.Player.Regime.CommerceBonus : 0;
-
-                if (City.Improvements.Contains(CityImprovementPivot.Marketplace))
-                {
-                    baseValue = (int)Math.Floor(MARKETPLACE_COMMERCE_INCREASE_RATIO * baseValue);
-                }
-
-                if (City.Improvements.Contains(CityImprovementPivot.Bank))
-                {
-                    baseValue = (int)Math.Floor(BANK_COMMERCE_INCREASE_RATIO * baseValue);
-                }
 
                 if (baseValue > 0 && City.Player.WonderIsActive(WonderPivot.Colossus))
                 {

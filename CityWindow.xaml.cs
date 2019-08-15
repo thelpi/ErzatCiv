@@ -48,7 +48,7 @@ namespace ErsatzCiv
         private void RefreshDisplay()
         {
             LabelCityInfos.Content = $"{_city.Name}, founded in {_city.CreationTurn}";
-            LabelTreasureStat.Content = _city.Treasure;
+            LabelTreasureStat.Content = _city.Tax;
             LabelFoodStat.Content = _city.Food;
             LabelPollutionStat.Content = _city.Pollution;
             LabelProductionStat.Content = _city.Productivity;

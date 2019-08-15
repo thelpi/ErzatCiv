@@ -198,7 +198,7 @@ namespace ErsatzCivLib.Model
             get
             {
                 // TODO
-                return _cities.Sum(c => c.Treasure);
+                return _cities.Sum(c => c.Tax);
             }
         }
         /// <summary>
@@ -757,9 +757,8 @@ namespace ErsatzCivLib.Model
             }
             
             if (actionPivot == MapSquareImprovementPivot.Irrigate
-                && !_advances.Contains(AdvancePivot.Electricity)
                 && !sq.HasRiver
-                && !_engine.Map.GetAdjacentMapSquares(sq).Values.Any(asq => asq.Irrigate))
+                && !_engine.Map.GetAdjacentMapSquares(sq).Values.Any(asq => asq.Irrigate || asq.Biome.IsSeaType))
             {
                 return false;
             }
