@@ -23,7 +23,6 @@ namespace ErsatzCivLib.Model
         private const double MAX_RATIO_TEMPERATURE = 0.45;
         private const double MIN_RATIO_TEMPERATURE = 0.05;
         private const double AVG_RATIO_TEMPERATURE = 0.25;
-        private const double RIVER_STARTER_RATIO = 0.005;
         private const int CONTINENT_COUNT_MIN = 3;
         private const int CONTINENT_COUNT_MAX = 6;
         private const int ISLAND_COUNT_MIN = 10;
@@ -182,7 +181,8 @@ namespace ErsatzCivLib.Model
             }
 
             // sets chunks
-            var chunksByType = BiomePivot.NonSeaAndNonDefaultBiomes.ToDictionary(b => b, b => new List<List<Tuple<int, int>>>());
+            var chunksByType = BiomePivot.ChunkAppearanceBiomes.ToDictionary(b => b, b => new List<List<Tuple<int, int>>>());
+            var rivers = new List<List<Tuple<int, int>>>();
 
             foreach (var fullLand in continentInfos)
             {
@@ -190,10 +190,9 @@ namespace ErsatzCivLib.Model
                 var continentLand = fullLand.Where(ms => !ms.Biome.IsSeaType).ToList();
 
                 var chunksCountByType =
-                    BiomePivot.NonSeaAndNonDefaultBiomes
+                    BiomePivot.ChunkAppearanceBiomes
                         .ToDictionary(b => b, b => b.ChunkSquaresCount(continentLand.Count, CHUNK_SIZE_RATIO, humidity, age));
-                var riversChunksCount = (int)Math.Round(continentLand.Count * RIVER_STARTER_RATIO);
-
+                
                 var topY = continentLand.Min(x => x.Row);
                 var leftX = continentLand.Min(x => x.Column);
                 var bottomY = continentLand.Max(x => x.Row);
@@ -208,6 +207,49 @@ namespace ErsatzCivLib.Model
                         chunkType.SizeInt * CHUNK_SIZE_RATIO,
                         topY, leftX, bottomY, rightX, ratioHeightWidth, chunkType.Temperatures));
                 }
+
+                // Rivers count on the continent.
+                var riversCount = (int)Math.Round(continentLand.Count * BiomePivot.River.AppearanceRate);
+
+                for (int i = 0; i < riversCount; i++)
+                {
+                    var river = new List<Tuple<int, int>>();
+
+                    // Random river starting point.
+                    var riverPt = new Tuple<int, int>(
+                        Tools.Randomizer.Next(topY, bottomY),
+                        Tools.Randomizer.Next(leftX, rightX)
+                    );
+
+                    // The river can go in two directions [(bottom or top) and (left or right)]
+                    var forbiddenDirection1 = (DirectionPivot)Tools.Randomizer.Next(2, 4);
+                    var forbiddenDirection2 = (DirectionPivot)Tools.Randomizer.Next(0, 2);
+
+                    // Loops until the river reachs the coast, or another river.
+                    while (riverPt.Item1 >= topY
+                        && riverPt.Item1 <= bottomY
+                        && riverPt.Item2 >= leftX
+                        && riverPt.Item2 <= rightX
+                        && !rivers.Any(r => r.Any(rsquare => rsquare.Item1 == riverPt.Item1 && rsquare.Item2 == riverPt.Item2)))
+                    {
+                        river.Add(riverPt);
+
+                        DirectionPivot currentDirection;
+                        do
+                        {
+                            // Picks a random direction, which can't be a forbidden one.
+                            currentDirection = (DirectionPivot)Tools.Randomizer.Next(0, 4);
+                        }
+                        while (currentDirection == forbiddenDirection1 || currentDirection == forbiddenDirection2);
+
+                        riverPt = new Tuple<int, int>(
+                            riverPt.Item1 + (currentDirection == DirectionPivot.Bottom ? 1 : (currentDirection == DirectionPivot.Top ? -1 : 0)),
+                            riverPt.Item2 + (currentDirection == DirectionPivot.Right ? 1 : (currentDirection == DirectionPivot.Left ? -1 : 0))
+                        );
+                    }
+
+                    rivers.Add(river);
+                }
             }
 
             foreach (var type in chunksByType.Keys)
@@ -221,6 +263,11 @@ namespace ErsatzCivLib.Model
                     }
                 }
             }
+
+            // Overrides chunks with river squares.
+            rivers.ForEach(r =>
+                r.ForEach(rSquare =>
+                    _mapSquareList[rSquare.Item1, rSquare.Item2].ChangeBiome(BiomePivot.River)));
         }
 
         #region Internal methods

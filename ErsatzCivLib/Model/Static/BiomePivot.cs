@@ -59,13 +59,11 @@ namespace ErsatzCivLib.Model.Static
         /// </summary>
         public int SpeedCost { get; private set; }
         /// <summary>
-        /// Appearance ratio on map (between 0 and 1).
-        /// Is ignored for <see cref="IsSeaType"/> biomes and <see cref="Default"/>.
+        /// Appearance rate on map (between 0 and 1); for <see cref="ChunkAppearanceBiomes"/> only.
         /// </summary>
-        internal double AppearanceRatio { get; private set; }
+        internal double AppearanceRate { get; private set; }
         /// <summary>
-        /// Medium size of a chunk of this biome.
-        /// Is ignored for <see cref="IsSeaType"/> biomes and <see cref="Default"/>.
+        /// Medium size of a chunk of this biome; for <see cref="ChunkAppearanceBiomes"/> only.
         /// </summary>
         private BiomeSizePivot Size { get; set; }
         /// <summary>
@@ -144,7 +142,7 @@ namespace ErsatzCivLib.Model.Static
                 }
             }
 
-            var realRatio = AppearanceRatio;
+            var realRatio = AppearanceRate;
             if (humidity == HumidityPivot.Dry)
             {
                 if (Humidity == HumidityPivot.Dry)
@@ -251,7 +249,7 @@ namespace ErsatzCivLib.Model.Static
             },
             UnderlyingBiome = null,
             SpeedCost = 1,
-            AppearanceRatio = 0.1,
+            AppearanceRate = 0.1,
             Size = BiomeSizePivot.Medium,
             Humidity = HumidityPivot.Average,
             Age = AgePivot.Old,
@@ -275,7 +273,7 @@ namespace ErsatzCivLib.Model.Static
             _temperatures = new List<TemperaturePivot>(),
             UnderlyingBiome = null,
             SpeedCost = 1,
-            AppearanceRatio = 0.1,
+            AppearanceRate = 0.1,
             Size = BiomeSizePivot.Large,
             Humidity = HumidityPivot.Average,
             Age = AgePivot.Average,
@@ -307,7 +305,7 @@ namespace ErsatzCivLib.Model.Static
             },
             UnderlyingBiome = null,
             SpeedCost = 2,
-            AppearanceRatio = 0.1,
+            AppearanceRate = 0.1,
             Size = BiomeSizePivot.Large,
             Humidity = HumidityPivot.Dry,
             Age = AgePivot.Average,
@@ -339,7 +337,7 @@ namespace ErsatzCivLib.Model.Static
             },
             UnderlyingBiome = null,
             SpeedCost = 1,
-            AppearanceRatio = 0.1,
+            AppearanceRate = 0.1,
             Size = BiomeSizePivot.Medium,
             Humidity = HumidityPivot.Average,
             Age = AgePivot.Old,
@@ -373,7 +371,7 @@ namespace ErsatzCivLib.Model.Static
             },
             UnderlyingBiome = null,
             SpeedCost = 2,
-            AppearanceRatio = 0.1,
+            AppearanceRate = 0.1,
             Size = BiomeSizePivot.Large,
             Humidity = HumidityPivot.Dry,
             Age = AgePivot.Average,
@@ -406,7 +404,7 @@ namespace ErsatzCivLib.Model.Static
             },
             UnderlyingBiome = delegate(IEnumerable<BiomePivot> biomes) { return biomes?.SingleOrDefault(b => b == Plains); },
             SpeedCost = 2,
-            AppearanceRatio = 0.1,
+            AppearanceRate = 0.1,
             Size = BiomeSizePivot.Medium,
             Humidity = HumidityPivot.Wet,
             Age = AgePivot.Average,
@@ -441,7 +439,7 @@ namespace ErsatzCivLib.Model.Static
             },
             UnderlyingBiome = null,
             SpeedCost = 3,
-            AppearanceRatio = 0.1,
+            AppearanceRate = 0.1,
             Size = BiomeSizePivot.Medium,
             Humidity = HumidityPivot.Average,
             Age = AgePivot.New,
@@ -477,7 +475,7 @@ namespace ErsatzCivLib.Model.Static
             },
             UnderlyingBiome = null,
             SpeedCost = 2,
-            AppearanceRatio = 0.1,
+            AppearanceRate = 0.1,
             Size = BiomeSizePivot.Small,
             Humidity = HumidityPivot.Average,
             Age = AgePivot.New,
@@ -512,7 +510,7 @@ namespace ErsatzCivLib.Model.Static
             },
             UnderlyingBiome = delegate (IEnumerable<BiomePivot> biomes) { return biomes?.SingleOrDefault(b => b == Grassland); },
             SpeedCost = 2,
-            AppearanceRatio = 0.02,
+            AppearanceRate = 0.02,
             Size = BiomeSizePivot.Small,
             Humidity = HumidityPivot.Wet,
             Age = AgePivot.Old,
@@ -546,7 +544,7 @@ namespace ErsatzCivLib.Model.Static
             },
             UnderlyingBiome = delegate (IEnumerable<BiomePivot> biomes) { return biomes?.SingleOrDefault(b => b == Plains); },
             SpeedCost = 2,
-            AppearanceRatio = 0.1,
+            AppearanceRate = 0.1,
             Size = BiomeSizePivot.Medium,
             Humidity = HumidityPivot.Wet,
             Age = AgePivot.Average,
@@ -582,7 +580,7 @@ namespace ErsatzCivLib.Model.Static
             },
             UnderlyingBiome = null,
             SpeedCost = 1,
-            AppearanceRatio = 0.1,
+            AppearanceRate = 0.1,
             Size = BiomeSizePivot.Large,
             Humidity = HumidityPivot.Dry,
             Age = AgePivot.Old,
@@ -617,7 +615,7 @@ namespace ErsatzCivLib.Model.Static
             },
             UnderlyingBiome = null,
             SpeedCost = 1,
-            AppearanceRatio = 0.05, // Not used in the same way than other biomes.
+            AppearanceRate = 0.005, // Not used in the same way than other biomes.
             Size = BiomeSizePivot.Small, // Irrelevant.
             Humidity = HumidityPivot.Wet,
             Age = AgePivot.Old,
@@ -652,13 +650,13 @@ namespace ErsatzCivLib.Model.Static
         }
 
         /// <summary>
-        /// List of every biomes except <see cref="IsSeaType"/> ones and <see cref="Default"/> one.
+        /// List of biomes which appears on the map by chunk.
         /// </summary>
-        internal static IReadOnlyCollection<BiomePivot> NonSeaAndNonDefaultBiomes
+        internal static IReadOnlyCollection<BiomePivot> ChunkAppearanceBiomes
         {
             get
             {
-                return Biomes.Where(b => !b.IsSeaType && b != Default).ToList();
+                return Biomes.Where(b => b != Ocean && b != Default && b != River).ToList();
             }
         }
 
