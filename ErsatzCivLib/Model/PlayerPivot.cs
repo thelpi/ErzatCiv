@@ -145,6 +145,10 @@ namespace ErsatzCivLib.Model
         #region Inferred properties
 
         /// <summary>
+        /// Indicates the name of the leader (you).
+        /// </summary>
+        public string LeaderName { get { return Gender ? Civilization.ManLeaderName : Civilization.WomanLeaderName; } }
+        /// <summary>
         /// Tax rate; between <c>0</c> and <c>1</c>.
         /// </summary>
         public double TaxRate { get { return 1 - (ScienceRate + LuxuryRate); } }

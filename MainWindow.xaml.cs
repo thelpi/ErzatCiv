@@ -105,6 +105,8 @@ namespace ErsatzCiv
             MiniMapCanvas.Children.Add(_rCapture);
 
             RefreshMiniMapSelector();
+
+            ShowGreetings();
         }
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
@@ -639,6 +641,15 @@ namespace ErsatzCiv
         {
             LabelScienceRate.Content = $"{(int)Math.Floor(_engine.HumanPlayer.ScienceRate * 100)} %";
             LabelLuxuryRate.Content = $"{(int)Math.Floor(_engine.HumanPlayer.LuxuryRate * 100)} %";
+        }
+
+        private void ShowGreetings()
+        {
+            var s1 = $"{_engine.HumanPlayer.LeaderName}, you are the chief of the {_engine.HumanPlayer.Civilization.Name} civilization !";
+            var s2 = $"Your civilization knows the following scientific advances : {string.Join(", ", _engine.HumanPlayer.Advances.Select(a => a.Name))}.";
+            var s3 = "Good luck !";
+
+            MessageBox.Show(s1 + "\r\n\r\n" + s2 + "\r\n\r\n" + s3, "ErsatzCiv");
         }
 
         #endregion
