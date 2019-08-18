@@ -11,8 +11,8 @@ namespace ErsatzCivLib.Model
     public class CityAreaMapSquarePivot
     {
         private const int CITY_FOOD_MIN = 2;
-        private const int CITY_PRODUCTIVITY_MIN = 1;
-        private const int CITY_COMMERCE_MIN = 1;
+        private const int CITY_PRODUCTIVITY_MIN = 0;
+        private const int CITY_COMMERCE_MIN = 0;
 
         private const double FACTORY_PRODUCTIVITY_INCREASE_RATIO = 1.5;
         private const double MFGPLANT_PRODUCTIVITY_INCREASE_RATIO = 2;

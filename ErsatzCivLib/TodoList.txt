@@ -47,3 +47,6 @@ https://civilization.fandom.com/wiki/United_Nations_(Civ1)
 https://civilization.fandom.com/wiki/Great_Wall_(Civ1)
 
 2 villes peuvent finir une merveille au même moment ?
+
+Dés que le temps passe (2000 avant JC ?), les hutes ne peuvent plus êtes des villes
+Les hutes ne peuvent pas découvrir d'avancées scientifiques après la fin de l'ère antique.

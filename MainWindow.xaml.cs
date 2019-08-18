@@ -511,7 +511,7 @@ namespace ErsatzCiv
             _engine.HumanPlayer.DiscoverNewSquareEvent += OnTriggerUpdateMapSquares;
             _engine.HumanPlayer.ForcedAdvanceEvent += delegate(object sender, ForcedAdvanceEventArgs e)
             {
-                ShowNewAdvanceDiscovered(e.Advance, e.WasInProgressAdvance);
+                ShowNewAdvanceDiscovered(e.Advance, e.WasInProgressAdvance, true);
             };
         }
 
@@ -537,6 +537,11 @@ namespace ErsatzCiv
                     DisplayCityName(city);
                     DrawMiniMapCity(city, false);
                 }
+            }
+
+            foreach (var hut in _engine.Map.Huts)
+            {
+                MapGrid.DrawHut(hut, DEFAULT_SIZE, CITY_ZINDEX, false);
             }
 
             // Ensures a refresh of the blinking current unit.
@@ -623,14 +628,17 @@ namespace ErsatzCiv
             }
             if (turnConsequences.EndOfAdvance != null)
             {
-                ShowNewAdvanceDiscovered(turnConsequences.EndOfAdvance, true);
+                ShowNewAdvanceDiscovered(turnConsequences.EndOfAdvance, true, turnConsequences.ShowEndOfAdvance);
             }
             RefreshDynamicView();
         }
 
-        private void ShowNewAdvanceDiscovered(AdvancePivot advance, bool getNewOne)
+        private void ShowNewAdvanceDiscovered(AdvancePivot advance, bool getNewOne, bool showCurrentOne)
         {
-            MessageBox.Show($"New scientific advance : {advance.Name} !", "ErsatzCiv");
+            if (showCurrentOne)
+            {
+                MessageBox.Show($"New scientific advance : {advance.Name} !", "ErsatzCiv");
+            }
             if (getNewOne)
             {
                 new WindowAdvancePick(_engine).ShowDialog();

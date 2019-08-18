@@ -146,36 +146,6 @@ namespace ErsatzCivLib.Model
         /// Sum of food, productivity and commerce statistics.
         /// </summary>
         public int TotalValue { get { return Food + Productivity + Commerce; } }
-        /// <summary>
-        /// Food value if the square is a city.
-        /// </summary>
-        public int CityFood
-        {
-            get
-            {
-                return Food < 2 ? 2 : Food;
-            }
-        }
-        /// <summary>
-        /// Productivity value if the square is a city.
-        /// </summary>
-        public int CityProductivity
-        {
-            get
-            {
-                return Productivity < 1 ? 1 : Productivity;
-            }
-        }
-        /// <summary>
-        /// Commerce value if the square is a city.
-        /// </summary>
-        public int CityCommerce
-        {
-            get
-            {
-                return Commerce < 1 ? 1 : Commerce;
-            }
-        }
 
         #endregion
 

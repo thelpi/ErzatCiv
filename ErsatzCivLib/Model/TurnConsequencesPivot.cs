@@ -24,6 +24,10 @@ namespace ErsatzCivLib.Model
         /// Indicates the discovery of a <see cref="Static.AdvancePivot"/> is completed.
         /// </summary>
         public AdvancePivot EndOfAdvance { get; private set; }
+        /// <summary>
+        /// Indicates if <see cref="EndOfAdvance"/> must be notified to the player.
+        /// </summary>
+        public bool ShowEndOfAdvance { get; private set; }
 
         #endregion
 
@@ -33,11 +37,13 @@ namespace ErsatzCivLib.Model
         /// <param name="endOfRevolution">The <see cref="EndOfRevolution"/> value.</param>
         /// <param name="endOfProduction">The <see cref="EndOfProduction"/> value.</param>
         /// <param name="endOfAdvance">The <see cref="EndOfAdvance"/> value.</param>
-        internal TurnConsequencesPivot(bool endOfRevolution, Dictionary<CityPivot, BuildablePivot> endOfProduction, AdvancePivot endOfAdvance)
+        /// <param name="showEndOfAdvance">The <see cref="ShowEndOfAdvance"/> value.</param>
+        internal TurnConsequencesPivot(bool endOfRevolution, Dictionary<CityPivot, BuildablePivot> endOfProduction, AdvancePivot endOfAdvance, bool showEndOfAdvance)
         {
             EndOfRevolution = endOfRevolution;
             EndOfProduction = endOfProduction;
             EndOfAdvance = endOfAdvance;
+            ShowEndOfAdvance = showEndOfAdvance;
         }
     }
 }

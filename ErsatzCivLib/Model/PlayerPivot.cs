@@ -661,7 +661,8 @@ namespace ErsatzCivLib.Model
                 }
             }
 
-            return new TurnConsequencesPivot(RevolutionIsDone, citiesWithDoneProduction, CurrentAdvance is null ? _advances.Last() : null);
+            return new TurnConsequencesPivot(RevolutionIsDone, citiesWithDoneProduction,
+                CurrentAdvance is null ? _advances.Last() : null, _advances.Count > Civilization.Advances.Count);
         }
 
         /// <summary>

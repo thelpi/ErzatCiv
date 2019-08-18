@@ -10,7 +10,6 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using ErsatzCiv.Properties;
 using ErsatzCivLib.Model;
-using ErsatzCivLib.Model.Enums;
 using Biome = ErsatzCivLib.Model.Static.BiomePivot;
 
 namespace ErsatzCiv
@@ -19,6 +18,7 @@ namespace ErsatzCiv
     {
         internal const double CITY_DISPLAY_RATIO = 0.8;
         internal const string CITY_RENDER_PATH = "city.png";
+        internal const string HUT_RENDER_PATH = "hut.png";
         internal const string UNIT_RENDER_PATH = "units\\{0}.png";
         internal static readonly Dictionary<string, string> MAP_SQUARE_COLORS = new Dictionary<string, string>
         {
@@ -323,6 +323,35 @@ namespace ErsatzCiv
             {
                 img.MouseLeftButtonDown += new MouseButtonEventHandler(mouseLeftButtonDownCallback);
             }
+
+            panel.Children.Add(img);
+        }
+
+        internal static void DrawHut(this Panel panel, HutPivot hut, double defaultDim, int cityZindex, bool skipPreviousCheck)
+        {
+            if (panel == null)
+            {
+                return;
+            }
+
+            if (!skipPreviousCheck)
+            {
+                panel.CleanPreviousChildrenByTag(hut);
+            }
+
+            Image img = new Image
+            {
+                Width = defaultDim * CITY_DISPLAY_RATIO,
+                Height = defaultDim * CITY_DISPLAY_RATIO,
+                Source = new BitmapImage(new Uri(Settings.Default.datasPath + HUT_RENDER_PATH)),
+                Stretch = Stretch.Uniform,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            img.SetValue(Grid.RowProperty, hut.MapSquareLocation.Row);
+            img.SetValue(Grid.ColumnProperty, hut.MapSquareLocation.Column);
+            img.SetValue(Panel.ZIndexProperty, cityZindex);
+            img.Tag = hut;
 
             panel.Children.Add(img);
         }

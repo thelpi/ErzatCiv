@@ -115,7 +115,7 @@ namespace ErsatzCivLib
                 var column = Tools.Randomizer.Next(0, Map.Width);
                 ms = Map[row, column];
             }
-            while (ms == null || ms.Biome.IsSeaType || excludedSpots.Contains(ms));
+            while (ms == null || ms.Biome.IsSeaType || Map.Huts.Any(h =>  h.MapSquareLocation == ms) || excludedSpots.Contains(ms));
 
             excludedSpots.Add(ms);
             return ms;

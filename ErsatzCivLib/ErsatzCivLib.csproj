@@ -53,6 +53,7 @@
     <Compile Include="Model\Enums\LandShapePivot.cs" />
     <Compile Include="Model\Enums\SizePivot.cs" />
     <Compile Include="Model\Enums\TemperaturePivot.cs" />
+    <Compile Include="Model\HutPivot.cs" />
     <Compile Include="Model\LandUnitPivot.cs" />
     <Compile Include="Model\SeaUnitPivot.cs" />
     <Compile Include="Model\SpaceShipParts\ComponentPivot.cs" />

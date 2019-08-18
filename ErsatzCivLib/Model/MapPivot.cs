@@ -17,6 +17,7 @@ namespace ErsatzCivLib.Model
     {
         #region Constants relative to map generation
 
+        private const double HUT_APPEARANCE_RATE = 0.01;
         private const int RATIO_WIDTH_HEIGHT = 2;
         private const int MINIMAL_HEIGHT = 20;
         private const int CHUNK_SIZE_RATIO = 5;
@@ -41,6 +42,12 @@ namespace ErsatzCivLib.Model
         #endregion
 
         #region Embedded properties
+
+        private List<HutPivot> _huts;
+        /// <summary>
+        /// List of <see cref="HutPivot"/>.
+        /// </summary>
+        public IReadOnlyCollection<HutPivot> Huts { get { return _huts; } }
 
         private MapSquarePivot[,] _mapSquareList;
         /// <summary>
@@ -114,7 +121,8 @@ namespace ErsatzCivLib.Model
                     Tools.Randomizer.Next(ISLAND_COUNT_MIN, ISLAND_COUNT_MAX + 1)
             );
             var landRatio = LAND_COVERAGE_RATIOS[landCoverage];
-            
+
+            _huts = new List<HutPivot>();
             Height = MINIMAL_HEIGHT * (int)mapSize;
             Width = Height * RATIO_WIDTH_HEIGHT;
             GlobalTemperature = temperature;
@@ -183,6 +191,7 @@ namespace ErsatzCivLib.Model
             // sets chunks
             var chunksByType = BiomePivot.ChunkAppearanceBiomes.ToDictionary(b => b, b => new List<List<Tuple<int, int>>>());
             var rivers = new List<List<Tuple<int, int>>>();
+            var huts = new List<Tuple<int, int>>();
 
             foreach (var fullLand in continentInfos)
             {
@@ -250,6 +259,25 @@ namespace ErsatzCivLib.Model
 
                     rivers.Add(river);
                 }
+
+                // Huts count on the continent.
+                var hutsCount = (int)Math.Round(continentLand.Count * HUT_APPEARANCE_RATE);
+
+                // Creates hut locations.
+                for (int i = 0; i < hutsCount; i++)
+                {
+                    Tuple<int, int> hutPoint;
+                    do
+                    {
+                        hutPoint = new Tuple<int, int>(
+                            Tools.Randomizer.Next(topY, bottomY),
+                            Tools.Randomizer.Next(leftX, rightX)
+                        );
+                    }
+                    while (huts.Any(h => h.Item1 == hutPoint.Item1 && h.Item2 == hutPoint.Item2));
+
+                    huts.Add(hutPoint);
+                }
             }
 
             foreach (var type in chunksByType.Keys)
@@ -268,6 +296,36 @@ namespace ErsatzCivLib.Model
             rivers.ForEach(r =>
                 r.ForEach(rSquare =>
                     _mapSquareList[rSquare.Item1, rSquare.Item2].ChangeBiome(BiomePivot.River)));
+
+            // Add huts.
+            foreach (var hSquare in huts)
+            {
+                HutPivot hut = null;
+                var location = _mapSquareList[hSquare.Item1, hSquare.Item2];
+                var typeHut = Tools.Randomizer.Next(1, 6);
+                switch (typeHut)
+                {
+                    case 1:
+                        hut = HutPivot.AdvanceHut(location);
+                        break;
+                    case 2:
+                        hut = HutPivot.BarbariansHut(location);
+                        break;
+                    case 3:
+                        hut = HutPivot.CityHut(location);
+                        break;
+                    case 4:
+                        hut = HutPivot.FriendlyUnitHut(location);
+                        break;
+                    case 5:
+                        hut = HutPivot.GoldHut(location);
+                        break;
+                }
+                if (hut != null)
+                {
+                    _huts.Add(hut);
+                }
+            }
         }
 
         #region Internal methods
