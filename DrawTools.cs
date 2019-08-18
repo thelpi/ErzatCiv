@@ -20,6 +20,7 @@ namespace ErsatzCiv
         internal const string CITY_RENDER_PATH = "city.png";
         internal const string HUT_RENDER_PATH = "hut.png";
         internal const string UNIT_RENDER_PATH = "units\\{0}.png";
+        internal const string UNIT_RENDER_PATH_BARBARIAN = "units\\red\\{0}.png";
         internal static readonly Dictionary<string, string> MAP_SQUARE_COLORS = new Dictionary<string, string>
         {
             { Biome.Grassland.Name, "#32CD32" },
@@ -55,7 +56,7 @@ namespace ErsatzCiv
             return panel.Children.OfType<FrameworkElement>().Where(x => x.Tag == tagValue).ToList();
         }
 
-        internal static void DrawUnit(this Panel panel, UnitPivot unit, double defaultDim, int zIndex, bool blinkAndZindex, bool cleanBefore)
+        internal static void DrawUnit(this Panel panel, UnitPivot unit, double defaultDim, int zIndex, bool blinkAndZindex, bool cleanBefore, bool barbarians = false)
         {
             if (panel == null)
             {
@@ -71,7 +72,7 @@ namespace ErsatzCiv
             {
                 Width = defaultDim,
                 Height = defaultDim,
-                Source = new BitmapImage(new Uri(Settings.Default.datasPath + UnitRenderFileName(unit))),
+                Source = new BitmapImage(new Uri(Settings.Default.datasPath + UnitRenderFileName(unit, barbarians))),
                 Stretch = Stretch.Uniform
             };
             img.SetValue(Grid.RowProperty, unit.MapSquareLocation.Row);
@@ -101,9 +102,9 @@ namespace ErsatzCiv
             panel.Children.Add(img);
         }
 
-        private static string UnitRenderFileName(UnitPivot unit)
+        private static string UnitRenderFileName(UnitPivot unit, bool barbarians)
         {
-            return string.Format(UNIT_RENDER_PATH, unit.GetType().Name.Replace("Pivot", string.Empty).ToLowerInvariant());
+            return string.Format(barbarians ? UNIT_RENDER_PATH_BARBARIAN : UNIT_RENDER_PATH, unit.GetType().Name.Replace("Pivot", string.Empty).ToLowerInvariant());
         }
 
         internal static void DrawSquareImprovements(this Panel panel, MapSquarePivot square, double defaultDim, Tuple<int, int> gridPositionOffset = null)

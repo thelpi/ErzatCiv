@@ -11,6 +11,29 @@ namespace ErsatzCivLib.Model
     [Serializable]
     public class HutPivot : IEquatable<HutPivot>
     {
+        /// <summary>
+        /// Default amount of gold inside the hut.
+        /// </summary>
+        public const int HUT_GOLD = 50;
+        /// <summary>
+        /// After this year (a negative number indicates "Before Christ"), an hut with a settler is actually empty.
+        /// </summary>
+        internal const int MAX_AGE_WITH_SETTLER = -2000;
+        /// <summary>
+        /// Max count of barbarians, except the <see cref="DiplomatPivot"/>.
+        /// </summary>
+        internal const int MAX_BARBARIANS_COUNT = 5;
+        /// <summary>
+        /// List of <see cref="UnitPivot"/> which can be barbarians (each time, it's the <c>Default</c> instance).
+        /// </summary>
+        internal static readonly IReadOnlyCollection<UnitPivot> POSSIBLE_UNIT_TYPES = new List<UnitPivot>
+        {
+            MilitiaPivot.Default,
+            KnightPivot.Default,
+            CavalryPivot.Default,
+            LegionPivot.Default
+        };
+
         #region Embedded properties
 
         /// <summary>
@@ -18,9 +41,9 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public MapSquarePivot MapSquareLocation { get; private set; }
         /// <summary>
-        /// Gold amount inside the hut.
+        /// <c>True</c> if there is some gold inside the hut; <c>False</c> otherwise.
         /// </summary>
-        public int Gold { get; private set; }
+        public bool IsGold { get; private set; }
         /// <summary>
         /// <c>True</c> if an <see cref="AdvancePivot"/> is discoverd inside the hut; <c>False</c> otherwise.
         /// </summary>
@@ -28,15 +51,19 @@ namespace ErsatzCivLib.Model
         /// <summary>
         /// <c>True</c> if a friendly <see cref="CavalryPivot"/> is inside the hut; <c>False</c> otherwise.
         /// </summary>
-        public bool IsFriendlyUnit { get; private set; }
+        public bool IsFriendlyCavalryUnit { get; private set; }
         /// <summary>
-        /// <c>True</c> if the hut is a city; <c>False</c> otherwise.
+        /// <c>True</c> if a <see cref="SettlerPivot"/> is inside the hut; <c>False</c> otherwise.
         /// </summary>
-        public bool IsCity { get; private set; }
+        public bool IsSettlerUnit { get; private set; }
         /// <summary>
         /// <c>True</c> if the hut contains an horde of barbarians; <c>False</c> otherwise.
         /// </summary>
         public bool IsBarbarians { get; private set; }
+        /// <summary>
+        /// The <see cref="EnginePivot"/> can set this value to <c>True</c> if the theoretical action can't be apply.
+        /// </summary>
+        public bool WasEmpty { get; internal set; }
 
         #endregion
 
@@ -55,27 +82,27 @@ namespace ErsatzCivLib.Model
             {
                 MapSquareLocation = mapSquare,
                 IsAdvance = false,
-                Gold = 50,
-                IsFriendlyUnit = false,
-                IsCity = false,
+                IsGold = true,
+                IsFriendlyCavalryUnit = false,
+                IsSettlerUnit = false,
                 IsBarbarians = false
             };
         }
 
         /// <summary>
-        /// Creates an <see cref="HutPivot"/> with a city inside.
+        /// Creates an <see cref="HutPivot"/> with a <see cref="SettlerPivot"/> inside.
         /// </summary>
         /// <param name="mapSquare">The <see cref="MapSquareLocation"/> value.</param>
         /// <returns>An instance of <see cref="HutPivot"/>.</returns>
-        internal static HutPivot CityHut(MapSquarePivot mapSquare)
+        internal static HutPivot SettlerHut(MapSquarePivot mapSquare)
         {
             return new HutPivot
             {
                 MapSquareLocation = mapSquare,
                 IsAdvance = false,
-                Gold = 0,
-                IsFriendlyUnit = false,
-                IsCity = true,
+                IsGold = false,
+                IsFriendlyCavalryUnit = false,
+                IsSettlerUnit = true,
                 IsBarbarians = false
             };
         }
@@ -85,15 +112,15 @@ namespace ErsatzCivLib.Model
         /// </summary>
         /// <param name="mapSquare">The <see cref="MapSquareLocation"/> value.</param>
         /// <returns>An instance of <see cref="HutPivot"/>.</returns>
-        internal static HutPivot FriendlyUnitHut(MapSquarePivot mapSquare)
+        internal static HutPivot FriendlyCavalryUnitHut(MapSquarePivot mapSquare)
         {
             return new HutPivot
             {
                 MapSquareLocation = mapSquare,
                 IsAdvance = false,
-                Gold = 0,
-                IsFriendlyUnit = true,
-                IsCity = false,
+                IsGold = false,
+                IsFriendlyCavalryUnit = true,
+                IsSettlerUnit = false,
                 IsBarbarians = false
             };
         }
@@ -109,9 +136,9 @@ namespace ErsatzCivLib.Model
             {
                 MapSquareLocation = mapSquare,
                 IsAdvance = true,
-                Gold = 0,
-                IsFriendlyUnit = false,
-                IsCity = false,
+                IsGold = false,
+                IsFriendlyCavalryUnit = false,
+                IsSettlerUnit = false,
                 IsBarbarians = false
             };
         }
@@ -127,10 +154,29 @@ namespace ErsatzCivLib.Model
             {
                 MapSquareLocation = mapSquare,
                 IsAdvance = false,
-                Gold = 0,
-                IsFriendlyUnit = false,
-                IsCity = false,
+                IsGold = false,
+                IsFriendlyCavalryUnit = false,
+                IsSettlerUnit = false,
                 IsBarbarians = true
+            };
+        }
+
+        /// <summary>
+        /// Creates an <see cref="HutPivot"/> with nothing inside.
+        /// </summary>
+        /// <param name="mapSquare">The <see cref="MapSquareLocation"/> value.</param>
+        /// <returns>An instance of <see cref="HutPivot"/>.</returns>
+        internal static HutPivot EmptyHut(MapSquarePivot mapSquare)
+        {
+            return new HutPivot
+            {
+                MapSquareLocation = mapSquare,
+                IsAdvance = false,
+                IsGold = false,
+                IsFriendlyCavalryUnit = false,
+                IsSettlerUnit = false,
+                IsBarbarians = false,
+                WasEmpty = true
             };
         }
 

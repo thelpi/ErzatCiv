@@ -302,9 +302,12 @@ namespace ErsatzCivLib.Model
             {
                 HutPivot hut = null;
                 var location = _mapSquareList[hSquare.Item1, hSquare.Item2];
-                var typeHut = Tools.Randomizer.Next(1, 6);
+                var typeHut = Tools.Randomizer.Next(0, 6);
                 switch (typeHut)
                 {
+                    case 0:
+                        hut = HutPivot.EmptyHut(location);
+                        break;
                     case 1:
                         hut = HutPivot.AdvanceHut(location);
                         break;
@@ -312,10 +315,10 @@ namespace ErsatzCivLib.Model
                         hut = HutPivot.BarbariansHut(location);
                         break;
                     case 3:
-                        hut = HutPivot.CityHut(location);
+                        hut = HutPivot.SettlerHut(location);
                         break;
                     case 4:
-                        hut = HutPivot.FriendlyUnitHut(location);
+                        hut = HutPivot.FriendlyCavalryUnitHut(location);
                         break;
                     case 5:
                         hut = HutPivot.GoldHut(location);
@@ -372,6 +375,15 @@ namespace ErsatzCivLib.Model
             {
                 return TemperaturePivot.Temperate;
             }
+        }
+
+        /// <summary>
+        /// Removes an <see cref="HutPivot"/> after discovery.
+        /// </summary>
+        /// <param name="hut">The hut to remove.</param>
+        internal void RemoveHut(HutPivot hut)
+        {
+            _huts.Remove(hut);
         }
 
         #endregion

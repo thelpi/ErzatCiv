@@ -32,13 +32,19 @@ namespace ErsatzCivLib
         /// </summary>
         public PlayerPivot HumanPlayer { get; }
 
+        private List<UnitPivot> _barbarians = new List<UnitPivot>();
+        /// <summary>
+        /// List of barbarian units.
+        /// </summary>
+        public IReadOnlyCollection<UnitPivot> Barbarians { get { return _barbarians; } }
+
         #endregion
 
         #region Inferred properties
 
-        /// <summary>
-        /// List of every players (human and IA).
-        /// </summary>
+            /// <summary>
+            /// List of every players (human and IA).
+            /// </summary>
         public IReadOnlyCollection<PlayerPivot> Players
         {
             get
@@ -129,6 +135,45 @@ namespace ErsatzCivLib
         #endregion
 
         #region Internal methods
+
+        /// <summary>
+        /// Adds barbarians to the engine from an <see cref="HutPivot"/>.
+        /// </summary>
+        /// <param name="hut">The hut.</param>
+        public void AddBarbariansFromHut(HutPivot hut)
+        {
+            if (!hut.IsBarbarians)
+            {
+                return;
+            }
+
+            // MapSquares where a barbarian unit can land.
+            var squares = Map.GetAdjacentMapSquares(hut.MapSquareLocation)
+                            .Select(msKvp => msKvp.Value)
+                            .Where(ms => !ms.Biome.IsSeaType && !IsCity(ms) && !Players.Any(p => p.Units.Any(u => u.MapSquareLocation == ms)))
+                            .ToList();
+
+            if (squares.Count == 0)
+            {
+                hut.WasEmpty = true;
+                return;
+            }
+
+            var countUnit = Tools.Randomizer.Next(1, HutPivot.MAX_BARBARIANS_COUNT + 1);
+
+            var barbarians = new List<UnitPivot>();
+            for (var i = 0; i < countUnit; i++)
+            {
+                var unitTemplate = HutPivot.POSSIBLE_UNIT_TYPES.ElementAt(Tools.Randomizer.Next(0, HutPivot.POSSIBLE_UNIT_TYPES.Count));
+                barbarians.Add((UnitPivot)unitTemplate.CreateOrGetInstance(null, squares[Tools.Randomizer.Next(0, squares.Count)]));
+            }
+
+            // Always adds a diplomat.
+            barbarians.Add(Model.Units.Land.DiplomatPivot.CreateAtLocation(null, squares[Tools.Randomizer.Next(0, squares.Count)]));
+
+            // Adds barbarians to the global list, and to the current hut.
+            _barbarians.AddRange(barbarians);
+        }
 
         /// <summary>
         /// Checks if a specified <see cref="MapSquarePivot"/> has a <see cref="CityPivot"/> built on it.

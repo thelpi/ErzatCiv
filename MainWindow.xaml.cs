@@ -50,6 +50,43 @@ namespace ErsatzCiv
 
         #region Events
 
+        private void OnTriggerHutDiscovered(object sender, DiscoverHutEventArgs evt)
+        {
+            if (evt.Hut != null)
+            {
+                MapGrid.CleanPreviousChildrenByTag(evt.Hut);
+
+                if (evt.Hut.WasEmpty)
+                {
+                    MessageBox.Show("This village is empty !", "ErsatzCiv");
+                }
+                else if (evt.Hut.IsGold)
+                {
+                    RefreshDynamicView();
+                    MessageBox.Show($"{HutPivot.HUT_GOLD} pieces of gold has been found !", "ErsatzCiv");
+                }
+                else if (evt.Hut.IsFriendlyCavalryUnit)
+                {
+                    RefreshDynamicView();
+                    MessageBox.Show("This military unit want to join your civilization !", "ErsatzCiv");
+                }
+                else if (evt.Hut.IsSettlerUnit)
+                {
+                    RefreshDynamicView();
+                    MessageBox.Show("This settler unit want to join your civilization !", "ErsatzCiv");
+                }
+                else if (evt.Hut.IsAdvance)
+                {
+                    // Nothing to notify in this case, but the message about science should shows that it was found inside an hut.
+                }
+                else if (evt.Hut.IsBarbarians)
+                {
+                    RefreshDynamicView();
+                    MessageBox.Show("You find an horde of barbarians !", "ErsatzCiv");
+                }
+            }
+        }
+
         private void OnTriggerUpdateMapSquares(object sender, DiscoverNewSquareEventArgs evt)
         {
             if (evt?.MapSquares != null)
@@ -513,6 +550,7 @@ namespace ErsatzCiv
             {
                 ShowNewAdvanceDiscovered(e.Advance, e.WasInProgressAdvance, true);
             };
+            _engine.HumanPlayer.DiscoverHutEvent += OnTriggerHutDiscovered;
         }
 
         private void RefreshDynamicView()
@@ -542,6 +580,11 @@ namespace ErsatzCiv
             foreach (var hut in _engine.Map.Huts)
             {
                 MapGrid.DrawHut(hut, DEFAULT_SIZE, CITY_ZINDEX, false);
+            }
+
+            foreach (var unit in _engine.Barbarians)
+            {
+                MapGrid.DrawUnit(unit, DEFAULT_SIZE, UNIT_ZINDEX, false, true, true);
             }
 
             // Ensures a refresh of the blinking current unit.
@@ -587,20 +630,28 @@ namespace ErsatzCiv
             switch (key)
             {
                 case Key.NumPad1:
+                case Key.End:
                     return DirectionPivot.BottomLeft;
                 case Key.NumPad2:
+                case Key.Down:
                     return DirectionPivot.Bottom;
                 case Key.NumPad3:
+                case Key.PageDown:
                     return DirectionPivot.BottomRight;
                 case Key.NumPad6:
+                case Key.Right:
                     return DirectionPivot.Right;
                 case Key.NumPad9:
+                case Key.PageUp:
                     return DirectionPivot.TopRight;
                 case Key.NumPad8:
+                case Key.Up:
                     return DirectionPivot.Top;
                 case Key.NumPad7:
+                case Key.Home:
                     return DirectionPivot.TopLeft;
                 case Key.NumPad4:
+                case Key.Left:
                     return DirectionPivot.Left;
                 default:
                     return null;

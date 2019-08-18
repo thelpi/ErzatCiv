@@ -272,6 +272,11 @@ namespace ErsatzCivLib.Model
         /// </summary>
         [field: NonSerialized]
         public event EventHandler<ForcedAdvanceEventArgs> ForcedAdvanceEvent;
+        /// <summary>
+        /// Triggered when an <see cref="HutPivot"/> is discovered.
+        /// </summary>
+        [field: NonSerialized]
+        public event EventHandler<DiscoverHutEventArgs> DiscoverHutEvent;
 
         #endregion
 
@@ -649,15 +654,7 @@ namespace ErsatzCivLib.Model
                         .ToList();
                 foreach (var a in advancesMoreThanOne)
                 {
-                    AddAdvance(a);
-                    bool inProgress = false;
-                    if (CurrentAdvance == a)
-                    {
-                        ScienceStack = 0;
-                        CurrentAdvance = null;
-                        inProgress = true;
-                    }
-                    ForcedAdvanceEvent?.Invoke(this, new ForcedAdvanceEventArgs(a, inProgress));
+                    FinishForcedAdvance(a);
                 }
             }
 
@@ -696,16 +693,70 @@ namespace ErsatzCivLib.Model
             }
 
             bool isCity = _cities.Any(c => c.MapSquareLocation == square);
+            var hut = _engine.Map.Huts.SingleOrDefault(h => h.MapSquareLocation == square);
 
             var res = CurrentUnit.Move(direction.Value, isCity, prevSq, square);
-            if (res && CurrentUnit.RemainingMoves == 0)
-            {
-                SetUnitIndex(false, false);
-            }
-
             if (res)
             {
                 MapSquareDiscoveryInvokator(square, _engine.Map.GetAdjacentMapSquares(square).Values);
+
+                if (hut != null)
+                {
+                    if (hut.IsGold)
+                    {
+                        Treasure += HutPivot.HUT_GOLD;
+                    }
+                    else if (hut.IsSettlerUnit)
+                    {
+                        if (_engine.CurrentYear < HutPivot.MAX_AGE_WITH_SETTLER)
+                        {
+                            _units.Add(SettlerPivot.CreateAtLocation(null, square));
+                        }
+                        else
+                        {
+                            hut.WasEmpty = true;
+                        }
+                    }
+                    else if (hut.IsBarbarians)
+                    {
+                        // Note that hut can becomes empty inside this function !
+                        _engine.AddBarbariansFromHut(hut);
+                    }
+                    else if (hut.IsAdvance)
+                    {
+                        // Takes the first from antique era.
+                        var advance = AdvancePivot
+                            .AdvancesByEra[EraPivot.Antiquity]
+                            .Where(a => !_advances.Contains(a) && (a.Prerequisites == null || a.Prerequisites.All(ap => _advances.Contains(ap))))
+                            .OrderBy(a => Tools.Randomizer.NextDouble())
+                            .FirstOrDefault();
+                        if (advance != null)
+                        {
+                            FinishForcedAdvance(advance);
+                        }
+                        else
+                        {
+                            hut.WasEmpty = true;
+                        }
+                    }
+                    else if (hut.IsFriendlyCavalryUnit)
+                    {
+                        _units.Add(CavalryPivot.CreateAtLocation(null, square));
+                    }
+                    else
+                    {
+                        hut.WasEmpty = true;
+                    }
+
+                    _engine.Map.RemoveHut(hut);
+                    DiscoverHutEvent(this, new DiscoverHutEventArgs(hut));
+                }
+
+                // The last thing to do.
+                if (CurrentUnit.RemainingMoves == 0)
+                {
+                    SetUnitIndex(false, false);
+                }
             }
 
             return res;
@@ -950,6 +1001,19 @@ namespace ErsatzCivLib.Model
                 _knownMapSquares.AddRange(squares);
                 DiscoverNewSquareEvent?.Invoke(this, new DiscoverNewSquareEventArgs(squares));
             }
+        }
+
+        private void FinishForcedAdvance(AdvancePivot a)
+        {
+            AddAdvance(a);
+            bool inProgress = false;
+            if (CurrentAdvance == a)
+            {
+                ScienceStack = 0;
+                CurrentAdvance = null;
+                inProgress = true;
+            }
+            ForcedAdvanceEvent?.Invoke(this, new ForcedAdvanceEventArgs(a, inProgress));
         }
 
         #endregion

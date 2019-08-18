@@ -83,8 +83,9 @@ namespace ErsatzCivLib.Model
         /// Creates a new instance from the current one.
         /// </summary>
         /// <param name="city">The <see cref="UnitPivot.City"/> value; pertinent for <see cref="UnitPivot"/> only.</param>
+        /// <param name="location">The <see cref="MapSquarePivot"/> location; pertinent only if <paramref name="city"/> is <c>Null</c>.</param>
         /// <returns>The instance location; might be <c>Null</c> if non-pertinent.</returns>
-        internal BuildablePivot CreateOrGetInstance(CityPivot city)
+        internal BuildablePivot CreateOrGetInstance(CityPivot city, MapSquarePivot location = null)
         {
             if (!Is<UnitPivot>() && !Is<SpaceShipPivot>())
             {
@@ -111,7 +112,7 @@ namespace ErsatzCivLib.Model
                 new[] { typeof(CityPivot), typeof(MapSquarePivot) },
                 null);
 
-            return (UnitPivot)method?.Invoke(null, new object[] { city, city.MapSquareLocation });
+            return (UnitPivot)method?.Invoke(null, new object[] { city, city?.MapSquareLocation ?? location });
         }
 
         private static List<BuildablePivot> _defaultUnitInstances = null;
