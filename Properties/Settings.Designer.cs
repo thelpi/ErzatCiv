@@ -23,12 +23,15 @@ namespace ErsatzCiv.Properties {
             }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("D:\\Ma programmation\\csharp\\Projects\\ErsatzCiv\\datas\\")]
+        [global::System.Configuration.DefaultSettingValueAttribute("\\datas\\")]
         public string datasPath {
             get {
                 return ((string)(this["datasPath"]));
+            }
+            set {
+                this["datasPath"] = value;
             }
         }
         
@@ -79,7 +82,7 @@ namespace ErsatzCiv.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool showFullMap {
             get {
                 return ((bool)(this["showFullMap"]));
@@ -92,6 +95,15 @@ namespace ErsatzCiv.Properties {
         public string squareImageBonusSubFolder {
             get {
                 return ((string)(this["squareImageBonusSubFolder"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("\\datas\\")]
+        public string defaultDatasPath {
+            get {
+                return ((string)(this["defaultDatasPath"]));
             }
         }
     }

@@ -2,8 +2,8 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ErsatzCiv.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="datasPath" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">D:\Ma programmation\csharp\Projects\ErsatzCiv\datas\</Value>
+    <Setting Name="datasPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">\datas\</Value>
     </Setting>
     <Setting Name="squareImageSubFolder" Type="System.String" Scope="Application">
       <Value Profile="(Default)">square\</Value>
@@ -18,10 +18,13 @@
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="showFullMap" Type="System.Boolean" Scope="Application">
-      <Value Profile="(Default)">True</Value>
+      <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="squareImageBonusSubFolder" Type="System.String" Scope="Application">
       <Value Profile="(Default)">bonus\</Value>
+    </Setting>
+    <Setting Name="defaultDatasPath" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">\datas\</Value>
     </Setting>
   </Settings>
 </SettingsFile>

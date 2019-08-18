@@ -563,13 +563,15 @@ namespace ErsatzCiv
             foreach (var player in _engine.Players)
             {
                 foreach (var unit in player.Units.Where(u => player == _engine.HumanPlayer
-                    || _engine.HumanPlayer.KnownMapSquares.Contains(u.MapSquareLocation)))
+                    || _engine.HumanPlayer.KnownMapSquares.Contains(u.MapSquareLocation)
+                    || Settings.Default.showFullMap))
                 {
                     MapGrid.DrawUnit(unit, DEFAULT_SIZE, UNIT_ZINDEX, false, true);
                 }
 
                 foreach (var city in player.Cities.Where(u => player == _engine.HumanPlayer
-                    || _engine.HumanPlayer.KnownMapSquares.Contains(u.MapSquareLocation)))
+                    || _engine.HumanPlayer.KnownMapSquares.Contains(u.MapSquareLocation)
+                    || Settings.Default.showFullMap))
                 {
                     MapGrid.DrawMapCity(city, DEFAULT_SIZE, CITY_ZINDEX, false);
                     DisplayCityName(city);
@@ -577,12 +579,14 @@ namespace ErsatzCiv
                 }
             }
 
-            foreach (var hut in _engine.Map.Huts)
+            foreach (var hut in _engine.Map.Huts.Where(h =>
+                _engine.HumanPlayer.KnownMapSquares.Contains(h.MapSquareLocation) || Settings.Default.showFullMap))
             {
                 MapGrid.DrawHut(hut, DEFAULT_SIZE, CITY_ZINDEX, false);
             }
 
-            foreach (var unit in _engine.Barbarians)
+            foreach (var unit in _engine.Barbarians.Where(b =>
+                _engine.HumanPlayer.KnownMapSquares.Contains(b.MapSquareLocation) || Settings.Default.showFullMap))
             {
                 MapGrid.DrawUnit(unit, DEFAULT_SIZE, UNIT_ZINDEX, false, true, true);
             }

@@ -1,6 +1,8 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using ErsatzCiv.Properties;
 using Microsoft.Win32;
 
 namespace ErsatzCiv
@@ -16,8 +18,24 @@ namespace ErsatzCiv
         public IntroWindow()
         {
             InitializeComponent();
+
+            if (Settings.Default.datasPath == Settings.Default.defaultDatasPath)
+            {
+                Settings.Default.datasPath = string.Concat(
+                    System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase),
+                    Settings.Default.datasPath);
+                Settings.Default.datasPath = Settings.Default.datasPath.Replace("file:\\", string.Empty);
+                Settings.Default.Save();
+            }
+
+            if (!System.IO.Directory.Exists(Settings.Default.datasPath))
+            {
+                MessageBox.Show($"The {Settings.Default.defaultDatasPath} folder inside the app folder doesn't exist !", "ErsatzCiv");
+                Environment.Exit(0);
+            }
+
             (GridContent.Background as ImageBrush).ImageSource =
-                new BitmapImage(new System.Uri(Properties.Settings.Default.datasPath + "intro.jpg"));
+                new BitmapImage(new Uri(Settings.Default.datasPath + "intro.jpg"));
         }
 
         private void LoadButton_Click(object sender, RoutedEventArgs e)
@@ -25,7 +43,7 @@ namespace ErsatzCiv
             OpenFileDialog openFileDialog = new OpenFileDialog
             {
                 Multiselect = false,
-                InitialDirectory = Properties.Settings.Default.datasPath + Properties.Settings.Default.savesSubFolder
+                InitialDirectory = Settings.Default.datasPath + Settings.Default.savesSubFolder
             };
             if (openFileDialog.ShowDialog() == true && !string.IsNullOrWhiteSpace(openFileDialog.FileName))
             {
