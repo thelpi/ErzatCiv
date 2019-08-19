@@ -45,7 +45,7 @@
             <ComboBox VerticalAlignment="Center" HorizontalAlignment="Left" Height="25" Width="150" Grid.Column="1" Grid.Row="5" Name="ComboBoxAge" VerticalContentAlignment="Center" />
             <ComboBox VerticalAlignment="Center" HorizontalAlignment="Left" Height="25" Width="150" Grid.Column="1" Grid.Row="6" Name="ComboBoxHumidity" VerticalContentAlignment="Center" />
             <ComboBox VerticalAlignment="Center" HorizontalAlignment="Left" Height="25" Width="150" Grid.Column="3" Grid.Row="2" Name="ComboBoxCivilization" VerticalContentAlignment="Center" DisplayMemberPath="Name" />
-            <RadioButton Margin="0, 0, 0, 5" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="150" Grid.Column="3" Grid.Row="3" Name="RadioGenderMan" GroupName="GenderGroup" Content="Man" IsChecked="True" />
+            <RadioButton Margin="0, 0, 0, 5" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="150" Grid.Column="3" Grid.Row="3" Name="RadioGenderMan" GroupName="GenderGroup" Content="Man" />
             <RadioButton Margin="0, 5, 0, 0" VerticalAlignment="top" HorizontalAlignment="Left" Width="150" Grid.Column="3" Grid.Row="4" Name="RadioGenderWoman" GroupName="GenderGroup" Content="Woman" />
             <ComboBox VerticalAlignment="Center" HorizontalAlignment="Left" Height="25" Width="150" Grid.Column="3" Grid.Row="5" Name="ComboBoxIaPlayersCount" VerticalContentAlignment="Center" />
         </Grid>

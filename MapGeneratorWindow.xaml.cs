@@ -22,14 +22,13 @@ namespace ErsatzCiv
 
             ShowAgain();
 
-            ComboBoxSize.ItemsSource = Enum.GetValues(typeof(SizePivot));
-            ComboBoxLandShape.ItemsSource = Enum.GetValues(typeof(LandShapePivot));
-            ComboBoxLandCoverage.ItemsSource = Enum.GetValues(typeof(LandCoveragePivot));
-            ComboBoxTemperature.ItemsSource = Enum.GetValues(typeof(TemperaturePivot));
-            ComboBoxAge.ItemsSource = Enum.GetValues(typeof(AgePivot));
-            ComboBoxHumidity.ItemsSource = Enum.GetValues(typeof(HumidityPivot));
-            ComboBoxCivilization.ItemsSource = CivilizationPivot.Instances;
+            SetDataSources();
 
+            SetDefaultValues();
+        }
+
+        private void SetDefaultValues()
+        {
             ComboBoxSize.SelectedValue = SizePivot.Medium;
             ComboBoxLandShape.SelectedValue = LandShapePivot.Continent;
             ComboBoxLandCoverage.SelectedValue = LandCoveragePivot.Medium;
@@ -37,6 +36,18 @@ namespace ErsatzCiv
             ComboBoxAge.SelectedValue = AgePivot.Average;
             ComboBoxHumidity.SelectedValue = HumidityPivot.Average;
             ComboBoxCivilization.SelectedValue = CivilizationPivot.French;
+            RadioGenderMan.IsChecked = true;
+        }
+
+        private void SetDataSources()
+        {
+            ComboBoxSize.ItemsSource = Enum.GetValues(typeof(SizePivot));
+            ComboBoxLandShape.ItemsSource = Enum.GetValues(typeof(LandShapePivot));
+            ComboBoxLandCoverage.ItemsSource = Enum.GetValues(typeof(LandCoveragePivot));
+            ComboBoxTemperature.ItemsSource = Enum.GetValues(typeof(TemperaturePivot));
+            ComboBoxAge.ItemsSource = Enum.GetValues(typeof(AgePivot));
+            ComboBoxHumidity.ItemsSource = Enum.GetValues(typeof(HumidityPivot));
+            ComboBoxCivilization.ItemsSource = CivilizationPivot.Instances;
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
