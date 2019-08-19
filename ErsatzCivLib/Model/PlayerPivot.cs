@@ -681,6 +681,11 @@ namespace ErsatzCivLib.Model
                 return true;
             }
 
+            if (CurrentUnit.RemainingMoves == 0)
+            {
+                return false;
+            }
+
             var prevSq = CurrentUnit.MapSquareLocation;
 
             var x = direction.Value.Row(prevSq.Row);
@@ -692,74 +697,40 @@ namespace ErsatzCivLib.Model
                 return false;
             }
 
-            bool isCity = _cities.Any(c => c.MapSquareLocation == square);
-            var hut = _engine.Map.Huts.SingleOrDefault(h => h.MapSquareLocation == square);
+            // A sea unit can't navigate on land.
+            // A land unit can't navigate on sea.
+            // A air unit can navigate on both.
+            // Each unit can navigate on city.
+            bool isMovable = _cities.Any(c => c.MapSquareLocation == square)
+                || (square.Biome.IsSeaType && CurrentUnit.Is<SeaUnitPivot>())
+                || (!square.Biome.IsSeaType && CurrentUnit.Is<LandUnitPivot>());
 
-            var res = CurrentUnit.Move(direction.Value, isCity, prevSq, square);
-            if (res)
+            if (!isMovable)
             {
-                MapSquareDiscoveryInvokator(square, _engine.Map.GetAdjacentMapSquares(square).Values);
-
-                if (hut != null)
-                {
-                    if (hut.IsGold)
-                    {
-                        Treasure += HutPivot.HUT_GOLD;
-                    }
-                    else if (hut.IsSettlerUnit)
-                    {
-                        if (_engine.CurrentYear < HutPivot.MAX_AGE_WITH_SETTLER)
-                        {
-                            _units.Add(SettlerPivot.CreateAtLocation(null, square));
-                        }
-                        else
-                        {
-                            hut.WasEmpty = true;
-                        }
-                    }
-                    else if (hut.IsBarbarians)
-                    {
-                        // Note that hut can becomes empty inside this function !
-                        _engine.AddBarbariansFromHut(hut);
-                    }
-                    else if (hut.IsAdvance)
-                    {
-                        // Takes the first from antique era.
-                        var advance = AdvancePivot
-                            .AdvancesByEra[EraPivot.Antiquity]
-                            .Where(a => !_advances.Contains(a) && (a.Prerequisites == null || a.Prerequisites.All(ap => _advances.Contains(ap))))
-                            .OrderBy(a => Tools.Randomizer.NextDouble())
-                            .FirstOrDefault();
-                        if (advance != null)
-                        {
-                            FinishForcedAdvance(advance);
-                        }
-                        else
-                        {
-                            hut.WasEmpty = true;
-                        }
-                    }
-                    else if (hut.IsFriendlyCavalryUnit)
-                    {
-                        _units.Add(CavalryPivot.CreateAtLocation(null, square));
-                    }
-                    else
-                    {
-                        hut.WasEmpty = true;
-                    }
-
-                    _engine.Map.RemoveHut(hut);
-                    DiscoverHutEvent(this, new DiscoverHutEventArgs(hut));
-                }
-
-                // The last thing to do.
-                if (CurrentUnit.RemainingMoves == 0)
-                {
-                    SetUnitIndex(false, false);
-                }
+                return false;
             }
 
-            return res;
+            // FIGHT !
+
+            // Is there a good reason to do this early ?
+            var hut = _engine.Map.Huts.SingleOrDefault(h => h.MapSquareLocation == square);
+
+            CurrentUnit.Move(direction.Value, prevSq, square);
+
+            MapSquareDiscoveryInvokator(square, _engine.Map.GetAdjacentMapSquares(square).Values);
+
+            if (hut != null)
+            {
+                DiscoverHut(square, hut);
+            }
+
+            // The last thing to do.
+            if (CurrentUnit.RemainingMoves == 0)
+            {
+                SetUnitIndex(false, false);
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -1014,6 +985,58 @@ namespace ErsatzCivLib.Model
                 inProgress = true;
             }
             ForcedAdvanceEvent?.Invoke(this, new ForcedAdvanceEventArgs(a, inProgress));
+        }
+
+        private void DiscoverHut(MapSquarePivot square, HutPivot hut)
+        {
+            if (hut.IsGold)
+            {
+                Treasure += HutPivot.HUT_GOLD;
+            }
+            else if (hut.IsSettlerUnit)
+            {
+                if (_engine.CurrentYear < HutPivot.MAX_AGE_WITH_SETTLER)
+                {
+                    _units.Add(SettlerPivot.CreateAtLocation(null, square));
+                }
+                else
+                {
+                    hut.WasEmpty = true;
+                }
+            }
+            else if (hut.IsBarbarians)
+            {
+                // Note that hut can becomes empty inside this function !
+                _engine.AddBarbariansFromHut(hut);
+            }
+            else if (hut.IsAdvance)
+            {
+                // Takes the first from antique era.
+                var advance = AdvancePivot
+                    .AdvancesByEra[EraPivot.Antiquity]
+                    .Where(a => !_advances.Contains(a) && (a.Prerequisites == null || a.Prerequisites.All(ap => _advances.Contains(ap))))
+                    .OrderBy(a => Tools.Randomizer.NextDouble())
+                    .FirstOrDefault();
+                if (advance != null)
+                {
+                    FinishForcedAdvance(advance);
+                }
+                else
+                {
+                    hut.WasEmpty = true;
+                }
+            }
+            else if (hut.IsFriendlyCavalryUnit)
+            {
+                _units.Add(CavalryPivot.CreateAtLocation(null, square));
+            }
+            else
+            {
+                hut.WasEmpty = true;
+            }
+
+            _engine.Map.RemoveHut(hut);
+            DiscoverHutEvent(this, new DiscoverHutEventArgs(hut));
         }
 
         #endregion

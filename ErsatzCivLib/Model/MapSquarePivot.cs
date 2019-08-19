@@ -193,7 +193,7 @@ namespace ErsatzCivLib.Model
         internal void ApplyCityActions()
         {
             Road = true;
-            RailRoad = true;
+            RailRoad = false; // Game bug !
             SquareChangeEvent?.Invoke(this, new SquareChangedEventArgs(this));
         }
 

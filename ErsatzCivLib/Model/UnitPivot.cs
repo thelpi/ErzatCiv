@@ -19,7 +19,6 @@ namespace ErsatzCivLib.Model
     public abstract class UnitPivot : BuildablePivot
     {
         private const double ROAD_SPEED_COST_RATIO = 0.3;
-        private const int CITY_SPEED_COST = 1;
 
         #region Embedded properties
 
@@ -103,41 +102,31 @@ namespace ErsatzCivLib.Model
         }
 
         /// <summary>
-        /// Tries to move the instance.
+        /// Moves the instance.
         /// </summary>
         /// <param name="direction">The <see cref="DirectionPivot"/>.</param>
-        /// <param name="comeIntoCity"><c>True</c> if the unit comes into a city.</param>
         /// <param name="previousMapSquare">The previous <see cref="MapSquarePivot"/>.</param>
         /// <param name="currentMapSquare">The new <see cref="MapSquarePivot"/>.</param>
-        /// <returns><c>True</c> if success; <c>False</c> otherwise.</returns>
-        internal bool Move(DirectionPivot direction, bool comeIntoCity, MapSquarePivot previousMapSquare, MapSquarePivot currentMapSquare)
+        internal void Move(DirectionPivot direction, MapSquarePivot previousMapSquare, MapSquarePivot currentMapSquare)
         {
             if (RemainingMoves == 0)
             {
-                return false;
-            }
-
-            if ((currentMapSquare.Biome.IsSeaType && !Is<SeaUnitPivot>() && !comeIntoCity)
-                || (!currentMapSquare.Biome.IsSeaType && !Is<LandUnitPivot>() && !comeIntoCity))
-            {
-                return false;
+                // Just in case !
+                return;
             }
 
             if (!previousMapSquare.RailRoad || !currentMapSquare.RailRoad)
             {
-                RemainingMoves -=
-                    (comeIntoCity ? CITY_SPEED_COST : currentMapSquare.Biome.SpeedCost)
-                    * (previousMapSquare.Road && currentMapSquare.Road ? ROAD_SPEED_COST_RATIO : 1);
+                RemainingMoves -= currentMapSquare.Biome.SpeedCost *
+                    (previousMapSquare.Road && currentMapSquare.Road ? ROAD_SPEED_COST_RATIO : 1);
             }
 
             MapSquareLocation = currentMapSquare;
 
-            if (RemainingMoves <= 0)
+            if (RemainingMoves < 0)
             {
                 RemainingMoves = 0;
             }
-
-            return true;
         }
 
         /// <summary>
