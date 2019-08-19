@@ -710,7 +710,11 @@ namespace ErsatzCivLib.Model
                 return false;
             }
 
-            // FIGHT !
+            // TODO : control zone.
+            // TODO : prevent attack on friendly units.
+            // TODO : prevent attack on friendly cities.
+            // TODO : attack to enemies units.
+            // TODO : attack to enemies cities.
 
             // Is there a good reason to do this early ?
             var hut = _engine.Map.Huts.SingleOrDefault(h => h.MapSquareLocation == square);
