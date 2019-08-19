@@ -34,8 +34,7 @@ namespace ErsatzCiv
                 Environment.Exit(0);
             }
 
-            (GridContent.Background as ImageBrush).ImageSource =
-                new BitmapImage(new Uri(Settings.Default.datasPath + "intro.jpg"));
+            (GridContent.Background as ImageBrush).ImageSource = DrawTools.GetBitmap("intro", isJpg: true);
         }
 
         private void LoadButton_Click(object sender, RoutedEventArgs e)

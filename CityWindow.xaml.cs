@@ -142,7 +142,7 @@ namespace ErsatzCiv
             {
                 Width = size,
                 Height = size,
-                Source = new System.Windows.Media.Imaging.BitmapImage(new Uri(Properties.Settings.Default.datasPath + "citizens\\" + citizen.ToString().ToLowerInvariant() + ".png")),
+                Source = DrawTools.GetBitmap(citizen.ToString(), isCitizen: true),
                 ToolTip = citizen.ToString(),
                 Style = style,
                 Stretch = System.Windows.Media.Stretch.Uniform,

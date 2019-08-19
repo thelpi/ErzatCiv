@@ -16,11 +16,21 @@ namespace ErsatzCiv
 {
     internal static class DrawTools
     {
+        // [filename (with color if required) / output bitmap]
+        private static readonly Dictionary<string, BitmapImage> _imagedSourcesCache = new Dictionary<string, BitmapImage>();
+
+        internal const string DEFAULT_RESOURCE_FORMAT = "ErsatzCiv.datas.{0}.png";
+        internal const string DEFAULT_RESOURCE_FORMAT_JPG = "ErsatzCiv.datas.{0}.jpg";
+        internal const string UNIT_RESOURCE_FORMAT = "ErsatzCiv.datas.units.{0}.png";
+        internal const string BIOME_RESOURCE_FORMAT = "ErsatzCiv.datas.biomes.{0}.png";
+        internal const string BIOME_BONUS_RESOURCE_FORMAT = "ErsatzCiv.datas.biomes.bonus.{0}.png";
+        internal const string CITIZEN_RESOURCE_FORMAT = "ErsatzCiv.datas.citizens.{0}.png";
+
+        internal const int DEFAULT_PIXEL_COLOR_VALUE_R = 235;
+        internal const int DEFAULT_PIXEL_COLOR_VALUE_G = 235;
+        internal const int DEFAULT_PIXEL_COLOR_VALUE_B = 235;
         internal const double CITY_DISPLAY_RATIO = 0.8;
-        internal const string CITY_RENDER_PATH = "city.png";
-        internal const string HUT_RENDER_PATH = "hut.png";
-        internal const string UNIT_RENDER_PATH = "units\\{0}.png";
-        internal const string UNIT_RENDER_PATH_BARBARIAN = "units\\red\\{0}.png";
+
         internal static readonly Dictionary<string, string> MAP_SQUARE_COLORS = new Dictionary<string, string>
         {
             { Biome.Grassland.Name, "#32CD32" },
@@ -72,7 +82,7 @@ namespace ErsatzCiv
             {
                 Width = defaultDim,
                 Height = defaultDim,
-                Source = new BitmapImage(new Uri(Settings.Default.datasPath + UnitRenderFileName(unit, barbarians))),
+                Source = GetUnitBitmap(unit, "ffffff"),
                 Stretch = Stretch.Uniform
             };
             img.SetValue(Grid.RowProperty, unit.MapSquareLocation.Row);
@@ -102,11 +112,6 @@ namespace ErsatzCiv
             panel.Children.Add(img);
         }
 
-        private static string UnitRenderFileName(UnitPivot unit, bool barbarians)
-        {
-            return string.Format(barbarians ? UNIT_RENDER_PATH_BARBARIAN : UNIT_RENDER_PATH, unit.GetType().Name.Replace("Pivot", string.Empty).ToLowerInvariant());
-        }
-
         internal static void DrawSquareImprovements(this Panel panel, MapSquarePivot square, double defaultDim, Tuple<int, int> gridPositionOffset = null)
         {
             if (panel == null)
@@ -129,11 +134,11 @@ namespace ErsatzCiv
             }
             if (square.Mine)
             {
-                DrawImageOnSquare(defaultDim, newElementsWithZIndex, 0.5, "mine.png", 2);
+                DrawImageOnSquare(defaultDim, newElementsWithZIndex, 0.5, "mine", 2);
             }
             if (square.Pollution)
             {
-                DrawImageOnSquare(defaultDim, newElementsWithZIndex, 0.8, "pollution.png", 3);
+                DrawImageOnSquare(defaultDim, newElementsWithZIndex, 0.8, "pollution", 3);
             }
             if (square.Fortress)
             {
@@ -165,13 +170,13 @@ namespace ErsatzCiv
             newElementsWithZIndex.Add(rect, 4);
         }
 
-        private static void DrawImageOnSquare(double defaultDim, Dictionary<FrameworkElement, int> newElementsWithZIndex, double ratio, string imgName, int zIndex)
+        private static void DrawImageOnSquare(double defaultDim, Dictionary<FrameworkElement, int> newElementsWithZIndex, double ratio, string contentName, int zIndex)
         {
             Image img = new Image
             {
                 Width = defaultDim * ratio,
                 Height = defaultDim * ratio,
-                Source = new BitmapImage(new Uri(Settings.Default.datasPath + imgName)),
+                Source = GetBitmap(contentName),
                 Stretch = Stretch.Uniform,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center
@@ -238,36 +243,18 @@ namespace ErsatzCiv
                 return;
             }
 
-            FrameworkElement squareRender;
-            string imgPath = Settings.Default.datasPath +
-                Settings.Default.squareImageSubFolder +
-                (square.HasBonus ? Settings.Default.squareImageBonusSubFolder : string.Empty)
-                + $"{square.Biome.Name.ToLowerInvariant()}.png";
-            if (System.IO.File.Exists(imgPath))
+            var squareRender = new Border
             {
-                squareRender = new Border
-                {
-                    Child = new Image
-                    {
-                        Width = defaultDim,
-                        Height = defaultDim,
-                        Source = new BitmapImage(new Uri(imgPath)),
-                        Stretch = Stretch.Uniform,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center
-                    }
-                };
-            }
-            else
-            {
-                squareRender = new Rectangle
+                Child = new Image
                 {
                     Width = defaultDim,
                     Height = defaultDim,
-                    Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(MAP_SQUARE_COLORS[square.Biome.Name]))
-                };
-            }
-
+                    Source = GetBitmap(square.Biome.Name, isBiome: true, isBiomeBonus: square.HasBonus),
+                    Stretch = Stretch.Uniform,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center
+                }
+            };
 
             squareRender.SetValue(Grid.RowProperty, square.Row - (gridPositionOffset == null ? 0 : gridPositionOffset.Item1));
             squareRender.SetValue(Grid.ColumnProperty, square.Column - (gridPositionOffset == null ? 0 : gridPositionOffset.Item2));
@@ -310,7 +297,7 @@ namespace ErsatzCiv
             {
                 Width = defaultDim * CITY_DISPLAY_RATIO,
                 Height = defaultDim * CITY_DISPLAY_RATIO,
-                Source = new BitmapImage(new Uri(Settings.Default.datasPath + CITY_RENDER_PATH)),
+                Source = GetBitmap("city"),
                 Stretch = Stretch.Uniform,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center
@@ -344,7 +331,7 @@ namespace ErsatzCiv
             {
                 Width = defaultDim * CITY_DISPLAY_RATIO,
                 Height = defaultDim * CITY_DISPLAY_RATIO,
-                Source = new BitmapImage(new Uri(Settings.Default.datasPath + HUT_RENDER_PATH)),
+                Source = GetBitmap("hut"),
                 Stretch = Stretch.Uniform,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center
@@ -355,6 +342,100 @@ namespace ErsatzCiv
             img.Tag = hut;
 
             panel.Children.Add(img);
+        }
+
+        internal static BitmapImage GetBitmap(string baseName, bool isBiome = false, bool isBiomeBonus = false, bool isCitizen = false, bool isJpg = false)
+        {
+            string resourcePathFormat = isJpg ? DEFAULT_RESOURCE_FORMAT_JPG : DEFAULT_RESOURCE_FORMAT;
+            if (isBiomeBonus)
+            {
+                resourcePathFormat = BIOME_BONUS_RESOURCE_FORMAT;
+            }
+            else if (isBiome)
+            {
+                resourcePathFormat = BIOME_RESOURCE_FORMAT;
+            }
+            else if (isCitizen)
+            {
+                resourcePathFormat = CITIZEN_RESOURCE_FORMAT;
+            }
+
+            baseName = string.Format(resourcePathFormat, baseName.Trim().ToLowerInvariant());
+
+            if (_imagedSourcesCache.ContainsKey(baseName))
+            {
+                return _imagedSourcesCache[baseName];
+            }
+
+            var resourceStream =
+                System.Reflection.Assembly
+                    .GetEntryAssembly()
+                    .GetManifestResourceStream(baseName);
+
+            var bitmapImage = StreamToBitmapImage(resourceStream);
+
+            _imagedSourcesCache.Add(baseName, bitmapImage);
+
+            return bitmapImage;
+        }
+
+        internal static BitmapImage GetUnitBitmap(UnitPivot unit, string hexadecimalColorSubstitute)
+        {
+            var cacheKey = string.Concat(unit.Name.ToLowerInvariant(), "_", hexadecimalColorSubstitute);
+            if (_imagedSourcesCache.ContainsKey(cacheKey))
+            {
+                return _imagedSourcesCache[cacheKey];
+            }
+            
+            var resourceStream =
+                System.Reflection.Assembly
+                    .GetEntryAssembly()
+                    .GetManifestResourceStream(string.Format(UNIT_RESOURCE_FORMAT, unit.Name.ToLowerInvariant()));
+
+            var scrBitmap = new System.Drawing.Bitmap(resourceStream);
+
+            var newColor = System.Drawing.ColorTranslator.FromHtml(string.Concat("#", hexadecimalColorSubstitute));
+
+            var newBitmap = new System.Drawing.Bitmap(scrBitmap.Width, scrBitmap.Height);
+            for (var i = 0; i < scrBitmap.Width; i++)
+            {
+                for (var j = 0; j < scrBitmap.Height; j++)
+                {
+                    var actualColor = scrBitmap.GetPixel(i, j);
+                    if (actualColor.G == DEFAULT_PIXEL_COLOR_VALUE_G
+                        && actualColor.B == DEFAULT_PIXEL_COLOR_VALUE_B
+                        && actualColor.R == DEFAULT_PIXEL_COLOR_VALUE_R)
+                    {
+                        newBitmap.SetPixel(i, j, newColor);
+                    }
+                    else
+                    {
+                        newBitmap.SetPixel(i, j, actualColor);
+                    }
+                }
+            }
+
+            BitmapImage bitmapImage;
+            using (var memory = new System.IO.MemoryStream())
+            {
+                newBitmap.Save(memory, System.Drawing.Imaging.ImageFormat.Png);
+                memory.Position = 0;
+                bitmapImage = StreamToBitmapImage(memory);
+            }
+
+            _imagedSourcesCache.Add(cacheKey, bitmapImage);
+
+            return bitmapImage;
+        }
+
+        private static BitmapImage StreamToBitmapImage(System.IO.Stream resourceStream)
+        {
+            var bitmapImage = new BitmapImage();
+            bitmapImage.BeginInit();
+            bitmapImage.StreamSource = resourceStream;
+            bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+            bitmapImage.EndInit();
+            return bitmapImage;
         }
     }
 }
