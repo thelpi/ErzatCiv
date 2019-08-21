@@ -588,7 +588,7 @@ namespace ErsatzCiv
             foreach (var unit in _engine.Barbarians.Where(b =>
                 _engine.HumanPlayer.KnownMapSquares.Contains(b.MapSquareLocation) || Settings.Default.showFullMap))
             {
-                MapGrid.DrawUnit(unit, DEFAULT_SIZE, UNIT_ZINDEX, false, true, true);
+                MapGrid.DrawUnit(unit, DEFAULT_SIZE, UNIT_ZINDEX, false, true);
             }
 
             // Ensures a refresh of the blinking current unit.

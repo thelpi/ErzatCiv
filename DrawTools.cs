@@ -85,7 +85,7 @@ namespace ErsatzCiv
             return panel.Children.OfType<FrameworkElement>().Where(x => x.Tag == tagValue).ToList();
         }
 
-        internal static void DrawUnit(this Panel panel, UnitPivot unit, double defaultDim, int zIndex, bool blinkAndZindex, bool cleanBefore, bool barbarians = false)
+        internal static void DrawUnit(this Panel panel, UnitPivot unit, double defaultDim, int zIndex, bool blinkAndZindex, bool cleanBefore)
         {
             if (panel == null)
             {
@@ -101,7 +101,7 @@ namespace ErsatzCiv
             {
                 Width = defaultDim,
                 Height = defaultDim,
-                Source = GetUnitBitmap(unit, "ffffff"),
+                Source = GetUnitBitmap(unit),
                 Stretch = Stretch.Uniform
             };
             img.SetValue(Grid.RowProperty, unit.MapSquareLocation.Row);
@@ -398,9 +398,9 @@ namespace ErsatzCiv
             return bitmapImage;
         }
 
-        internal static BitmapImage GetUnitBitmap(UnitPivot unit, string hexadecimalColorSubstitute)
+        internal static BitmapImage GetUnitBitmap(UnitPivot unit)
         {
-            var cacheKey = string.Concat(unit.Name.ToLowerInvariant(), "_", hexadecimalColorSubstitute);
+            var cacheKey = string.Concat(unit.Name.ToLowerInvariant(), "_", CIVILIZATION_COLORS[unit.Player.Civilization.Name]);
             if (_imagedSourcesCache.ContainsKey(cacheKey))
             {
                 return _imagedSourcesCache[cacheKey];
@@ -413,7 +413,7 @@ namespace ErsatzCiv
 
             var scrBitmap = new System.Drawing.Bitmap(resourceStream);
 
-            var newColor = System.Drawing.ColorTranslator.FromHtml(string.Concat("#", hexadecimalColorSubstitute));
+            var newColor = System.Drawing.ColorTranslator.FromHtml(CIVILIZATION_COLORS[unit.Player.Civilization.Name]);
 
             var newBitmap = new System.Drawing.Bitmap(scrBitmap.Width, scrBitmap.Height);
             for (var i = 0; i < scrBitmap.Width; i++)

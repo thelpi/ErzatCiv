@@ -87,7 +87,7 @@ namespace ErsatzCivLib.Model
             int citizenCostToProduce, MapSquarePivot location, PlayerPivot player) :
             base(productivityCost, advancePrerequisite, advanceObsolescence, purchasePrice, name, false)
         {
-            Player = city?. Player ?? player;
+            Player = city?.Player ?? player;
             City = city;
             MapSquareLocation = city?.MapSquareLocation ?? location;
             DefensePoints = defensePoints;

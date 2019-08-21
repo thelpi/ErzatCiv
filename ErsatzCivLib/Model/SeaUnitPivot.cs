@@ -41,14 +41,17 @@ namespace ErsatzCivLib.Model
         {
             var bonus = 0;
 
-            if (Player.WonderIsActive(WonderPivot.MagellanExpedition))
+            if (Player != null)
             {
-                bonus += MAGELLAN_WONDER_INCREASE_SPEED;
-            }
+                if (Player.WonderIsActive(WonderPivot.MagellanExpedition))
+                {
+                    bonus += MAGELLAN_WONDER_INCREASE_SPEED;
+                }
 
-            if (Player.WonderIsActive(WonderPivot.Lighthouse))
-            {
-                bonus += LIGHTHOUSE_WONDER_INCREASE_SPEED;
+                if (Player.WonderIsActive(WonderPivot.Lighthouse))
+                {
+                    bonus += LIGHTHOUSE_WONDER_INCREASE_SPEED;
+                }
             }
 
             return Speed + bonus;
