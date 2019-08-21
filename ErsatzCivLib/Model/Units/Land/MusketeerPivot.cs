@@ -10,24 +10,25 @@ namespace ErsatzCivLib.Model.Units.Land
     [Serializable]
     public class MusketeerPivot : LandUnitPivot
     {
-        private MusketeerPivot(CityPivot city, MapSquarePivot location) :
-            base(city, 2, 3, 1, 30, AdvancePivot.Gunpowder, AdvancePivot.Conscription, 210, null, 0, location)
+        private MusketeerPivot(CityPivot city, MapSquarePivot location, PlayerPivot player) :
+            base(city, 2, 3, 1, 30, AdvancePivot.Gunpowder, AdvancePivot.Conscription, 210, null, 0, location, player)
         { }
 
         /// <summary>
         /// Default instance.
         /// </summary>
-        internal static readonly MusketeerPivot Default = new MusketeerPivot(null, null);
+        internal static readonly MusketeerPivot Default = new MusketeerPivot(null, null, null);
 
         /// <summary>
         /// Static constructior.
         /// </summary>
         /// <param name="city">The <see cref="UnitPivot.City"/> value.</param>
         /// <param name="location">The <see cref="UnitPivot.MapSquareLocation"/> value if <paramref name="city"/> is <c>Null</c>.</param>
+        /// <param name="player">The <see cref="UnitPivot.Player"/> value, if <paramref name="city"/> is <c>Null</c>.</param>
         /// <returns>An instance of <see cref="MusketeerPivot"/>.</returns>
-        internal static MusketeerPivot CreateAtLocation(CityPivot city, MapSquarePivot location)
+        internal static MusketeerPivot CreateAtLocation(CityPivot city, MapSquarePivot location, PlayerPivot player)
         {
-            return new MusketeerPivot(city, location);
+            return new MusketeerPivot(city, location, player);
         }
     }
 }

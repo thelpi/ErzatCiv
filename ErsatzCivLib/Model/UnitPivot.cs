@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using ErsatzCivLib.Model.Enums;
 using ErsatzCivLib.Model.Static;
 
@@ -11,7 +12,7 @@ namespace ErsatzCivLib.Model
     /// Each concrete implementation must implement :
     /// - A <c>static internal readonly</c> field "Default" used as a template.
     /// - A <c>static internal</c> method "CreateAtLocation" used to create instances, based on the default template.
-    /// The method must have two parameters, of type <see cref="CityPivot"/> and <see cref="MapSquarePivot"/> respectively.
+    /// The method must have three parameters, of type <see cref="CityPivot"/>, <see cref="MapSquarePivot"/> and <see cref="PlayerPivot"/> respectively.
     /// - Every constructors must be <c>private</c>.
     /// </remarks>
     /// <seealso cref="BuildablePivot"/>
@@ -23,7 +24,11 @@ namespace ErsatzCivLib.Model
         #region Embedded properties
 
         /// <summary>
-        /// The <see cref="CityPivot"/> which owns this instance.
+        /// The <see cref="PlayerPivot"/> which owns this instance.
+        /// </summary>
+        public PlayerPivot Player { get; private set; }
+        /// <summary>
+        /// The <see cref="CityPivot"/> which maintains this instance.
         /// </summary>
         public CityPivot City { get; private set; }
         /// <summary>
@@ -76,11 +81,13 @@ namespace ErsatzCivLib.Model
         /// <param name="name">The <see cref="BuildablePivot.Name"/> value.</param>
         /// <param name="citizenCostToProduce">The <see cref="CitizenCostToProduce"/> value.</param>
         /// <param name="location">The <see cref="MapSquareLocation"/> value, if <paramref name="city"/> is <c>Null</c>.</param>
+        /// <param name="player">The <see cref="Player"/> value, if <paramref name="city"/> is <c>Null</c>.</param>
         protected UnitPivot(CityPivot city, int offensePoints, int defensePoints, int speed, int productivityCost,
-            AdvancePivot advancePrerequisite, AdvancePivot advanceObsolescence, int purchasePrice, string name = null,
-            int citizenCostToProduce = 0, MapSquarePivot location = null) :
-            base(productivityCost, advancePrerequisite, advanceObsolescence, purchasePrice, name)
+            AdvancePivot advancePrerequisite, AdvancePivot advanceObsolescence, int purchasePrice, string name,
+            int citizenCostToProduce, MapSquarePivot location, PlayerPivot player) :
+            base(productivityCost, advancePrerequisite, advanceObsolescence, purchasePrice, name, false)
         {
+            Player = city?. Player ?? player;
             City = city;
             MapSquareLocation = city?.MapSquareLocation ?? location;
             DefensePoints = defensePoints;
@@ -144,6 +151,25 @@ namespace ErsatzCivLib.Model
         protected virtual int ComputeRealSpeed()
         {
             return Speed;
+        }
+
+        /// <summary>
+        /// Creates a new instance from the current one.
+        /// </summary>
+        /// <param name="city">The <see cref="City"/> value.</param>
+        /// <param name="location">The <see cref="MapSquareLocation"/> value; pertinent only if <paramref name="city"/> is <c>Null</c>.</param>
+        /// <param name="player">The <see cref="Player"/> value; pertinent only if <paramref name="city"/> is <c>Null</c>.</param>
+        /// <returns>A new <see cref="UnitPivot"/> from the current one.</returns>
+        internal UnitPivot CreateInstance(CityPivot city, MapSquarePivot location, PlayerPivot player)
+        {
+            var method = GetType().GetMethod(
+                "CreateAtLocation",
+                BindingFlags.Static | BindingFlags.NonPublic,
+                null,
+                new[] { typeof(CityPivot), typeof(MapSquarePivot), typeof(PlayerPivot) },
+                null);
+
+            return (UnitPivot)method?.Invoke(null, new object[] { city, location, player });
         }
     }
 }

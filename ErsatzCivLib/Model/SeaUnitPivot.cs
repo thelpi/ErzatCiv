@@ -25,10 +25,12 @@ namespace ErsatzCivLib.Model
         /// <param name="purchasePrice">The <see cref="BuildablePivot.PurchasePrice"/> value.</param>
         /// <param name="name">The <see cref="BuildablePivot.Name"/> value.</param>
         /// <param name="location">The <see cref="UnitPivot.MapSquareLocation"/> value, if <paramref name="city"/> is <c>Null</c>.</param>
+        /// <param name="player">The <see cref="UnitPivot.Player"/> value, if <paramref name="city"/> is <c>Null</c>.</param>
         protected SeaUnitPivot(CityPivot city, int offensePoints, int defensePoints, int speed, int productivityCost,
-            AdvancePivot advancePrerequisite, AdvancePivot advanceObsolescence, int purchasePrice, string name, MapSquarePivot location) :
+            AdvancePivot advancePrerequisite, AdvancePivot advanceObsolescence, int purchasePrice, string name,
+            MapSquarePivot location, PlayerPivot player) :
             base(city, offensePoints, defensePoints, speed, productivityCost,
-                advancePrerequisite, advanceObsolescence, purchasePrice, name, 0, location)
+                advancePrerequisite, advanceObsolescence, purchasePrice, name, 0, location, player)
         { }
 
         /// <summary>
@@ -39,17 +41,14 @@ namespace ErsatzCivLib.Model
         {
             var bonus = 0;
 
-            if (City != null)
+            if (Player.WonderIsActive(WonderPivot.MagellanExpedition))
             {
-                if (City.Player.WonderIsActive(WonderPivot.MagellanExpedition))
-                {
-                    bonus += MAGELLAN_WONDER_INCREASE_SPEED;
-                }
+                bonus += MAGELLAN_WONDER_INCREASE_SPEED;
+            }
 
-                if (City.Player.WonderIsActive(WonderPivot.Lighthouse))
-                {
-                    bonus += LIGHTHOUSE_WONDER_INCREASE_SPEED;
-                }
+            if (Player.WonderIsActive(WonderPivot.Lighthouse))
+            {
+                bonus += LIGHTHOUSE_WONDER_INCREASE_SPEED;
             }
 
             return Speed + bonus;

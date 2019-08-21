@@ -10,24 +10,25 @@ namespace ErsatzCivLib.Model.Units.Air
     [Serializable]
     public class BomberPivot : AirUnitPivot
     {
-        private BomberPivot(CityPivot city, MapSquarePivot location) :
-            base(city, 12, 1, 8, 120, AdvancePivot.AdvancedFlight, null, 1920, null, location)
+        private BomberPivot(CityPivot city, MapSquarePivot location, PlayerPivot player) :
+            base(city, 12, 1, 8, 120, AdvancePivot.AdvancedFlight, null, 1920, null, location, player)
         { }
 
         /// <summary>
         /// Default instance.
         /// </summary>
-        internal static readonly BomberPivot Default = new BomberPivot(null, null);
+        internal static readonly BomberPivot Default = new BomberPivot(null, null, null);
 
         /// <summary>
         /// Static constructior.
         /// </summary>
         /// <param name="city">The <see cref="UnitPivot.City"/> value.</param>
         /// <param name="location">The <see cref="UnitPivot.MapSquareLocation"/> value, if <paramref name="city"/> is <c>Null</c>.</param>
+        /// <param name="player">The <see cref="UnitPivot.Player"/> value, if <paramref name="city"/> is <c>Null</c>.</param>
         /// <returns>An instance of <see cref="BomberPivot"/>.</returns>
-        internal static BomberPivot CreateAtLocation(CityPivot city, MapSquarePivot location)
+        internal static BomberPivot CreateAtLocation(CityPivot city, MapSquarePivot location, PlayerPivot player)
         {
-            return new BomberPivot(city, location);
+            return new BomberPivot(city, location, player);
         }
     }
 }

@@ -10,24 +10,25 @@ namespace ErsatzCivLib.Model.Units.Land
     [Serializable]
     public class RiflemenPivot : LandUnitPivot
     {
-        private RiflemenPivot(CityPivot city, MapSquarePivot location) :
-            base(city, 3, 5, 1, 30, AdvancePivot.Conscription, null, 210, null, 0, location)
+        private RiflemenPivot(CityPivot city, MapSquarePivot location, PlayerPivot player) :
+            base(city, 3, 5, 1, 30, AdvancePivot.Conscription, null, 210, null, 0, location, player)
         { }
 
         /// <summary>
         /// Default instance.
         /// </summary>
-        internal static readonly RiflemenPivot Default = new RiflemenPivot(null, null);
+        internal static readonly RiflemenPivot Default = new RiflemenPivot(null, null, null);
 
         /// <summary>
         /// Static constructior.
         /// </summary>
         /// <param name="city">The <see cref="UnitPivot.City"/> value.</param>
         /// <param name="location">The <see cref="UnitPivot.MapSquareLocation"/> value if <paramref name="city"/> is <c>Null</c>.</param>
+        /// <param name="player">The <see cref="UnitPivot.Player"/> value, if <paramref name="city"/> is <c>Null</c>.</param>
         /// <returns>An instance of <see cref="RiflemenPivot"/>.</returns>
-        internal static RiflemenPivot CreateAtLocation(CityPivot city, MapSquarePivot location)
+        internal static RiflemenPivot CreateAtLocation(CityPivot city, MapSquarePivot location, PlayerPivot player)
         {
-            return new RiflemenPivot(city, location);
+            return new RiflemenPivot(city, location, player);
         }
     }
 }

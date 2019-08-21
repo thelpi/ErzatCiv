@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using ErsatzCivLib.Model.SpaceShipParts;
+//using ErsatzCivLib.Model.SpaceShipParts;
 using ErsatzCivLib.Model.Static;
 
 namespace ErsatzCivLib.Model
@@ -49,11 +49,11 @@ namespace ErsatzCivLib.Model
         /// <param name="advancePrerequisite">The <see cref="AdvancePrerequisite"/> value.</param>
         /// <param name="advanceObsolescence">The <see cref="AdvanceObsolescence"/> value.</param>
         /// <param name="purchasePrice">The <see cref="PurchasePrice"/> value.</param>
-        /// <param name="name">Optionnal; the <see cref="Name"/> value.
+        /// <param name="name">The <see cref="Name"/> value.
         /// IF <c>Null</c>, the class name is used without the "Pivot" suffix.</param>
-        /// <param name="hasCitizenHappinessEffect">Optionnal; the <see cref="HasCitizenHappinessEffect"/> value.</param>
+        /// <param name="hasCitizenHappinessEffect">The <see cref="HasCitizenHappinessEffect"/> value.</param>
         protected BuildablePivot(int productivityCost, AdvancePivot advancePrerequisite, AdvancePivot advanceObsolescence,
-            int purchasePrice, string name = null, bool hasCitizenHappinessEffect = false)
+            int purchasePrice, string name, bool hasCitizenHappinessEffect)
         {
             Name = name ?? GetType().Name.Replace("Pivot", string.Empty);
             ProductivityCost = productivityCost;
@@ -79,42 +79,6 @@ namespace ErsatzCivLib.Model
             return GetType() == typeof(T) || GetType().IsSubclassOf(typeof(T));
         }
 
-        /// <summary>
-        /// Creates a new instance from the current one.
-        /// </summary>
-        /// <param name="city">The <see cref="UnitPivot.City"/> value; pertinent for <see cref="UnitPivot"/> only.</param>
-        /// <param name="location">The <see cref="MapSquarePivot"/> location; pertinent only if <paramref name="city"/> is <c>Null</c>.</param>
-        /// <returns>The instance location; might be <c>Null</c> if non-pertinent.</returns>
-        internal BuildablePivot CreateOrGetInstance(CityPivot city, MapSquarePivot location = null)
-        {
-            if (!Is<UnitPivot>() && !Is<SpaceShipPivot>())
-            {
-                return this;
-            }
-
-            if (Is<ComponentPivot>())
-            {
-                return ComponentPivot.Create();
-            }
-            else if (Is<ModulePivot>())
-            {
-                return ModulePivot.Create();
-            }
-            else if (Is<StructuralPivot>())
-            {
-                return StructuralPivot.Create();
-            }
-
-            var method = GetType().GetMethod(
-                "CreateAtLocation",
-                BindingFlags.Static | BindingFlags.NonPublic,
-                null,
-                new[] { typeof(CityPivot), typeof(MapSquarePivot) },
-                null);
-
-            return (UnitPivot)method?.Invoke(null, new object[] { city, city?.MapSquareLocation ?? location });
-        }
-
         private static List<BuildablePivot> _defaultUnitInstances = null;
         /// <summary>
         /// Gets every <c>Default</c> instances for each concrete type which inherits from <see cref="BuildablePivot"/>.
@@ -134,9 +98,7 @@ namespace ErsatzCivLib.Model
                     
                     _defaultUnitInstances.AddRange(CityImprovementPivot.Instances);
                     _defaultUnitInstances.AddRange(WonderPivot.Instances);
-                    _defaultUnitInstances.Add(StructuralPivot.Default);
-                    _defaultUnitInstances.Add(ModulePivot.Default);
-                    _defaultUnitInstances.Add(ComponentPivot.Default);
+                    // TODO : spaceship instances.
                 }
 
                 return _defaultUnitInstances;

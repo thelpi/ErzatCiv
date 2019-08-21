@@ -307,8 +307,8 @@ namespace ErsatzCivLib.Model
             ScienceRate = DEFAULT_SCIENCE_RATE;
             LuxuryRate = DEFAULT_LUXURY_RATE;
 
-            _units.Add(SettlerPivot.CreateAtLocation(null, beginLocation));
-            _units.Add(SettlerPivot.CreateAtLocation(null, beginLocation));
+            _units.Add(SettlerPivot.CreateAtLocation(null, beginLocation, this));
+            _units.Add(SettlerPivot.CreateAtLocation(null, beginLocation, this));
 
             MapSquareDiscoveryInvokator(beginLocation, _engine.Map.GetAdjacentMapSquares(beginLocation).Values);
 
@@ -1001,7 +1001,7 @@ namespace ErsatzCivLib.Model
             {
                 if (_engine.CurrentYear < HutPivot.MAX_AGE_WITH_SETTLER)
                 {
-                    _units.Add(SettlerPivot.CreateAtLocation(null, square));
+                    _units.Add(SettlerPivot.CreateAtLocation(null, square, this));
                 }
                 else
                 {
@@ -1032,7 +1032,7 @@ namespace ErsatzCivLib.Model
             }
             else if (hut.IsFriendlyCavalryUnit)
             {
-                _units.Add(CavalryPivot.CreateAtLocation(null, square));
+                _units.Add(CavalryPivot.CreateAtLocation(null, square, this));
             }
             else
             {

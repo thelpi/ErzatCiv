@@ -19,8 +19,8 @@ namespace ErsatzCivLib.Model.Units.Land
 
         #endregion
 
-        private SettlerPivot(CityPivot city, MapSquarePivot location) :
-            base(city, 0, 1, 1, 40, null, null, 320, null, 1, location)
+        private SettlerPivot(CityPivot city, MapSquarePivot location, PlayerPivot player) :
+            base(city, 0, 1, 1, 40, null, null, 320, null, 1, location, player)
         { }
 
         /// <summary>
@@ -43,17 +43,18 @@ namespace ErsatzCivLib.Model.Units.Land
         /// <summary>
         /// Default instance.
         /// </summary>
-        internal static readonly SettlerPivot Default = new SettlerPivot(null, null);
+        internal static readonly SettlerPivot Default = new SettlerPivot(null, null, null);
 
         /// <summary>
         /// Static constructior.
         /// </summary>
         /// <param name="city">The <see cref="UnitPivot.City"/> value.</param>
         /// <param name="location">The <see cref="UnitPivot.MapSquareLocation"/> value if <paramref name="city"/> is <c>Null</c>.</param>
+        /// <param name="player">The <see cref="UnitPivot.Player"/> value, if <paramref name="city"/> is <c>Null</c>.</param>
         /// <returns>An instance of <see cref="SettlerPivot"/>.</returns>
-        internal static SettlerPivot CreateAtLocation(CityPivot city, MapSquarePivot location)
+        internal static SettlerPivot CreateAtLocation(CityPivot city, MapSquarePivot location, PlayerPivot player)
         {
-            return new SettlerPivot(city, location);
+            return new SettlerPivot(city, location, player);
         }
     }
 }

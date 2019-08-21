@@ -10,24 +10,25 @@ namespace ErsatzCivLib.Model.Units.Air
     [Serializable]
     public class BattleshipPivot : SeaUnitPivot
     {
-        private BattleshipPivot(CityPivot city, MapSquarePivot location) :
-            base(city, 18, 12, 4, 160, AdvancePivot.Steel, null, 3200, null, location)
+        private BattleshipPivot(CityPivot city, MapSquarePivot location, PlayerPivot player) :
+            base(city, 18, 12, 4, 160, AdvancePivot.Steel, null, 3200, null, location, player)
         { }
 
         /// <summary>
         /// Default instance.
         /// </summary>
-        internal static readonly BattleshipPivot Default = new BattleshipPivot(null, null);
+        internal static readonly BattleshipPivot Default = new BattleshipPivot(null, null, null);
 
         /// <summary>
         /// Static constructior.
         /// </summary>
         /// <param name="city">The <see cref="UnitPivot.City"/> value.</param>
         /// <param name="location">The <see cref="UnitPivot.MapSquareLocation"/> value, if <paramref name="city"/> is <c>Null</c>.</param>
+        /// <param name="player">The <see cref="UnitPivot.Player"/> value, if <paramref name="city"/> is <c>Null</c>.</param>
         /// <returns>An instance of <see cref="BattleshipPivot"/>.</returns>
-        internal static BattleshipPivot CreateAtLocation(CityPivot city, MapSquarePivot location)
+        internal static BattleshipPivot CreateAtLocation(CityPivot city, MapSquarePivot location, PlayerPivot player)
         {
-            return new BattleshipPivot(city, location);
+            return new BattleshipPivot(city, location, player);
         }
     }
 }

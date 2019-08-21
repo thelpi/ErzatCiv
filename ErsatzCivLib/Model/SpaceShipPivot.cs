@@ -29,7 +29,7 @@ namespace ErsatzCivLib.Model
         /// <param name="spaceShipItemCount">Optionnal; the <see cref="SpaceShipItemCount"/> value.</param>
         protected SpaceShipPivot(int productivityCost, AdvancePivot advancePrerequisite,
             int purchasePrice, string name, int spaceShipItemCount) :
-            base(productivityCost, advancePrerequisite, null, purchasePrice, name)
+            base(productivityCost, advancePrerequisite, null, purchasePrice, name, false)
         {
             SpaceShipItemCount = spaceShipItemCount;
         }

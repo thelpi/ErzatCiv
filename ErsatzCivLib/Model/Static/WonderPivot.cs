@@ -13,7 +13,7 @@ namespace ErsatzCivLib.Model.Static
     public class WonderPivot : BuildablePivot, IEquatable<WonderPivot>
     {
         private WonderPivot(int productivityCost, AdvancePivot advancePrerequisite, AdvancePivot advanceObsolescence,
-            string name = null, bool hasCitizenHappinessEffect = false) :
+            string name, bool hasCitizenHappinessEffect) :
             base(productivityCost, advancePrerequisite, advanceObsolescence, -1, name, hasCitizenHappinessEffect)
         { }
 

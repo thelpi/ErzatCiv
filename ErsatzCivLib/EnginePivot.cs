@@ -165,11 +165,11 @@ namespace ErsatzCivLib
             for (var i = 0; i < countUnit; i++)
             {
                 var unitTemplate = HutPivot.POSSIBLE_UNIT_TYPES.ElementAt(Tools.Randomizer.Next(0, HutPivot.POSSIBLE_UNIT_TYPES.Count));
-                barbarians.Add((UnitPivot)unitTemplate.CreateOrGetInstance(null, squares[Tools.Randomizer.Next(0, squares.Count)]));
+                barbarians.Add((UnitPivot)unitTemplate.CreateInstance(null, squares[Tools.Randomizer.Next(0, squares.Count)], null)); // TODO : barbarian player !
             }
 
             // Always adds a diplomat.
-            barbarians.Add(Model.Units.Land.DiplomatPivot.CreateAtLocation(null, squares[Tools.Randomizer.Next(0, squares.Count)]));
+            barbarians.Add(Model.Units.Land.DiplomatPivot.CreateAtLocation(null, squares[Tools.Randomizer.Next(0, squares.Count)], null)); // TODO : barbarian player !
 
             // Adds barbarians to the global list, and to the current hut.
             _barbarians.AddRange(barbarians);
@@ -547,13 +547,17 @@ namespace ErsatzCivLib
                 throw new ArgumentException("The city is not manage by the human player !", nameof(city));
             }
 
-            var invokedInstance = buildableDefaultInstance.CreateOrGetInstance(city);
-            if (invokedInstance == null)
+            BuildablePivot instanceToBuild = buildableDefaultInstance;
+            if (buildableDefaultInstance.Is<UnitPivot>())
             {
-                throw new InvalidOperationException($"Failure to create an instance of the specified production type !");
+                instanceToBuild = (buildableDefaultInstance as UnitPivot).CreateInstance(city, null, null);
+                if (instanceToBuild == null)
+                {
+                    throw new InvalidOperationException($"Failure to create an instance of the specified production type !");
+                }
             }
 
-            city.ChangeProduction(invokedInstance);
+            city.ChangeProduction(instanceToBuild);
         }
 
         /// <summary>

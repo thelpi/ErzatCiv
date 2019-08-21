@@ -11,6 +11,7 @@ using System.Windows.Shapes;
 using ErsatzCiv.Properties;
 using ErsatzCivLib.Model;
 using Biome = ErsatzCivLib.Model.Static.BiomePivot;
+using Civ = ErsatzCivLib.Model.Static.CivilizationPivot;
 
 namespace ErsatzCiv
 {
@@ -31,6 +32,24 @@ namespace ErsatzCiv
         internal const int DEFAULT_PIXEL_COLOR_VALUE_B = 235;
         internal const double CITY_DISPLAY_RATIO = 0.8;
 
+        internal static readonly Dictionary<string, string> CIVILIZATION_COLORS = new Dictionary<string, string>
+        {
+            { Civ.American.Name, "#08dede" },
+            { Civ.Aztec.Name, "#fff890" },
+            { Civ.Babylonian.Name, "#5fdf60" },
+            { Civ.Chinese.Name, "#08dede" },
+            { Civ.Egyptian.Name, "#fff890" },
+            { Civ.English.Name, "#ff50ff" },
+            { Civ.French.Name, "#7088ff" },
+            { Civ.German.Name, "#7088ff" },
+            { Civ.Greek.Name, "#ff50ff" },
+            { Civ.Indian.Name, "#80878f" },
+            { Civ.Japanese.Name, "#5fdf60" },
+            { Civ.Mongolian.Name, "#80878f" },
+            { Civ.Roman.Name, "#FFFFFF" },
+            { Civ.Russian.Name, "#FFFFFF" },
+            { Civ.Zulu.Name, "#fff890" }
+        };
         internal static readonly Dictionary<string, string> MAP_SQUARE_COLORS = new Dictionary<string, string>
         {
             { Biome.Grassland.Name, "#32CD32" },
@@ -44,7 +63,7 @@ namespace ErsatzCiv
             { Biome.Swamp.Name, "#3CB371" },
             { Biome.Forest.Name, "#006400" },
             { Biome.Plains.Name, "#EEE8AA" },
-            { Biome.River.Name, "#1E90FF" },
+            { Biome.River.Name, "#1E90FF" }
         };
 
         internal static void CleanPreviousChildrenByTag(this Panel panel, object tagValue)

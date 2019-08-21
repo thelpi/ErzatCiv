@@ -57,9 +57,6 @@
     <Compile Include="Model\HutPivot.cs" />
     <Compile Include="Model\LandUnitPivot.cs" />
     <Compile Include="Model\SeaUnitPivot.cs" />
-    <Compile Include="Model\SpaceShipParts\ComponentPivot.cs" />
-    <Compile Include="Model\SpaceShipParts\ModulePivot.cs" />
-    <Compile Include="Model\SpaceShipParts\StructuralPivot.cs" />
     <Compile Include="Model\SpaceShipPivot.cs" />
     <Compile Include="Model\CitizenPivot.cs" />
     <Compile Include="Model\Enums\CitizenTypePivot.cs" />
