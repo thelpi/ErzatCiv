@@ -17,7 +17,17 @@ namespace ErsatzCivLib
     {
         #region Embedded properties
 
-        private readonly List<PlayerPivot> _iaPlayers = new List<PlayerPivot>();
+        private readonly List<PlayerPivot> _opponentPlayers = new List<PlayerPivot>();
+        /// <summary>
+        /// List of every Ia players except <see cref="BarbarianPlayer"/>.
+        /// </summary>
+        public IReadOnlyCollection<PlayerPivot> OpponentPlayers
+        {
+            get
+            {
+                return _opponentPlayers;
+            }
+        }
 
         /// <summary>
         /// Current turn.
@@ -31,25 +41,43 @@ namespace ErsatzCivLib
         /// The human player.
         /// </summary>
         public PlayerPivot HumanPlayer { get; }
-
-        private List<UnitPivot> _barbarians = new List<UnitPivot>();
         /// <summary>
-        /// List of barbarian units.
+        /// The barbarian player.
         /// </summary>
-        public IReadOnlyCollection<UnitPivot> Barbarians { get { return _barbarians; } }
+        public PlayerPivot BarbarianPlayer { get; }
 
         #endregion
 
         #region Inferred properties
 
-            /// <summary>
-            /// List of every players (human and IA).
-            /// </summary>
+        /// <summary>
+        /// List of every players (human and IA, including <see cref="BarbarianPlayer"/>).
+        /// </summary>
         public IReadOnlyCollection<PlayerPivot> Players
         {
             get
             {
-                return _iaPlayers.Concat(new[] { HumanPlayer }).ToList();
+                return _opponentPlayers.Concat(new[] { HumanPlayer, BarbarianPlayer }).ToList();
+            }
+        }
+        /// <summary>
+        /// List of every players except <see cref="HumanPlayer"/>.
+        /// </summary>
+        public IReadOnlyCollection<PlayerPivot> NotHumanPlayers
+        {
+            get
+            {
+                return _opponentPlayers.Concat(new[] { BarbarianPlayer }).ToList();
+            }
+        }
+        /// <summary>
+        /// List of every players except <see cref="BarbarianPlayer"/>.
+        /// </summary>
+        public IReadOnlyCollection<PlayerPivot> NotBarbarianPlayers
+        {
+            get
+            {
+                return _opponentPlayers.Concat(new[] { HumanPlayer }).ToList();
             }
         }
         /// <summary>
@@ -70,11 +98,13 @@ namespace ErsatzCivLib
         /// <param name="humidity">Map humidity.</param>
         /// <param name="playerCivilization">Human player civilization.</param>
         /// <param name="playerGender">The <see cref="PlayerPivot.Gender"/> value.</param>
-        /// <param name="iaPlayersCount">Number of IA civilizations.</param>
+        /// <param name="iaPlayersCount">Number of IA civilizations (except barbarians).</param>
+        /// <param name="randomCityNames">Sets <c>True</c> to active random city names for the human player.</param>
         /// <exception cref="ArgumentNullException"><paramref name="playerCivilization"/> is <c>Null</c>.</exception>
         /// <exception cref="ArgumentException"><paramref name="iaPlayersCount"/> invalid.</exception>
         public EnginePivot(SizePivot mapSize, LandShapePivot mapShape, LandCoveragePivot landCoverage, TemperaturePivot temperature,
-            AgePivot age, HumidityPivot humidity, CivilizationPivot playerCivilization, bool playerGender, int iaPlayersCount)
+            AgePivot age, HumidityPivot humidity, CivilizationPivot playerCivilization,
+            bool playerGender, int iaPlayersCount, bool randomCityNames)
         {
             if (playerCivilization == null)
             {
@@ -90,7 +120,7 @@ namespace ErsatzCivLib
 
             List<MapSquarePivot> excludedSpots = new List<MapSquarePivot>();
 
-            HumanPlayer = new PlayerPivot(this, playerCivilization, false, GetRandomLocation(excludedSpots), playerGender);
+            HumanPlayer = new PlayerPivot(this, playerCivilization, false, GetRandomLocation(excludedSpots), playerGender, randomCityNames);
 
             var allCivs = CivilizationPivot.GetCivilizations(false);
             for (int i = 0; i < iaPlayersCount; i++)
@@ -100,9 +130,11 @@ namespace ErsatzCivLib
                 {
                     iaCiv = allCivs.ElementAt(Tools.Randomizer.Next(0, allCivs.Count));
                 }
-                while (HumanPlayer.Civilization == iaCiv || _iaPlayers.Any(ia => ia.Civilization == iaCiv));
-                _iaPlayers.Add(new PlayerPivot(this, iaCiv, true, GetRandomLocation(excludedSpots), Tools.Randomizer.Next(0, 2) == 0));
+                while (HumanPlayer.Civilization == iaCiv || _opponentPlayers.Any(ia => ia.Civilization == iaCiv));
+                _opponentPlayers.Add(new PlayerPivot(this, iaCiv, true, GetRandomLocation(excludedSpots), Tools.Randomizer.Next(0, 2) == 0, false));
             }
+
+            BarbarianPlayer = new PlayerPivot(this, CivilizationPivot.Barbarian, true, null, false, true);
 
             CurrentTurn = 0;
         }
@@ -111,7 +143,7 @@ namespace ErsatzCivLib
 
         private IReadOnlyCollection<CityPivot> GetEveryCities()
         {
-            return _iaPlayers.SelectMany(iap => iap.Cities).Concat(HumanPlayer.Cities).ToList();
+            return Players.SelectMany(iap => iap.Cities).ToList();
         }
 
         private MapSquarePivot GetRandomLocation(List<MapSquarePivot> excludedSpots)
@@ -152,7 +184,7 @@ namespace ErsatzCivLib
             // MapSquares where a barbarian unit can land.
             var squares = Map.GetAdjacentMapSquares(hut.MapSquareLocation)
                             .Select(msKvp => msKvp.Value)
-                            .Where(ms => !ms.Biome.IsSeaType && !IsCity(ms) && !Players.Any(p => p.Units.Any(u => u.MapSquareLocation == ms)))
+                            .Where(ms => !ms.Biome.IsSeaType && !IsCity(ms) && !NotBarbarianPlayers.Any(p => p.Units.Any(u => u.MapSquareLocation == ms)))
                             .ToList();
 
             if (squares.Count == 0)
@@ -161,20 +193,7 @@ namespace ErsatzCivLib
                 return;
             }
 
-            var countUnit = Tools.Randomizer.Next(1, HutPivot.MAX_BARBARIANS_COUNT + 1);
-
-            var barbarians = new List<UnitPivot>();
-            for (var i = 0; i < countUnit; i++)
-            {
-                var unitTemplate = HutPivot.POSSIBLE_UNIT_TYPES.ElementAt(Tools.Randomizer.Next(0, HutPivot.POSSIBLE_UNIT_TYPES.Count));
-                barbarians.Add((UnitPivot)unitTemplate.CreateInstance(null, squares[Tools.Randomizer.Next(0, squares.Count)], null)); // TODO : barbarian player !
-            }
-
-            // Always adds a diplomat.
-            barbarians.Add(Model.Units.Land.DiplomatPivot.CreateAtLocation(null, squares[Tools.Randomizer.Next(0, squares.Count)], null)); // TODO : barbarian player !
-
-            // Adds barbarians to the global list, and to the current hut.
-            _barbarians.AddRange(barbarians);
+            BarbarianPlayer.CreateHordeOfBarbarians(squares);
         }
 
         /// <summary>
@@ -248,7 +267,7 @@ namespace ErsatzCivLib
         /// <returns>List of <see cref="WonderPivot"/>.</returns>
         internal IReadOnlyCollection<WonderPivot> GetEveryWonders()
         {
-            return Players.SelectMany(p => p.Wonders).ToList();
+            return NotBarbarianPlayers.SelectMany(p => p.Wonders).ToList();
         }
 
         #endregion
@@ -332,7 +351,7 @@ namespace ErsatzCivLib
             }
 
             var turnConsequences = HumanPlayer.NextTurn();
-            foreach (var iaPlayer in _iaPlayers)
+            foreach (var iaPlayer in NotHumanPlayers)
             {
                 var turnConsequencesIa = iaPlayer.NextTurn();
                 // TODO : what do with this ?
@@ -367,71 +386,6 @@ namespace ErsatzCivLib
         public bool MoveCurrentUnit(DirectionPivot? direction)
         {
             return HumanPlayer.MoveCurrentUnit(direction);
-        }
-
-        /// <summary>
-        /// Loads a game save.
-        /// </summary>
-        /// <param name="saveFullPath">The save file path.</param>
-        /// <returns>A tuple with the <see cref="EnginePivot"/> if success; an error message if failure.</returns>
-        public static Tuple<EnginePivot, string> DeserializeSave(string saveFullPath)
-        {
-            try
-            {
-                string settings = null;
-                using (StreamReader sr = new StreamReader(saveFullPath))
-                {
-                    settings = sr.ReadToEnd();
-                }
-
-                byte[] b = Convert.FromBase64String(settings);
-                using (var stream = new MemoryStream(b))
-                {
-                    var formatter = new BinaryFormatter();
-                    stream.Seek(0, SeekOrigin.Begin);
-                    var engine = (EnginePivot)formatter.Deserialize(stream);
-                    return new Tuple<EnginePivot, string>(engine, engine == null ? "Failure to deserialize the save !" : null);
-                }
-            }
-            catch (Exception ex)
-            {
-                return new Tuple<EnginePivot, string>(null, ex.Message);
-            }
-        }
-        
-        /// <summary>
-        /// Creates a game save into the specified folder.
-        /// </summary>
-        /// <param name="folder">The target folder.</param>
-        /// <returns><c>Null</c> if success; otherwise an error message.</returns>
-        public string SerializeToFile(string folder)
-        {
-            try
-            {
-                string fileContent = null;
-
-                using (var stream = new MemoryStream())
-                {
-                    var formatter = new BinaryFormatter();
-                    formatter.Serialize(stream, this);
-                    stream.Flush();
-                    stream.Position = 0;
-                    fileContent = Convert.ToBase64String(stream.ToArray());
-                }
-
-                string fileName = "SAVE_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".data";
-
-                using (StreamWriter sw = new StreamWriter(folder + fileName, false))
-                {
-                    sw.Write(fileContent);
-                }
-
-                return null;
-            }
-            catch (Exception ex)
-            {
-                return ex.Message;
-            }
         }
 
         /// <summary>
@@ -649,6 +603,76 @@ namespace ErsatzCivLib
         public void TriggerRevolution()
         {
             HumanPlayer.TriggerRevolution();
+        }
+
+        #endregion
+
+        #region Static methods
+
+        /// <summary>
+        /// Loads a game save.
+        /// </summary>
+        /// <param name="saveFullPath">The save file path.</param>
+        /// <returns>A tuple with the <see cref="EnginePivot"/> if success; an error message if failure.</returns>
+        public static Tuple<EnginePivot, string> DeserializeSave(string saveFullPath)
+        {
+            try
+            {
+                string settings = null;
+                using (StreamReader sr = new StreamReader(saveFullPath))
+                {
+                    settings = sr.ReadToEnd();
+                }
+
+                byte[] b = Convert.FromBase64String(settings);
+                using (var stream = new MemoryStream(b))
+                {
+                    var formatter = new BinaryFormatter();
+                    stream.Seek(0, SeekOrigin.Begin);
+                    var engine = (EnginePivot)formatter.Deserialize(stream);
+                    return new Tuple<EnginePivot, string>(engine, engine == null ? "Failure to deserialize the save !" : null);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new Tuple<EnginePivot, string>(null, ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Creates a game save into the specified folder.
+        /// </summary>
+        /// <param name="engine">The engine to save.</param>
+        /// <param name="folder">The target folder.</param>
+        /// <returns><c>Null</c> if success; otherwise an error message.</returns>
+        public static string SerializeToFile(EnginePivot engine, string folder)
+        {
+            try
+            {
+                string fileContent = null;
+
+                using (var stream = new MemoryStream())
+                {
+                    var formatter = new BinaryFormatter();
+                    formatter.Serialize(stream, engine);
+                    stream.Flush();
+                    stream.Position = 0;
+                    fileContent = Convert.ToBase64String(stream.ToArray());
+                }
+
+                string fileName = "SAVE_" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".data";
+
+                using (StreamWriter sw = new StreamWriter(folder + fileName, false))
+                {
+                    sw.Write(fileContent);
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
         }
 
         #endregion

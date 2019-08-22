@@ -82,6 +82,10 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public CivilizationPivot Civilization { get; private set; }
         /// <summary>
+        /// Indicates if the city's name should be randomly generated.
+        /// </summary>
+        public bool RandomCityNames { get; private set; }
+        /// <summary>
         /// Indicates the player gender. <c>True</c> for man, <c>False</c> for woman.
         /// </summary>
         public bool Gender { get; private set; }
@@ -239,7 +243,7 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                return Civilization.NextCityName(_cities);
+                return Civilization.NextCityName(RandomCityNames, _cities);
             }
         }
 
@@ -288,11 +292,13 @@ namespace ErsatzCivLib.Model
         /// <param name="isIa">The <see cref="IsIA"/> value.</param>
         /// <param name="beginLocation">Units position at the beginning.</param>
         /// <param name="gender">The <see cref="Gender"/> value.</param>
-        internal PlayerPivot(EnginePivot owner, CivilizationPivot civilization, bool isIa, MapSquarePivot beginLocation, bool gender)
+        /// <param name="randomCityNames">The <see cref="RandomCityNames"/> value.</param>
+        internal PlayerPivot(EnginePivot owner, CivilizationPivot civilization, bool isIa, MapSquarePivot beginLocation, bool gender, bool randomCityNames)
         {
             _engine = owner;
 
             Gender = gender;
+            RandomCityNames = randomCityNames;
             Civilization = civilization;
             IsIA = isIa;
 
@@ -307,10 +313,13 @@ namespace ErsatzCivLib.Model
             ScienceRate = DEFAULT_SCIENCE_RATE;
             LuxuryRate = DEFAULT_LUXURY_RATE;
 
-            _units.Add(SettlerPivot.CreateAtLocation(null, beginLocation, this));
-            _units.Add(SettlerPivot.CreateAtLocation(null, beginLocation, this));
+            if (beginLocation != null)
+            {
+                _units.Add(SettlerPivot.CreateAtLocation(null, beginLocation, this));
+                _units.Add(SettlerPivot.CreateAtLocation(null, beginLocation, this));
 
-            MapSquareDiscoveryInvokator(beginLocation, _engine.Map.GetAdjacentMapSquares(beginLocation).Values);
+                MapSquareDiscoveryInvokator(beginLocation, _engine.Map.GetAdjacentMapSquares(beginLocation).Values);
+            }
 
             SetUnitIndex(false, true);
         }
@@ -359,6 +368,32 @@ namespace ErsatzCivLib.Model
         #endregion
 
         #region Internal methods
+
+        /// <summary>
+        /// Generates an horde of barbarians on the map, if the current instance is <see cref="CivilizationPivot.Barbarian"/>.
+        /// </summary>
+        /// <param name="squares">List of <see cref="MapSquarePivot"/> where units can land.</param>
+        internal void CreateHordeOfBarbarians(List<MapSquarePivot> squares)
+        {
+            if (Civilization != CivilizationPivot.Barbarian)
+            {
+                return;
+            }
+
+            var countUnit = Tools.Randomizer.Next(1, HutPivot.MAX_BARBARIANS_COUNT + 1);
+
+            var barbarians = new List<UnitPivot>();
+            for (var i = 0; i < countUnit; i++)
+            {
+                var unitTemplate = HutPivot.POSSIBLE_UNIT_TYPES.ElementAt(Tools.Randomizer.Next(0, HutPivot.POSSIBLE_UNIT_TYPES.Count));
+                barbarians.Add(unitTemplate.CreateInstance(null, squares[Tools.Randomizer.Next(0, squares.Count)], this));
+            }
+
+            // Always adds a diplomat.
+            barbarians.Add(DiplomatPivot.CreateAtLocation(null, squares[Tools.Randomizer.Next(0, squares.Count)], this));
+
+            _units.AddRange(barbarians);
+        }
 
         /// <summary>
         /// Changes the <see cref="LuxuryRate"/> and <see cref="ScienceRate"/> values.
@@ -431,7 +466,7 @@ namespace ErsatzCivLib.Model
                 return null;
             }
 
-            if (_engine.Players.Any(p => p._cities.Any(c => c.Name.Equals(name.ToLower(), StringComparison.InvariantCultureIgnoreCase))))
+            if (_engine.NotBarbarianPlayers.Any(p => p._cities.Any(c => c.Name.Equals(name.ToLower(), StringComparison.InvariantCultureIgnoreCase))))
             {
                 notUniqueNameError = true;
                 return null;
@@ -599,7 +634,7 @@ namespace ErsatzCivLib.Model
                     }
                     else if (WonderPivot.ApolloProgram == produced)
                     {
-                        foreach (var cityToShow in _engine.Players.SelectMany(p => p.Cities))
+                        foreach (var cityToShow in _engine.NotBarbarianPlayers.SelectMany(p => p.Cities))
                         {
                             MapSquareDiscoveryInvokator(cityToShow.MapSquareLocation, new List<MapSquarePivot>());
                         }
@@ -644,7 +679,7 @@ namespace ErsatzCivLib.Model
             if (WonderIsActive(WonderPivot.GreatLibrary))
             {
                 var advancesMoreThanOne =
-                    _engine.Players
+                    _engine.NotBarbarianPlayers
                         .Where(p => p != this)
                         .SelectMany(p => p.Advances)
                         .GroupBy(a => a)
@@ -659,7 +694,7 @@ namespace ErsatzCivLib.Model
             }
 
             return new TurnConsequencesPivot(RevolutionIsDone, citiesWithDoneProduction,
-                CurrentAdvance is null ? _advances.Last() : null, _advances.Count > Civilization.Advances.Count);
+                CurrentAdvance is null ? _advances.LastOrDefault() : null, _advances.Count > Civilization.Advances.Count);
         }
 
         /// <summary>

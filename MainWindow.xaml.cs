@@ -301,7 +301,7 @@ namespace ErsatzCiv
             var res = MessageBox.Show("Save the game ?", "ErsatzCiv", MessageBoxButton.YesNoCancel);
             if (res == MessageBoxResult.Yes)
             {
-                var serRes = _engine.SerializeToFile(Settings.Default.datasPath + Settings.Default.savesSubFolder);
+                var serRes = EnginePivot.SerializeToFile(_engine, Settings.Default.datasPath + Settings.Default.savesSubFolder);
                 if (!string.IsNullOrWhiteSpace(serRes))
                 {
                     MessageBox.Show($"Save has failed with the following error : {serRes}", "ErsatzCiv");
@@ -583,12 +583,6 @@ namespace ErsatzCiv
                 _engine.HumanPlayer.KnownMapSquares.Contains(h.MapSquareLocation) || Settings.Default.showFullMap))
             {
                 MapGrid.DrawHut(hut, DEFAULT_SIZE, CITY_ZINDEX, false);
-            }
-
-            foreach (var unit in _engine.Barbarians.Where(b =>
-                _engine.HumanPlayer.KnownMapSquares.Contains(b.MapSquareLocation) || Settings.Default.showFullMap))
-            {
-                MapGrid.DrawUnit(unit, DEFAULT_SIZE, UNIT_ZINDEX, false, true);
             }
 
             // Ensures a refresh of the blinking current unit.

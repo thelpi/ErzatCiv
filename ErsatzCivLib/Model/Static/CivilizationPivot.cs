@@ -45,10 +45,21 @@ namespace ErsatzCivLib.Model.Static
         /// <summary>
         /// Tries to determinate the name of the next city of the civilization, based on the names already used.
         /// </summary>
+        /// <param name="randomCityNames">Sets <c>True</c> to randomize name.</param>
         /// <param name="cities">List of cities.</param>
         /// <returns>The name suggestion.</returns>
-        public string NextCityName(IEnumerable<CityPivot> cities)
+        public string NextCityName(bool randomCityNames, IEnumerable<CityPivot> cities)
         {
+            if (randomCityNames || _cities.Count == 0)
+            {
+                return new string(Enumerable.Range(0, 8).Select(i =>
+                {
+                    var arrayUsed = (i % 2 > 0 ? "AEIOUY" : "BCDFGHJKLMNPQRSTVWXZ").ToCharArray();
+                    var nextIndex = Tools.Randomizer.Next(0, arrayUsed.Length);
+                    return arrayUsed[nextIndex];
+                }).ToArray());
+            }
+
             cities = cities?.Where(c => c != null);
             if (cities?.Any() != true)
             {

@@ -37,6 +37,7 @@ namespace ErsatzCiv
             ComboBoxHumidity.SelectedValue = HumidityPivot.Average;
             ComboBoxCivilization.SelectedValue = CivilizationPivot.French;
             RadioGenderMan.IsChecked = true;
+            CheckBoxRandomCityName.IsChecked = false;
         }
 
         private void SetDataSources()
@@ -88,7 +89,8 @@ namespace ErsatzCiv
                 ComboBoxHumidity.SelectedItem,
                 ComboBoxCivilization.SelectedItem,
                 RadioGenderMan.IsChecked == true,
-                ComboBoxIaPlayersCount.SelectedItem
+                ComboBoxIaPlayersCount.SelectedItem,
+                CheckBoxRandomCityName.IsChecked == true
             });
         }
 
@@ -98,8 +100,8 @@ namespace ErsatzCiv
 
             e.Result = new EnginePivot((SizePivot)parameters[0], (LandShapePivot)parameters[1],
                 (LandCoveragePivot)parameters[2], (TemperaturePivot)parameters[3],
-                (AgePivot)parameters[4], (HumidityPivot)parameters[5],
-                (CivilizationPivot)parameters[6], (bool)parameters[7], (int)parameters[8]);
+                (AgePivot)parameters[4], (HumidityPivot)parameters[5], (CivilizationPivot)parameters[6],
+                (bool)parameters[7], (int)parameters[8], (bool)parameters[9]);
         }
 
         private void EndOfMapGeneration(object sender, RunWorkerCompletedEventArgs e)
