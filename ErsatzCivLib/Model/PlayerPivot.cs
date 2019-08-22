@@ -145,6 +145,12 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public IReadOnlyCollection<AdvancePivot> Advances { get { return _advances; } }
 
+        private readonly List<PlayerPivot> _enemies = new List<PlayerPivot>();
+        /// <summary>
+        /// List of enemies <see cref="PlayerPivot"/>.
+        /// </summary>
+        public IReadOnlyCollection<PlayerPivot> Enemies { get { return _enemies; } }
+
         #endregion
 
         #region Inferred properties
@@ -394,6 +400,48 @@ namespace ErsatzCivLib.Model
         #endregion
 
         #region Internal methods
+
+        /// <summary>
+        /// Switches the peace status with another <see cref="PlayerPivot"/>.
+        /// Also switches the status for <paramref name="opponent"/>.
+        /// If status on both sides are inconsistent, only the current instance is switched.
+        /// Status with <see cref="CivilizationPivot.Barbarian"/> is never peace (no switch from war).
+        /// </summary>
+        /// <param name="opponent">The opponent.</param>
+        internal void SwitchPeaceStatusWithOpponent(PlayerPivot opponent)
+        {
+            if (Civilization.IsBarbarian || opponent.Civilization.IsBarbarian)
+            {
+                // Forces war.
+                if (!_enemies.Contains(opponent))
+                {
+                    _enemies.Add(opponent);
+                }
+                if (!opponent._enemies.Contains(this))
+                {
+                    opponent._enemies.Add(this);
+                }
+            }
+            else
+            {
+                if (!_enemies.Contains(opponent))
+                {
+                    _enemies.Add(opponent);
+                    if (!opponent._enemies.Contains(this))
+                    {
+                        opponent._enemies.Add(this);
+                    }
+                }
+                else
+                {
+                    _enemies.Remove(opponent);
+                    if (opponent._enemies.Contains(this))
+                    {
+                        opponent._enemies.Remove(this);
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Generates an horde of barbarians on the map, if the current instance is <see cref="CivilizationPivot.Barbarian"/>.
@@ -1043,9 +1091,20 @@ namespace ErsatzCivLib.Model
         private void AddAdvance(AdvancePivot advance)
         {
             _advances.Add(advance);
-            if (advance == AdvancePivot.Mysticism)
+            if (advance == AdvancePivot.Mysticism || Wonders.Any(w => w.AdvanceObsolescence == advance && w.HasCitizenHappinessEffect))
             {
                 CheckEveryCitiesHappiness();
+            }
+            foreach (var city in _cities.Where(c => c.Improvements.Any(i => i.HasCitizenHappinessEffect && i.AdvanceObsolescence == advance)))
+            {
+                city.CheckCitizensHappiness();
+            }
+            if (advance == AdvancePivot.Combustion || advance == AdvancePivot.Gunpowder)
+            {
+                foreach (var city in _cities)
+                {
+                    city.ForceRemoveCityImprovement(CityImprovementPivot.Barracks);
+                }
             }
         }
 

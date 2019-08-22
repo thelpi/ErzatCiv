@@ -136,6 +136,15 @@ namespace ErsatzCivLib
 
             BarbarianPlayer = new PlayerPivot(this, CivilizationPivot.Barbarian, true, null, false, true);
 
+            // Sets war between every civilizations.
+            for (int i = 0; i < Players.Count - 1; i++)
+            {
+                for (int j = i + 1; j < Players.Count; j++)
+                {
+                    Players.ElementAt(i).SwitchPeaceStatusWithOpponent(Players.ElementAt(j));
+                }
+            }
+
             CurrentTurn = 0;
         }
 

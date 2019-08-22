@@ -1,10 +1,4 @@
-﻿Les casernes sont obsolètes après "Combustion" et "Gunpowder".
-
-L'impossibilité d'irriguer sans eau (avant "Electricity") n'existe pas.
-
-Les rivières sont des carrés propres, et pas entre carrés.
-
-"Fusion Power" réduit le risque d'accident nucléraire
+﻿"Fusion Power" réduit le risque d'accident nucléraire
 
 Gestion des "Futures tech".
 
@@ -34,8 +28,6 @@ Power plant : risque d'accident nucléaire
 
 Gestion de la corruption un peu random
 
-Confusion taxes / Luxuries / Trade / Commerce / Treasure
-
 Humeur des citoyens : impact des unités à l'extérieur
 Quand c'est fait, faire : https://civilization.fandom.com/wiki/Women%27s_Suffrage_(Civ1)
 
@@ -47,6 +39,3 @@ https://civilization.fandom.com/wiki/United_Nations_(Civ1)
 https://civilization.fandom.com/wiki/Great_Wall_(Civ1)
 
 2 villes peuvent finir une merveille au même moment ?
-
-Dés que le temps passe (2000 avant JC ?), les hutes ne peuvent plus êtes des villes
-Les hutes ne peuvent pas découvrir d'avancées scientifiques après la fin de l'ère antique.

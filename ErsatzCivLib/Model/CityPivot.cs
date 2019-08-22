@@ -538,7 +538,7 @@ namespace ErsatzCivLib.Model
             MapSquareLocation = location;
             CreationTurn = currentTurn;
             Production = production;
-            
+
             _improvements = new List<CityImprovementPivot>();
             _wonders = new List<WonderPivot>();
 
@@ -951,6 +951,22 @@ namespace ErsatzCivLib.Model
         internal void UnlinkSettler(SettlerPivot settler)
         {
             _settlers.Remove(settler);
+        }
+
+        /// <summary>
+        /// Forces the remove of a specified <see cref="CityImprovementPivot"/> of the city.
+        /// </summary>
+        /// <param name="cityImprovement">The city improvement.</param>
+        internal void ForceRemoveCityImprovement(CityImprovementPivot cityImprovement)
+        {
+            if (Improvements.Contains(cityImprovement))
+            {
+                _improvements.Remove(cityImprovement);
+                if (cityImprovement.HasCitizenHappinessEffect)
+                {
+                    CheckCitizensHappiness();
+                }
+            }
         }
 
         /// <summary>
