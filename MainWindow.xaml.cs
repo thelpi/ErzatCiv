@@ -220,7 +220,7 @@ namespace ErsatzCiv
 
                         MapGrid.CleanPreviousChildrenByTag(windowCity.UnitUsed);
                         MapGrid.DrawMapCity(windowCity.City, DEFAULT_SIZE, CITY_ZINDEX, true);
-                        DisplayCityName(windowCity.City);
+                        //DisplayCityName(windowCity.City);
                         DrawMiniMapCity(windowCity.City, true);
 
                         // Ensures a refresh of the blinking current unit.
@@ -574,7 +574,7 @@ namespace ErsatzCiv
                     || Settings.Default.showFullMap))
                 {
                     MapGrid.DrawMapCity(city, DEFAULT_SIZE, CITY_ZINDEX, false);
-                    DisplayCityName(city);
+                    //DisplayCityName(city);
                     DrawMiniMapCity(city, false);
                 }
             }

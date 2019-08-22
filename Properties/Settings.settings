@@ -18,7 +18,7 @@
       <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="showFullMap" Type="System.Boolean" Scope="Application">
-      <Value Profile="(Default)">False</Value>
+      <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="squareImageBonusSubFolder" Type="System.String" Scope="Application">
       <Value Profile="(Default)">bonus\</Value>

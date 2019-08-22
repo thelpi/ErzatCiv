@@ -30,7 +30,7 @@ namespace ErsatzCiv
         internal const int DEFAULT_PIXEL_COLOR_VALUE_R = 235;
         internal const int DEFAULT_PIXEL_COLOR_VALUE_G = 235;
         internal const int DEFAULT_PIXEL_COLOR_VALUE_B = 235;
-        internal const double CITY_DISPLAY_RATIO = 0.8;
+        internal const double HUT_DISPLAY_RATIO = 0.8;
 
         internal static readonly Dictionary<string, string> CIVILIZATION_COLORS = new Dictionary<string, string>
         {
@@ -48,7 +48,8 @@ namespace ErsatzCiv
             { Civ.Mongolian.Name, "#80878f" },
             { Civ.Roman.Name, "#FFFFFF" },
             { Civ.Russian.Name, "#FFFFFF" },
-            { Civ.Zulu.Name, "#fff890" }
+            { Civ.Zulu.Name, "#fff890" },
+            { Civ.Barbarian.Name, "#DC143C" }
         };
         internal static readonly Dictionary<string, string> MAP_SQUARE_COLORS = new Dictionary<string, string>
         {
@@ -312,14 +313,26 @@ namespace ErsatzCiv
                 panel.CleanPreviousChildrenByTag(city);
             }
 
-            Image img = new Image
+            Label lbl = new Label
             {
-                Width = defaultDim * CITY_DISPLAY_RATIO,
-                Height = defaultDim * CITY_DISPLAY_RATIO,
-                Source = GetBitmap("city"),
-                Stretch = Stretch.Uniform,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center
+                Width = defaultDim,
+                Height = defaultDim,
+                Content = string.Concat(city.CitizensCount, "\r\n", city.Name),
+                Background = Brushes.Transparent,
+                FontSize = 14,
+                VerticalContentAlignment = VerticalAlignment.Center,
+                HorizontalContentAlignment = HorizontalAlignment.Center
+            };
+            lbl.SetValue(Grid.RowProperty, city.MapSquareLocation.Row - (gridPositionOffset == null ? 0 : gridPositionOffset.Item1));
+            lbl.SetValue(Grid.ColumnProperty, city.MapSquareLocation.Column - (gridPositionOffset == null ? 0 : gridPositionOffset.Item2));
+            lbl.SetValue(Panel.ZIndexProperty, cityZindex + 1);
+            lbl.Tag = city;
+
+            Rectangle img = new Rectangle
+            {
+                Width = defaultDim,
+                Height = defaultDim,
+                Fill = new SolidColorBrush((Color)ColorConverter.ConvertFromString(CIVILIZATION_COLORS[city.Player.Civilization.Name]))
             };
             img.SetValue(Grid.RowProperty, city.MapSquareLocation.Row - (gridPositionOffset == null ? 0 : gridPositionOffset.Item1));
             img.SetValue(Grid.ColumnProperty, city.MapSquareLocation.Column - (gridPositionOffset == null ? 0 : gridPositionOffset.Item2));
@@ -331,6 +344,7 @@ namespace ErsatzCiv
                 img.MouseLeftButtonDown += new MouseButtonEventHandler(mouseLeftButtonDownCallback);
             }
 
+            panel.Children.Add(lbl);
             panel.Children.Add(img);
         }
 
@@ -348,8 +362,8 @@ namespace ErsatzCiv
 
             Image img = new Image
             {
-                Width = defaultDim * CITY_DISPLAY_RATIO,
-                Height = defaultDim * CITY_DISPLAY_RATIO,
+                Width = defaultDim * HUT_DISPLAY_RATIO,
+                Height = defaultDim * HUT_DISPLAY_RATIO,
                 Source = GetBitmap("hut"),
                 Stretch = Stretch.Uniform,
                 HorizontalAlignment = HorizontalAlignment.Center,
