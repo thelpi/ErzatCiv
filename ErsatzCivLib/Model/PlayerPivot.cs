@@ -21,6 +21,7 @@ namespace ErsatzCivLib.Model
         private const int SCIENCE_COST = 100;
         private const double DEFAULT_LUXURY_RATE = 0;
         private const double DEFAULT_SCIENCE_RATE = 0.5;
+        private const int MAX_TURNS = 9999;
 
         #region Embedded properties
 
@@ -183,8 +184,13 @@ namespace ErsatzCivLib.Model
         {
             get
             {
+                if (Civilization.IsBarbarian)
+                {
+                    return MAX_TURNS;
+                }
+
                 return CurrentAdvance == null ? 0 : (
-                    ScienceByTurn == 0 ? 9999 : (int)Math.Ceiling((SCIENCE_COST - ScienceStack) / (double)ScienceByTurn)
+                    ScienceByTurn == 0 ? MAX_TURNS : (int)Math.Ceiling((SCIENCE_COST - ScienceStack) / (double)ScienceByTurn)
                 );
             }
         }
@@ -216,6 +222,11 @@ namespace ErsatzCivLib.Model
         {
             get
             {
+                if (Civilization.IsBarbarian)
+                {
+                    return MAX_TURNS;
+                }
+
                 var anarchyTurns = ((_cities.Count * REVOLUTION_TURNS_BY_CITY) + 1);
                 if (WonderIsActive(WonderPivot.Pyramids))
                 {
@@ -232,6 +243,11 @@ namespace ErsatzCivLib.Model
         {
             get
             {
+                if (Civilization.IsBarbarian)
+                {
+                    return false;
+                }
+
                 return Regime == RegimePivot.Anarchy && RevolutionTurnsCount == 0;
             }
         }
@@ -302,23 +318,33 @@ namespace ErsatzCivLib.Model
             Civilization = civilization;
             IsIA = isIa;
 
-            foreach (var advance in civilization.Advances)
+            if (!Civilization.IsBarbarian)
             {
-                AddAdvance(advance);
-            }
+                foreach (var advance in civilization.Advances)
+                {
+                    AddAdvance(advance);
+                }
 
-            Regime = RegimePivot.Despotism;
-            Treasure = TREASURE_START;
+                Regime = RegimePivot.Despotism;
+                Treasure = TREASURE_START;
 
-            ScienceRate = DEFAULT_SCIENCE_RATE;
-            LuxuryRate = DEFAULT_LUXURY_RATE;
+                ScienceRate = DEFAULT_SCIENCE_RATE;
+                LuxuryRate = DEFAULT_LUXURY_RATE;
 
-            if (beginLocation != null)
-            {
                 _units.Add(SettlerPivot.CreateAtLocation(null, beginLocation, this));
                 _units.Add(SettlerPivot.CreateAtLocation(null, beginLocation, this));
 
                 MapSquareDiscoveryInvokator(beginLocation, _engine.Map.GetAdjacentMapSquares(beginLocation).Values);
+            }
+            else
+            {
+                Regime = RegimePivot.Anarchy;
+                Treasure = 0;
+
+                ScienceRate = 0;
+                LuxuryRate = 1;
+
+                // TODO :add random units ?
             }
 
             SetUnitIndex(false, true);
@@ -375,7 +401,7 @@ namespace ErsatzCivLib.Model
         /// <param name="squares">List of <see cref="MapSquarePivot"/> where units can land.</param>
         internal void CreateHordeOfBarbarians(List<MapSquarePivot> squares)
         {
-            if (Civilization != CivilizationPivot.Barbarian)
+            if (!Civilization.IsBarbarian)
             {
                 return;
             }
@@ -402,6 +428,11 @@ namespace ErsatzCivLib.Model
         /// <param name="scienceRate">The <see cref="ScienceRate"/> value.</param>
         internal void ChangeRates(double luxuryRate, double scienceRate)
         {
+            if (Civilization.IsBarbarian)
+            {
+                return;
+            }
+
             LuxuryRate = luxuryRate;
             ScienceRate = scienceRate;
         }
@@ -411,6 +442,11 @@ namespace ErsatzCivLib.Model
         /// </summary>
         internal void TriggerRevolution()
         {
+            if (Civilization.IsBarbarian)
+            {
+                return;
+            }
+
             if (Regime != RegimePivot.Anarchy)
             {
                 Regime = RegimePivot.Anarchy;
@@ -430,6 +466,11 @@ namespace ErsatzCivLib.Model
         /// <returns><c>True</c> if the current advance has been changed; <c>False</c> otherwise.</returns>
         internal bool ChangeCurrentAdvance(AdvancePivot advance)
         {
+            if (Civilization.IsBarbarian)
+            {
+                return false;
+            }
+
             // Conditions to search :
             // - not already known
             // - prerequisites are known
@@ -460,6 +501,11 @@ namespace ErsatzCivLib.Model
         internal CityPivot BuildCity(int currentTurn, string name, out bool notUniqueNameError)
         {
             notUniqueNameError = false;
+
+            if (Civilization.IsBarbarian)
+            {
+                return null;
+            }
 
             if (!CanBuildCity())
             {
@@ -541,7 +587,7 @@ namespace ErsatzCivLib.Model
         /// <returns><c>True</c> if a city can be build; <c>False</c> otherwise.</returns>
         internal bool CanBuildCity()
         {
-            if (CurrentUnit?.Is<SettlerPivot>() != true)
+            if (Civilization.IsBarbarian || CurrentUnit?.Is<SettlerPivot>() != true)
             {
                 return false;
             }
@@ -603,74 +649,25 @@ namespace ErsatzCivLib.Model
         {
             var citiesWithDoneProduction = new Dictionary<CityPivot, BuildablePivot>();
 
-            foreach (var city in _cities)
-            {
-                var turnInfo = city.NextTurn();
-                var produced = turnInfo.Item1;
-                if (produced != null)
-                {
-                    if (produced.Is<UnitPivot>())
-                    {
-                        _units.Add(produced as UnitPivot);
-                        SetUnitIndex(false, false);
-                    }
-                    else
-                    {
-                        citiesWithDoneProduction.Add(city, produced);
-                    }
-
-                    if (CityImprovementPivot.Palace == produced)
-                    {
-                        city.SetAsNewCapital(Capital);
-                        Capital = city;
-                    }
-                    else if (WonderPivot.HooverDam == produced)
-                    {
-                        foreach (var contCity in Cities.Where(c =>
-                            c.MapSquareLocation.ContinentIndex == city.MapSquareLocation.ContinentIndex))
-                        {
-                            contCity.ForceCityImprovement(CityImprovementPivot.HydroPlant);
-                        }
-                    }
-                    else if (WonderPivot.ApolloProgram == produced)
-                    {
-                        foreach (var cityToShow in _engine.NotBarbarianPlayers.SelectMany(p => p.Cities))
-                        {
-                            MapSquareDiscoveryInvokator(cityToShow.MapSquareLocation, new List<MapSquarePivot>());
-                        }
-                    }
-                    else if (WonderPivot.DarwinVoyage == produced)
-                    {
-                        bool oneAdvanceWasReady = true;
-                        if (CurrentAdvance != null)
-                        {
-                            CheckScienceAtNextTurn(0);
-                            oneAdvanceWasReady = false;
-                        }
-                        ForcedAdvanceEvent?.Invoke(this, new ForcedAdvanceEventArgs(_advances.Last(), true));
-                        while (CurrentAdvance == null) { }
-                        CheckScienceAtNextTurn(0);
-                        ForcedAdvanceEvent?.Invoke(this, new ForcedAdvanceEventArgs(_advances.Last(), true));
-                        if (!oneAdvanceWasReady)
-                        {
-                            while (CurrentAdvance == null) { }
-                            CheckScienceAtNextTurn(0);
-                            ForcedAdvanceEvent?.Invoke(this, new ForcedAdvanceEventArgs(_advances.Last(), true));
-                        }
-                    }
-                }
-                if (turnInfo.Item2 != null)
-                {
-                    _units.Remove(turnInfo.Item2);
-                }
-            }
             foreach (var u in _units)
             {
                 u.Release();
             }
 
-            CheckScienceAtNextTurn(SCIENCE_COST);
-            CheckTreasureAtNextTurn();
+            if (!Civilization.IsBarbarian)
+            {
+                foreach (var city in _cities)
+                {
+                    var production = TreatCityAtTheEndOfTurn(city);
+                    if (production != null)
+                    {
+                        citiesWithDoneProduction.Add(city, production);
+                    }
+                }
+
+                CheckScienceAtNextTurn(SCIENCE_COST);
+                CheckTreasureAtNextTurn();
+            }
 
             SetUnitIndex(false, true);
 
@@ -751,14 +748,12 @@ namespace ErsatzCivLib.Model
             // TODO : attack to enemies units.
             // TODO : attack to enemies cities.
 
-            // Is there a good reason to do this early ?
-            var hut = _engine.Map.Huts.SingleOrDefault(h => h.MapSquareLocation == square);
-
             CurrentUnit.Move(direction.Value, prevSq, square);
 
             MapSquareDiscoveryInvokator(square, _engine.Map.GetAdjacentMapSquares(square).Values);
 
-            if (hut != null)
+            var hut = _engine.Map.Huts.SingleOrDefault(h => h.MapSquareLocation == square);
+            if (hut != null && !Civilization.IsBarbarian)
             {
                 DiscoverHut(square, hut);
             }
@@ -778,6 +773,11 @@ namespace ErsatzCivLib.Model
         /// <param name="regimePivot">The new <see cref="RegimePivot"/>.</param>
         internal void ChangeCurrentRegime(RegimePivot regimePivot)
         {
+            if (Civilization.IsBarbarian)
+            {
+                return;
+            }
+
             Regime = regimePivot;
             _anarchyTurnsCount = 0;
             CheckEveryCitiesHappiness();
@@ -792,7 +792,7 @@ namespace ErsatzCivLib.Model
         /// <returns><c>True</c> if success; <c>False</c> otherwise.</returns>
         internal bool SettlerAction(MapSquareImprovementPivot actionPivot)
         {
-            if (CurrentUnit == null || !CurrentUnit.Is<SettlerPivot>())
+            if (CurrentUnit == null || !CurrentUnit.Is<SettlerPivot>() || Civilization.IsBarbarian)
             {
                 return false;
             }
@@ -846,6 +846,11 @@ namespace ErsatzCivLib.Model
         internal IReadOnlyCollection<BuildablePivot> GetBuildableItemsForCity(CityPivot city, out int indexOfDefault)
         {
             indexOfDefault = -1;
+
+            if (Civilization.IsBarbarian)
+            {
+                return null;
+            }
 
             var buildableDefaultInstances = BuildablePivot.GetEveryDefaultInstances.ToList();
             if (buildableDefaultInstances == null)
@@ -960,6 +965,72 @@ namespace ErsatzCivLib.Model
         #endregion
 
         #region Private methods
+
+        private BuildablePivot TreatCityAtTheEndOfTurn(CityPivot city)
+        {
+            BuildablePivot prudctionReturned = null;
+
+            var turnInfo = city.NextTurn();
+            var produced = turnInfo.Item1;
+            if (produced != null)
+            {
+                if (produced.Is<UnitPivot>())
+                {
+                    _units.Add(produced as UnitPivot);
+                    SetUnitIndex(false, false);
+                }
+                else
+                {
+                    prudctionReturned = produced;
+                }
+
+                if (CityImprovementPivot.Palace == produced)
+                {
+                    city.SetAsNewCapital(Capital);
+                    Capital = city;
+                }
+                else if (WonderPivot.HooverDam == produced)
+                {
+                    foreach (var contCity in Cities.Where(c =>
+                        c.MapSquareLocation.ContinentIndex == city.MapSquareLocation.ContinentIndex))
+                    {
+                        contCity.ForceCityImprovement(CityImprovementPivot.HydroPlant);
+                    }
+                }
+                else if (WonderPivot.ApolloProgram == produced)
+                {
+                    foreach (var cityToShow in _engine.NotBarbarianPlayers.SelectMany(p => p.Cities))
+                    {
+                        MapSquareDiscoveryInvokator(cityToShow.MapSquareLocation, new List<MapSquarePivot>());
+                    }
+                }
+                else if (WonderPivot.DarwinVoyage == produced)
+                {
+                    bool oneAdvanceWasReady = true;
+                    if (CurrentAdvance != null)
+                    {
+                        CheckScienceAtNextTurn(0);
+                        oneAdvanceWasReady = false;
+                    }
+                    ForcedAdvanceEvent?.Invoke(this, new ForcedAdvanceEventArgs(_advances.Last(), true));
+                    while (CurrentAdvance == null) { }
+                    CheckScienceAtNextTurn(0);
+                    ForcedAdvanceEvent?.Invoke(this, new ForcedAdvanceEventArgs(_advances.Last(), true));
+                    if (!oneAdvanceWasReady)
+                    {
+                        while (CurrentAdvance == null) { }
+                        CheckScienceAtNextTurn(0);
+                        ForcedAdvanceEvent?.Invoke(this, new ForcedAdvanceEventArgs(_advances.Last(), true));
+                    }
+                }
+            }
+            if (turnInfo.Item2 != null)
+            {
+                _units.Remove(turnInfo.Item2);
+            }
+
+            return prudctionReturned;
+        }
 
         private void CheckEveryCitiesHappiness()
         {

@@ -40,6 +40,21 @@ namespace ErsatzCivLib.Model.Static
 
         #endregion
 
+        #region Inferred properties
+
+        /// <summary>
+        /// Indicates if the current instance is <see cref="Barbarian"/>.
+        /// </summary>
+        public bool IsBarbarian
+        {
+            get
+            {
+                return this == Barbarian;
+            }
+        }
+
+        #endregion
+
         private CivilizationPivot() { }
 
         /// <summary>
