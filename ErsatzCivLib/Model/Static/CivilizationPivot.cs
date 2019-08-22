@@ -333,23 +333,35 @@ namespace ErsatzCivLib.Model.Static
             _cities = new List<string> { "Zimbabwe", "Ulundi", "Bapedi", "Hlobane", "Isandhlwala", "Intombe", "Mpondo", "Ngome",
                 "Swazi", "Tugela", "Umtata", "Umfolozi", "Ibabanago", "Isipezi", "Amatikulu", "Zunquin" }
         };
+        /// <summary>
+        /// Constant; the barbarian "fake" civilization.
+        /// </summary>
+        public static readonly CivilizationPivot Barbarian = new CivilizationPivot
+        {
+            Name = "Barbarian",
+            ManLeaderName = "Anonymous",
+            WomanLeaderName = "Anonymous",
+            _advances = new List<AdvancePivot>(),
+            _cities = new List<string>()
+        };
 
         #endregion
 
         private static List<CivilizationPivot> _instances = null;
+
         /// <summary>
-        /// List of every <see cref="CivilizationPivot"/> instances.
+        /// Gets a list of every <see cref="CivilizationPivot"/> instances.
         /// </summary>
-        public static IReadOnlyCollection<CivilizationPivot> Instances
+        /// <param name="withBarbarianCiv">Specifiy if <see cref="Barbarian"/> civilization should be included or not.</param>
+        /// <returns>List of civilizations.</returns>
+        public static IReadOnlyCollection<CivilizationPivot> GetCivilizations(bool withBarbarianCiv)
         {
-            get
+            if (_instances == null)
             {
-                if (_instances == null)
-                {
-                    _instances = Tools.GetInstancesOfTypeFromStaticFields<CivilizationPivot>();
-                }
-                return _instances;
+                _instances = Tools.GetInstancesOfTypeFromStaticFields<CivilizationPivot>();
+                _instances.Remove(Barbarian);
             }
+            return withBarbarianCiv ? _instances.Concat(new[] { Barbarian }).ToList() : _instances;
         }
     }
 }

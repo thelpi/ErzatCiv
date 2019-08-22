@@ -47,7 +47,7 @@ namespace ErsatzCiv
             ComboBoxTemperature.ItemsSource = Enum.GetValues(typeof(TemperaturePivot));
             ComboBoxAge.ItemsSource = Enum.GetValues(typeof(AgePivot));
             ComboBoxHumidity.ItemsSource = Enum.GetValues(typeof(HumidityPivot));
-            ComboBoxCivilization.ItemsSource = CivilizationPivot.Instances;
+            ComboBoxCivilization.ItemsSource = CivilizationPivot.GetCivilizations(false);
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
@@ -128,7 +128,7 @@ namespace ErsatzCiv
 
         private void ComboBoxSize_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            var count = CivilizationPivot.Instances.Count;
+            var count = CivilizationPivot.GetCivilizations(false).Count;
             if (ComboBoxSize.SelectedItem != null)
             {
                 count /= (6 - (int)ComboBoxSize.SelectedItem);

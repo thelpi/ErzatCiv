@@ -81,7 +81,7 @@ namespace ErsatzCivLib
                 throw new ArgumentNullException(nameof(playerCivilization));
             }
             iaPlayersCount = iaPlayersCount < 0 ? 0 : iaPlayersCount;
-            if (iaPlayersCount > CivilizationPivot.Instances.Count / (6 - (int)mapSize))
+            if (iaPlayersCount > CivilizationPivot.GetCivilizations(false).Count / (6 - (int)mapSize))
             {
                 throw new ArgumentException("The IA players count is too high for this map size !", nameof(iaPlayersCount));
             }
@@ -91,12 +91,14 @@ namespace ErsatzCivLib
             List<MapSquarePivot> excludedSpots = new List<MapSquarePivot>();
 
             HumanPlayer = new PlayerPivot(this, playerCivilization, false, GetRandomLocation(excludedSpots), playerGender);
+
+            var allCivs = CivilizationPivot.GetCivilizations(false);
             for (int i = 0; i < iaPlayersCount; i++)
             {
                 CivilizationPivot iaCiv = null;
                 do
                 {
-                    iaCiv = CivilizationPivot.Instances.ElementAt(Tools.Randomizer.Next(0, CivilizationPivot.Instances.Count));
+                    iaCiv = allCivs.ElementAt(Tools.Randomizer.Next(0, allCivs.Count));
                 }
                 while (HumanPlayer.Civilization == iaCiv || _iaPlayers.Any(ia => ia.Civilization == iaCiv));
                 _iaPlayers.Add(new PlayerPivot(this, iaCiv, true, GetRandomLocation(excludedSpots), Tools.Randomizer.Next(0, 2) == 0));
