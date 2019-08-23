@@ -17,7 +17,7 @@ namespace ErsatzCivLib.Model
     public class PlayerPivot : IEquatable<PlayerPivot>
     {
         private const double REVOLUTION_TURNS_BY_CITY = 0.5;
-        private const int TREASURE_START = 100;
+        private const int TREASURE_START = 50;
         private const int SCIENCE_COST = 100;
         private const double DEFAULT_LUXURY_RATE = 0;
         private const double DEFAULT_SCIENCE_RATE = 0.5;

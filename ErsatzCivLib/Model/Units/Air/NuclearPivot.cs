@@ -6,12 +6,17 @@ namespace ErsatzCivLib.Model.Units.Air
     /// <summary>
     /// Represents a nuclear strike unit.
     /// </summary>
+    /// <remarks>
+    /// Disappears on use.
+    /// Can't be seen by opponent.
+    /// Causes pollution on land, but not on sea.
+    /// </remarks>
     /// <seealso cref="AirUnitPivot"/>
     [Serializable]
     public class NuclearPivot : AirUnitPivot
     {
         private NuclearPivot(CityPivot city, MapSquarePivot location, PlayerPivot player) :
-            base(city, 99, 0, 16, 160, AdvancePivot.Rocketry, null, 3200, null, location, player)
+            base(city, 99, 0, 16, 160, AdvancePivot.Rocketry, null, 3200, null, location, player, true, false, false, 1, 1, 1)
         { }
 
         /// <summary>

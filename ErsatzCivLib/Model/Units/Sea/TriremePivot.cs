@@ -1,17 +1,18 @@
 ﻿using System;
 using ErsatzCivLib.Model.Static;
 
-namespace ErsatzCivLib.Model.Units.Air
+namespace ErsatzCivLib.Model.Units.Sea
 {
     /// <summary>
-    /// Represents a bomber plane unit.
+    /// Represents a trireme unit.
     /// </summary>
+    /// <remarks>Must finish turn on a coast square.</remarks>
     /// <seealso cref="SeaUnitPivot"/>
     [Serializable]
     public class TriremePivot : SeaUnitPivot
     {
         private TriremePivot(CityPivot city, MapSquarePivot location, PlayerPivot player) :
-            base(city, 1, 0, 3, 40, AdvancePivot.MapMaking, AdvancePivot.Navigation, 320, null, location, player)
+            base(city, 1, 0, 3, 40, AdvancePivot.MapMaking, AdvancePivot.Navigation, 320, null, location, player, false, false, 1, 2, false, 1)
         { }
 
         /// <summary>

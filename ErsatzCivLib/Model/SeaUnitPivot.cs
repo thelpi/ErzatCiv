@@ -12,6 +12,19 @@ namespace ErsatzCivLib.Model
         private const int MAGELLAN_WONDER_INCREASE_SPEED = 1;
         private const int LIGHTHOUSE_WONDER_INCREASE_SPEED = 1;
 
+        #region Embedded properties
+
+        /// <summary>
+        /// Transport capacity (<see cref="LandUnitPivot"/> only).
+        /// </summary>
+        public int TransportCapacity { get; private set; }
+        /// <summary>
+        /// If <c>True</c>, can attack opponent <see cref="LandUnitPivot"/>.
+        /// </summary>
+        public bool CanAttackCoastUnit { get; private set; }
+
+        #endregion
+
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -26,12 +39,21 @@ namespace ErsatzCivLib.Model
         /// <param name="name">The <see cref="BuildablePivot.Name"/> value.</param>
         /// <param name="location">The <see cref="UnitPivot.MapSquareLocation"/> value, if <paramref name="city"/> is <c>Null</c>.</param>
         /// <param name="player">The <see cref="UnitPivot.Player"/> value, if <paramref name="city"/> is <c>Null</c>.</param>
+        /// <param name="ignoreControlZone">Optional; the <see cref="UnitPivot.IgnoreControlZone"/> value.</param>
+        /// <param name="ignoreCityWalls">Optional; the <see cref="UnitPivot.IgnoreCityWalls"/> value.</param>
+        /// <param name="squareSight">Optional; the <see cref="UnitPivot.SquareSight"/> value.</param>
+        /// <param name="transportCapacity">Optional; the <see cref="TransportCapacity"/> value.</param>
+        /// <param name="canAttackCoastUnit">Optional; the <see cref="CanAttackCoastUnit"/> value.</param>
+        /// <param name="maintenanceCost">The <see cref="UnitPivot.MaintenanceCost"/> value.</param>
         protected SeaUnitPivot(CityPivot city, int offensePoints, int defensePoints, int speed, int productivityCost,
-            AdvancePivot advancePrerequisite, AdvancePivot advanceObsolescence, int purchasePrice, string name,
-            MapSquarePivot location, PlayerPivot player) :
-            base(city, offensePoints, defensePoints, speed, productivityCost,
-                advancePrerequisite, advanceObsolescence, purchasePrice, name, 0, location, player)
-        { }
+            AdvancePivot advancePrerequisite, AdvancePivot advanceObsolescence, int purchasePrice, string name, MapSquarePivot location,
+            PlayerPivot player, bool ignoreControlZone, bool ignoreCityWalls, int squareSight, int transportCapacity, bool canAttackCoastUnit, int maintenanceCost) :
+            base(city, offensePoints, defensePoints, speed, productivityCost, advancePrerequisite, advanceObsolescence, purchasePrice, name, 0,
+                location, player, ignoreControlZone, ignoreCityWalls, squareSight, maintenanceCost)
+        {
+            TransportCapacity = transportCapacity;
+            CanAttackCoastUnit = canAttackCoastUnit;
+        }
 
         /// <summary>
         /// Computes the real <see cref="UnitPivot.Speed"/>.

@@ -9,6 +9,19 @@ namespace ErsatzCivLib.Model
     [Serializable]
     public abstract class AirUnitPivot : UnitPivot
     {
+        #region Embedded properties
+
+        /// <summary>
+        /// If <c>True</c>, can attack opponent's <see cref="AirUnitPivot"/>.
+        /// </summary>
+        public bool CanAttackAirUnit { get; private set; }
+        /// <summary>
+        /// Number of turn before goiing back to city or <see cref="Units.Sea.CarrierPivot"/>.
+        /// </summary>
+        public int TurnsInAir { get; private set; }
+
+        #endregion
+
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -23,11 +36,20 @@ namespace ErsatzCivLib.Model
         /// <param name="name">The <see cref="BuildablePivot.Name"/> value.</param>
         /// <param name="location">The <see cref="UnitPivot.MapSquareLocation"/> value, if <paramref name="city"/> is <c>Null</c>.</param>
         /// <param name="player">The <see cref="UnitPivot.Player"/> value, if <paramref name="city"/> is <c>Null</c>.</param>
+        /// <param name="ignoreControlZone">The <see cref="UnitPivot.IgnoreControlZone"/> value.</param>
+        /// <param name="canAttackAirUnit">The <see cref="CanAttackAirUnit"/> value.</param>
+        /// <param name="ignoreCityWalls">The <see cref="UnitPivot.IgnoreCityWalls"/> value.</param>
+        /// <param name="squareSight">The <see cref="UnitPivot.SquareSight"/> value.</param>
+        /// <param name="turnsInAir">The <see cref="TurnsInAir"/> value.</param>
+        /// <param name="maintenanceCost">The <see cref="UnitPivot.MaintenanceCost"/> value.</param>
         protected AirUnitPivot(CityPivot city, int offensePoints, int defensePoints, int speed, int productivityCost,
-            AdvancePivot advancePrerequisite, AdvancePivot advanceObsolescence, int purchasePrice, string name,
-            MapSquarePivot location, PlayerPivot player) :
-            base(city, offensePoints, defensePoints, speed, productivityCost,
-                advancePrerequisite, advanceObsolescence, purchasePrice, name, 0, location, player)
-        { }
+            AdvancePivot advancePrerequisite, AdvancePivot advanceObsolescence, int purchasePrice, string name, MapSquarePivot location,
+            PlayerPivot player, bool ignoreControlZone, bool canAttackAirUnit, bool ignoreCityWalls, int squareSight, int turnsInAir, int maintenanceCost) :
+            base(city, offensePoints, defensePoints, speed, productivityCost, advancePrerequisite, advanceObsolescence, purchasePrice, name,
+                0, location, player, ignoreControlZone, ignoreCityWalls, squareSight, maintenanceCost)
+        {
+            CanAttackAirUnit = canAttackAirUnit;
+            TurnsInAir = turnsInAir;
+        }
     }
 }

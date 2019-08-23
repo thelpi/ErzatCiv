@@ -11,7 +11,7 @@ namespace ErsatzCivLib.Model.Units.Land
     public class DiplomatPivot : LandUnitPivot
     {
         private DiplomatPivot(CityPivot city, MapSquarePivot location, PlayerPivot player) :
-            base(city, 0, 0, 2, 30, AdvancePivot.Writing, null, 210, null, 0, location, player)
+            base(city, 0, 0, 2, 30, AdvancePivot.Writing, null, 210, null, 0, location, player, ignoreControlZone: true, maintenanceCost: 0)
         { }
 
         /// <summary>

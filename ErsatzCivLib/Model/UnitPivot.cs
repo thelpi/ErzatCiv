@@ -55,13 +55,29 @@ namespace ErsatzCivLib.Model
         /// Citizens cost to produce the unit.
         /// </summary>
         public int CitizenCostToProduce { get; private set; }
+        /// <summary>
+        /// If <c>True</c>, ignore opponent control's zone.
+        /// </summary>
+        public bool IgnoreControlZone { get; private set; }
+        /// <summary>
+        /// If <c>True</c>, opponent <see cref="CityImprovementPivot.CityWalls"/> has no effect.
+        /// </summary>
+        public bool IgnoreCityWalls { get; private set; }
+        /// <summary>
+        /// Number of squares in sight.
+        /// </summary>
+        public int SquareSight { get; private set; }
+        /// <summary>
+        /// The maintenance cost, in productivity by turn.
+        /// </summary>
+        public int MaintenanceCost { get; private set; }
 
         #endregion
 
         #region Inferred properties
 
         /// <summary>
-        /// Indicates if the unit is a military one.
+        /// Indicates if the unit is a military one; peaceful units doesn't cause unhappiness in republic or democracy.
         /// </summary>
         public bool IsMilitary { get { return OffensePoints > 0; } }
 
@@ -82,9 +98,13 @@ namespace ErsatzCivLib.Model
         /// <param name="citizenCostToProduce">The <see cref="CitizenCostToProduce"/> value.</param>
         /// <param name="location">The <see cref="MapSquareLocation"/> value, if <paramref name="city"/> is <c>Null</c>.</param>
         /// <param name="player">The <see cref="Player"/> value, if <paramref name="city"/> is <c>Null</c>.</param>
-        protected UnitPivot(CityPivot city, int offensePoints, int defensePoints, int speed, int productivityCost,
-            AdvancePivot advancePrerequisite, AdvancePivot advanceObsolescence, int purchasePrice, string name,
-            int citizenCostToProduce, MapSquarePivot location, PlayerPivot player) :
+        /// <param name="ignoreControlZone">The <see cref="IgnoreControlZone"/> value.</param>
+        /// <param name="ignoreCityWalls">The <see cref="IgnoreCityWalls"/> value.</param>
+        /// <param name="squareSight">The <see cref="SquareSight"/> value.</param>
+        /// <param name="maintenanceCost">The <see cref="MaintenanceCost"/> value.</param>
+        protected UnitPivot(CityPivot city, int offensePoints, int defensePoints, int speed, int productivityCost, AdvancePivot advancePrerequisite,
+            AdvancePivot advanceObsolescence, int purchasePrice, string name, int citizenCostToProduce, MapSquarePivot location, PlayerPivot player,
+            bool ignoreControlZone, bool ignoreCityWalls, int squareSight, int maintenanceCost) :
             base(productivityCost, advancePrerequisite, advanceObsolescence, purchasePrice, name, false)
         {
             Player = city?.Player ?? player;
@@ -95,6 +115,10 @@ namespace ErsatzCivLib.Model
             Speed = speed;
             RemainingMoves = ComputeRealSpeed();
             CitizenCostToProduce = citizenCostToProduce;
+            IgnoreControlZone = ignoreControlZone;
+            IgnoreCityWalls = ignoreCityWalls;
+            SquareSight = squareSight;
+            MaintenanceCost = maintenanceCost;
         }
 
         /// <summary>

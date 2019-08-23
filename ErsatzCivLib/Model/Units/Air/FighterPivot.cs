@@ -11,7 +11,7 @@ namespace ErsatzCivLib.Model.Units.Air
     public class FighterPivot : AirUnitPivot
     {
         private FighterPivot(CityPivot city, MapSquarePivot location, PlayerPivot player) :
-            base(city, 4, 2, 10, 60, AdvancePivot.Flight, null, 600, null, location, player)
+            base(city, 4, 2, 10, 60, AdvancePivot.Flight, null, 600, null, location, player, false, true, false, 1, 1, 1)
         { }
 
         /// <summary>

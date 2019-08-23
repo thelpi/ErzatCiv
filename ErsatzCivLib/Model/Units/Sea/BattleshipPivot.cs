@@ -1,7 +1,7 @@
 ﻿using System;
 using ErsatzCivLib.Model.Static;
 
-namespace ErsatzCivLib.Model.Units.Air
+namespace ErsatzCivLib.Model.Units.Sea
 {
     /// <summary>
     /// Represents a battleship unit.
@@ -11,7 +11,7 @@ namespace ErsatzCivLib.Model.Units.Air
     public class BattleshipPivot : SeaUnitPivot
     {
         private BattleshipPivot(CityPivot city, MapSquarePivot location, PlayerPivot player) :
-            base(city, 18, 12, 4, 160, AdvancePivot.Steel, null, 3200, null, location, player)
+            base(city, 18, 12, 4, 160, AdvancePivot.Steel, null, 3200, null, location, player, false, false, 2, 0, true, 1)
         { }
 
         /// <summary>

@@ -11,7 +11,7 @@ namespace ErsatzCivLib.Model.Units.Land
     public class ArtilleryPivot : LandUnitPivot
     {
         private ArtilleryPivot(CityPivot city, MapSquarePivot location, PlayerPivot player) :
-            base(city, 12, 2, 2, 60, AdvancePivot.Robotics, null, 600, null, 0, location, player)
+            base(city, 12, 2, 2, 60, AdvancePivot.Robotics, null, 600, null, 0, location, player, ignoreCityWalls: true)
         { }
 
         /// <summary>

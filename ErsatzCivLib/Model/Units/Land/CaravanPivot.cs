@@ -11,7 +11,7 @@ namespace ErsatzCivLib.Model.Units.Land
     public class CaravanPivot : LandUnitPivot
     {
         private CaravanPivot(CityPivot city, MapSquarePivot location, PlayerPivot player) :
-            base(city, 0, 1, 1, 50, AdvancePivot.Trade, null, 450, null, 0, location, player)
+            base(city, 0, 1, 1, 50, AdvancePivot.Trade, null, 450, null, 0, location, player, ignoreControlZone: true, maintenanceCost: 0)
         { }
 
         /// <summary>

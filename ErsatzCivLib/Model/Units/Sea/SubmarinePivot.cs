@@ -1,17 +1,18 @@
 ﻿using System;
 using ErsatzCivLib.Model.Static;
 
-namespace ErsatzCivLib.Model.Units.Air
+namespace ErsatzCivLib.Model.Units.Sea
 {
     /// <summary>
-    /// Represents a bomber plane unit.
+    /// Represents a submarine unit.
     /// </summary>
+    /// <remarks>Invisible to land units, can be spotted only when adjacent to a sea or an air unit (not when two spaces away).</remarks>
     /// <seealso cref="SeaUnitPivot"/>
     [Serializable]
     public class SubmarinePivot : SeaUnitPivot
     {
         private SubmarinePivot(CityPivot city, MapSquarePivot location, PlayerPivot player) :
-            base(city, 8, 2, 3, 50, AdvancePivot.MassProduction, null, 450, null, location, player)
+            base(city, 8, 2, 3, 50, AdvancePivot.MassProduction, null, 450, null, location, player, false, false, 2, 0, false, 1)
         { }
 
         /// <summary>

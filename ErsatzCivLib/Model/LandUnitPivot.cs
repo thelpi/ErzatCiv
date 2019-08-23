@@ -24,11 +24,14 @@ namespace ErsatzCivLib.Model
         /// <param name="citizenCostToProduce">The <see cref="UnitPivot.CitizenCostToProduce"/> value.</param>
         /// <param name="location">The <see cref="UnitPivot.MapSquareLocation"/> value, if <paramref name="city"/> is <c>Null</c>.</param>
         /// <param name="player">The <see cref="UnitPivot.Player"/> value, if <paramref name="city"/> is <c>Null</c>.</param>
+        /// <param name="ignoreControlZone">Optional; the <see cref="UnitPivot.IgnoreControlZone"/> value.</param>
+        /// <param name="ignoreCityWalls">Optional; the <see cref="UnitPivot.IgnoreCityWalls"/> value.</param>
+        /// <param name="maintenanceCost">Optional; the <see cref="UnitPivot.MaintenanceCost"/> value.</param>
         protected LandUnitPivot(CityPivot city, int offensePoints, int defensePoints, int speed, int productivityCost,
             AdvancePivot advancePrerequisite, AdvancePivot advanceObsolescence, int purchasePrice, string name, int citizenCostToProduce,
-            MapSquarePivot location, PlayerPivot player) :
-            base(city, offensePoints, defensePoints, speed, productivityCost,
-                advancePrerequisite, advanceObsolescence, purchasePrice, name, citizenCostToProduce, location, player)
+            MapSquarePivot location, PlayerPivot player, bool ignoreControlZone = false, bool ignoreCityWalls = false, int maintenanceCost = 1) :
+            base(city, offensePoints, defensePoints, speed, productivityCost, advancePrerequisite, advanceObsolescence,
+                purchasePrice, name, citizenCostToProduce, location, player, ignoreControlZone, ignoreCityWalls, 1, maintenanceCost)
         { }
     }
 }

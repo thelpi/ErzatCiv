@@ -1,17 +1,17 @@
 ﻿using System;
 using ErsatzCivLib.Model.Static;
 
-namespace ErsatzCivLib.Model.Units.Air
+namespace ErsatzCivLib.Model.Units.Sea
 {
     /// <summary>
-    /// Represents a bomber plane unit.
+    /// Represents a frigate unit.
     /// </summary>
     /// <seealso cref="SeaUnitPivot"/>
     [Serializable]
     public class FrigatePivot : SeaUnitPivot
     {
         private FrigatePivot(CityPivot city, MapSquarePivot location, PlayerPivot player) :
-            base(city, 2, 2, 3, 40, AdvancePivot.Magnetism, AdvancePivot.Industrialization, 320, null, location, player)
+            base(city, 2, 2, 3, 40, AdvancePivot.Magnetism, AdvancePivot.Industrialization, 320, null, location, player, false, false, 1, 4, true, 1)
         { }
 
         /// <summary>
