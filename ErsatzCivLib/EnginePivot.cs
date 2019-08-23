@@ -192,7 +192,6 @@ namespace ErsatzCivLib
 
             // MapSquares where a barbarian unit can land.
             var squares = Map.GetAdjacentMapSquares(hut.MapSquareLocation)
-                            .Select(msKvp => msKvp.Value)
                             .Where(ms => !ms.Biome.IsSeaType && !IsCity(ms) && !NotBarbarianPlayers.Any(p => p.Units.Any(u => u.MapSquareLocation == ms)))
                             .ToList();
 

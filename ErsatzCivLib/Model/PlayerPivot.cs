@@ -340,7 +340,7 @@ namespace ErsatzCivLib.Model
                 _units.Add(SettlerPivot.CreateAtLocation(null, beginLocation, this));
                 _units.Add(SettlerPivot.CreateAtLocation(null, beginLocation, this));
 
-                MapSquareDiscoveryInvokator(beginLocation, _engine.Map.GetAdjacentMapSquares(beginLocation).Values);
+                MapSquareDiscoveryInvokator(beginLocation, _engine.Map.GetAdjacentMapSquares(beginLocation, 2));
             }
             else
             {
@@ -798,7 +798,7 @@ namespace ErsatzCivLib.Model
 
             CurrentUnit.Move(direction.Value, prevSq, square);
 
-            MapSquareDiscoveryInvokator(square, _engine.Map.GetAdjacentMapSquares(square).Values);
+            MapSquareDiscoveryInvokator(square, _engine.Map.GetAdjacentMapSquares(square, CurrentUnit.SquareSight));
 
             var hut = _engine.Map.Huts.SingleOrDefault(h => h.MapSquareLocation == square);
             if (hut != null && !Civilization.IsBarbarian)
@@ -871,7 +871,7 @@ namespace ErsatzCivLib.Model
             
             if (actionPivot == MapSquareImprovementPivot.Irrigate
                 && sq.Biome != BiomePivot.River
-                && !_engine.Map.GetAdjacentMapSquares(sq).Values.Any(asq => asq.Irrigate || asq.Biome.IsSeaType || asq.Biome == BiomePivot.River))
+                && !_engine.Map.GetAdjacentMapSquares(sq).Any(asq => asq.Irrigate || asq.Biome.IsSeaType || asq.Biome == BiomePivot.River))
             {
                 return false;
             }
@@ -958,7 +958,7 @@ namespace ErsatzCivLib.Model
 
             // No hydroplant if no water.
             if (city.MapSquareLocation.Biome != BiomePivot.River
-                && !_engine.Map.GetAdjacentMapSquares(city.MapSquareLocation).Values.Any(msq => msq.Biome.IsSeaType || msq.Biome == BiomePivot.River))
+                && !_engine.Map.GetAdjacentMapSquares(city.MapSquareLocation).Any(msq => msq.Biome.IsSeaType || msq.Biome == BiomePivot.River))
             {
                 buildableDefaultInstances.Remove(CityImprovementPivot.HydroPlant);
             }

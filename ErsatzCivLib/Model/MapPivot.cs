@@ -334,26 +334,27 @@ namespace ErsatzCivLib.Model
         #region Internal methods
 
         /// <summary>
-        /// Gets the <c>8</c> adjacent squares of a <see cref="MapSquarePivot"/>.
-        /// Invalid values are cleaned, so the final list might not contains <c>8</c> elements.
+        /// Gets the adjacent squares of a <see cref="MapSquarePivot"/>.
         /// </summary>
         /// <param name="mapSquare">The location.</param>
-        /// <returns>List of <see cref="MapSquarePivot"/>, one by <see cref="DirectionPivot"/>.</returns>
-        internal IReadOnlyDictionary<DirectionPivot, MapSquarePivot> GetAdjacentMapSquares(MapSquarePivot mapSquare)
+        /// <param name="radius">The radius.</param>
+        /// <returns>List of <see cref="MapSquarePivot"/>.</returns>
+        internal IReadOnlyCollection<MapSquarePivot> GetAdjacentMapSquares(MapSquarePivot mapSquare, int radius = 1)
         {
-            var msList = new Dictionary<DirectionPivot, MapSquarePivot>
+            var squares = new List<MapSquarePivot>();
+            for (int i = mapSquare.Row - radius; i <= mapSquare.Row + radius; i++)
             {
-                { DirectionPivot.TopLeft, this[mapSquare.Row - 1, mapSquare.Column - 1] },
-                { DirectionPivot.Left, this[mapSquare.Row, mapSquare.Column - 1] },
-                { DirectionPivot.BottomLeft, this[mapSquare.Row + 1, mapSquare.Column - 1] },
-                { DirectionPivot.Top, this[mapSquare.Row - 1, mapSquare.Column] },
-                { DirectionPivot.Bottom, this[mapSquare.Row + 1, mapSquare.Column] },
-                { DirectionPivot.TopRight, this[mapSquare.Row - 1, mapSquare.Column + 1] },
-                { DirectionPivot.Right, this[mapSquare.Row, mapSquare.Column + 1] },
-                { DirectionPivot.BottomRight, this[mapSquare.Row + 1, mapSquare.Column + 1] },
-            };
+                for (int j = mapSquare.Column - radius; j <= mapSquare.Column + radius; j++)
+                {
+                    var sq = this[i, j];
+                    if (sq != null)
+                    {
+                        squares.Add(sq);
+                    }
+                }
+            }
 
-            return msList.Where(x => x.Value != null).ToDictionary(x => x.Key, x => x.Value);
+            return squares.Where(sq => sq != null).ToList();
         }
 
         /// <summary>
