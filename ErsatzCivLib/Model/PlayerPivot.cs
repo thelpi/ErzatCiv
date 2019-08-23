@@ -588,7 +588,6 @@ namespace ErsatzCivLib.Model
             MapSquareDiscoveryInvokator(city.MapSquareLocation, _engine.GetMapSquaresAroundCity(city).Keys);
 
             _cities.Add(city);
-            _cities.SingleOrDefault(c => c.Settlers.Contains(settler))?.UnlinkSettler(settler);
             _units.Remove(settler);
             SetUnitIndex(true, false);
 
@@ -1042,6 +1041,7 @@ namespace ErsatzCivLib.Model
                     foreach (var contCity in Cities.Where(c =>
                         c.MapSquareLocation.ContinentIndex == city.MapSquareLocation.ContinentIndex))
                     {
+                        // TODO : the HydroPlant maintenance cost should be zero in this case.
                         contCity.ForceCityImprovement(CityImprovementPivot.HydroPlant);
                     }
                 }
@@ -1072,9 +1072,9 @@ namespace ErsatzCivLib.Model
                     }
                 }
             }
-            if (turnInfo.Item2 != null)
+            if (turnInfo.Item2)
             {
-                _units.Remove(turnInfo.Item2);
+                _units.Remove(_units.First(u => u.Is<SettlerPivot>() && u.City == city));
             }
 
             return prudctionReturned;

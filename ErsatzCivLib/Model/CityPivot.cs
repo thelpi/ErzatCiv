@@ -127,11 +127,6 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public IReadOnlyCollection<UnitPivot> Garrison { get { return _garrison; } }
 
-        private List<SettlerPivot> _settlers = new List<SettlerPivot>();
-        /// <summary>
-        /// Settlers on the map who belong to this city.
-        /// </summary>
-        public IReadOnlyCollection<SettlerPivot> Settlers { get { return _settlers; } }
 
         private readonly List<CitizenPivot> _specialistCitizens;
         /// <summary>
@@ -272,7 +267,7 @@ namespace ErsatzCivLib.Model
         {
             get
             {
-                return (CitizensCount * FOOD_BY_CITIZEN_BY_TURN) + (_settlers.Count * Player.Regime.SettlerFoodConsumption);
+                return (CitizensCount * FOOD_BY_CITIZEN_BY_TURN) + (Player.Units.Count(u => u.Is<SettlerPivot>() && u.City == this) * Player.Regime.SettlerFoodConsumption);
             }
         }
         /// <summary>
@@ -307,7 +302,12 @@ namespace ErsatzCivLib.Model
                     return 0;
                 }
 
-                return AreaMapSquares.Sum(ams => Player.Regime.ProductionMalus && ams.Food > 2 ? (ams.Productivity - 1) : ams.Productivity);
+                var baseValue = AreaMapSquares.Sum(ams =>
+                    Player.Regime.ProductionMalus && ams.Food > 2 ? (ams.Productivity - 1) : ams.Productivity);
+
+                baseValue -= Player.Units.Where(u => u.City == this).Sum(u => u.MaintenanceCost);
+
+                return baseValue;
             }
         }
         /// <summary>
@@ -395,7 +395,11 @@ namespace ErsatzCivLib.Model
                     baseValue *= BANK_COMMERCE_INCREASE_RATIO;
                 }
 
-                return (int)Math.Round(baseValue);
+                var valueInt = (int)Math.Round(baseValue);
+
+                valueInt -= _improvements.Sum(i => i.MaintenanceCost);
+
+                return valueInt;
             }
         }
         /// <summary>
@@ -666,10 +670,10 @@ namespace ErsatzCivLib.Model
         /// <summary>
         /// Recomputes everything before passing to the next turn.
         /// </summary>
-        /// <returns>A tuple of values [finished production / settler disbanded].</returns>
-        internal Tuple<BuildablePivot, SettlerPivot> NextTurn()
+        /// <returns>A tuple of values [finished production / settler to disband].</returns>
+        internal Tuple<BuildablePivot, bool> NextTurn()
         {
-            SettlerPivot disbandedSettler = null;
+            bool disbandSettler = false;
 
             BuildablePivot produced = null;
             bool resetCitizensRequired = false;
@@ -705,10 +709,9 @@ namespace ErsatzCivLib.Model
 
             if (FoodStorage < 0 && FoodGranaryStorage < 0)
             {
-                if (_settlers.Count > 0)
+                if (Player.Units.Any(u => u.Is<SettlerPivot>() && u.City == this))
                 {
-                    disbandedSettler = _settlers[0];
-                    _settlers.RemoveAt(0);
+                    disbandSettler = true;
                 }
                 else
                 {
@@ -796,13 +799,9 @@ namespace ErsatzCivLib.Model
             if (produced != null)
             {
                 RemovePreviousPlant(produced);
-                if (produced.Is<SettlerPivot>())
-                {
-                    _settlers.Add(produced as SettlerPivot);
-                }
             }
 
-            return new Tuple<BuildablePivot, SettlerPivot>(produced, disbandedSettler);
+            return new Tuple<BuildablePivot, bool>(produced, disbandSettler);
         }
 
         /// <summary>
@@ -942,15 +941,6 @@ namespace ErsatzCivLib.Model
             }
             //_improvements.Remove(CityImprovementPivot.Courthouse);
             _improvements.Add(CityImprovementPivot.Palace);
-        }
-
-        /// <summary>
-        /// Proceeds to unlink a <see cref="SettlerPivot"/> from the city.
-        /// </summary>
-        /// <param name="settler">The settler.</param>
-        internal void UnlinkSettler(SettlerPivot settler)
-        {
-            _settlers.Remove(settler);
         }
 
         /// <summary>
