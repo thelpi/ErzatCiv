@@ -181,6 +181,15 @@ namespace ErsatzCivLib
         #region Internal methods
 
         /// <summary>
+        /// Removes a defeated opponent.
+        /// </summary>
+        /// <param name="opponent">The opponent.</param>
+        internal void RemoveOpponent(PlayerPivot opponent)
+        {
+            _opponentPlayers.Remove(opponent);
+        }
+
+        /// <summary>
         /// Adds barbarians to the engine from an <see cref="HutPivot"/>.
         /// </summary>
         /// <param name="hut">The hut.</param>

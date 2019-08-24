@@ -270,6 +270,16 @@ namespace ErsatzCivLib.Model
                 return Civilization.NextCityName(RandomCityNames, _cities);
             }
         }
+        /// <summary>
+        /// Indicates the player is dead (no <see cref="CityPivot"/>, no <see cref="SettlerPivot"/>); barbarians can't die.
+        /// </summary>
+        public bool IsDead
+        {
+            get
+            {
+                return !Civilization.IsBarbarian && _cities.Count == 0 && _units.Count(u => u.Is<SettlerPivot>()) == 0;
+            }
+        }
 
         #endregion
 
@@ -310,7 +320,12 @@ namespace ErsatzCivLib.Model
         /// </summary>
         [field: NonSerialized]
         public event EventHandler<AttackInPeaceEventArgs> AttackInPeaceEvent;
-
+        /// <summary>
+        /// Triggered when an opponent <see cref="PlayerPivot"/> is defeated.
+        /// </summary>
+        [field: NonSerialized]
+        public event EventHandler<DeadPlayerEventArgs> DeadPlayerEvent;
+        
         #endregion
 
         /// <summary>
@@ -808,7 +823,8 @@ namespace ErsatzCivLib.Model
             // TODO :
             // Sea units attack others sea units, or coast if "CanAttackCoastUnit" is true (in that case, even if successful attack, the unit can't move to the new location)
             // Nobody except fighters can attack air units
-            
+            // Squares exploited by opponent should be impossible to cross without breaking the peace.
+
             // One player only.
             var unitsAttacked = _engine.Players.Where(p => p != this).SelectMany(p => p.Units).Where(u => u.MapSquareLocation == targetSquare).ToList();
             // One city only.
@@ -830,14 +846,17 @@ namespace ErsatzCivLib.Model
                 var opponent = cityAttacked.Player;
                 if (_enemies.Contains(opponent))
                 {
-                    AttackMove(cityAttacked, unitsAttacked, out isWalkingDead, out bool takeCity);
-                    if (takeCity)
+                    if (unitsAttacked.Any())
                     {
-                        // Takes the city ("isWalkingDead" is mandatory False in this case).
+                        AttackUnitMove(unitsAttacked, cityAttacked, out isWalkingDead);
+                        if (!isWalkingDead)
+                        {
+                            noRealMove = true;
+                        }
                     }
-                    else if (!isWalkingDead)
+                    else
                     {
-                        noRealMove = true;
+                        CaptureCity(cityAttacked);
                     }
                 }
                 else
@@ -848,14 +867,17 @@ namespace ErsatzCivLib.Model
                     if (_orderAttack)
                     {
                         SwitchPeaceStatusWithOpponent(opponent);
-                        AttackMove(cityAttacked, unitsAttacked, out isWalkingDead, out bool takeCity);
-                        if (takeCity)
+                        if (unitsAttacked.Any())
                         {
-                            // Takes the city ("isWalkingDead" is mandatory False in this case).
+                            AttackUnitMove(unitsAttacked, cityAttacked, out isWalkingDead);
+                            if (!isWalkingDead)
+                            {
+                                noRealMove = true;
+                            }
                         }
-                        else if (!isWalkingDead)
+                        else
                         {
-                            noRealMove = true;
+                            CaptureCity(cityAttacked);
                         }
                     }
                     else
@@ -874,7 +896,7 @@ namespace ErsatzCivLib.Model
                 var opponent = unitsAttacked.First().Player;
                 if (_enemies.Contains(opponent))
                 {
-                    AttackMove(null, unitsAttacked, out isWalkingDead, out bool takeCity);
+                    AttackUnitMove(unitsAttacked, null, out isWalkingDead);
                 }
                 else
                 {
@@ -884,7 +906,7 @@ namespace ErsatzCivLib.Model
                     if (_orderAttack)
                     {
                         SwitchPeaceStatusWithOpponent(opponent);
-                        AttackMove(null, unitsAttacked, out isWalkingDead, out bool takeCity);
+                        AttackUnitMove(unitsAttacked, null, out isWalkingDead);
                     }
                     else
                     {
@@ -1122,10 +1144,115 @@ namespace ErsatzCivLib.Model
 
         #region Private methods
 
-        private void AttackMove(CityPivot city, IReadOnlyCollection<UnitPivot> units, out bool dieInProcess, out bool takeCity)
+        private void CaptureCity(CityPivot cityAttacked)
+        {
+            var formerPlayer = cityAttacked.Player;
+
+            // TODO : fake compute.
+            var treasureTransfert = formerPlayer.Treasure / formerPlayer.Cities.Count;
+            Treasure += treasureTransfert;
+            formerPlayer.Treasure -= treasureTransfert;
+
+            formerPlayer._cities.Remove(cityAttacked);
+
+            // Barbarians can't capture cities.
+            if (cityAttacked.CitizensCount > 1 && !Civilization.IsBarbarian)
+            {
+                _cities.Add(cityAttacked);
+                cityAttacked.CheckCitizensHappiness();
+            }
+
+            if (formerPlayer.IsDead)
+            {
+                _engine.RemoveOpponent(formerPlayer);
+                DeadPlayerEvent?.Invoke(this, new DeadPlayerEventArgs(formerPlayer, this));
+            }
+        }
+
+        private void AttackUnitMove(IReadOnlyCollection<UnitPivot> units, CityPivot city, out bool dieInProcess)
         {
             dieInProcess = false;
-            takeCity = false;
+
+            var unitsWithRealDefense = new List<Tuple<UnitPivot, double, bool>>();
+            foreach (var unit in units)
+            {
+                unitsWithRealDefense.Add(new Tuple<UnitPivot, double, bool>(
+                    unit,
+                    unit.GetUnitDefense(city),
+                    unit.City?.Improvements?.Contains(CityImprovementPivot.Barracks) == true
+                ));
+            }
+
+            var defenseUnitConfiguration = unitsWithRealDefense.OrderByDescending(u => u.Item2).ThenByDescending(u => u.Item3 ? 1 : 0).First();
+            var offenseUnitConfiguration = new Tuple<UnitPivot, double, bool>(
+                CurrentUnit,
+                CurrentUnit.OffensePoints,
+                CurrentUnit.City?.Improvements?.Contains(CityImprovementPivot.Barracks) == true
+            );
+
+            if (offenseUnitConfiguration.Item3 && !defenseUnitConfiguration.Item3)
+            {
+                offenseUnitConfiguration = new Tuple<UnitPivot, double, bool>(
+                    offenseUnitConfiguration.Item1,
+                    offenseUnitConfiguration.Item2 + 1,
+                    offenseUnitConfiguration.Item3
+                );
+            }
+            else if (!offenseUnitConfiguration.Item3 && defenseUnitConfiguration.Item3)
+            {
+                defenseUnitConfiguration = new Tuple<UnitPivot, double, bool>(
+                    defenseUnitConfiguration.Item1,
+                    defenseUnitConfiguration.Item2 + 1,
+                    defenseUnitConfiguration.Item3
+                );
+            }
+
+            var randomAttackValue = Tools.Randomizer.NextDouble() * (defenseUnitConfiguration.Item2 + offenseUnitConfiguration.Item2);
+            if (randomAttackValue > offenseUnitConfiguration.Item2)
+            {
+                // defense win
+                dieInProcess = true;
+            }
+            else
+            {
+                // offense win
+
+                var unit = defenseUnitConfiguration.Item1;
+                var formerPlayer = unit.Player;
+
+                formerPlayer._units.Remove(unit);
+                unit.City?.CheckCitizensHappiness();
+
+                // If inside the city, only one unit is killed; otherwise, every units of the square are killed.s
+                if (city != null)
+                {
+                    city.RemoveFromGarrison(unit);
+                }
+                else
+                {
+                    foreach (var u in units)
+                    {
+                        if (u != unit)
+                        {
+                            formerPlayer._units.Remove(u);
+                            u.City?.CheckCitizensHappiness();
+                        }
+                    }
+
+                    // It might be the death of the opponent player.
+                    if (formerPlayer.IsDead)
+                    {
+                        _engine.RemoveOpponent(formerPlayer);
+                        DeadPlayerEvent?.Invoke(this, new DeadPlayerEventArgs(formerPlayer, this));
+                    }
+                }
+            }
+
+            // Note that the population is reduced even if the defense wins.
+            if (city != null && city.CitizensCount > 1 && !city.Improvements.Contains(CityImprovementPivot.CityWalls))
+            {
+                city.RemoveAnyCitizen(true);
+            }
         }
 
         private bool IsOpponentControlZone(MapSquarePivot sourceSquare, MapSquarePivot destinationSquare)

@@ -127,7 +127,6 @@ namespace ErsatzCivLib.Model
         /// </summary>
         public IReadOnlyCollection<UnitPivot> Garrison { get { return _garrison; } }
 
-
         private readonly List<CitizenPivot> _specialistCitizens;
         /// <summary>
         /// List of specialists <see cref="CitizenPivot"/>.
@@ -599,18 +598,6 @@ namespace ErsatzCivLib.Model
             return false;
         }
 
-        private void RemoveAnyCitizen()
-        {
-            if (_specialistCitizens.Count > 0)
-            {
-                _specialistCitizens.RemoveAt(0);
-            }
-            else
-            {
-                _areaMapSquares.Remove(AreaWithoutCityMapSquares.First());
-            }
-        }
-
         private void AddRegularCitizen(CitizenPivot citizenSource, MapSquarePivot location, bool delayHappinessCheck = false)
         {
             var alreadyInArea = _areaMapSquares.SingleOrDefault(ams => ams.Citizen == citizenSource);
@@ -634,6 +621,36 @@ namespace ErsatzCivLib.Model
         #endregion
 
         #region Internal methods
+
+        /// <summary>
+        /// Removes any citizen, starting with specialists if any.
+        /// </summary>
+        /// <param name="recheck">Optionnal; proceeds to <see cref="ResetCitizens()"/> after removing.</param>
+        internal void RemoveAnyCitizen(bool recheck = false)
+        {
+            if (_specialistCitizens.Count > 0)
+            {
+                _specialistCitizens.RemoveAt(0);
+            }
+            else
+            {
+                _areaMapSquares.Remove(AreaWithoutCityMapSquares.First());
+            }
+            if (recheck)
+            {
+                ResetCitizens();
+            }
+        }
+
+        /// <summary>
+        /// Removes as specified <see cref="UnitPivot"/> from garrison, then check the citizen happiness.
+        /// </summary>
+        /// <param name="unit">The unit to remove.</param>
+        internal void RemoveFromGarrison(UnitPivot unit)
+        {
+            _garrison.Remove(unit);
+            CheckCitizensHappiness();
+        }
 
         /// <summary>
         /// Adds as specified <see cref="UnitPivot"/> in garrison, then check the citizen happiness.

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
 using ErsatzCivLib.Model.Enums;
 using ErsatzCivLib.Model.Static;
@@ -20,6 +21,9 @@ namespace ErsatzCivLib.Model
     public abstract class UnitPivot : BuildablePivot
     {
         private const double ROAD_SPEED_COST_RATIO = 0.3;
+        private const double CITYWALLS_DEFNSE_BONUS_RATE = 3;
+        private const double FORTRESS_DEFNSE_BONUS_RATE = 2;
+        private const double FORTIFIED_DEFENSE_BONUS_RATE = 1.5;
 
         #region Embedded properties
 
@@ -71,6 +75,10 @@ namespace ErsatzCivLib.Model
         /// The maintenance cost, in productivity by turn.
         /// </summary>
         public int MaintenanceCost { get; private set; }
+        /// <summary>
+        /// Indicates if the unit is currently fortified.
+        /// </summary>
+        public bool IsFortified { get; private set; }
 
         #endregion
 
@@ -218,6 +226,31 @@ namespace ErsatzCivLib.Model
 
             // Just in case.
             return false;
+        }
+
+        /// <summary>
+        /// Computes the real defense value of an unit, regardless of <see cref="CityImprovementPivot.Barracks"/> situation.
+        /// </summary>
+        /// <param name="city">Optionnal; the <see cref="CityPivot"/> where the unit is defending.</param>
+        /// <returns>Real defense value.</returns>
+        internal double GetUnitDefense(CityPivot city = null)
+        {
+            double defense = DefensePoints;
+            if (IsFortified)
+            {
+                defense *= FORTIFIED_DEFENSE_BONUS_RATE;
+            }
+            defense *= MapSquareLocation.Biome.DefenseBonusRate;
+            if (city != null && city.Improvements.Contains(CityImprovementPivot.CityWalls))
+            {
+                defense *= CITYWALLS_DEFNSE_BONUS_RATE;
+            }
+            else if (city == null && MapSquareLocation.Fortress)
+            {
+                defense *= FORTRESS_DEFNSE_BONUS_RATE;
+            }
+
+            return defense;
         }
     }
 }

@@ -50,6 +50,11 @@ namespace ErsatzCiv
 
         #region Events
 
+        private void OnTriggerDeadPlayer(object sender, DeadPlayerEventArgs e)
+        {
+            MessageBox.Show($"The {e.Player.Civilization.Name} civilization has been defeated by the {e.Killer.Civilization.Name} !", "ErsatzCiv");
+        }
+
         private void OnTriggerAttackInPeace(object sender, AttackInPeaceEventArgs e)
         {
             var response = MessageBox.Show($"Are you sure you want to break peace traty with {e.Opponent.Civilization.Name} ?", "ErsatzCiv", MessageBoxButton.YesNo);
@@ -558,6 +563,7 @@ namespace ErsatzCiv
             };
             _engine.HumanPlayer.DiscoverHutEvent += OnTriggerHutDiscovered;
             _engine.HumanPlayer.AttackInPeaceEvent += OnTriggerAttackInPeace;
+            _engine.HumanPlayer.DeadPlayerEvent += OnTriggerDeadPlayer;
         }
 
         private void RefreshDynamicView()

@@ -563,7 +563,7 @@ namespace ErsatzCivLib.Model.Static
             Commerce = 0,
             Food = 1,
             Productivity = 1,
-            DefenseBonusRate = 0,
+            DefenseBonusRate = 1,
             _actions = new List<MapSquareImprovementPivot>
             {
                 MapSquareImprovementPivot.Irrigate,
