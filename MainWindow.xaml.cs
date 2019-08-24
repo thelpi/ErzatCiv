@@ -50,6 +50,12 @@ namespace ErsatzCiv
 
         #region Events
 
+        private void OnTriggerAttackInPeace(object sender, AttackInPeaceEventArgs e)
+        {
+            var response = MessageBox.Show($"Are you sure you want to break peace traty with {e.Opponent.Civilization.Name} ?", "ErsatzCiv", MessageBoxButton.YesNo);
+            _engine.SetPendingAttackResponse(response == MessageBoxResult.Yes);
+        }
+
         private void OnTriggerHutDiscovered(object sender, DiscoverHutEventArgs evt)
         {
             if (evt.Hut != null)
@@ -551,6 +557,7 @@ namespace ErsatzCiv
                 ShowNewAdvanceDiscovered(e.Advance, e.WasInProgressAdvance, true);
             };
             _engine.HumanPlayer.DiscoverHutEvent += OnTriggerHutDiscovered;
+            _engine.HumanPlayer.AttackInPeaceEvent += OnTriggerAttackInPeace;
         }
 
         private void RefreshDynamicView()

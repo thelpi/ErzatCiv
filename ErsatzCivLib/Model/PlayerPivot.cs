@@ -27,6 +27,8 @@ namespace ErsatzCivLib.Model
 
         private int _anarchyTurnsCount;
         private readonly EnginePivot _engine;
+        private bool _pendingOrderAttack;
+        private bool _orderAttack;
 
         private int _currentUnitIndex;
         /// <summary>
@@ -303,6 +305,11 @@ namespace ErsatzCivLib.Model
         /// </summary>
         [field: NonSerialized]
         public event EventHandler<DiscoverHutEventArgs> DiscoverHutEvent;
+        /// <summary>
+        /// Triggered when an peaceful <see cref="PlayerPivot"/> is attacked.
+        /// </summary>
+        [field: NonSerialized]
+        public event EventHandler<AttackInPeaceEventArgs> AttackInPeaceEvent;
 
         #endregion
 
@@ -400,6 +407,16 @@ namespace ErsatzCivLib.Model
         #endregion
 
         #region Internal methods
+
+        /// <summary>
+        /// Sets the pending <see cref="_orderAttack"/> value.
+        /// </summary>
+        /// <param name="orderAttack"><c>True</c> to attack; <c>False</c> to cancel.</param>
+        internal void SetPendingAttackResponse(bool orderAttack)
+        {
+            _orderAttack = orderAttack;
+            _pendingOrderAttack = false;
+        }
 
         /// <summary>
         /// Switches the peace status with another <see cref="PlayerPivot"/>.
@@ -765,44 +782,97 @@ namespace ErsatzCivLib.Model
                 return false;
             }
 
-            var prevSq = CurrentUnit.MapSquareLocation;
+            var sourceSquare = CurrentUnit.MapSquareLocation;
 
-            var x = direction.Value.Row(prevSq.Row);
-            var y = direction.Value.Column(prevSq.Column);
-
-            var square = _engine.Map[x, y];
-            if (square == null)
+            var targetSquare = _engine.Map[direction.Value.Row(sourceSquare.Row), direction.Value.Column(sourceSquare.Column)];
+            if (targetSquare == null)
             {
                 return false;
             }
 
             // A sea unit can't navigate on land.
             // A land unit can't navigate on sea.
-            // A air unit can navigate on both.
+            // An air unit can navigate on both.
             // Each unit can navigate on city.
-            bool isMovable = _cities.Any(c => c.MapSquareLocation == square)
-                || (square.Biome.IsSeaType && CurrentUnit.Is<SeaUnitPivot>())
-                || (!square.Biome.IsSeaType && CurrentUnit.Is<LandUnitPivot>());
+            bool canNavigateToTarget = _cities.Any(c => c.MapSquareLocation == targetSquare)
+                || (targetSquare.Biome.IsSeaType && CurrentUnit.Is<SeaUnitPivot>())
+                || (!targetSquare.Biome.IsSeaType && CurrentUnit.Is<LandUnitPivot>());
 
-            if (!isMovable)
+            if (!canNavigateToTarget)
             {
                 return false;
             }
 
-            // TODO : control zone.
-            // TODO : prevent attack on friendly units.
-            // TODO : prevent attack on friendly cities.
-            // TODO : attack to enemies units.
-            // TODO : attack to enemies cities.
+            // TODO :
+            // Sea units attack others sea units, or coast if "CanAttackCoastUnit" is true (in that case, even if successful attack, the unit can't move to the new location)
+            // Nobody except fighters can attack air units
+            
+            // One player only.
+            var unitsAttacked = _engine.Players.Where(p => p != this).SelectMany(p => p.Units).Where(u => u.MapSquareLocation == targetSquare).ToList();
+            // One city only.
+            var cityAttacked = _engine.Players.Where(p => p != this).SelectMany(p => p.Cities).Where(c => c.MapSquareLocation == targetSquare).SingleOrDefault();
 
-            CurrentUnit.Move(direction.Value, prevSq, square);
+            /* /!\/!\/!\ Be aware that units inside cities are included /!\/!\/!\ */
 
-            MapSquareDiscoveryInvokator(square, _engine.Map.GetAdjacentMapSquares(square, CurrentUnit.SquareSight));
+            if (cityAttacked != null)
+            {
+                var opponent = cityAttacked.Player;
+                if (_enemies.Contains(opponent))
+                {
+                    // ATTACK CITY
+                }
+                else
+                {
+                    _pendingOrderAttack = true;
+                    AttackInPeaceEvent?.Invoke(this, new AttackInPeaceEventArgs(opponent));
+                    while (_pendingOrderAttack) { }
+                    if (_orderAttack)
+                    {
+                        SwitchPeaceStatusWithOpponent(opponent);
+                        // ATTACK CITY
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+            else if (unitsAttacked.Any())
+            {
+                var opponent = unitsAttacked.First().Player;
+                if (_enemies.Contains(opponent))
+                {
+                    // ATTACK UNIT
+                }
+                else
+                {
+                    _pendingOrderAttack = true;
+                    AttackInPeaceEvent?.Invoke(this, new AttackInPeaceEventArgs(opponent));
+                    while (_pendingOrderAttack) { }
+                    if (_orderAttack)
+                    {
+                        SwitchPeaceStatusWithOpponent(opponent);
+                        // ATTACK UNIT
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+            else if (!CurrentUnit.IgnoreControlZone && IsOpponentControlZone(sourceSquare, targetSquare))
+            {
+                return false;
+            }
 
-            var hut = _engine.Map.Huts.SingleOrDefault(h => h.MapSquareLocation == square);
+            CurrentUnit.Move(direction.Value, sourceSquare, targetSquare);
+
+            MapSquareDiscoveryInvokator(targetSquare, _engine.Map.GetAdjacentMapSquares(targetSquare, CurrentUnit.SquareSight));
+
+            var hut = _engine.Map.Huts.SingleOrDefault(h => h.MapSquareLocation == targetSquare);
             if (hut != null && !Civilization.IsBarbarian)
             {
-                DiscoverHut(square, hut);
+                DiscoverHut(targetSquare, hut);
             }
 
             // The last thing to do.
@@ -812,6 +882,33 @@ namespace ErsatzCivLib.Model
             }
 
             return true;
+        }
+
+        private bool IsOpponentControlZone(MapSquarePivot sourceSquare, MapSquarePivot destinationSquare)
+        {
+            // This section assumes to things :
+            // Cities don't matter per se : they have the control zone of unit(s) inside, if any.
+            // Control zone applies only for opponent units of the same type [air / land / sea].
+
+            var unitsOnControlZone = new List<UnitPivot>();
+            foreach (var sq in _engine.Map.GetAdjacentMapSquares(sourceSquare))
+            {
+                var unitOnThisSquare = _engine.Players.Where(p => p != this).SelectMany(p => p.Units).Where(u => u.MapSquareLocation == sq && u.IsMilitary && u.IsSameType(CurrentUnit)).FirstOrDefault();
+                if (unitOnThisSquare != null)
+                {
+                    unitsOnControlZone.Add(unitOnThisSquare);
+                }
+            }
+            
+            foreach (var currentUnitOnControlZone in unitsOnControlZone)
+            {
+                if (_engine.Map.GetAdjacentMapSquares(currentUnitOnControlZone.MapSquareLocation).Contains(destinationSquare))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>

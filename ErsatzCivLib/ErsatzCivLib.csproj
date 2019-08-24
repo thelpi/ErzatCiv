@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="Model\AirUnitPivot.cs" />
     <Compile Include="Model\CityAreaMapSquarePivot.cs" />
+    <Compile Include="Model\Events\AttackInPeaceEventArgs.cs" />
     <Compile Include="Model\Events\DiscoverHutEventArgs.cs" />
     <Compile Include="Model\Events\DiscoverNewSquareEventArgs.cs" />
     <Compile Include="Model\Events\ForcedAdvanceEventArgs.cs" />

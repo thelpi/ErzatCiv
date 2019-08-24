@@ -60,6 +60,7 @@ namespace ErsatzCivLib
                 return _opponentPlayers.Concat(new[] { HumanPlayer, BarbarianPlayer }).ToList();
             }
         }
+
         /// <summary>
         /// List of every players except <see cref="HumanPlayer"/>.
         /// </summary>
@@ -281,6 +282,15 @@ namespace ErsatzCivLib
         #endregion
 
         #region Public methods
+
+        /// <summary>
+        /// Sets the pending human <see cref="PlayerPivot._orderAttack"/> value.
+        /// </summary>
+        /// <param name="orderAttack"><c>True</c> to attack; <c>False</c> to cancel.</param>
+        public void SetPendingAttackResponse(bool orderAttack)
+        {
+            HumanPlayer.SetPendingAttackResponse(orderAttack);
+        }
 
         /// <summary>
         /// Changes the <see cref="PlayerPivot.LuxuryRate"/> and <see cref="PlayerPivot.ScienceRate"/> values.

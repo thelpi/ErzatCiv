@@ -195,5 +195,29 @@ namespace ErsatzCivLib.Model
 
             return (UnitPivot)method?.Invoke(null, new object[] { city, location, player });
         }
+
+        /// <summary>
+        /// Checks if the current instance is the same subtype [land / sea / air] than <paramref name="other"/>.
+        /// </summary>
+        /// <param name="other">The second instance.</param>
+        /// <returns><c>True</c> if both are the same subtype; <c>False</c> otherwise.</returns>
+        internal bool IsSameType(UnitPivot other)
+        {
+            if (Is<LandUnitPivot>())
+            {
+                return other.Is<LandUnitPivot>();
+            }
+            else if (Is<SeaUnitPivot>())
+            {
+                return other.Is<SeaUnitPivot>();
+            }
+            else if (Is<AirUnitPivot>())
+            {
+                return other.Is<AirUnitPivot>();
+            }
+
+            // Just in case.
+            return false;
+        }
     }
 }

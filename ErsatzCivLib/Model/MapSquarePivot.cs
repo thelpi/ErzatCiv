@@ -178,6 +178,54 @@ namespace ErsatzCivLib.Model
         #region Internal methods
 
         /// <summary>
+        /// Gets the <see cref="DirectionPivot"/> of the current instance relatively to another instance.
+        /// </summary>
+        /// <param name="other">The second instance.</param>
+        /// <returns>The direction; <c>Null</c> if instances have a distance above <c>1</c>, or instances are equal.</returns>
+        internal DirectionPivot? GetDirectionRelativeTo(MapSquarePivot other)
+        {
+            if (this == other)
+            {
+                return null;
+            }
+
+            if (Row == other.Row && Column == other.Column + 1)
+            {
+                return DirectionPivot.Right;
+            }
+            else if (Row == other.Row && Column == other.Column - 1)
+            {
+                return DirectionPivot.Left;
+            }
+            else if(Row == other.Row + 1 && Column == other.Column)
+            {
+                return DirectionPivot.Bottom;
+            }
+            else if (Row == other.Row - 1 && Column == other.Column)
+            {
+                return DirectionPivot.Top;
+            }
+            else if (Row == other.Row - 1 && Column == other.Column - 1)
+            {
+                return DirectionPivot.TopLeft;
+            }
+            else if (Row == other.Row - 1 && Column == other.Column + 1)
+            {
+                return DirectionPivot.TopRight;
+            }
+            else if (Row == other.Row + 1 && Column == other.Column - 1)
+            {
+                return DirectionPivot.BottomLeft;
+            }
+            else if (Row == other.Row + 1 && Column == other.Column + 1)
+            {
+                return DirectionPivot.BottomRight;
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Changes the <see cref="BiomePivot"/> of this instance.
         /// </summary>
         /// <param name="biome">The biome.</param>
