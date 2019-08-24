@@ -790,6 +790,8 @@ namespace ErsatzCivLib.Model
                 return false;
             }
 
+            // TODO : the code below makes impossible attacks on coast by sea units !
+
             // A sea unit can't navigate on land.
             // A land unit can't navigate on sea.
             // An air unit can navigate on both.
@@ -812,14 +814,31 @@ namespace ErsatzCivLib.Model
             // One city only.
             var cityAttacked = _engine.Players.Where(p => p != this).SelectMany(p => p.Cities).Where(c => c.MapSquareLocation == targetSquare).SingleOrDefault();
 
-            /* /!\/!\/!\ Be aware that units inside cities are included /!\/!\/!\ */
+            // True if the unit is killed in the process.
+            var isWalkingDead = false;
+            // True if the unit attacks a city but doesn't take it (but doesn't die either).
+            var noRealMove = false;
 
             if (cityAttacked != null)
             {
+                // Non-military units can attack city without any unit inside
+                if (unitsAttacked.Any() && !CurrentUnit.IsMilitary)
+                {
+                    return false;
+                }
+
                 var opponent = cityAttacked.Player;
                 if (_enemies.Contains(opponent))
                 {
-                    // ATTACK CITY
+                    AttackMove(cityAttacked, unitsAttacked, out isWalkingDead, out bool takeCity);
+                    if (takeCity)
+                    {
+                        // Takes the city ("isWalkingDead" is mandatory False in this case).
+                    }
+                    else if (!isWalkingDead)
+                    {
+                        noRealMove = true;
+                    }
                 }
                 else
                 {
@@ -829,7 +848,15 @@ namespace ErsatzCivLib.Model
                     if (_orderAttack)
                     {
                         SwitchPeaceStatusWithOpponent(opponent);
-                        // ATTACK CITY
+                        AttackMove(cityAttacked, unitsAttacked, out isWalkingDead, out bool takeCity);
+                        if (takeCity)
+                        {
+                            // Takes the city ("isWalkingDead" is mandatory False in this case).
+                        }
+                        else if (!isWalkingDead)
+                        {
+                            noRealMove = true;
+                        }
                     }
                     else
                     {
@@ -839,10 +866,15 @@ namespace ErsatzCivLib.Model
             }
             else if (unitsAttacked.Any())
             {
+                if (!CurrentUnit.IsMilitary)
+                {
+                    return false;
+                }
+
                 var opponent = unitsAttacked.First().Player;
                 if (_enemies.Contains(opponent))
                 {
-                    // ATTACK UNIT
+                    AttackMove(null, unitsAttacked, out isWalkingDead, out bool takeCity);
                 }
                 else
                 {
@@ -852,7 +884,7 @@ namespace ErsatzCivLib.Model
                     if (_orderAttack)
                     {
                         SwitchPeaceStatusWithOpponent(opponent);
-                        // ATTACK UNIT
+                        AttackMove(null, unitsAttacked, out isWalkingDead, out bool takeCity);
                     }
                     else
                     {
@@ -865,50 +897,30 @@ namespace ErsatzCivLib.Model
                 return false;
             }
 
-            CurrentUnit.Move(direction.Value, sourceSquare, targetSquare);
-
-            MapSquareDiscoveryInvokator(targetSquare, _engine.Map.GetAdjacentMapSquares(targetSquare, CurrentUnit.SquareSight));
-
-            var hut = _engine.Map.Huts.SingleOrDefault(h => h.MapSquareLocation == targetSquare);
-            if (hut != null && !Civilization.IsBarbarian)
+            if (!isWalkingDead && !noRealMove)
             {
-                DiscoverHut(targetSquare, hut);
+                CurrentUnit.Move(direction.Value, sourceSquare, targetSquare);
+
+                MapSquareDiscoveryInvokator(targetSquare, _engine.Map.GetAdjacentMapSquares(targetSquare, CurrentUnit.SquareSight));
+
+                var hut = _engine.Map.Huts.SingleOrDefault(h => h.MapSquareLocation == targetSquare);
+                if (hut != null && !Civilization.IsBarbarian)
+                {
+                    DiscoverHut(targetSquare, hut);
+                }
             }
 
             // The last thing to do.
-            if (CurrentUnit.RemainingMoves == 0)
+            if (CurrentUnit.RemainingMoves == 0 || isWalkingDead)
             {
-                SetUnitIndex(false, false);
+                if (isWalkingDead)
+                {
+                    _units.Remove(CurrentUnit);
+                }
+                SetUnitIndex(isWalkingDead, false);
             }
 
             return true;
-        }
-
-        private bool IsOpponentControlZone(MapSquarePivot sourceSquare, MapSquarePivot destinationSquare)
-        {
-            // This section assumes to things :
-            // Cities don't matter per se : they have the control zone of unit(s) inside, if any.
-            // Control zone applies only for opponent units of the same type [air / land / sea].
-
-            var unitsOnControlZone = new List<UnitPivot>();
-            foreach (var sq in _engine.Map.GetAdjacentMapSquares(sourceSquare))
-            {
-                var unitOnThisSquare = _engine.Players.Where(p => p != this).SelectMany(p => p.Units).Where(u => u.MapSquareLocation == sq && u.IsMilitary && u.IsSameType(CurrentUnit)).FirstOrDefault();
-                if (unitOnThisSquare != null)
-                {
-                    unitsOnControlZone.Add(unitOnThisSquare);
-                }
-            }
-            
-            foreach (var currentUnitOnControlZone in unitsOnControlZone)
-            {
-                if (_engine.Map.GetAdjacentMapSquares(currentUnitOnControlZone.MapSquareLocation).Contains(destinationSquare))
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         /// <summary>
@@ -1109,6 +1121,39 @@ namespace ErsatzCivLib.Model
         #endregion
 
         #region Private methods
+
+        private void AttackMove(CityPivot city, IReadOnlyCollection<UnitPivot> units, out bool dieInProcess, out bool takeCity)
+        {
+            dieInProcess = false;
+            takeCity = false;
+        }
+
+        private bool IsOpponentControlZone(MapSquarePivot sourceSquare, MapSquarePivot destinationSquare)
+        {
+            // This section assumes to things :
+            // Cities don't matter per se : they have the control zone of unit(s) inside, if any.
+            // Control zone applies only for opponent units of the same type [air / land / sea].
+
+            var unitsOnControlZone = new List<UnitPivot>();
+            foreach (var sq in _engine.Map.GetAdjacentMapSquares(sourceSquare))
+            {
+                var unitOnThisSquare = _engine.Players.Where(p => p != this).SelectMany(p => p.Units).Where(u => u.MapSquareLocation == sq && u.IsMilitary && u.IsSameType(CurrentUnit)).FirstOrDefault();
+                if (unitOnThisSquare != null)
+                {
+                    unitsOnControlZone.Add(unitOnThisSquare);
+                }
+            }
+
+            foreach (var currentUnitOnControlZone in unitsOnControlZone)
+            {
+                if (_engine.Map.GetAdjacentMapSquares(currentUnitOnControlZone.MapSquareLocation).Contains(destinationSquare))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         private BuildablePivot TreatCityAtTheEndOfTurn(CityPivot city)
         {
