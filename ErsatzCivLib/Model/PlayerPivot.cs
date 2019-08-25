@@ -22,6 +22,7 @@ namespace ErsatzCivLib.Model
         private const double DEFAULT_LUXURY_RATE = 0;
         private const double DEFAULT_SCIENCE_RATE = 0.5;
         private const int MAX_TURNS = 9999;
+        private const int BARBARIAN_DIPLOMAT_TRAESURE_GAIN = 100;
 
         #region Embedded properties
 
@@ -325,6 +326,16 @@ namespace ErsatzCivLib.Model
         /// </summary>
         [field: NonSerialized]
         public event EventHandler<DeadPlayerEventArgs> DeadPlayerEvent;
+        /// <summary>
+        /// Triggered when an unit is killed.
+        /// </summary>
+        [field: NonSerialized]
+        public event EventHandler<KilledUnitEventArgs> KilledUnitEvent;
+        /// <summary>
+        /// Triggered when a barbarian diplomat is killed.
+        /// </summary>
+        [field: NonSerialized]
+        public event EventHandler<BarbarianDiplomatKilledEventArgs> BarbarianDiplomatKilledEvent;
         
         #endregion
 
@@ -831,7 +842,7 @@ namespace ErsatzCivLib.Model
             var cityAttacked = _engine.Players.Where(p => p != this).SelectMany(p => p.Cities).Where(c => c.MapSquareLocation == targetSquare).SingleOrDefault();
 
             // True if the unit is killed in the process.
-            var isWalkingDead = false;
+            var dieInProcess = false;
             // True if the unit attacks a city but doesn't take it (but doesn't die either).
             var noRealMove = false;
 
@@ -848,8 +859,8 @@ namespace ErsatzCivLib.Model
                 {
                     if (unitsAttacked.Any())
                     {
-                        AttackUnitMove(unitsAttacked, cityAttacked, out isWalkingDead);
-                        if (!isWalkingDead)
+                        AttackUnitMove(unitsAttacked, cityAttacked, out dieInProcess);
+                        if (!dieInProcess)
                         {
                             noRealMove = true;
                         }
@@ -869,8 +880,8 @@ namespace ErsatzCivLib.Model
                         SwitchPeaceStatusWithOpponent(opponent);
                         if (unitsAttacked.Any())
                         {
-                            AttackUnitMove(unitsAttacked, cityAttacked, out isWalkingDead);
-                            if (!isWalkingDead)
+                            AttackUnitMove(unitsAttacked, cityAttacked, out dieInProcess);
+                            if (!dieInProcess)
                             {
                                 noRealMove = true;
                             }
@@ -896,7 +907,7 @@ namespace ErsatzCivLib.Model
                 var opponent = unitsAttacked.First().Player;
                 if (_enemies.Contains(opponent))
                 {
-                    AttackUnitMove(unitsAttacked, null, out isWalkingDead);
+                    AttackUnitMove(unitsAttacked, null, out dieInProcess);
                 }
                 else
                 {
@@ -906,7 +917,7 @@ namespace ErsatzCivLib.Model
                     if (_orderAttack)
                     {
                         SwitchPeaceStatusWithOpponent(opponent);
-                        AttackUnitMove(unitsAttacked, null, out isWalkingDead);
+                        AttackUnitMove(unitsAttacked, null, out dieInProcess);
                     }
                     else
                     {
@@ -919,7 +930,7 @@ namespace ErsatzCivLib.Model
                 return false;
             }
 
-            if (!isWalkingDead && !noRealMove)
+            if (!dieInProcess && !noRealMove)
             {
                 CurrentUnit.Move(direction.Value, sourceSquare, targetSquare);
 
@@ -933,13 +944,14 @@ namespace ErsatzCivLib.Model
             }
 
             // The last thing to do.
-            if (CurrentUnit.RemainingMoves == 0 || isWalkingDead)
+            if (CurrentUnit.RemainingMoves == 0 || dieInProcess)
             {
-                if (isWalkingDead)
+                if (dieInProcess)
                 {
                     _units.Remove(CurrentUnit);
+                    KilledUnitEvent?.Invoke(this, new KilledUnitEventArgs(CurrentUnit, unitsAttacked.First().Player));
                 }
-                SetUnitIndex(isWalkingDead, false);
+                SetUnitIndex(dieInProcess, false);
             }
 
             return true;
@@ -1223,10 +1235,12 @@ namespace ErsatzCivLib.Model
                 formerPlayer._units.Remove(unit);
                 unit.City?.CheckCitizensHappiness();
 
-                // If inside the city, only one unit is killed; otherwise, every units of the square are killed.s
+                // If inside the city, only one unit is killed; otherwise, every units of the square are killed.
                 if (city != null)
                 {
                     city.RemoveFromGarrison(unit);
+                    KilledUnitEvent?.Invoke(this, new KilledUnitEventArgs(unit, this));
+                    CheckKillBarbarianDiplomat(unit);
                 }
                 else
                 {
@@ -1236,8 +1250,10 @@ namespace ErsatzCivLib.Model
                         {
                             formerPlayer._units.Remove(u);
                             u.City?.CheckCitizensHappiness();
+                            CheckKillBarbarianDiplomat(u);
                         }
                     }
+                    KilledUnitEvent?.Invoke(this, new KilledUnitEventArgs(units, this));
 
                     // It might be the death of the opponent player.
                     if (formerPlayer.IsDead)
@@ -1252,6 +1268,15 @@ namespace ErsatzCivLib.Model
             if (city != null && city.CitizensCount > 1 && !city.Improvements.Contains(CityImprovementPivot.CityWalls))
             {
                 city.RemoveAnyCitizen(true);
+            }
+        }
+
+        private void CheckKillBarbarianDiplomat(UnitPivot unit)
+        {
+            if (unit.Is<DiplomatPivot>() && unit.Player == _engine.BarbarianPlayer)
+            {
+                Treasure += BARBARIAN_DIPLOMAT_TRAESURE_GAIN;
+                BarbarianDiplomatKilledEvent?.Invoke(this, new BarbarianDiplomatKilledEventArgs(BARBARIAN_DIPLOMAT_TRAESURE_GAIN));
             }
         }
 

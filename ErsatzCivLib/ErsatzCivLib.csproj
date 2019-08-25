@@ -44,10 +44,12 @@
     <Compile Include="Model\AirUnitPivot.cs" />
     <Compile Include="Model\CityAreaMapSquarePivot.cs" />
     <Compile Include="Model\Events\AttackInPeaceEventArgs.cs" />
+    <Compile Include="Model\Events\BarbarianDiplomatKilledEventArgs.cs" />
     <Compile Include="Model\Events\DeadPlayerEventArgs.cs" />
     <Compile Include="Model\Events\DiscoverHutEventArgs.cs" />
     <Compile Include="Model\Events\DiscoverNewSquareEventArgs.cs" />
     <Compile Include="Model\Events\ForcedAdvanceEventArgs.cs" />
+    <Compile Include="Model\Events\KilledUnitEventArgs.cs" />
     <Compile Include="Model\Events\NextUnitEventArgs.cs" />
     <Compile Include="Model\Events\SquareChangedEventArgs.cs" />
     <Compile Include="Model\Enums\AgePivot.cs" />

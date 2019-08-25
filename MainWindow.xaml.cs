@@ -50,6 +50,24 @@ namespace ErsatzCiv
 
         #region Events
 
+        private void OnTriggerBarbarianDiplomatKilled(object sender, BarbarianDiplomatKilledEventArgs e)
+        {
+            MessageBox.Show($"You just get {e.TreasureGain} gold from this barbarian diplomat !", "ErsatzCiv");
+        }
+
+        private void OnTriggerKilledUnit(object sender, KilledUnitEventArgs e)
+        {
+            if (e.Units.Count > 1 && (e.Killer == _engine.HumanPlayer || e.Units.First().Player == _engine.HumanPlayer))
+            {
+                MessageBox.Show($"{e.Units.Count} units killed !", "ErsatzCiv");
+            }
+
+            foreach (var unit in e.Units)
+            {
+                MapGrid.CleanPreviousChildrenByTag(unit);
+            }
+        }
+
         private void OnTriggerDeadPlayer(object sender, DeadPlayerEventArgs e)
         {
             MessageBox.Show($"The {e.Player.Civilization.Name} civilization has been defeated by the {e.Killer.Civilization.Name} !", "ErsatzCiv");
@@ -564,6 +582,11 @@ namespace ErsatzCiv
             _engine.HumanPlayer.DiscoverHutEvent += OnTriggerHutDiscovered;
             _engine.HumanPlayer.AttackInPeaceEvent += OnTriggerAttackInPeace;
             _engine.HumanPlayer.DeadPlayerEvent += OnTriggerDeadPlayer;
+            foreach (var p in _engine.Players)
+            {
+                p.KilledUnitEvent += OnTriggerKilledUnit;
+            }
+            _engine.HumanPlayer.BarbarianDiplomatKilledEvent += OnTriggerBarbarianDiplomatKilled;
         }
 
         private void RefreshDynamicView()
