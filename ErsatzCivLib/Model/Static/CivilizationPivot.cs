@@ -67,12 +67,7 @@ namespace ErsatzCivLib.Model.Static
         {
             if (randomCityNames || _cities.Count == 0)
             {
-                return new string(Enumerable.Range(0, 8).Select(i =>
-                {
-                    var arrayUsed = (i % 2 > 0 ? "AEIOUY" : "BCDFGHJKLMNPQRSTVWXZ").ToCharArray();
-                    var nextIndex = Tools.Randomizer.Next(0, arrayUsed.Length);
-                    return arrayUsed[nextIndex];
-                }).ToArray());
+                return CityNameTools.GenerateCityName(this);
             }
 
             cities = cities?.Where(c => c != null);
