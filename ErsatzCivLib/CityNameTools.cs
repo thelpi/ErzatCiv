@@ -10,13 +10,18 @@ namespace ErsatzCivLib
     /// </summary>
     internal static class CityNameTools
     {
-        private const double AVERAGE_CHARS = 11.5;
-        private const double STANDARD_DEVIATION_CHARS = 5.5;
-        private const char END_OF_DATAS = ' ';
+        private static readonly Dictionary<int, int> LENGTH_DISTRIBUTION = new Dictionary<int, int>
+        {
+            { 1, 1 }, { 2, 14 }, { 3, 137 }, { 4, 636 }, { 5, 1816 }, { 6, 3045 }, { 7, 3585 }, { 8, 3665 }, { 9, 3090 }, { 10, 2488 },
+            { 11, 1720 }, { 12, 1132 }, { 13, 905 }, { 14, 956 }, { 15, 1193 }, { 16, 1326 }, { 17, 1421 }, { 18, 1500 }, { 19, 1394 },
+            { 20, 1132 }, { 21, 881 }, { 22, 593 }, { 23, 363 }, { 24, 204 }, { 25, 120 }, { 26, 86 }, { 27, 51 }, { 28, 17 }, { 29, 21 },
+            { 30, 7 }, { 31, 7 }, { 32, 8 }, { 33, 2 }, { 34, 3 }, { 35, 4 }, { 36, 2 }, { 37, 1 }, { 38, 1 }
+        };
+        private const char END_OF_DATAS = '#';
         private static Dictionary<CivilizationPivot, Dictionary<char, Tuple<int, Dictionary<char, int>>>> CHARS_STATS =
             new Dictionary<CivilizationPivot, Dictionary<char, Tuple<int, Dictionary<char, int>>>>();
-        private static Dictionary<CivilizationPivot, Dictionary<char, Tuple<int, Dictionary<char, int>>>> FIRST_CHAR_STATS =
-            new Dictionary<CivilizationPivot, Dictionary<char, Tuple<int, Dictionary<char, int>>>>();
+        private static Dictionary<CivilizationPivot, Dictionary<char, int>> FIRST_CHAR_STATS =
+            new Dictionary<CivilizationPivot, Dictionary<char, int>>();
 
         private static void GenerateCharStats(CivilizationPivot civ)
         {
@@ -26,7 +31,7 @@ namespace ErsatzCivLib
             }
 
             var tempCharStats = new Dictionary<char, Tuple<int, Dictionary<char, int>>>();
-            var tempFirstCharStats = new Dictionary<char, Tuple<int, Dictionary<char, int>>>();
+            var tempFirstCharStats = new Dictionary<char, int>();
 
             // TODO : files required for every civilizations !
             // string rName = $"{civ.Name.ToLowerInvariant()}_city_name";
@@ -38,22 +43,31 @@ namespace ErsatzCivLib
                 int i = 0;
                 foreach (var ch in row)
                 {
-                    var usedHere = i == 0 || row[i - 1] == END_OF_DATAS ? tempFirstCharStats : tempCharStats;
-
-                    if (!usedHere.ContainsKey(ch))
+                    if (i == 0)
                     {
-                        usedHere.Add(ch, new Tuple<int, Dictionary<char, int>>(1, new Dictionary<char, int>()));
+                        if (!tempFirstCharStats.ContainsKey(ch))
+                        {
+                            tempFirstCharStats.Add(ch, 0);
+                        }
+                        tempFirstCharStats[ch]++;
                     }
                     else
                     {
-                        usedHere[ch] = new Tuple<int, Dictionary<char, int>>(usedHere[ch].Item1 + 1, usedHere[ch].Item2);
+                        if (!tempCharStats.ContainsKey(ch))
+                        {
+                            tempCharStats.Add(ch, new Tuple<int, Dictionary<char, int>>(1, new Dictionary<char, int>()));
+                        }
+                        else
+                        {
+                            tempCharStats[ch] = new Tuple<int, Dictionary<char, int>>(tempCharStats[ch].Item1 + 1, tempCharStats[ch].Item2);
+                        }
+                        var nextCh = i == row.Length - 1 ? END_OF_DATAS : row[i + 1];
+                        if (!tempCharStats[ch].Item2.ContainsKey(nextCh))
+                        {
+                            tempCharStats[ch].Item2.Add(nextCh, 0);
+                        }
+                        tempCharStats[ch].Item2[nextCh]++;
                     }
-                    var nextCh = i == row.Length - 1 ? END_OF_DATAS : row[i + 1];
-                    if (!usedHere[ch].Item2.ContainsKey(nextCh))
-                    {
-                        usedHere[ch].Item2.Add(nextCh, 0);
-                    }
-                    usedHere[ch].Item2[nextCh]++;
                     i++;
                 }
             }
@@ -70,30 +84,31 @@ namespace ErsatzCivLib
 
         private static int GetCityNameCharactersCount()
         {
-            int tmp = 0;
-            do
-            {
-                tmp = Convert.ToInt32(Math.Round(
-                    AVERAGE_CHARS + STANDARD_DEVIATION_CHARS * (
-                        Math.Pow(-2 * Math.Log(Tools.Randomizer.NextDouble()), 0.5)
-                        * Math.Cos(2 * Math.PI * Tools.Randomizer.NextDouble())
-                    )
-                ));
-            }
-            while (tmp <= 0);
+            var nextI = Tools.Randomizer.Next(0, LENGTH_DISTRIBUTION.Sum(kvp => kvp.Value));
 
-            return tmp;
+            int i = 0;
+            while (nextI >= 0)
+            {
+                nextI -= LENGTH_DISTRIBUTION.ElementAt(i).Value;
+                if (nextI <= 0)
+                {
+                    return LENGTH_DISTRIBUTION.ElementAt(i).Key;
+                }
+                i++;
+            }
+
+            throw new NotImplementedException("Should not occurs !");
         }
 
         private static char GetRandomFirstChar(CivilizationPivot civ)
         {
             var datas = FIRST_CHAR_STATS[civ];
             
-            var rdm = Tools.Randomizer.Next(0, datas.Sum(kvp => kvp.Value.Item1));
+            var rdm = Tools.Randomizer.Next(0, datas.Sum(kvp => kvp.Value));
             int i = 0;
             do
             {
-                rdm -= datas.ElementAt(i).Value.Item1;
+                rdm -= datas.ElementAt(i).Value;
                 if (rdm <= 0)
                 {
                     return datas.ElementAt(i).Key;
@@ -127,7 +142,7 @@ namespace ErsatzCivLib
                 }
                 while (rdm > 0);
             }
-            while ((alreadyTwice && charTmp.Value == previousChar) || (forbidSpace && charTmp.Value == END_OF_DATAS));
+            while (charTmp.Value == END_OF_DATAS || (alreadyTwice && charTmp.Value == previousChar) || (forbidSpace && charTmp.Value == ' '));
 
             return charTmp.Value;
         }
@@ -146,7 +161,7 @@ namespace ErsatzCivLib
 
             for (int i = 0; i < countChars; i++)
             {
-                if (i == 0 || nameChars[i - 1] == END_OF_DATAS)
+                if (i == 0 || nameChars[i - 1] == ' ')
                 {
                     nameChars[i] = GetRandomFirstChar(civilization);
                 }
@@ -154,7 +169,7 @@ namespace ErsatzCivLib
                 {
                     nameChars[i] = GetRandomNextChar(civilization, nameChars[i - 1],
                         i - 2 >= 0 && nameChars[i - 2] == nameChars[i - 1],
-                        (i - 2 >= 0 && nameChars[i - 2] == END_OF_DATAS) || (i == 1) || (i == countChars - 2));
+                        (i - 2 >= 0 && nameChars[i - 2] == ' ') || (i == 1) || (i == countChars - 2));
                 }
             }
 

@@ -8,6 +8,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace ErsatzCivLibTests
 {
     [TestClass]
+    [Ignore]
     public class BuildableImplementationTests
     {
         private const string DefaultFieldName = "Default";
