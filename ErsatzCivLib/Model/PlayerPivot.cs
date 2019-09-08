@@ -948,8 +948,9 @@ namespace ErsatzCivLib.Model
             {
                 if (dieInProcess)
                 {
-                    _units.Remove(CurrentUnit);
-                    KilledUnitEvent?.Invoke(this, new KilledUnitEventArgs(CurrentUnit, unitsAttacked.First().Player));
+                    var killedUnitToRemove = CurrentUnit;
+                    _units.Remove(killedUnitToRemove); // "CurrentUnit" becomes null here, that's why we use "killedUnitToRemove".
+                    KilledUnitEvent?.Invoke(this, new KilledUnitEventArgs(killedUnitToRemove, unitsAttacked.First().Player));
                 }
                 SetUnitIndex(dieInProcess, false);
             }
@@ -1234,6 +1235,7 @@ namespace ErsatzCivLib.Model
 
                 formerPlayer._units.Remove(unit);
                 unit.City?.CheckCitizensHappiness();
+                CheckKillBarbarianDiplomat(unit);
 
                 // If inside the city, only one unit is killed; otherwise, every units of the square are killed.
                 if (city != null)
